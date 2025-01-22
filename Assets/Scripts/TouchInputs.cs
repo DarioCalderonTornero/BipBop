@@ -9,8 +9,10 @@ public class TouchInputs : MonoBehaviour
 
     public event EventHandler OnOneTouch;
     public event EventHandler OnZoomIn;
+    public event EventHandler OnZoomOut;
     public event EventHandler OnShake;
     public event EventHandler OnLookDown;
+    
     
     private float initialPinchDistance; 
     private bool isZooming = false;    
@@ -42,10 +44,10 @@ public class TouchInputs : MonoBehaviour
             Touch touch1 = Input.GetTouch(0);
             Touch touch2 = Input.GetTouch(1);
 
-            // Calcula la distancia entre los dos dedos
+            // Calcula la distancia actual entre los dos dedos
             float currentPinchDistance = Vector2.Distance(touch1.position, touch2.position);
 
-            if (!isZooming && touch1.phase == TouchPhase.Began || touch2.phase == TouchPhase.Began)
+            if (!isZooming && (touch1.phase == TouchPhase.Began || touch2.phase == TouchPhase.Began))
             {
                 // Registra la distancia inicial cuando comienza el gesto
                 initialPinchDistance = currentPinchDistance;
@@ -53,18 +55,23 @@ public class TouchInputs : MonoBehaviour
             }
             else if (isZooming && (touch1.phase == TouchPhase.Moved || touch2.phase == TouchPhase.Moved))
             {
-                // Compara la distancia actual con la inicial
-                if (currentPinchDistance < initialPinchDistance * 0.8f) // Zoom hacia dentro
+                if (currentPinchDistance > initialPinchDistance * 1.2f) // Zoom In (alejar dedos)
                 {
                     OnZoomIn?.Invoke(this, EventArgs.Empty);
-                    LogicaPuntos.Instance.OnTaskAction("¡Haz zoom!");
-                    isZooming = false; // Reinicia la bandera para no repetir
+                    LogicaPuntos.Instance.OnTaskAction("¡Haz zoom hacia dentro!");
+                    isZooming = false; // Reinicia la bandera para evitar repeticiones
+                }
+                else if (currentPinchDistance < initialPinchDistance * 0.8f) // Zoom Out (acercar dedos)
+                {
+                    OnZoomOut?.Invoke(this, EventArgs.Empty);
+                    LogicaPuntos.Instance.OnTaskAction("¡Haz zoom hacia fuera!");
+                    isZooming = false; // Reinicia la bandera para evitar repeticiones
                 }
             }
         }
         else
         {
-            isZooming = false; // Reinicia el zoom si se sueltan los dedos
+            isZooming = false; // Reinicia el estado si se sueltan los dedos
         }
 
         // Detecta una sacudida del dispositivo

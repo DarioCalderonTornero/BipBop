@@ -15,13 +15,21 @@ public class LogicaPuntos : MonoBehaviour
     private float currentTime;
     private bool isGameActive = true;
     private int score = 0; // Puntuación inicial
+   
 
     public event EventHandler OnGameOver;
 
     private bool isTaskCompleted = false; // Verifica si la tarea actual ya fue completada
 
     private string currentTask; // Tarea actual
-    private string[] tasks = { "¡Toca la pantalla!", "¡Haz zoom!", "¡Agita el teléfono!", "¡Ponlo boca abajo!" };
+    private string lastTask;    // Última tarea realizada
+    private string[] tasks = {
+        "¡Toca la pantalla!",
+        "¡Haz zoom hacia dentro!",
+        "¡Haz zoom hacia fuera!",
+        "¡Agita el teléfono!",
+        "¡Ponlo boca abajo!"
+    };
 
     private void Awake()
     {
@@ -72,21 +80,31 @@ public class LogicaPuntos : MonoBehaviour
 
     private void StartNewTask()
     {
-        // Incrementa la puntuación
         score++;
         UpdateScoreText();
 
-        // Genera una nueva tarea aleatoria
-        currentTask = tasks[UnityEngine.Random.Range(0, tasks.Length)];
+        // Filtrar tareas según las configuraciones
+        List<string> availableTasks = new List<string>(tasks);
+
+        // Si las tareas de movimiento están deshabilitadas
+        if (PlayerPrefs.GetInt("MotionTasks", 1) == 0)
+        {
+            availableTasks.Remove("¡Agita el teléfono!");
+            availableTasks.Remove("¡Ponlo boca abajo!");
+        }
+
+        // Seleccionar una nueva tarea diferente
+        string newTask;
+        do
+        {
+            newTask = availableTasks[UnityEngine.Random.Range(0, availableTasks.Count)];
+        } while (newTask == currentTask);
+
+        currentTask = newTask;
         instructionText.text = currentTask;
 
-        // Reinicia el temporizador al tiempo inicial actual
         currentTime = startTime;
-
-        // Reduce el tiempo inicial para la próxima tarea con un mínimo de 2 segundos
         startTime = Mathf.Max(2f, startTime - 0.1f);
-
-        // Actualiza el texto del temporizador inmediatamente
         UpdateTimeText();
     }
 
@@ -105,5 +123,10 @@ public class LogicaPuntos : MonoBehaviour
     public int GetScore()
     {
         return score;
+    }
+
+    public bool IsGameActive()
+    {
+        return isGameActive;
     }
 }
