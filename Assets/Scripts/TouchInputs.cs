@@ -16,17 +16,18 @@ public class TouchInputs : MonoBehaviour
     public event EventHandler OnSwipeDown;
     public event EventHandler OnSwipeLeft;
     public event EventHandler OnSwipeRight;
-    public event EventHandler OnRotateRight; 
-    public event EventHandler OnRotateLeft;  
+    public event EventHandler OnRotateRight;
+    public event EventHandler OnRotateLeft;
 
     private float initialPinchDistance;
     private bool isZooming = false;
     private bool validZoom = false;
 
-    private Vector2 swipeStartPos; 
-    private bool isSwiping = false; 
+    private Vector2 swipeStartPos;
+    private bool isSwiping = false;
 
-    private float rotationThreshold = 8f; 
+    private float previousZRotation = 0f; // Almacena el ángulo previo
+    private const float rotationSensitivity = 10f; // Sensibilidad para rotación
     private bool hasRotatedRight = false;
     private bool hasRotatedLeft = false;
 
@@ -171,29 +172,42 @@ public class TouchInputs : MonoBehaviour
         // Detecta rotación hacia la derecha o izquierda
         float zRotation = Input.gyro.attitude.eulerAngles.z;
 
+        // Corrige el salto entre 0° y 360°
+        if (zRotation - previousZRotation > 180f)
+        {
+            zRotation -= 360f;
+        }
+        else if (zRotation - previousZRotation < -180f)
+        {
+            zRotation += 360f;
+        }
+
         // Rotación hacia la derecha
-        if (!hasRotatedRight && zRotation > rotationThreshold && zRotation < 180f)
+        if (!hasRotatedRight && (zRotation - previousZRotation) > rotationSensitivity)
         {
             hasRotatedRight = true;
             OnRotateRight?.Invoke(this, EventArgs.Empty);
             LogicaPuntos.Instance.OnTaskAction("¡Gira a la derecha!");
         }
-        else if (hasRotatedRight && zRotation <= rotationThreshold)
+        else if (hasRotatedRight && (zRotation - previousZRotation) < -rotationSensitivity / 2f)
         {
-            hasRotatedRight = false; // Resetea cuando vuelve al ángulo inicial
+            hasRotatedRight = false; // Permite volver a detectar la rotación
         }
 
         // Rotación hacia la izquierda
-        if (!hasRotatedLeft && zRotation < 360f - rotationThreshold && zRotation > 180f)
+        if (!hasRotatedLeft && (zRotation - previousZRotation) < -rotationSensitivity)
         {
             hasRotatedLeft = true;
             OnRotateLeft?.Invoke(this, EventArgs.Empty);
             LogicaPuntos.Instance.OnTaskAction("¡Gira a la izquierda!");
         }
-        else if (hasRotatedLeft && zRotation >= 360f - rotationThreshold)
+        else if (hasRotatedLeft && (zRotation - previousZRotation) > rotationSensitivity / 2f)
         {
-            hasRotatedLeft = false; // Resetea cuando vuelve al ángulo inicial
+            hasRotatedLeft = false; // Permite volver a detectar la rotación
         }
+
+        // Actualiza el valor previo de zRotation
+        previousZRotation = zRotation;
     }
 
 }

@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class InteractionBlocker : MonoBehaviour
 {
     public Button startButton; // Arrastra tu botón aquí desde el Inspector
-    private float disableDuration = 2f; // Tiempo que estará desactivado
+    private float disableDuration = 0.3f; // Tiempo que estará desactivado
 
     void Start()
     {
