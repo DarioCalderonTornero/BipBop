@@ -3,24 +3,24 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class LogicaPuntos : MonoBehaviour
 {
     public static LogicaPuntos Instance { get; private set; }
 
     public TextMeshProUGUI instructionText; // Texto para mostrar la instrucción
-    public TextMeshProUGUI timeText; // Texto para mostrar el tiempo restante
     public TextMeshProUGUI scoreText; // Texto para mostrar la puntuación
+    public Slider timeSlider; // Slider para mostrar el tiempo restante
     public float startTime = 100f; // Tiempo inicial en segundos
+
     private float currentTime;
     private bool isGameActive = true;
     private int score = 0; // Puntuación inicial
-   
 
     public event EventHandler OnGameOver;
 
     private bool isTaskCompleted = false; // Verifica si la tarea actual ya fue completada
-
     private string currentTask; // Tarea actual
     private string lastTask;    // Última tarea realizada
     private string[] tasks = {
@@ -40,6 +40,10 @@ public class LogicaPuntos : MonoBehaviour
 
     void Start()
     {
+        // Configura el slider
+        timeSlider.maxValue = startTime;
+        timeSlider.value = startTime;
+
         // Inicia el juego con una nueva tarea
         StartNewTask();
     }
@@ -52,8 +56,8 @@ public class LogicaPuntos : MonoBehaviour
         // Reduce el tiempo restante en función del tiempo real transcurrido
         currentTime -= Time.deltaTime;
 
-        // Actualiza el texto del temporizador
-        UpdateTimeText();
+        // Actualiza el slider con el tiempo restante
+        timeSlider.value = currentTime;
 
         // Si el tiempo se acaba, termina el juego
         if (currentTime <= 0f)
@@ -105,13 +109,10 @@ public class LogicaPuntos : MonoBehaviour
 
         currentTime = startTime;
         startTime = Mathf.Max(2f, startTime - 0.1f);
-        UpdateTimeText();
-    }
 
-    private void UpdateTimeText()
-    {
-        // Actualiza el texto en pantalla con el tiempo actual formateado
-        timeText.text = "Tiempo: " + currentTime.ToString("F1") + "s";
+        // Actualiza el slider con el nuevo tiempo
+        timeSlider.maxValue = startTime;
+        timeSlider.value = currentTime;
     }
 
     private void UpdateScoreText()
