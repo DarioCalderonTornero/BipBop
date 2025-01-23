@@ -28,7 +28,13 @@ public class LogicaPuntos : MonoBehaviour
         "¡Haz zoom hacia dentro!",
         "¡Haz zoom hacia fuera!",
         "¡Agita el teléfono!",
-        "¡Ponlo boca abajo!"
+        "¡Ponlo boca abajo!",
+        "¡Desliza hacia la derecha!",
+        "¡Desliza hacia la izquierda!",
+        "¡Desliza hacia arriba!",
+        "¡Desliza hacia abajo!",
+        "¡Gira a la derecha!",
+        "¡Gira a la izquierda!"
     };
 
     private void Awake()
@@ -95,6 +101,8 @@ public class LogicaPuntos : MonoBehaviour
         {
             availableTasks.Remove("¡Agita el teléfono!");
             availableTasks.Remove("¡Ponlo boca abajo!");
+            availableTasks.Remove("¡Gira a la derecha!");
+            availableTasks.Remove("¡Gira a la izquierda!");
         }
 
         // Seleccionar una nueva tarea diferente
