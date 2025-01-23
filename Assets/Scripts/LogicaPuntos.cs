@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class LogicaPuntos : MonoBehaviour
@@ -68,9 +69,7 @@ public class LogicaPuntos : MonoBehaviour
         // Si el tiempo se acaba, termina el juego
         if (currentTime <= 0f)
         {
-            isGameActive = false;
-            instructionText.text = "";
-            OnGameOver?.Invoke(this, EventArgs.Empty);
+            EndGame(); // Usa el nuevo método para manejar el fin del juego
         }
     }
 
@@ -137,5 +136,28 @@ public class LogicaPuntos : MonoBehaviour
     public bool IsGameActive()
     {
         return isGameActive;
+    }
+
+    private void SaveRecordIfNeeded()
+    {
+        // Recupera el récord actual
+        int currentRecord = PlayerPrefs.GetInt("MaxRecord", 0);
+
+        // Si la puntuación actual supera el récord, actualiza el valor
+        if (score > currentRecord)
+        {
+            PlayerPrefs.SetInt("MaxRecord", score);
+            PlayerPrefs.Save();
+        }
+    }
+
+    // Llama a esta función al final del juego
+    private void EndGame()
+    {
+        isGameActive = false;
+        instructionText.text = "";
+        SaveRecordIfNeeded(); // Guarda el récord si es necesario
+        OnGameOver?.Invoke(this, EventArgs.Empty);
+        SceneManager.LoadScene("Menu");
     }
 }
