@@ -21,13 +21,12 @@ public class TouchInputs : MonoBehaviour
 
     private float initialPinchDistance;
     private bool isZooming = false;
-    private bool validZoom = false;
 
     private Vector2 swipeStartPos;
     private bool isSwiping = false;
 
     private float previousZRotation = 0f; // Almacena el ángulo previo
-    private const float rotationSensitivity = 10f; // Sensibilidad para rotación
+    private const float rotationSensitivity = 5f; // Sensibilidad para rotación
     private bool hasRotatedRight = false;
     private bool hasRotatedLeft = false;
 
@@ -101,58 +100,39 @@ public class TouchInputs : MonoBehaviour
             }
         }
 
-        // Lógica de zoom
+        // Detecta gestos de zoom
         if (Input.touchCount == 2)
         {
             Touch touch1 = Input.GetTouch(0);
             Touch touch2 = Input.GetTouch(1);
 
+            // Calcula la distancia actual entre los dos dedos
             float currentPinchDistance = Vector2.Distance(touch1.position, touch2.position);
 
             if (!isZooming && (touch1.phase == TouchPhase.Began || touch2.phase == TouchPhase.Began))
             {
                 initialPinchDistance = currentPinchDistance;
                 isZooming = true;
-                validZoom = false;
             }
             else if (isZooming && (touch1.phase == TouchPhase.Moved || touch2.phase == TouchPhase.Moved))
             {
-                if (!validZoom)
+                if (currentPinchDistance > initialPinchDistance * 1.2f) // Zoom In
                 {
-                    if (currentPinchDistance > initialPinchDistance * 1.05f) // Zoom In
-                    {
-                        validZoom = true;
-                    }
-                    else if (currentPinchDistance < initialPinchDistance * 0.95f) // Zoom Out
-                    {
-                        validZoom = true;
-                    }
+                    OnZoomIn?.Invoke(this, EventArgs.Empty);
+                    LogicaPuntos.Instance.OnTaskAction("¡Haz zoom hacia dentro!");
+                    isZooming = false;
                 }
-            }
-            else if (isZooming && (touch1.phase == TouchPhase.Ended || touch2.phase == TouchPhase.Ended))
-            {
-                if (validZoom)
+                else if (currentPinchDistance < initialPinchDistance * 0.8f) // Zoom Out
                 {
-                    if (currentPinchDistance > initialPinchDistance * 1.05f)
-                    {
-                        OnZoomIn?.Invoke(this, EventArgs.Empty);
-                        LogicaPuntos.Instance.OnTaskAction("¡Haz zoom hacia dentro!");
-                    }
-                    else if (currentPinchDistance < initialPinchDistance * 0.95f)
-                    {
-                        OnZoomOut?.Invoke(this, EventArgs.Empty);
-                        LogicaPuntos.Instance.OnTaskAction("¡Haz zoom hacia fuera!");
-                    }
+                    OnZoomOut?.Invoke(this, EventArgs.Empty);
+                    LogicaPuntos.Instance.OnTaskAction("¡Haz zoom hacia fuera!");
+                    isZooming = false;
                 }
-
-                isZooming = false;
-                validZoom = false;
             }
         }
         else
         {
             isZooming = false;
-            validZoom = false;
         }
 
         // Detecta una sacudida del dispositivo
