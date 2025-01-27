@@ -26,7 +26,7 @@ public class TouchInputs : MonoBehaviour
     private bool isSwiping = false;
 
     private float previousZRotation = 0f; // Almacena el ángulo previo
-    private const float rotationSensitivity = 5f; // Sensibilidad para rotación
+    private const float rotationSensitivity = 10f; // Sensibilidad para rotación
     private bool hasRotatedRight = false;
     private bool hasRotatedLeft = false;
 

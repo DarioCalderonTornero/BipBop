@@ -17,7 +17,7 @@ public class LogicaPuntos : MonoBehaviour
 
     private float currentTime;
     private bool isGameActive = true;
-    private int score = 0; // Puntuación inicial
+    private int score = -1; // Puntuación inicial
 
     public event EventHandler OnGameOver;
 
