@@ -7,6 +7,7 @@ using UnityEngine.UI;
 public class SwipeMenu : MonoBehaviour, IEndDragHandler
 {
     [SerializeField] private int maxPage;
+
     int currentPage;
     Vector3 targetPos;
 
@@ -14,15 +15,17 @@ public class SwipeMenu : MonoBehaviour, IEndDragHandler
     [SerializeField] private RectTransform swipeContainerRect;
 
     [SerializeField] private float dragThresold;
-
     [SerializeField] private float tweenTime;
+
     [SerializeField] private LeanTweenType tweenType;
 
     [SerializeField] private Image[] barImage;
 
     [SerializeField] private Sprite barClosed, barOpen;
 
-    [SerializeField] private Button previousButton, nextButton;
+    [SerializeField] private Button previousButton;
+    [SerializeField] private Button nextButton;
+    [SerializeField] private Button page2Button;
 
     private void Awake()
     {
@@ -31,7 +34,22 @@ public class SwipeMenu : MonoBehaviour, IEndDragHandler
         dragThresold = Screen.width / 2;
         UpdateBar();
         UpdateButtons();
+
+        //page2Button.onClick.AddListener(() =>
+        //{
+          //  GoToPage(2);
+        //});
     }
+
+    /*
+    private void GoToPage(int page)
+    {
+        currentPage = page;
+
+        targetPos += pageStep;
+        MovePage();
+    }
+    */
 
     public void Next()
     {
@@ -88,10 +106,15 @@ public class SwipeMenu : MonoBehaviour, IEndDragHandler
     {
         previousButton.interactable = true;
         nextButton.interactable = true;
+        page2Button.interactable = currentPage != 2;
 
         if (currentPage == 1)
             previousButton.interactable = false;
         else if (currentPage == maxPage)
-            nextButton.interactable = false;    
+        {
+            nextButton.interactable = false;
+            
+        }
+           
     }
 }
