@@ -157,6 +157,16 @@ public class LogicaPuntos : MonoBehaviour
         isGameActive = false;
         instructionText.text = "";
         SaveRecordIfNeeded(); // Guarda el récord si es necesario
+
+        // Calcula las monedas ganadas en esta partida (1 moneda por cada 15 puntos)
+        int coinsEarned = score / 15; // División entera: 15, 30, 45, etc.
+
+        // Recupera el total actual de monedas y suma las nuevas
+        int totalCoins = PlayerPrefs.GetInt("CoinCount", 0);
+        totalCoins += coinsEarned;
+        PlayerPrefs.SetInt("CoinCount", totalCoins);
+        PlayerPrefs.Save();
+
         OnGameOver?.Invoke(this, EventArgs.Empty);
         SceneManager.LoadScene("Menu");
     }
