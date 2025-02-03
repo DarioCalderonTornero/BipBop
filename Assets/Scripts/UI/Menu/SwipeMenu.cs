@@ -25,7 +25,10 @@ public class SwipeMenu : MonoBehaviour, IEndDragHandler
 
     [SerializeField] private Button previousButton;
     [SerializeField] private Button nextButton;
+
+    [SerializeField] private Button page1Button;
     [SerializeField] private Button page2Button;
+    [SerializeField] private Button page3Button;
 
     private void Awake()
     {
@@ -35,21 +38,75 @@ public class SwipeMenu : MonoBehaviour, IEndDragHandler
         UpdateBar();
         UpdateButtons();
 
-        //page2Button.onClick.AddListener(() =>
-        //{
-          //  GoToPage(2);
-        //});
+        page1Button.onClick.AddListener(() =>
+        {
+            Page1();
+        });
+
+        page2Button.onClick.AddListener(() =>
+        {
+            Page2();
+        });
+
+        page3Button.onClick.AddListener(() =>
+        {
+            Page3();
+        });
+        
     }
 
-    /*
-    private void GoToPage(int page)
+    private void Page1()
     {
-        currentPage = page;
+        if (currentPage != 1)
+        {
+            if (currentPage == 2)
+            {
+                Previous();
+            }
 
-        targetPos += pageStep;
-        MovePage();
+            if (currentPage == maxPage)
+            {
+                currentPage -= 2;
+                targetPos -= pageStep * 2;
+                MovePage();
+            }
+        }
     }
-    */
+
+    private void Page2()
+    {
+        if (currentPage != 2)
+        {
+            if (currentPage == 1)
+            {
+                Next();
+            }
+
+            if (currentPage == maxPage)
+            {
+                Previous();
+            }
+        }
+    }
+
+    private void Page3()
+    {
+        if (currentPage != maxPage)
+        {
+            if (currentPage == 1)
+            {
+                currentPage += 2;
+                targetPos += pageStep * 2;
+                MovePage();
+            }
+
+           if (currentPage == 2)
+            {
+                Next();
+            }
+        }
+    }
+ 
 
     public void Next()
     {
@@ -104,17 +161,10 @@ public class SwipeMenu : MonoBehaviour, IEndDragHandler
 
     private void UpdateButtons()
     {
-        previousButton.interactable = true;
-        nextButton.interactable = true;
+        previousButton.interactable = currentPage != 1;
+        nextButton.interactable = currentPage != maxPage;
+        page1Button.interactable = currentPage != 1;
         page2Button.interactable = currentPage != 2;
-
-        if (currentPage == 1)
-            previousButton.interactable = false;
-        else if (currentPage == maxPage)
-        {
-            nextButton.interactable = false;
-            
-        }
-           
+        page3Button.interactable = currentPage != 3;
     }
 }
