@@ -8,7 +8,7 @@ using UnityEngine.UI;
 public class MainMenu : MonoBehaviour
 {
     [SerializeField] private Button playButton;
-    [SerializeField] private Toggle voiceInstructionsToggle;
+    // [SerializeField] private Toggle voiceInstructionsToggle;
     [SerializeField] private Toggle motionTasksToggle;
     [SerializeField] private TextMeshProUGUI coinText; // Texto que mostrará las monedas acumuladas
 
@@ -23,11 +23,11 @@ public class MainMenu : MonoBehaviour
     private void Start()
     {
         // Cargar configuraciones guardadas
-        voiceInstructionsToggle.isOn = PlayerPrefs.GetInt("VoiceInstructions", 1) == 1;
+        // voiceInstructionsToggle.isOn = PlayerPrefs.GetInt("VoiceInstructions", 1) == 1;
         motionTasksToggle.isOn = PlayerPrefs.GetInt("MotionTasks", 1) == 1;
 
         // Suscribirse a los eventos de los toggles
-        voiceInstructionsToggle.onValueChanged.AddListener(OnVoiceInstructionsToggleChanged);
+        // voiceInstructionsToggle.onValueChanged.AddListener(OnVoiceInstructionsToggleChanged);
         motionTasksToggle.onValueChanged.AddListener(OnMotionTasksToggleChanged);
 
         // Actualizar el texto de monedas
