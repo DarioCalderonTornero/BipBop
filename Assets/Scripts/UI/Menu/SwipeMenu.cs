@@ -34,7 +34,7 @@ public class SwipeMenu : MonoBehaviour, IEndDragHandler
     {
         currentPage = 1;
         targetPos = swipeContainerRect.localPosition;
-        dragThresold = Screen.width / 2;
+        dragThresold = Screen.width / 15;
         UpdateBar();
         UpdateButtons();
 
