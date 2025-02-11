@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -7,15 +8,22 @@ using UnityEngine.UI;
 
 public class MainMenu : MonoBehaviour
 {
+    public static MainMenu Instance { get; private set; }
+
     [SerializeField] private Button playButton;
     // [SerializeField] private Toggle voiceInstructionsToggle;
     [SerializeField] private Toggle motionTasksToggle;
     [SerializeField] private TextMeshProUGUI coinText; // Texto que mostrará las monedas acumuladas
 
+    public event EventHandler OnPlayButton;
+
     private void Awake()
     {
+        Instance = this;
+
         playButton.onClick.AddListener(() =>
         {
+            OnPlayButton?.Invoke(this, EventArgs.Empty);    
             SceneManager.LoadScene("GameScene");
         });
     }

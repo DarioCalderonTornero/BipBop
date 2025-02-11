@@ -6,61 +6,29 @@ using UnityEngine.UI;
 
 public class Timer : MonoBehaviour
 {
-    [SerializeField] private float timer;
-    [SerializeField] private float timerMax = 10f;
+    public static Timer Instance {  get; private set; }
+
     [SerializeField] private Image timerImage;
-
-    public event EventHandler OnCountDown;
-    public event EventHandler OnPlaying;
-    public event EventHandler OnGameOver;
-
-    private float countDownTimer = 3f;
-
-    public enum States { CountDown, Playing, GameOver }
-    private States states;
 
     private void Awake()
     {
+        Instance = this;
         timerImage.fillAmount = 0;
+        Hide();
     }
 
     private void Update()
     {
-
-        switch (states)
-        {
-            case States.CountDown:
-                OnCountDown?.Invoke(this, EventArgs.Empty);
-                countDownTimer -= Time.deltaTime;
-                timer = timerMax;
-                if (countDownTimer < 0)
-                {
-                    states = States.Playing;
-                }
-                break;
-
-            case States.Playing:
-                OnPlaying?.Invoke(this, EventArgs.Empty);   
-                timer -= Time.deltaTime;
-                if (timer < 0)
-                {
-                    states = States.GameOver;
-                }
-                break;
-
-            case States.GameOver:
-                OnGameOver?.Invoke(this, EventArgs.Empty);
-                break;
-
-
-
-        }
-
-        timerImage.fillAmount = GetGameTimerUI();
+        timerImage.fillAmount = GameStates.Instance.GetGameTimerUI();
     }
 
-    private float GetGameTimerUI()
+    public void Show()
     {
-        return 1 - (timer / timerMax);
+        gameObject.SetActive(true);
+    }
+
+    public void Hide()
+    {
+        gameObject.SetActive(false);
     }
 }

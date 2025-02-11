@@ -12,7 +12,7 @@ public class LogicaPuntos : MonoBehaviour
 
     public TextMeshProUGUI instructionText; // Texto para mostrar la instrucción
     public TextMeshProUGUI scoreText; // Texto para mostrar la puntuación
-    public Slider timeSlider; // Slider para mostrar el tiempo restante
+    public Image timerUI; // Slider para mostrar el tiempo restante
     public float startTime = 100f; // Tiempo inicial en segundos
 
     private float currentTime;
@@ -48,8 +48,8 @@ public class LogicaPuntos : MonoBehaviour
     void Start()
     {
         // Configura el slider
-        timeSlider.maxValue = startTime;
-        timeSlider.value = startTime;
+        timerUI.fillAmount = 0;
+        
 
         // Inicia el juego con una nueva tarea
         StartNewTask();
@@ -64,7 +64,7 @@ public class LogicaPuntos : MonoBehaviour
         currentTime -= Time.deltaTime;
 
         // Actualiza el slider con el tiempo restante
-        timeSlider.value = currentTime;
+        timerUI.fillAmount = currentTime/startTime;
 
         // Si el tiempo se acaba, termina el juego
         if (currentTime <= 0f)
@@ -118,8 +118,7 @@ public class LogicaPuntos : MonoBehaviour
         startTime = Mathf.Max(2f, startTime - 0.1f);
 
         // Actualiza el slider con el nuevo tiempo
-        timeSlider.maxValue = startTime;
-        timeSlider.value = currentTime;
+        timerUI.fillAmount = 0f;
     }
 
     private void UpdateScoreText()
