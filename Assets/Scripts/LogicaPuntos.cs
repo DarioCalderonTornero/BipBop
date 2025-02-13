@@ -69,6 +69,7 @@ public class LogicaPuntos : MonoBehaviour
         // Si el tiempo se acaba, termina el juego
         if (currentTime <= 0f)
         {
+            OnGameOver?.Invoke(this, EventArgs.Empty);
             EndGame(); // Usa el nuevo método para manejar el fin del juego
         }
     }
@@ -166,7 +167,7 @@ public class LogicaPuntos : MonoBehaviour
         PlayerPrefs.SetInt("CoinCount", totalCoins);
         PlayerPrefs.Save();
 
-        OnGameOver?.Invoke(this, EventArgs.Empty);
-        SceneManager.LoadScene("Menu");
+        
+        
     }
 }
