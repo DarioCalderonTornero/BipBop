@@ -13,9 +13,11 @@ public class GameOver : MonoBehaviour
     [SerializeField] private TextMeshProUGUI coinText;
     [SerializeField] private TextMeshProUGUI gameOverText;
 
+    [SerializeField] private Animator myanimator;
+
     private void Awake()
     {
-        Hide();
+        //Hide();
         retryButton.onClick.AddListener(() =>
         {
             SceneManager.LoadScene("GameScene");
@@ -29,31 +31,19 @@ public class GameOver : MonoBehaviour
 
     void Start()
     {
+        myanimator = GetComponent<Animator>();
         LogicaPuntos.Instance.OnGameOver += LogicaPuntos_OnGameOver;
-        
+    }
+
+    private void Update()
+    {
+
     }
 
     private void LogicaPuntos_OnGameOver(object sender, System.EventArgs e)
     {
-        Show();
         Debug.Log("Show");
+        myanimator.SetBool("IsGameOver", true);
     }
-
-    private void Show()
-    {
-        retryButton.gameObject.SetActive(true);
-        mainMenuButton.gameObject.SetActive(true);
-        gameOverText.gameObject.SetActive(true);
-        backGround.gameObject.SetActive(true);
-        coinText.gameObject.SetActive(true);
-    }
-
-    private void Hide()
-    {
-        retryButton.gameObject.SetActive(false);
-        mainMenuButton.gameObject.SetActive(false);
-        gameOverText.gameObject.SetActive(false);
-        backGround.gameObject.SetActive(false);
-        coinText.gameObject.SetActive(false);
-    }
+  
 }

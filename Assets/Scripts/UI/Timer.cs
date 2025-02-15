@@ -14,7 +14,7 @@ public class Timer : MonoBehaviour
     {
         Instance = this;
         timerImage.fillAmount = 0;
-        Hide();
+        //Hide();
     }
 
     private void Update()

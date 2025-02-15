@@ -67,4 +67,14 @@ public class GameStates : MonoBehaviour
     {
         return 1 - (timer / timerMax);
     }
+
+    public bool PlayGame()
+    {
+        return states == States.Playing;
+    }
+
+    public bool countDown()
+    {
+        return states == States.CountDown;
+    }
 }
