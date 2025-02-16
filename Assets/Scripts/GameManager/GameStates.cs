@@ -77,4 +77,9 @@ public class GameStates : MonoBehaviour
     {
         return states == States.CountDown;
     }
+
+    public float GetCountDownTime()
+    {
+        return countDownTimer;
+    }
 }

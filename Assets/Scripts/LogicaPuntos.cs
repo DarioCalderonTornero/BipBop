@@ -16,7 +16,7 @@ public class LogicaPuntos : MonoBehaviour
     public float startTime = 100f; // Tiempo inicial en segundos
 
     private float currentTime;
-    private bool isGameActive = true;
+    private bool isGameActive = false; // Se desactiva hasta que pasen los 3 segundos
     private int score = -1; // Puntuación inicial
 
     public event EventHandler OnGameOver;
@@ -41,17 +41,26 @@ public class LogicaPuntos : MonoBehaviour
     private void Awake()
     {
         Instance = this;
-        instructionText.text = "";
+        instructionText.text = "Preparándote..."; // Mensaje mientras espera
         scoreText.text = "Puntos: 0"; // Inicializa el texto de la puntuación
+        timerUI.fillAmount = 0; // Barra vacía al inicio
     }
 
     void Start()
     {
-        // Configura el slider
-        timerUI.fillAmount = 0;
-        
+        StartCoroutine(StartGameAfterDelay(3.0f));
+    }
 
-        // Inicia el juego con una nueva tarea
+    private IEnumerator StartGameAfterDelay(float delay)
+    {
+        CountDownUI.Instance.Show();
+
+        yield return new WaitForSeconds(delay); 
+
+        CountDownUI.Instance.Hide();
+        isGameActive = true; 
+        instructionText.text = ""; 
+
         StartNewTask();
     }
 
@@ -64,7 +73,7 @@ public class LogicaPuntos : MonoBehaviour
         currentTime -= Time.deltaTime;
 
         // Actualiza el slider con el tiempo restante
-        timerUI.fillAmount = currentTime/startTime;
+        timerUI.fillAmount = currentTime / startTime;
 
         // Si el tiempo se acaba, termina el juego
         if (currentTime <= 0f)
@@ -151,23 +160,19 @@ public class LogicaPuntos : MonoBehaviour
         }
     }
 
-    // Llama a esta función al final del juego
     private void EndGame()
     {
         isGameActive = false;
-        instructionText.text = "";
+        instructionText.text = "¡Juego terminado!";
         SaveRecordIfNeeded(); // Guarda el récord si es necesario
 
         // Calcula las monedas ganadas en esta partida (1 moneda por cada 15 puntos)
-        int coinsEarned = score / 15; // División entera: 15, 30, 45, etc.
+        int coinsEarned = score / 15;
 
         // Recupera el total actual de monedas y suma las nuevas
         int totalCoins = PlayerPrefs.GetInt("CoinCount", 0);
         totalCoins += coinsEarned;
         PlayerPrefs.SetInt("CoinCount", totalCoins);
         PlayerPrefs.Save();
-
-        
-        
     }
 }
