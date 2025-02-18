@@ -74,4 +74,16 @@ public class BouncingShape : MonoBehaviour
     {
         GeometricModeManager.Instance.OnShapeTapped(this);
     }
+
+    // Este método se ejecuta cuando la figura colisiona con otro collider
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        // Opcional: Si quieres aplicar este comportamiento solo con los bordes, puedes comprobar:
+        // if(collision.gameObject.CompareTag("Wall")) { ... }
+
+        // Aplica una pequeña rotación aleatoria a la velocidad para evitar estancamientos
+        float randomAngle = Random.Range(-40f, 40f); // Puedes ajustar este rango según necesites
+        Vector2 newVelocity = Quaternion.Euler(0, 0, randomAngle) * rb.velocity;
+        rb.velocity = newVelocity;
+    }
 }

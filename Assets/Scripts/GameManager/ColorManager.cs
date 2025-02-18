@@ -11,6 +11,7 @@ public class ColorManager : MonoBehaviour
 
     [Header("UI Elements")]
     public TextMeshProUGUI colorWordText;  // Muestra el nombre del color que se debe seleccionar
+    public Image colorWordBackground;
     public TextMeshProUGUI scoreText;        // Puntuación actual
     public Slider timeSlider;                // Barra de tiempo
     public float startTime = 60f;            // Tiempo inicial
@@ -77,6 +78,15 @@ public class ColorManager : MonoBehaviour
         // Configurar el texto: el contenido es el nombre correcto, pero se muestra en displayColor
         colorWordText.text = correctColorName;
         colorWordText.color = displayColor;
+       
+        int backgroundColorIndex;
+        do
+        {
+            backgroundColorIndex = Random.Range(0, colorValues.Length);
+        } while (backgroundColorIndex == textColorIndex);
+        Color backgroundColor = colorValues[backgroundColorIndex];
+        colorWordBackground.color = backgroundColor;
+
 
         // 3. Preparar las opciones para los botones
         // Queremos que entre las 4 opciones aparezcan:
@@ -143,16 +153,40 @@ public class ColorManager : MonoBehaviour
             UpdateScoreText();
 
             // Ajustar el tiempo: se reduce en 0.1, pero nunca por debajo de 2.5
-            startTime = Mathf.Max(2.5f, startTime - 0.1f);
+            startTime = Mathf.Max(1f, startTime - 0.1f);
             currentTime = startTime;
 
             // Aquí podrías incrementar la dificultad de otras formas (por ejemplo, velocidad, etc.)
             SetupRound();
+
+            UpdateCandidateButtonsSize();
         }
         else
         {
-            // Respuesta incorrecta: puedes dar feedback (por ejemplo, sonido o animación).
-            // Por ahora, no se suma nada.
+            EndGame();
+        }
+    }
+    private void UpdateCandidateButtonsSize()
+    {
+        // Tamaño por defecto: 100x100; a los 25 puntos se reduce a 80x80; a los 50, a 60x60.
+        float size1 = 419.92f;
+        float size2 = 262.141f;
+        if (score >= 50)
+        {
+            size1 = 220f;
+            size2 = 130f;
+           
+        }
+        else if (score >= 25)
+        {
+            size1 = 320f;
+            size2 = 200f;
+        }
+
+        foreach (Button btn in candidateButtons)
+        {
+            RectTransform rt = btn.GetComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(size1, size2);
         }
     }
 

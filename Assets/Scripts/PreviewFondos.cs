@@ -16,6 +16,8 @@ public class PreviewFondos : MonoBehaviour
     // Guarda el sprite seleccionado para aplicar si se confirma
     private Sprite selectedSprite;
 
+    public GameObject botonesPantallas;
+
     private void Awake()
     {
         if (Instance == null)
@@ -30,6 +32,7 @@ public class PreviewFondos : MonoBehaviour
         selectedSprite = nuevoFondo;
         previewImage.sprite = nuevoFondo;
         previewPanel.SetActive(true);
+        botonesPantallas.SetActive(false);
     }
 
     // Llamado por el botón de confirmar en el panel de preview
@@ -45,11 +48,13 @@ public class PreviewFondos : MonoBehaviour
             fondoSelector.CambiarFondo(selectedSprite);
         }
         previewPanel.SetActive(false);
+        botonesPantallas.SetActive(true);
     }
 
     // Llamado por el botón de cancelar en el panel de preview
     public void CancelPreview()
     {
         previewPanel.SetActive(false);
+        botonesPantallas.SetActive(true);
     }
 }

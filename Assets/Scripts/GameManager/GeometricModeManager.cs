@@ -65,7 +65,7 @@ public class GeometricModeManager : MonoBehaviour
         if (shape == currentTarget)
         {
             // Si se toca la figura objetivo, la ponemos verde y registramos el acierto
-            shape.TemporarilyChangeColor(Color.green, 1f);
+            shape.TemporarilyChangeColor(Color.green, 0.5f);
             score++;
             UpdateScoreText();
 
@@ -85,7 +85,7 @@ public class GeometricModeManager : MonoBehaviour
         else
         {
             // Si se toca una figura que no es objetivo, se pone roja durante 1 segundo
-            shape.TemporarilyChangeColor(Color.red, 1f);
+            shape.TemporarilyChangeColor(Color.red, 0.5f);
         }
     }
 
@@ -152,9 +152,32 @@ public class GeometricModeManager : MonoBehaviour
         }
     }
 
+    private void SaveRecordIfNeeded()
+    {
+        // Recupera el récord actual
+        int currentRecord = PlayerPrefs.GetInt("MaxRecordGeometric", 0);
+
+        // Si la puntuación actual supera el récord, actualiza el valor
+        if (score > currentRecord)
+        {
+            PlayerPrefs.SetInt("MaxRecordGeometric", score);
+            PlayerPrefs.Save();
+        }
+    }
+
     private void EndGame()
     {
+        SaveRecordIfNeeded();
         // Aquí puedes implementar lógica adicional (guardar récord, mostrar resultados, etc.)
         SceneManager.LoadScene("Menu");
+
+        // Calcula las monedas ganadas en esta partida (1 moneda por cada 15 puntos)
+        int coinsEarned = score / 10;
+
+        // Recupera el total actual de monedas y suma las nuevas
+        int totalCoins = PlayerPrefs.GetInt("CoinCount", 0);
+        totalCoins += coinsEarned;
+        PlayerPrefs.SetInt("CoinCount", totalCoins);
+        PlayerPrefs.Save();
     }
 }

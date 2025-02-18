@@ -9,6 +9,7 @@ public class InteractionBlocker : MonoBehaviour
     public Button startButton; // Arrastra tu botón aquí desde el Inspector
     private float disableDuration = 0.3f; // Tiempo que estará desactivado
     [SerializeField] private TextMeshProUGUI recordText; // Asigna este Text desde el inspector
+    [SerializeField] private TextMeshProUGUI recordTextGeometric; // Asigna este Text desde el inspector
 
     void Start()
     {
@@ -25,6 +26,9 @@ public class InteractionBlocker : MonoBehaviour
 
         // Actualiza el texto del récord en el menú
         recordText.text = $"Récord Máximo: {maxRecord}";
+
+        int maxRecordGeometric = PlayerPrefs.GetInt("MaxRecordGeometric", 0);
+        recordTextGeometric.text = $"Récord Máximo: {maxRecordGeometric}";
 
     }
 

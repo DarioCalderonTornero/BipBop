@@ -9,7 +9,8 @@ public class ButtonsModes : MonoBehaviour
 {
     [SerializeField] private Button ClassicButton;
     [SerializeField] private Button GeometricButton;
-    
+    [SerializeField] private Button ColorButton;
+
     void Awake()
     {
         ClassicButton.onClick.AddListener(() =>
@@ -20,6 +21,11 @@ public class ButtonsModes : MonoBehaviour
         GeometricButton.onClick.AddListener(() =>
         {
             SceneManager.LoadScene("GeometricScene");
+        });
+
+        ColorButton.onClick.AddListener(() =>
+        {
+            SceneManager.LoadScene("ColorScene");
         });
     }
 
