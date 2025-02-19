@@ -12,10 +12,16 @@ public class FondoPartida : MonoBehaviour
 
     private void Start()
     {
-        // Lee el nombre del fondo seleccionado de PlayerPrefs.
-        string selectedBackgroundName = PlayerPrefs.GetString("SelectedBackground", defaultBackgroundName);
+        // Comprueba si ya se ha equipado un fondo; si no, lo establece como predeterminado.
+        string selectedBackgroundName = PlayerPrefs.GetString("SelectedBackground", "");
+        if (string.IsNullOrEmpty(selectedBackgroundName))
+        {
+            selectedBackgroundName = defaultBackgroundName;
+            PlayerPrefs.SetString("SelectedBackground", defaultBackgroundName);
+            PlayerPrefs.Save();
+        }
 
-        // Carga el sprite desde la carpeta Resources/Backgrounds
+        // Carga el sprite desde la carpeta Resources/Sprites
         Sprite newBackground = Resources.Load<Sprite>("Sprites/" + selectedBackgroundName);
 
         if (newBackground != null)
@@ -28,11 +34,11 @@ public class FondoPartida : MonoBehaviour
             Debug.LogWarning("No se encontró el sprite para: " + selectedBackgroundName);
         }
 
+        // Asegura que el color del componente Image sea blanco
         Image imageComponent = GetComponent<Image>();
         if (imageComponent != null)
         {
             imageComponent.color = new Color32(255, 255, 255, 255);
         }
-
     }
 }

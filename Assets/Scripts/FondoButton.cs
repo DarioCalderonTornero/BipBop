@@ -9,6 +9,6 @@ public class FondoButton : MonoBehaviour
     public void OnButtonClicked()
     {
         // Llama al BackgroundPreviewManager para mostrar la preview
-        PreviewFondos.Instance.ShowPreview(fondoSprite);
+        // PreviewFondos.Instance.ShowPreview(fondoSprite);
     }
 }
