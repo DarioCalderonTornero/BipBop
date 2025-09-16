@@ -13,7 +13,6 @@ public class MainMenu : MonoBehaviour
     [SerializeField] private Button playButton;
     // [SerializeField] private Toggle voiceInstructionsToggle;
     [SerializeField] private Toggle motionTasksToggle;
-    [SerializeField] private TextMeshProUGUI coinText; // Texto que mostrará las monedas acumuladas
 
     public event EventHandler OnPlayButton;
 
@@ -23,7 +22,7 @@ public class MainMenu : MonoBehaviour
 
         playButton.onClick.AddListener(() =>
         {
-            OnPlayButton?.Invoke(this, EventArgs.Empty);    
+            OnPlayButton?.Invoke(this, EventArgs.Empty);
             SceneManager.LoadScene("GameScene");
         });
     }
@@ -38,8 +37,8 @@ public class MainMenu : MonoBehaviour
         // voiceInstructionsToggle.onValueChanged.AddListener(OnVoiceInstructionsToggleChanged);
         motionTasksToggle.onValueChanged.AddListener(OnMotionTasksToggleChanged);
 
-        // Actualizar el texto de monedas
-        UpdateCoinText();
+        // Asignar el texto de monedas al CurrencyManager
+        CurrencyManager.Instance.AssignUIByName("CoinText"); // nombre del TMP en tu Canvas
     }
 
     private void OnVoiceInstructionsToggleChanged(bool isOn)
@@ -51,12 +50,4 @@ public class MainMenu : MonoBehaviour
     {
         PlayerPrefs.SetInt("MotionTasks", isOn ? 1 : 0);
     }
-
-    private void UpdateCoinText()
-    {
-        // Recupera el total de monedas guardadas (por defecto 0)
-        int totalCoins = PlayerPrefs.GetInt("CoinCount", 0);
-        coinText.text = "Monedas: " + totalCoins;
-    }
-
 }

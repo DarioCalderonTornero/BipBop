@@ -70,11 +70,11 @@ public class GeometricModeManager : MonoBehaviour
             UpdateScoreText();
 
             // Ajustar el tiempo: disminuir en 0.1 segundos, pero no por debajo de 2.5 segundos
-            startTime = Mathf.Max(2.5f, startTime - 0.1f);
+            startTime = Mathf.Max(1.5f, startTime - 0.1f);
             currentTime = startTime;
 
             // Ajustar la velocidad: multiplicar por speedIncreaseFactor pero sin superar 2f
-            speedMultiplier = Mathf.Min(2f, speedMultiplier * speedIncreaseFactor);
+            speedMultiplier = Mathf.Min(4f, speedMultiplier * speedIncreaseFactor);
             UpdateShapesSpeed();
 
             // Activar nuevas figuras según la puntuación:
@@ -145,11 +145,18 @@ public class GeometricModeManager : MonoBehaviour
         if (score >= 25 && shapes.Count > 3 && !shapes[3].gameObject.activeSelf)
         {
             shapes[3].gameObject.SetActive(true);
+            StartCoroutine(ApplySpeedNextFrame(shapes[3]));
         }
         if (score >= 50 && shapes.Count > 4 && !shapes[4].gameObject.activeSelf)
         {
             shapes[4].gameObject.SetActive(true);
+            StartCoroutine(ApplySpeedNextFrame(shapes[4]));
         }
+    }
+    private IEnumerator ApplySpeedNextFrame(BouncingShape shape)
+    {
+        yield return null; // espera un frame
+        shape.UpdateSpeed(speedMultiplier);
     }
 
     private void SaveRecordIfNeeded()

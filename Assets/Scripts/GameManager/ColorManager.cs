@@ -197,7 +197,14 @@ public class ColorManager : MonoBehaviour
 
     private void EndGame()
     {
-        // Aquí se podría guardar el récord, etc.
+        // Guardar el récord máximo
+        int maxRecordColor = PlayerPrefs.GetInt("MaxRecordColor", 0);
+        if (score > maxRecordColor)
+        {
+            PlayerPrefs.SetInt("MaxRecordColor", score);
+            PlayerPrefs.Save();
+        }
+
         SceneManager.LoadScene("Menu");
     }
 }

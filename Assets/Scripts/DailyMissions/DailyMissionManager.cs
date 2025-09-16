@@ -74,8 +74,15 @@ public class DailyMissionManager : MonoBehaviour
             mission.AddProgress(amount);
             RefreshUI();
 
-            if (mission.IsCompleted)
-                Debug.Log($"Misión completada: {mission.template.description}. Recompensa: {mission.template.reward} monedas");
+            if (mission.IsCompleted && !mission.rewardClaimed)
+            {
+                mission.rewardClaimed = true;
+
+                // Aquí sumas monedas (ejemplo con CurrencyManager)
+                CurrencyManager.Instance.AddCoins(mission.template.reward);
+
+                Debug.Log($"Misión completada: {mission.template.description}. ¡Has ganado {mission.template.reward} monedas!");
+            }
 
             SaveMissions();
         }

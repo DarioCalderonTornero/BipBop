@@ -10,6 +10,7 @@ public class InteractionBlocker : MonoBehaviour
     private float disableDuration = 0.3f; // Tiempo que estará desactivado
     [SerializeField] private TextMeshProUGUI recordText; // Asigna este Text desde el inspector
     [SerializeField] private TextMeshProUGUI recordTextGeometric; // Asigna este Text desde el inspector
+    [SerializeField] private TextMeshProUGUI recordTextColor;
 
     void Start()
     {
@@ -29,6 +30,9 @@ public class InteractionBlocker : MonoBehaviour
 
         int maxRecordGeometric = PlayerPrefs.GetInt("MaxRecordGeometric", 0);
         recordTextGeometric.text = $"Récord Máximo: {maxRecordGeometric}";
+
+        int maxRecordColor = PlayerPrefs.GetInt("MaxRecordColor", 0);
+        recordTextColor.text = $"Récord Máximo: {maxRecordColor}";
 
     }
 
