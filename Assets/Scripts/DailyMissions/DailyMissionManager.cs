@@ -1,6 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class DailyMissionManager : MonoBehaviour
 {
@@ -11,11 +14,15 @@ public class DailyMissionManager : MonoBehaviour
     [SerializeField] private int missionsPerDay = 3;
 
     [Header("UI")]
-    [SerializeField] private Transform missionsContainer;
+    [SerializeField] private string missionsContainerName = "MissionsContainer";
     [SerializeField] private MissionUI missionUIPrefab;
+    [SerializeField] private string timerTextName = "DailyMissionsTimerText";
 
     private List<DailyMission> activeMissions = new List<DailyMission>();
     private List<MissionUI> missionUIList = new List<MissionUI>();
+
+    private Transform missionsContainer;
+    private TextMeshProUGUI timerText;
 
     private void Awake()
     {
@@ -23,79 +30,40 @@ public class DailyMissionManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
+
+            LoadMissions();
         }
         else
         {
             Destroy(gameObject);
             return;
         }
-
-        // Genera misiones si hay templates válidas
-        if (missionTemplates == null || missionTemplates.Count == 0)
-        {
-            Debug.LogError("No hay MissionTemplates asignadas en el inspector.");
-            return;
-        }
-
-        GenerateAndDisplayMissions();
     }
 
-    private void GenerateAndDisplayMissions()
+    private void OnEnable()
     {
-        activeMissions.Clear();
-        missionUIList.Clear();
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
 
-        // Limpiar children previos
-        foreach (Transform child in missionsContainer)
-        {
-            Destroy(child.gameObject);
-        }
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
 
-        // Crear nuevas misiones
-        List<MissionTemplate> pool = new List<MissionTemplate>();
-        foreach (var template in missionTemplates)
-        {
-            if (template != null) pool.Add(template);
-        }
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        // Reasignar UI
+        GameObject containerObj = GameObject.Find(missionsContainerName);
+        if (containerObj != null)
+            missionsContainer = containerObj.transform;
 
-        if (pool.Count == 0)
-        {
-            Debug.LogError("Todas las MissionTemplates son null.");
-            return;
-        }
+        GameObject timerObj = GameObject.Find(timerTextName);
+        if (timerObj != null)
+            timerText = timerObj.GetComponent<TextMeshProUGUI>();
 
-        for (int i = 0; i < missionsPerDay; i++)
-        {
-            if (pool.Count == 0) break;
-
-            int index = Random.Range(0, pool.Count);
-            var chosenTemplate = pool[index];
-            pool.RemoveAt(index);
-
-            DailyMission newMission = new DailyMission(chosenTemplate);
-            activeMissions.Add(newMission);
-
-            // Instancia UI y asigna misión
-            if (missionUIPrefab != null)
-            {
-                MissionUI ui = Instantiate(missionUIPrefab, missionsContainer);
-                if (ui != null)
-                {
-                    ui.Setup(newMission, null); // aquí podrías pasar iconos si quieres
-                    missionUIList.Add(ui);
-                }
-                else
-                {
-                    Debug.LogError("MissionUI prefab no se pudo instanciar.");
-                }
-            }
-            else
-            {
-                Debug.LogError("missionUIPrefab no asignado en el inspector.");
-            }
-        }
-
-        Debug.Log($"Generadas y mostradas {activeMissions.Count} misiones.");
+        // Instanciar o refrescar UI
+        GenerateAndDisplayMissions();
+        RefreshTimerText();
     }
 
     public void AddProgress(string missionId, int amount = 1)
@@ -107,22 +75,104 @@ public class DailyMissionManager : MonoBehaviour
             RefreshUI();
 
             if (mission.IsCompleted)
-            {
                 Debug.Log($"Misión completada: {mission.template.description}. Recompensa: {mission.template.reward} monedas");
-            }
-        }
-        else
-        {
-            Debug.Log($"Se intentó añadir progreso a misión '{missionId}', pero no está activa o ya fue completada.");
+
+            SaveMissions();
         }
     }
 
     private void RefreshUI()
     {
-        foreach (var ui in missionUIList)
+        if (missionUIList.Count == 0)
         {
-            if (ui != null)
-                ui.Refresh();
+            GenerateAndDisplayMissions();
+            return;
         }
+
+        foreach (var ui in missionUIList)
+            ui.Refresh();
+    }
+
+    private void GenerateAndDisplayMissions()
+    {
+        if (missionsContainer == null) return;
+
+        foreach (Transform child in missionsContainer)
+            Destroy(child.gameObject);
+
+        missionUIList.Clear();
+
+        if (activeMissions.Count == 0)
+        {
+            // Generar nuevas misiones
+            List<MissionTemplate> pool = new List<MissionTemplate>();
+            foreach (var t in missionTemplates)
+                if (t != null) pool.Add(t);
+
+            for (int i = 0; i < missionsPerDay && pool.Count > 0; i++)
+            {
+                int index = UnityEngine.Random.Range(0, pool.Count);
+                DailyMission newMission = new DailyMission(pool[index]);
+                activeMissions.Add(newMission);
+                pool.RemoveAt(index);
+            }
+
+            SaveMissions();
+        }
+
+        // Crear UI
+        foreach (var mission in activeMissions)
+        {
+            MissionUI ui = Instantiate(missionUIPrefab, missionsContainer);
+            ui.Setup(mission, null);
+            missionUIList.Add(ui);
+        }
+    }
+
+    #region Guardado
+    private void SaveMissions()
+    {
+        string json = JsonUtility.ToJson(new DailyMissionsSaveData(activeMissions));
+        PlayerPrefs.SetString("DailyMissionsData", json);
+        PlayerPrefs.Save();
+    }
+
+    private void LoadMissions()
+    {
+        if (PlayerPrefs.HasKey("DailyMissionsData"))
+        {
+            string json = PlayerPrefs.GetString("DailyMissionsData");
+            DailyMissionsSaveData data = JsonUtility.FromJson<DailyMissionsSaveData>(json);
+            if (data != null && data.activeMissions != null)
+                activeMissions = data.activeMissions;
+        }
+    }
+    #endregion
+
+    #region Timer
+    public void RefreshTimerText()
+    {
+        if (timerText != null && DailyMissionsTimer.Instance != null)
+            timerText.text = $"Misiones diarias {DailyMissionsTimer.Instance.GetRemainingTimeString()}";
+    }
+
+    public void ResetMissions()
+    {
+        activeMissions.Clear();
+        missionUIList.Clear();
+        GenerateAndDisplayMissions();
+        SaveMissions();
+    }
+    #endregion
+}
+
+[Serializable]
+public class DailyMissionsSaveData
+{
+    public List<DailyMission> activeMissions;
+
+    public DailyMissionsSaveData(List<DailyMission> missions)
+    {
+        activeMissions = missions;
     }
 }

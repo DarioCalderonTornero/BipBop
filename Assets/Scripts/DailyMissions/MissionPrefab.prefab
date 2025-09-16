@@ -55,6 +55,8 @@ MonoBehaviour:
   descriptionText: {fileID: 7380796517425188402}
   progressText: {fileID: 4452906917838563558}
   iconImage: {fileID: 8978890304177739959}
+  completedIcon: {fileID: 10901, guid: 0000000000000000f000000000000000, type: 0}
+  completedTextColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
 --- !u!114 &-4229057431763049145
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -142,8 +144,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: New Text
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: ed1d81ddd34b36744a1179f3a10754e3, type: 2}
+  m_sharedMaterial: {fileID: 857910466089235216, guid: ed1d81ddd34b36744a1179f3a10754e3, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -243,7 +245,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: -20.737}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 92, y: -14.2}
+  m_AnchoredPosition: {x: 101.8, y: -13.8}
   m_SizeDelta: {x: 53.611, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1843148601303594794
@@ -318,7 +320,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -3.4999962, y: 0}
+  m_AnchoredPosition: {x: 8.4, y: 0}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5389194199789903699
@@ -351,8 +353,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 0/1
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: ed1d81ddd34b36744a1179f3a10754e3, type: 2}
+  m_sharedMaterial: {fileID: 857910466089235216, guid: ed1d81ddd34b36744a1179f3a10754e3, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []

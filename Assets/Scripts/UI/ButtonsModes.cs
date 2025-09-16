@@ -16,16 +16,22 @@ public class ButtonsModes : MonoBehaviour
         ClassicButton.onClick.AddListener(() =>
         {
             SceneManager.LoadScene("GameScene");
+            DailyMissionManager.Instance.AddProgress("juega_1_partida", 1);
+            DailyMissionManager.Instance.AddProgress("juega_3_partidas", 1);
         });
 
         GeometricButton.onClick.AddListener(() =>
         {
             SceneManager.LoadScene("GeometricScene");
+            DailyMissionManager.Instance.AddProgress("juega_1_partida", 1);
+            DailyMissionManager.Instance.AddProgress("juega_3_partidas", 1);
         });
 
         ColorButton.onClick.AddListener(() =>
         {
             SceneManager.LoadScene("ColorScene");
+            DailyMissionManager.Instance.AddProgress("juega_1_partida", 1);
+            DailyMissionManager.Instance.AddProgress("juega_3_partidas", 1);
         });
     }
 
