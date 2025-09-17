@@ -150,8 +150,26 @@ public class DailyMissionManager : MonoBehaviour
         {
             string json = PlayerPrefs.GetString("DailyMissionsData");
             DailyMissionsSaveData data = JsonUtility.FromJson<DailyMissionsSaveData>(json);
+
             if (data != null && data.activeMissions != null)
-                activeMissions = data.activeMissions;
+            {
+                activeMissions.Clear();
+                foreach (var save in data.activeMissions)
+                {
+                    MissionTemplate template = missionTemplates.Find(t => t.id == save.templateId);
+                    if (template != null)
+                    {
+                        DailyMission mission = new DailyMission(template);
+                        mission.currentProgress = save.currentProgress;
+                        mission.rewardClaimed = save.rewardClaimed;
+                        activeMissions.Add(mission);
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"No se encontró template con id {save.templateId}, misión descartada.");
+                    }
+                }
+            }
         }
     }
     #endregion
@@ -174,12 +192,29 @@ public class DailyMissionManager : MonoBehaviour
 }
 
 [Serializable]
+public class DailyMissionSaveData
+{
+    public string templateId;
+    public int currentProgress;
+    public bool rewardClaimed;
+
+    public DailyMissionSaveData(DailyMission mission)
+    {
+        templateId = mission.template != null ? mission.template.id : "";
+        currentProgress = mission.currentProgress;
+        rewardClaimed = mission.rewardClaimed;
+    }
+}
+
+[Serializable]
 public class DailyMissionsSaveData
 {
-    public List<DailyMission> activeMissions;
+    public List<DailyMissionSaveData> activeMissions;
 
     public DailyMissionsSaveData(List<DailyMission> missions)
     {
-        activeMissions = missions;
+        activeMissions = new List<DailyMissionSaveData>();
+        foreach (var m in missions)
+            activeMissions.Add(new DailyMissionSaveData(m));
     }
 }

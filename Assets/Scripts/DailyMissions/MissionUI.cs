@@ -27,6 +27,12 @@ public class MissionUI : MonoBehaviour
 
         this.mission = mission;
 
+        if (mission.template == null)
+        {
+            Debug.LogError($"MissionUI.Setup: El template es null en la misión con progreso {mission.currentProgress}");
+            return;
+        }
+
         // Guardamos color original para poder restaurarlo si hace falta
         defaultTextColor = descriptionText.color;
 
