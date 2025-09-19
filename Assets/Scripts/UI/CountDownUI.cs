@@ -7,9 +7,11 @@ public class CountDownUI : MonoBehaviour
 {
     public static CountDownUI Instance { get; private set; }
 
-    [SerializeField] private TextMeshProUGUI countDownText;
+    public TextMeshProUGUI countDownText;
 
     private Animator myAnimator;
+
+    private bool isCustomMessage = false;
 
     private void Awake()
     {
@@ -24,7 +26,10 @@ public class CountDownUI : MonoBehaviour
 
     private void Update()
     {
-        countDownText.text = Mathf.Ceil(GameStates.Instance.GetCountDownTime()).ToString();
+        if (!isCustomMessage)
+        {
+            countDownText.text = Mathf.Ceil(GameStates.Instance.GetCountDownTime()).ToString();
+        }
     }
 
     public void Show()
@@ -36,6 +41,16 @@ public class CountDownUI : MonoBehaviour
     public void Hide()
     {
         countDownText.gameObject.SetActive(false);
+    }
 
+    public void ShowMessage(string message)
+    {
+        isCustomMessage = true;
+        countDownText.text = message;
+    }
+
+    public void SetAnimatorFalse()
+    {
+        myAnimator.SetBool("IsCountDown", false);
     }
 }

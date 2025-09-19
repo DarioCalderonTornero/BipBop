@@ -33,7 +33,7 @@ public class GameStates : MonoBehaviour
     private void Update()
     {
         GameState();
-        CameraShake.Instance.Shake();
+        //CameraShake.Instance.Shake();
     }
 
     private void GameState()

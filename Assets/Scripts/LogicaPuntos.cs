@@ -43,7 +43,7 @@ public class LogicaPuntos : MonoBehaviour
         Instance = this;
         instructionText.text = "Prepárate..."; // Mensaje mientras espera
         scoreText.text = "Puntos: 0"; // Inicializa el texto de la puntuación
-        timerUI.fillAmount = 0; // Barra vacía al inicio
+        timerUI.fillAmount = 1; // Barra vacía al inicio
     }
 
     void Start()
@@ -55,7 +55,11 @@ public class LogicaPuntos : MonoBehaviour
     {
         CountDownUI.Instance.Show();
 
-        yield return new WaitForSeconds(delay); 
+        yield return new WaitForSeconds(delay);
+
+        CountDownUI.Instance.ShowMessage("GO!");
+
+        yield return new WaitForSeconds(0.8f);
 
         CountDownUI.Instance.Hide();
         isGameActive = true; 
@@ -69,17 +73,14 @@ public class LogicaPuntos : MonoBehaviour
         if (!isGameActive)
             return;
 
-        // Reduce el tiempo restante en función del tiempo real transcurrido
         currentTime -= Time.deltaTime;
 
-        // Actualiza el slider con el tiempo restante
         timerUI.fillAmount = currentTime / startTime;
 
-        // Si el tiempo se acaba, termina el juego
         if (currentTime <= 0f)
         {
             OnGameOver?.Invoke(this, EventArgs.Empty);
-            EndGame(); // Usa el nuevo método para manejar el fin del juego
+            EndGame(); 
         }
     }
 
@@ -127,13 +128,11 @@ public class LogicaPuntos : MonoBehaviour
         currentTime = startTime;
         startTime = Mathf.Max(2f, startTime - 0.1f);
 
-        // Actualiza el slider con el nuevo tiempo
         timerUI.fillAmount = 0f;
     }
 
     private void UpdateScoreText()
     {
-        // Actualiza el texto en pantalla con la puntuación actual
         scoreText.text = "Puntos: " + score;
     }
 
@@ -164,12 +163,10 @@ public class LogicaPuntos : MonoBehaviour
     {
         isGameActive = false;
         instructionText.text = "¡Juego terminado!";
-        SaveRecordIfNeeded(); // Guarda el récord si es necesario
+        SaveRecordIfNeeded(); 
 
-        // Calcula las monedas ganadas en esta partida (1 moneda por cada 15 puntos)
         int coinsEarned = score / 15;
 
-        // Recupera el total actual de monedas y suma las nuevas
         int totalCoins = PlayerPrefs.GetInt("CoinCount", 0);
         totalCoins += coinsEarned;
         PlayerPrefs.SetInt("CoinCount", totalCoins);

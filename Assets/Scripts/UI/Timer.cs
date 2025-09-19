@@ -13,13 +13,13 @@ public class Timer : MonoBehaviour
     private void Awake()
     {
         Instance = this;
-        timerImage.fillAmount = 0;
+        timerImage.fillAmount = 1;
         //Hide();
     }
 
     private void Update()
     {
-        timerImage.fillAmount = GameStates.Instance.GetGameTimerUI();
+        //timerImage.fillAmount = GameStates.Instance.GetGameTimerUI();
     }
 
     public void Show()
