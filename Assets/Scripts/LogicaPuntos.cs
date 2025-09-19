@@ -43,7 +43,7 @@ public class LogicaPuntos : MonoBehaviour
         Instance = this;
         instructionText.text = "Prepárate..."; // Mensaje mientras espera
         scoreText.text = "Puntos: 0"; // Inicializa el texto de la puntuación
-        timerUI.fillAmount = 1; // Barra vacía al inicio
+        timerUI.fillAmount = 1; 
     }
 
     void Start()
