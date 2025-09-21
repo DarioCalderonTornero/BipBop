@@ -21,6 +21,8 @@ public class PreviewFondos : MonoBehaviour
     private int currentPrice;
     private string currentBackgroundID; // Identificador único del fondo
 
+    public Sprite CurrentSelectedSprite { get; private set; }
+
     private void Awake()
     {
         if (Instance == null)
@@ -35,14 +37,14 @@ public class PreviewFondos : MonoBehaviour
     /// <param name="nuevoFondo">El sprite del fondo</param>
     /// <param name="backgroundID">Identificador único del fondo</param>
     /// <param name="price">Precio del fondo en monedas</param>
-    public void ShowPreview(Sprite nuevoFondo, string backgroundID, int price)
+    public void ShowPreview(BackgroundDataSO backgroundDataSO)
     {
-        selectedSprite = nuevoFondo;
-        currentBackgroundID = backgroundID;
-        currentPrice = price;
+        CurrentSelectedSprite = backgroundDataSO.sprite;
+        currentBackgroundID = backgroundDataSO.id;
+        currentPrice = backgroundDataSO.price;
 
-        previewImage.sprite = nuevoFondo;
-        priceText.text = "Precio: " + price.ToString() + " monedas";
+        previewImage.sprite = backgroundDataSO.sprite;
+        priceText.text = "Precio: " + backgroundDataSO.price + " monedas";
 
         // Si es el fondo predeterminado, lo marcamos como comprado.
         bool purchased = (currentBackgroundID == "DefaultBackground") || (PlayerPrefs.GetInt("Purchased_" + currentBackgroundID, 0) == 1);
@@ -98,9 +100,9 @@ public class PreviewFondos : MonoBehaviour
                 PlayerPrefs.SetInt("CoinCount", coins);
                 // Marca el fondo como comprado
                 PlayerPrefs.SetInt("Purchased_" + currentBackgroundID, 1);
-                // Equipar el fondo automáticamente (o dejar que el jugador presione "Equipar")
                 PlayerPrefs.SetString("SelectedBackground", currentBackgroundID);
                 PlayerPrefs.Save();
+
             }
             else
             {
@@ -116,7 +118,7 @@ public class PreviewFondos : MonoBehaviour
         }
 
         // Aplica el fondo mediante el script FondoSelector
-        fondoSelector.CambiarFondo(selectedSprite);
+        fondoSelector.CambiarFondo(CurrentSelectedSprite);
         previewPanel.SetActive(false);
         botonesPantallas.SetActive(true);
     }

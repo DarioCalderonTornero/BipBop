@@ -5,40 +5,27 @@ using UnityEngine.UI;
 
 public class FondoPartida : MonoBehaviour
 {
-    // Asigna este componente en el Inspector: es el SpriteRenderer del fondo de la partida.
-    [SerializeField] private Image backgroundRenderer;
-    // Nombre por defecto si no se ha seleccionado ninguno.
-    [SerializeField] private string defaultBackgroundName = "DefaultBackground";
+    [Header("Referencias")]
+    [SerializeField] private Image backgroundRenderer;      
+    [SerializeField] private Sprite defaultBackground;        
+    [SerializeField] private BackgroundCatalogSO catalogoFondos; 
 
     private void Start()
     {
-        // Comprueba si ya se ha equipado un fondo; si no, lo establece como predeterminado.
-        string selectedBackgroundName = PlayerPrefs.GetString("SelectedBackground", "");
-        if (string.IsNullOrEmpty(selectedBackgroundName))
-        {
-            selectedBackgroundName = defaultBackgroundName;
-            PlayerPrefs.SetString("SelectedBackground", defaultBackgroundName);
-            PlayerPrefs.Save();
-        }
+        string equippedID = PlayerPrefs.GetString("SelectedBackground", "DefaultBackground");
+        Debug.Log($"[FondoPartida] ID cargado desde PlayerPrefs: {equippedID}");
 
-        // Carga el sprite desde la carpeta Resources/Sprites
-        Sprite newBackground = Resources.Load<Sprite>("Sprites/" + selectedBackgroundName);
+        BackgroundDataSO backgroundData = catalogoFondos.backgroundDataSO.Find(b => b.id == equippedID);
 
-        if (newBackground != null)
+        if (backgroundData != null && backgroundData.sprite != null)
         {
-            backgroundRenderer.sprite = newBackground;
-            Debug.Log("Fondo cambiado a: " + selectedBackgroundName);
+            backgroundRenderer.sprite = backgroundData.sprite;
+            Debug.Log($"[FondoPartida] Fondo cargado correctamente: {backgroundData.id} -> {backgroundData.sprite.name}");
         }
         else
         {
-            Debug.LogWarning("No se encontró el sprite para: " + selectedBackgroundName);
-        }
-
-        // Asegura que el color del componente Image sea blanco
-        Image imageComponent = GetComponent<Image>();
-        if (imageComponent != null)
-        {
-            imageComponent.color = new Color32(255, 255, 255, 255);
+            backgroundRenderer.sprite = defaultBackground;
+            Debug.Log($"[FondoPartida] No se encontró el fondo con ID '{equippedID}' en el catálogo. Se aplica default: {defaultBackground.name}");
         }
     }
 }
