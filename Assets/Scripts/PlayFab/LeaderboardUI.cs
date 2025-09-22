@@ -19,6 +19,7 @@ public class LeaderboardUI : MonoBehaviour
 
     private void Awake()
     {
+
         // Singleton
         if (Instance == null)
         {
@@ -61,6 +62,11 @@ public class LeaderboardUI : MonoBehaviour
     private void OnOpenButtonClicked()
     {
         ShowLeaderboard("HighScore", 10); // Cambia el nombre de la estadística si hace falta
+    }
+
+    public void OnColorLeaderboardButtonClicked()
+    {
+        LeaderboardUI.Instance.ShowLeaderboard("ColorScore", 10); // Top 10 del modo colores
     }
 
     /// <summary>

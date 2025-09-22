@@ -15,11 +15,17 @@ public class PlayFabScoreManager : MonoBehaviour
         else { Destroy(gameObject); }
     }
 
+    private void Start()
+    {
+        PlayerPrefs.DeleteKey("best_ColorScore");
+        PlayerPrefs.Save();
+        Debug.Log("Record local borrado");
+    }
     #region Enviar Scores Client-side
     /// <summary>
     /// Envia un score al leaderboard de PlayFab si supera el mejor local.
     /// </summary>
-    public void SubmitScore(string statisticName, int score)
+    public void SubmitScore(string statisticName, int score, bool forceSend = false)
     {
         if (!PlayFabLoginManager.Instance.IsLoggedIn)
         {
@@ -27,26 +33,30 @@ public class PlayFabScoreManager : MonoBehaviour
             return;
         }
 
-        int bestLocal = PlayerPrefs.GetInt("best_" + statisticName, 0);
-        if (score <= bestLocal)
+        string key = "best_" + statisticName;
+        int bestLocal = PlayerPrefs.GetInt(key, 0);
+
+        // Si no queremos forzar, solo enviar si supera el record
+        if (!forceSend && score <= bestLocal)
         {
-            Debug.Log("Score menor o igual al mejor local. Ignorado.");
+            Debug.Log($"Score menor o igual al mejor local ({bestLocal}). Ignorado.");
             return;
         }
 
-        PlayerPrefs.SetInt("best_" + statisticName, score);
+        // Guardar record local
+        PlayerPrefs.SetInt(key, score);
         PlayerPrefs.Save();
 
         var request = new UpdatePlayerStatisticsRequest
         {
             Statistics = new List<StatisticUpdate>
+        {
+            new StatisticUpdate
             {
-                new StatisticUpdate
-                {
-                    StatisticName = statisticName,
-                    Value = score
-                }
+                StatisticName = statisticName,
+                Value = score
             }
+        }
         };
 
         PlayFabClientAPI.UpdatePlayerStatistics(request, result =>
@@ -55,7 +65,6 @@ public class PlayFabScoreManager : MonoBehaviour
         }, error =>
         {
             Debug.LogWarning("Error al enviar score: " + error.GenerateErrorReport());
-            // opcional: encolar para reintento
         });
     }
     #endregion

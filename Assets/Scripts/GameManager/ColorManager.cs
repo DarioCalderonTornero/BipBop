@@ -190,6 +190,12 @@ public class ColorManager : MonoBehaviour
             PlayerPrefs.Save();
         }
 
+        // Enviar puntuación a PlayFab
+        if (PlayFabLoginManager.Instance != null && PlayFabLoginManager.Instance.IsLoggedIn)
+        {
+            PlayFabScoreManager.Instance.SubmitScore("ColorScore", score);
+        }
+
         SceneManager.LoadScene("Menu");
     }
 }
