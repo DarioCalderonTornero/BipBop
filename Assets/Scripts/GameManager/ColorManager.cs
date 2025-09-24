@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -9,15 +10,17 @@ public class ColorManager : MonoBehaviour
 {
     public static ColorManager Instance { get; private set; }
 
+    public event EventHandler OnGameOver;
+
     [Header("UI Elements")]
-    public TextMeshProUGUI colorWordText;  // Muestra el nombre del color que se debe seleccionar
+    public TextMeshProUGUI colorWordText;  
     public Image colorWordBackground;
-    public TextMeshProUGUI scoreText;        // Puntuación actual
-    public Slider timeSlider;                // Barra de tiempo
-    public float startTime = 60f;            // Tiempo inicial
+    public TextMeshProUGUI scoreText;        
+    public Slider timeSlider;               
+    public float startTime = 60f;            
 
     [Header("Candidate Buttons")]
-    public List<Button> candidateButtons;    // Debe tener 6 botones, cada uno mostrando un color
+    public List<Button> candidateButtons;    
 
     [Header("Color Data")]
     public string[] colorNames = { "Rojo", "Azul", "Verde", "Amarillo", "Morado", "Naranja", "Marrón", "Negro", "Blanco" };
@@ -25,9 +28,9 @@ public class ColorManager : MonoBehaviour
                                 new Color(0.6f, 0.3f, 0.1f), Color.black, Color.white };
 
     private float currentTime;
-    private int score = 0;
+    //private int score = 0;
     private int correctIndex;
-    private int lastCorrectIndex = -1; // recordamos el último índice correcto
+    private int lastCorrectIndex = -1; 
 
     private void Awake()
     {
@@ -57,14 +60,14 @@ public class ColorManager : MonoBehaviour
     private void SetupRound()
     {
         int availableCount = 6;
-        if (score >= 10) availableCount = 7;
-        if (score >= 20) availableCount = 8;
-        if (score >= 30) availableCount = 9;
+        if (ColorGamePuntos.Instance.GetScore() >= 10) availableCount = 7;
+        if (ColorGamePuntos.Instance.GetScore() >= 20) availableCount = 8;
+        if (ColorGamePuntos.Instance.GetScore() >= 30) availableCount = 9;
 
         // aseguramos que no se repita el mismo color correcto dos veces seguidas
         do
         {
-            correctIndex = Random.Range(0, availableCount);
+            correctIndex = UnityEngine.Random.Range(0, availableCount);
         } while (correctIndex == lastCorrectIndex);
 
         lastCorrectIndex = correctIndex;
@@ -75,7 +78,7 @@ public class ColorManager : MonoBehaviour
         int textColorIndex;
         do
         {
-            textColorIndex = Random.Range(0, availableCount);
+            textColorIndex = UnityEngine.Random.Range(0, availableCount);
         } while (textColorIndex == correctIndex);
         Color displayColor = colorValues[textColorIndex];
 
@@ -86,7 +89,7 @@ public class ColorManager : MonoBehaviour
         int backgroundColorIndex;
         do
         {
-            backgroundColorIndex = Random.Range(0, colorValues.Length);
+            backgroundColorIndex = UnityEngine.Random.Range(0, colorValues.Length);
         } while (backgroundColorIndex == textColorIndex);
         colorWordBackground.color = colorValues[backgroundColorIndex];
 
@@ -103,7 +106,7 @@ public class ColorManager : MonoBehaviour
         // barajamos la lista
         for (int i = 0; i < remainingIndices.Count; i++)
         {
-            int r = Random.Range(i, remainingIndices.Count);
+            int r = UnityEngine.Random.Range(i, remainingIndices.Count);
             (remainingIndices[i], remainingIndices[r]) = (remainingIndices[r], remainingIndices[i]);
         }
 
@@ -120,7 +123,7 @@ public class ColorManager : MonoBehaviour
         // barajar botones
         for (int i = 0; i < candidateIndices.Count; i++)
         {
-            int r = Random.Range(i, candidateIndices.Count);
+            int r = UnityEngine.Random.Range(i, candidateIndices.Count);
             (candidateIndices[i], candidateIndices[r]) = (candidateIndices[r], candidateIndices[i]);
         }
 
@@ -139,7 +142,7 @@ public class ColorManager : MonoBehaviour
     {
         if (selectedIndex == correctIndex)
         {
-            score++;
+            ColorGamePuntos.Instance.AddScore();
             UpdateScoreText();
 
             startTime = Mathf.Max(1f, startTime - 0.1f);
@@ -158,12 +161,12 @@ public class ColorManager : MonoBehaviour
     {
         float size1 = 419.92f;
         float size2 = 262.141f;
-        if (score >= 50)
+        if (ColorGamePuntos.Instance.GetScore() >= 50)
         {
             size1 = 220f;
             size2 = 130f;
         }
-        else if (score >= 25)
+        else if (ColorGamePuntos.Instance.GetScore() >= 25)
         {
             size1 = 320f;
             size2 = 200f;
@@ -178,24 +181,21 @@ public class ColorManager : MonoBehaviour
 
     private void UpdateScoreText()
     {
-        scoreText.text = "Puntos: " + score;
+        ColorGamePuntos.Instance.ShowScore();
     }
 
     private void EndGame()
     {
-        int maxRecordColor = PlayerPrefs.GetInt("MaxRecordColor", 0);
-        if (score > maxRecordColor)
-        {
-            PlayerPrefs.SetInt("MaxRecordColor", score);
-            PlayerPrefs.Save();
-        }
+        ColorGamePuntos.Instance.SafeRecordIfNeeded();
+
+        OnGameOver?.Invoke(this, EventArgs.Empty);  
 
         // Enviar puntuación a PlayFab
         if (PlayFabLoginManager.Instance != null && PlayFabLoginManager.Instance.IsLoggedIn)
         {
-            PlayFabScoreManager.Instance.SubmitScore("ColorScore", score);
+            PlayFabScoreManager.Instance.SubmitScore("ColorScore", ColorGamePuntos.Instance.GetScore());
         }
 
-        SceneManager.LoadScene("Menu");
+        //SceneManager.LoadScene("Menu");
     }
 }

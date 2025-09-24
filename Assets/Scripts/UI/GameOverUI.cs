@@ -8,8 +8,7 @@ using UnityEngine.UI;
 public class GameOverUI : MonoBehaviour
 {
     [SerializeField] private Button retryButton;
-    [SerializeField] private TextMeshProUGUI retryText;
-    [SerializeField] private TextMeshProUGUI scoreText; // Texto para mostrar la puntuación final
+    [SerializeField] private TextMeshProUGUI scoreText;
 
     private void Awake()
     {
@@ -22,14 +21,14 @@ public class GameOverUI : MonoBehaviour
 
     private void Start()
     {
-        LogicaPuntos.Instance.OnGameOver += LogicaPuntos_OnGameOver;
+        LogicaJuego.Instance.OnGameOver += LogicaPuntos_OnGameOver;
         Hide();
     }
 
     private void LogicaPuntos_OnGameOver(object sender, System.EventArgs e)
     {
         // Muestra la puntuación final
-        scoreText.text = $"Score: {LogicaPuntos.Instance.GetScore()}";
+        //scoreText.text = $"Score: {LogicaJuego.Instance.GetScore()}";
         Show();
     }
 

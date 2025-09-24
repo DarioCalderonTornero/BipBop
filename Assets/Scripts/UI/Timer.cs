@@ -9,6 +9,7 @@ public class Timer : MonoBehaviour
     public static Timer Instance {  get; private set; }
 
     [SerializeField] private Image timerImage;
+ 
 
     private void Awake()
     {
@@ -17,10 +18,7 @@ public class Timer : MonoBehaviour
         //Hide();
     }
 
-    private void Update()
-    {
-        //timerImage.fillAmount = GameStates.Instance.GetGameTimerUI();
-    }
+   
 
     public void Show()
     {

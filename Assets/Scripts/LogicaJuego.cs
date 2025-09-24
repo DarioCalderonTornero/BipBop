@@ -6,18 +6,16 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class LogicaPuntos : MonoBehaviour
+public class LogicaJuego : MonoBehaviour
 {
-    public static LogicaPuntos Instance { get; private set; }
+    public static LogicaJuego Instance { get; private set; }
 
     public TextMeshProUGUI instructionText; // Texto para mostrar la instrucción
-    public TextMeshProUGUI scoreText; // Texto para mostrar la puntuación
     public Image timerUI; // Slider para mostrar el tiempo restante
-    public float startTime = 100f; // Tiempo inicial en segundos
+    public float startTime; // Tiempo inicial en segundos
 
     private float currentTime;
     private bool isGameActive = false; // Se desactiva hasta que pasen los 3 segundos
-    private int score = -1; // Puntuación inicial
 
     public event EventHandler OnGameOver;
 
@@ -41,14 +39,13 @@ public class LogicaPuntos : MonoBehaviour
     private void Awake()
     {
         Instance = this;
-        instructionText.text = "Prepárate..."; // Mensaje mientras espera
-        scoreText.text = "Puntos: 0"; // Inicializa el texto de la puntuación
+        instructionText.text = "Prepárate..."; 
         timerUI.fillAmount = 1; 
     }
 
     void Start()
     {
-        StartCoroutine(StartGameAfterDelay(3.0f));
+        StartCoroutine(StartGameAfterDelay(3.1f));
     }
 
     private IEnumerator StartGameAfterDelay(float delay)
@@ -100,7 +97,7 @@ public class LogicaPuntos : MonoBehaviour
 
     private void StartNewTask()
     {
-        score++;
+        MainGamePoints.Instance.AddScore();
         UpdateScoreText();
 
         // Filtrar tareas según las configuraciones
@@ -133,12 +130,7 @@ public class LogicaPuntos : MonoBehaviour
 
     private void UpdateScoreText()
     {
-        scoreText.text = "Puntos: " + score;
-    }
-
-    public int GetScore()
-    {
-        return score;
+        MainGamePoints.Instance.ShowScore();
     }
 
     public bool IsGameActive()
@@ -151,12 +143,7 @@ public class LogicaPuntos : MonoBehaviour
         // Recupera el récord actual
         int currentRecord = PlayerPrefs.GetInt("MaxRecord", 0);
 
-        // Si la puntuación actual supera el récord, actualiza el valor
-        if (score > currentRecord)
-        {
-            PlayerPrefs.SetInt("MaxRecord", score);
-            PlayerPrefs.Save();
-        }
+        MainGamePoints.Instance.SafeRecordIfNeeded();
     }
 
     private void EndGame()
@@ -165,11 +152,11 @@ public class LogicaPuntos : MonoBehaviour
         instructionText.text = "¡Juego terminado!";
         SaveRecordIfNeeded(); 
 
-        int coinsEarned = score / 15;
+        //int coinsEarned = score / 15;
 
-        PlayFabScoreManager.Instance.SubmitScore("HighScore", score);
+        //PlayFabScoreManager.Instance.SubmitScore("HighScore", score);
         int totalCoins = PlayerPrefs.GetInt("CoinCount", 0);
-        totalCoins += coinsEarned;
+        //totalCoins += coinsEarned;
         PlayerPrefs.SetInt("CoinCount", totalCoins);
         PlayerPrefs.Save();
     }

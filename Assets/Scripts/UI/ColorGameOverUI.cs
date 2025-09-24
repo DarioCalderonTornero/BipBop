@@ -5,8 +5,9 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class GameOver : MonoBehaviour
+public class ColorGameOverUI : MonoBehaviour
 {
+
     [SerializeField] private Button retryButton;
     [SerializeField] private Button mainMenuButton;
     [SerializeField] private Image backGround;
@@ -20,7 +21,7 @@ public class GameOver : MonoBehaviour
         //Hide();
         retryButton.onClick.AddListener(() =>
         {
-            SceneManager.LoadScene("GameScene");
+            SceneManager.LoadScene("ColorScene");
         });
 
         mainMenuButton.onClick.AddListener(() =>
@@ -32,18 +33,12 @@ public class GameOver : MonoBehaviour
     void Start()
     {
         myanimator = GetComponent<Animator>();
-        LogicaJuego.Instance.OnGameOver += LogicaPuntos_OnGameOver;
+        ColorManager.Instance.OnGameOver += ColorManager_OnGameOver;
     }
 
-    private void Update()
+    private void ColorManager_OnGameOver(object sender, System.EventArgs e)
     {
-
-    }
-
-    private void LogicaPuntos_OnGameOver(object sender, System.EventArgs e)
-    {
-        Debug.Log("Show");
         myanimator.SetBool("IsGameOver", true);
     }
-  
 }
+

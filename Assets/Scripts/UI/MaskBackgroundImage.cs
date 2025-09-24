@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class FondoPartida : MonoBehaviour
+public class MaskBackgroundImage : MonoBehaviour
 {
-    [SerializeField] private Image backgroundRenderer;      
-    [SerializeField] private Sprite defaultBackground;        
-    [SerializeField] private BackgroundCatalogSO catalogoFondos; 
+    [SerializeField] private Image backgroundImage;
+    [SerializeField] private Sprite defaultBackground;
+    [SerializeField] private BackgroundCatalogSO catalogoFondos;
 
     private void Start()
     {
@@ -17,11 +17,11 @@ public class FondoPartida : MonoBehaviour
 
         if (backgroundData != null && backgroundData.sprite != null)
         {
-            backgroundRenderer.sprite = backgroundData.sprite;
+            backgroundImage.sprite = backgroundData.sprite;
         }
         else
         {
-            backgroundRenderer.sprite = defaultBackground;
+            backgroundImage.sprite = defaultBackground;
         }
     }
 }
