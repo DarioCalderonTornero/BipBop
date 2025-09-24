@@ -21,12 +21,14 @@ public class ColorGameOverUI : MonoBehaviour
         //Hide();
         retryButton.onClick.AddListener(() =>
         {
-            SceneManager.LoadScene("ColorScene");
+            SceneLoader.LoadScene(SceneLoader.Scene.ColorScene);
+
         });
 
         mainMenuButton.onClick.AddListener(() =>
         {
-            SceneManager.LoadScene("Menu");
+            SceneLoader.LoadScene(SceneLoader.Scene.Menu);
+
         });
     }
 

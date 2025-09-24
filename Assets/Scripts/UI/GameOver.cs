@@ -20,12 +20,12 @@ public class GameOver : MonoBehaviour
         //Hide();
         retryButton.onClick.AddListener(() =>
         {
-            SceneManager.LoadScene("GameScene");
+            SceneLoader.LoadScene(SceneLoader.Scene.GameScene);
         });
 
         mainMenuButton.onClick.AddListener(() =>
         {
-            SceneManager.LoadScene("Menu");
+            SceneLoader.LoadScene(SceneLoader.Scene.Menu);
         });
     }
 
