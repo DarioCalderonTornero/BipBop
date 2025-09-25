@@ -15,7 +15,7 @@ public class PlayFabScoreManager : MonoBehaviour
     const string QUEUE_KEY = "pf_score_queue_v1";
 
     private List<ScoreQueueItem> queue = new List<ScoreQueueItem>();
-    private DateTime sessionStart; // añadimos esto
+    private DateTime sessionStart;
 
     private void Awake()
     {
@@ -25,7 +25,7 @@ public class PlayFabScoreManager : MonoBehaviour
             DontDestroyOnLoad(gameObject);
             LoadQueue();
 
-            sessionStart = DateTime.UtcNow; // guardamos inicio sesión
+            sessionStart = DateTime.UtcNow;
         }
         else
         {
@@ -36,14 +36,18 @@ public class PlayFabScoreManager : MonoBehaviour
     void LoadQueue()
     {
         string json = PlayerPrefs.GetString(QUEUE_KEY, "");
-        if (!string.IsNullOrEmpty(json)) queue = JsonUtility.FromJson<Wrapper>(json).items;
+        if (!string.IsNullOrEmpty(json))
+            queue = JsonUtility.FromJson<Wrapper>(json).items;
     }
+
     void SaveQueue()
     {
         PlayerPrefs.SetString(QUEUE_KEY, JsonUtility.ToJson(new Wrapper { items = queue }));
         PlayerPrefs.Save();
     }
-    [Serializable] class Wrapper { public List<ScoreQueueItem> items = new List<ScoreQueueItem>(); }
+
+    [Serializable]
+    class Wrapper { public List<ScoreQueueItem> items = new List<ScoreQueueItem>(); }
 
     public void EnqueueScore(string statName, int score, int sessionLength = 0)
     {
@@ -57,7 +61,7 @@ public class PlayFabScoreManager : MonoBehaviour
         SaveQueue();
     }
 
-    // Llamar al final de partida
+    // Enviar score directo sin CloudScript
     public void SubmitScore(string statisticName, int score, int sessionLength = 0, bool forceSend = false)
     {
         if (!PlayFabLoginManager.Instance.IsLoggedIn)
@@ -67,11 +71,8 @@ public class PlayFabScoreManager : MonoBehaviour
             return;
         }
 
-        // calculamos duración de sesión si no se pasó manualmente
         if (sessionLength <= 0)
-        {
             sessionLength = (int)(DateTime.UtcNow - sessionStart).TotalSeconds;
-        }
 
         string key = "best_" + statisticName;
         int bestLocal = PlayerPrefs.GetInt(key, 0);
@@ -84,47 +85,29 @@ public class PlayFabScoreManager : MonoBehaviour
         PlayerPrefs.SetInt(key, score);
         PlayerPrefs.Save();
 
-        var req = new ExecuteCloudScriptRequest
+        var request = new UpdatePlayerStatisticsRequest
         {
-            FunctionName = "submitScore",
-            FunctionParameter = new
+            Statistics = new List<StatisticUpdate>
             {
-                statName = statisticName,
-                score = score,
-                sessionLength = sessionLength,
-                clientBest = bestLocal
-            },
-            GeneratePlayStreamEvent = true
+                new StatisticUpdate
+                {
+                    StatisticName = statisticName,
+                    Value = score
+                }
+            }
         };
 
-        PlayFabClientAPI.ExecuteCloudScript(req, result =>
-        {
-            if (result.FunctionResult != null)
+        Debug.Log($"[PlayFab] Subiendo score directo: {statisticName}={score}");
+
+        PlayFabClientAPI.UpdatePlayerStatistics(request,
+            result => { Debug.Log("[PlayFab] Score subido correctamente"); },
+            error =>
             {
-                try
-                {
-                    string raw = PlayFabSimpleJson.SerializeObject(result.FunctionResult);
-                    Debug.Log("CloudScript result: " + raw);
-                }
-                catch (Exception ex)
-                {
-                    Debug.LogWarning("Error parseando FunctionResult: " + ex.Message);
-                    Debug.Log("FunctionResult (ToString): " + result.FunctionResult.ToString());
-                }
-            }
-            else
-            {
-                Debug.LogWarning("CloudScript devolvió null en FunctionResult");
-            }
-        },
-        error =>
-        {
-            Debug.LogWarning("CloudScript failed, encolando: " + error.GenerateErrorReport());
-            EnqueueScore(statisticName, score, sessionLength);
-        });
+                Debug.LogWarning("[PlayFab] Error al subir score, encolando: " + error.GenerateErrorReport());
+                EnqueueScore(statisticName, score, sessionLength);
+            });
     }
 
-    // Cola procesadora simple
     private void Start()
     {
         StartCoroutine(ProcessQueueLoop());
@@ -140,19 +123,19 @@ public class PlayFabScoreManager : MonoBehaviour
             bool finished = false;
             bool success = false;
 
-            var req = new ExecuteCloudScriptRequest
+            var request = new UpdatePlayerStatisticsRequest
             {
-                FunctionName = "submitScore",
-                FunctionParameter = new
+                Statistics = new List<StatisticUpdate>
                 {
-                    statName = item.statName,
-                    score = item.score,
-                    sessionLength = item.sessionLength
-                },
-                GeneratePlayStreamEvent = true
+                    new StatisticUpdate
+                    {
+                        StatisticName = item.statName,
+                        Value = item.score
+                    }
+                }
             };
 
-            PlayFabClientAPI.ExecuteCloudScript(req,
+            PlayFabClientAPI.UpdatePlayerStatistics(request,
                 res => { success = true; finished = true; },
                 err => { success = false; finished = true; });
 
@@ -163,7 +146,7 @@ public class PlayFabScoreManager : MonoBehaviour
             {
                 queue.RemoveAt(0);
                 SaveQueue();
-                Debug.Log("Queued score enviado OK");
+                Debug.Log("[PlayFab] Queued score enviado OK");
             }
             else
             {
@@ -182,13 +165,9 @@ public class PlayFabScoreManager : MonoBehaviour
             MaxResultsCount = top
         };
 
-        PlayFabClientAPI.GetLeaderboard(request, result =>
-        {
-            onSuccess?.Invoke(result.Leaderboard);
-        }, error =>
-        {
-            Debug.LogWarning("Error obteniendo leaderboard: " + error.GenerateErrorReport());
-        });
+        PlayFabClientAPI.GetLeaderboard(request,
+            result => { onSuccess?.Invoke(result.Leaderboard); },
+            error => { Debug.LogWarning("Error obteniendo leaderboard: " + error.GenerateErrorReport()); });
     }
     #endregion
 }

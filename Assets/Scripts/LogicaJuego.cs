@@ -152,11 +152,11 @@ public class LogicaJuego : MonoBehaviour
         instructionText.text = "¡Juego terminado!";
         SaveRecordIfNeeded(); 
 
-        //int coinsEarned = score / 15;
+        int coinsEarned = MainGamePoints.Instance.GetScore() / 15;
 
-        //PlayFabScoreManager.Instance.SubmitScore("HighScore", score);
+        PlayFabScoreManager.Instance.SubmitScore("HighScore", MainGamePoints.Instance.GetScore());
         int totalCoins = PlayerPrefs.GetInt("CoinCount", 0);
-        //totalCoins += coinsEarned;
+        totalCoins += coinsEarned;
         PlayerPrefs.SetInt("CoinCount", totalCoins);
         PlayerPrefs.Save();
     }
