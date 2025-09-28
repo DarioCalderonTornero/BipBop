@@ -9,7 +9,7 @@ public class CurrencyManagerUI : MonoBehaviour
 
     private void Update()
     {
-        coinText.text = "Coins: " + CurrencyManager.Instance.GetCoins().ToString();
+        coinText.text = CurrencyManager.Instance.GetCoins().ToString();
         Debug.Log(coinText);
     }
 }
