@@ -34,9 +34,6 @@ public class PreviewFondos : MonoBehaviour
     /// <summary>
     /// Se llama desde el botón de cada fondo en la tienda.
     /// </summary>
-    /// <param name="nuevoFondo">El sprite del fondo</param>
-    /// <param name="backgroundID">Identificador único del fondo</param>
-    /// <param name="price">Precio del fondo en monedas</param>
     public void ShowPreview(BackgroundDataSO backgroundDataSO)
     {
         CurrentSelectedSprite = backgroundDataSO.sprite;
@@ -47,8 +44,10 @@ public class PreviewFondos : MonoBehaviour
         priceText.text = "Precio: " + backgroundDataSO.price + " monedas";
 
         // Si es el fondo predeterminado, lo marcamos como comprado.
-        bool purchased = (currentBackgroundID == "DefaultBackground") || (PlayerPrefs.GetInt("Purchased_" + currentBackgroundID, 0) == 1);
-        int coins = PlayerPrefs.GetInt("CoinCount", 0);
+        bool purchased = (currentBackgroundID == "DefaultBackground")
+                         || (PlayerPrefs.GetInt("Purchased_" + currentBackgroundID, 0) == 1);
+
+        int coins = CurrencyManager.Instance.GetCoins();
 
         if (!purchased)
         {
@@ -89,24 +88,25 @@ public class PreviewFondos : MonoBehaviour
     {
         // Comprueba si el fondo ya se compró
         bool purchased = PlayerPrefs.GetInt("Purchased_" + currentBackgroundID, 0) == 1;
+
         if (!purchased)
         {
-            // Lee la cantidad de monedas del jugador
-            int coins = PlayerPrefs.GetInt("CoinCount", 0);
+            int coins = CurrencyManager.Instance.GetCoins();
+
             if (coins >= currentPrice)
             {
-                // Descuenta las monedas del precio del fondo
-                coins -= currentPrice;
-                PlayerPrefs.SetInt("CoinCount", coins);
-                // Marca el fondo como comprado
+                // Gastar monedas con CurrencyManager (esto actualiza UI y PlayerPrefs)
+                CurrencyManager.Instance.SpendCoins(currentPrice);
+                Debug.Log(currentPrice);
+
+                // Marca el fondo como comprado y lo equipa
                 PlayerPrefs.SetInt("Purchased_" + currentBackgroundID, 1);
                 PlayerPrefs.SetString("SelectedBackground", currentBackgroundID);
                 PlayerPrefs.Save();
-
             }
             else
             {
-                // Esto no debería suceder, ya que el botón debería estar deshabilitado si no hay monedas suficientes
+                // Esto no debería suceder, ya que el botón debería estar deshabilitado
                 return;
             }
         }

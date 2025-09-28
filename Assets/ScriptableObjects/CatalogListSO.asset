@@ -15,3 +15,5 @@ MonoBehaviour:
   backgroundDataSO:
   - {fileID: 11400000, guid: 19acc02191ae0ff4ea2075c2b246702b, type: 2}
   - {fileID: 11400000, guid: 1bc7c38e33816b840971818a776362b5, type: 2}
+  - {fileID: 11400000, guid: cb2ef859cc58daa4a9f0c08b63698896, type: 2}
+  - {fileID: 11400000, guid: 73eefed49a7f23a43a49f359ac7f5b80, type: 2}

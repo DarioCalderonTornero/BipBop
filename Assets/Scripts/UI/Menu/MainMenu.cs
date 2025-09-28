@@ -38,7 +38,7 @@ public class MainMenu : MonoBehaviour
         motionTasksToggle.onValueChanged.AddListener(OnMotionTasksToggleChanged);
 
         // Asignar el texto de monedas al CurrencyManager
-        CurrencyManager.Instance.AssignUIByName("CoinText"); // nombre del TMP en tu Canvas
+        //CurrencyManager.Instance.AssignUIByName("CoinText"); // nombre del TMP en tu Canvas
     }
 
     private void OnVoiceInstructionsToggleChanged(bool isOn)
