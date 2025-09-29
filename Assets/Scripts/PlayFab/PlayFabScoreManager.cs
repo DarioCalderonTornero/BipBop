@@ -170,4 +170,35 @@ public class PlayFabScoreManager : MonoBehaviour
             error => { Debug.LogWarning("Error obteniendo leaderboard: " + error.GenerateErrorReport()); });
     }
     #endregion
+
+    #region Obtener posición del jugador
+    public void GetPlayerRank(string statisticName, Action<PlayerLeaderboardEntry> onSuccess)
+    {
+        var request = new GetLeaderboardAroundPlayerRequest
+        {
+            StatisticName = statisticName,
+            MaxResultsCount = 1 // Solo queremos al jugador
+        };
+
+        PlayFabClientAPI.GetLeaderboardAroundPlayer(request,
+            result =>
+            {
+                if (result.Leaderboard != null && result.Leaderboard.Count > 0)
+                {
+                    var myEntry = result.Leaderboard[0];
+                    onSuccess?.Invoke(myEntry);
+                }
+                else
+                {
+                    Debug.LogWarning($"No se encontró la posición del jugador en {statisticName}");
+                    onSuccess?.Invoke(null);
+                }
+            },
+            error =>
+            {
+                Debug.LogWarning($"Error obteniendo posición en {statisticName}: " + error.GenerateErrorReport());
+                onSuccess?.Invoke(null);
+            });
+    }
+    #endregion
 }

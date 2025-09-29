@@ -16,6 +16,7 @@ public class LeaderboardUI : MonoBehaviour
     public Button closeButton;           // Botón para cerrar
 
     private Button openButton;           // Botón para abrir el ranking (por nombre)
+    public TextMeshProUGUI myPositionText;
 
     private void Awake()
     {
@@ -101,6 +102,20 @@ public class LeaderboardUI : MonoBehaviour
                     texts[1].text = entry.DisplayName ?? "Player";          // Nombre
                     texts[2].text = entry.StatValue.ToString();            // Score
                 }
+            }
+        });
+
+        PlayFabScoreManager.Instance.GetPlayerRank(statisticName, myEntry =>
+        {
+            if (myEntry != null)
+            {
+                int rank = myEntry.Position + 1; // PlayFab empieza en 0
+                int score = myEntry.StatValue;
+                myPositionText.text = $"Tu posición actual: {rank}º con {score} puntos";
+            }
+            else
+            {
+                myPositionText.text = "Aún no tienes puntuación en este modo.";
             }
         });
     }
