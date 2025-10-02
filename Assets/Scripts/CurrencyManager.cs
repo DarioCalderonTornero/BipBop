@@ -8,7 +8,7 @@ public class CurrencyManager : MonoBehaviour
     public static CurrencyManager Instance { get; private set; }
 
 
-    private int coins;
+    private static int coins;
 
     private void Awake()
     {
@@ -42,7 +42,10 @@ public class CurrencyManager : MonoBehaviour
         SaveCoins();
     }
 
-    public int GetCoins() => coins;
+    public int GetCoins()
+    {
+        return coins;
+    }
 
     private void SaveCoins()
     {

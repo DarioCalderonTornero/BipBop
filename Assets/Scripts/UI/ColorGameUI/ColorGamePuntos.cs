@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -5,8 +6,10 @@ using UnityEngine;
 
 public class ColorGamePuntos : MonoBehaviour
 {
-    
     public static ColorGamePuntos Instance { get; private set; }
+
+    public event EventHandler OnAddScore;
+
     [SerializeField] private TextMeshProUGUI scoreText;
     private int score = 0;
 

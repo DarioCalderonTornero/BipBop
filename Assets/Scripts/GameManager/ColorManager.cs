@@ -143,6 +143,10 @@ public class ColorManager : MonoBehaviour
         if (selectedIndex == correctIndex)
         {
             ColorGamePuntos.Instance.AddScore();
+            //CurrencyManager.Instance.AddCoins(1);
+
+            Debug.Log("Coin Added");
+
             UpdateScoreText();
 
             startTime = Mathf.Max(1f, startTime - 0.1f);
