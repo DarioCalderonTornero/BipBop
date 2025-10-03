@@ -174,11 +174,15 @@ public class GridGameManager : MonoBehaviour
 
     IEnumerator ArrowRoutine()
     {
+        Camera cam = Camera.main;
+        float margin = 2f; // cuanto más grande, más lejos spawnea la flecha fuera de la pantalla
+
         while (!isGameOver)
         {
             yield return new WaitForSeconds(rowInterval);
 
-            int mode = Random.Range(0, 4); // 0=fila, 1=columna, 2=diag principal, 3=diag secundaria
+            // elegir dirección
+            int mode = Random.Range(0, 4); // 0=fila,1=columna,2=diag principal,3=diag secundaria
             int index = Random.Range(0, gridSize);
 
             Transform start = null;
@@ -189,42 +193,71 @@ public class GridGameManager : MonoBehaviour
             else if (mode == 2) { start = gridCells[0, 0]; end = gridCells[gridSize - 1, gridSize - 1]; }
             else if (mode == 3) { start = gridCells[gridSize - 1, 0]; end = gridCells[0, gridSize - 1]; }
 
-            // Aviso
+            // aleatorizar dirección
+            bool reverse = Random.value < 0.5f;
+            Vector3 worldStart = reverse ? end.position : start.position;
+            Vector3 worldEnd = reverse ? start.position : end.position;
+
+            Vector3 dir = (worldEnd - worldStart).normalized;
+
+            // **SPAWN DE LA LINEA DE PREVIEW (WARNING) QUE ATRAVIESA TODA LA PANTALLA**
+            Vector3 warningStart = worldStart;
+            Vector3 warningEnd = worldEnd;
+
+            if (mode == 0) // horizontal
+            {
+                warningStart = new Vector3(cam.ViewportToWorldPoint(new Vector3(0, 0, 0)).x, worldStart.y, 0);
+                warningEnd = new Vector3(cam.ViewportToWorldPoint(new Vector3(1, 0, 0)).x, worldStart.y, 0);
+            }
+            else if (mode == 1) // vertical
+            {
+                warningStart = new Vector3(worldStart.x, cam.ViewportToWorldPoint(new Vector3(0, 0, 0)).y, 0);
+                warningEnd = new Vector3(worldStart.x, cam.ViewportToWorldPoint(new Vector3(0, 1, 0)).y, 0);
+            }
+            else // diagonales
+            {
+                warningStart = worldStart - dir * 10f; // valor grande para que atraviese pantalla
+                warningEnd = worldEnd + dir * 10f;
+            }
+
             GameObject warning = Instantiate(warningPrefab, gridParent);
-            warning.transform.position = (start.position + end.position) / 2f;
-            warning.transform.right = (end.position - start.position).normalized;
-            float length = Vector3.Distance(start.position, end.position);
+            warning.transform.position = (warningStart + warningEnd) / 2f;
+            warning.transform.right = (warningEnd - warningStart).normalized;
+            float length = Vector3.Distance(warningStart, warningEnd);
             warning.transform.localScale = new Vector3(length, 0.1f, 1f);
 
             yield return new WaitForSeconds(warningTime);
             Destroy(warning);
 
-            // Flecha
+            if (isGameOver) yield break; // prevenir flechas tras game over
+
+            // **SPAWN DE LA FLECHA REAL**
+            Vector3 offStart = worldStart - dir * margin;
+            Vector3 offEnd = worldEnd + dir * margin;
+
             GameObject arrow = Instantiate(arrowPrefab, gridParent);
-            arrow.transform.position = start.position;
-            arrow.transform.right = (end.position - start.position).normalized;
+            arrow.transform.position = offStart;
+            arrow.transform.right = dir;
 
-            float travelTime = 0.5f;
+            float speed = 8f; // velocidad de la flecha
+            float travelDist = Vector3.Distance(offStart, offEnd);
+            float travelTime = travelDist / speed;
+
             float elapsed = 0f;
-
             while (elapsed < travelTime)
             {
-                arrow.transform.position = Vector3.Lerp(start.position, end.position, elapsed / travelTime);
+                if (isGameOver) { Destroy(arrow); yield break; }
+
+                arrow.transform.position = Vector3.Lerp(offStart, offEnd, elapsed / travelTime);
                 elapsed += Time.deltaTime;
                 yield return null;
             }
 
             Destroy(arrow);
-
-            // Comprobar impacto
-            if (mode == 0 && playerY == index) GameOver();
-            if (mode == 1 && playerX == index) GameOver();
-            if (mode == 2 && playerX == playerY) GameOver();
-            if (mode == 3 && playerX + playerY == gridSize - 1) GameOver();
         }
     }
 
-    void GameOver()
+    public void GameOver()
     {
         if (isGameOver) return;
         isGameOver = true;
