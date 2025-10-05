@@ -143,9 +143,9 @@ public class ColorManager : MonoBehaviour
         if (selectedIndex == correctIndex)
         {
             ColorGamePuntos.Instance.AddScore();
-            //CurrencyManager.Instance.AddCoins(1);
 
-            Debug.Log("Coin Added");
+            if (CurrencyManager.Instance != null)
+                CurrencyManager.Instance.AddCoins(1);
 
             UpdateScoreText();
 

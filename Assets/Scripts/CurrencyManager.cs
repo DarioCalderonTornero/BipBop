@@ -1,12 +1,11 @@
-using System.Collections;
-using System.Collections.Generic;
-using TMPro;
+using System;
 using UnityEngine;
 
 public class CurrencyManager : MonoBehaviour
 {
     public static CurrencyManager Instance { get; private set; }
 
+    public event Action<int> OnCoinsChanged;
 
     private static int coins;
 
@@ -16,8 +15,7 @@ public class CurrencyManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
-
-            coins = PlayerPrefs.GetInt("CoinCount", 0);
+            //coins = 0; 
         }
         else
         {
@@ -25,43 +23,19 @@ public class CurrencyManager : MonoBehaviour
         }
     }
 
-    private void Update()
-    {
-        Debug.Log(coins);
-    }
-
     public void AddCoins(int amount)
     {
+        if (amount <= 0) return;
         coins += amount;
-        SaveCoins();
+        OnCoinsChanged?.Invoke(coins);
     }
 
     public void SpendCoins(int amount)
     {
+        if (amount <= 0) return;
         coins = Mathf.Max(0, coins - amount);
-        SaveCoins();
+        OnCoinsChanged?.Invoke(coins);
     }
 
-    public int GetCoins()
-    {
-        return coins;
-    }
-
-    private void SaveCoins()
-    {
-        PlayerPrefs.SetInt("CoinCount", coins);
-        PlayerPrefs.Save();
-    }
-
-    // Cuando entres a otra escena, reubica el TMP por nombre si quieres
-    /*
-    public void AssignUIByName(string coinTextObjectName)
-    {
-        GameObject obj = GameObject.Find(coinTextObjectName);
-        if (obj != null)
-        {
-            coinText = obj.GetComponent<TextMeshProUGUI>();
-        }
-    }
-    */
+    public int GetCoins() => coins;
 }
