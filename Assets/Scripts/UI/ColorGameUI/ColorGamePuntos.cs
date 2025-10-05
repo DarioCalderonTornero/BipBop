@@ -39,6 +39,7 @@ public class ColorGamePuntos : MonoBehaviour
         CurrencyManager.Instance.AddCoins(1);   
     }
 
+
     public void ShowScore()
     {
         scoreText.text = "Puntos:  " + score;

@@ -28,7 +28,6 @@ public class ColorGameOverUI : MonoBehaviour
         mainMenuButton.onClick.AddListener(() =>
         {
             SceneLoader.LoadScene(SceneLoader.Scene.Menu);
-
         });
     }
 
@@ -40,6 +39,7 @@ public class ColorGameOverUI : MonoBehaviour
 
     private void ColorManager_OnGameOver(object sender, System.EventArgs e)
     {
+        coinText.text = "Coins: " + ColorGamePuntos.Instance.GetScore();
         myanimator.SetBool("IsGameOver", true);
     }
 }

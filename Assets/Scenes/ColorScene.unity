@@ -268,7 +268,7 @@ GameObject:
   - component: {fileID: 67270015}
   - component: {fileID: 67270014}
   m_Layer: 5
-  m_Name: CointText
+  m_Name: PointsText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
