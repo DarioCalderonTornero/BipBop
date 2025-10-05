@@ -144,9 +144,6 @@ public class ColorManager : MonoBehaviour
         {
             ColorGamePuntos.Instance.AddScore();
 
-            if (CurrencyManager.Instance != null)
-                CurrencyManager.Instance.AddCoins(1);
-
             UpdateScoreText();
 
             startTime = Mathf.Max(1f, startTime - 0.1f);

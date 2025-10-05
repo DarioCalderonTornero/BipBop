@@ -1,39 +1,47 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class CurrencyManagerUI : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI coinText;
 
+    private void Start()
+    {
+        UpdateCoinText();
+    }
+
+    private void Update()
+    {
+        if (SceneManager.GetActiveScene().name == "Menu")
+        {
+            UpdateCoinText();
+        }
+    }
+
+    private void UpdateCoinText()
+    {
+        if (CurrencyManager.Instance != null && coinText != null)
+        {
+            coinText.text = CurrencyManager.Instance.GetCoins().ToString();
+        }
+    }
+
     private void OnEnable()
     {
-        if (coinText == null)
-        {
-            return;
-        }
-
-        if (CurrencyManager.Instance != null)
-        {
-            CurrencyManager.Instance.OnCoinsChanged += HandleCoinsChanged;
-            // valor inicial
-            HandleCoinsChanged(CurrencyManager.Instance.GetCoins());
-        }
-        else
-        {
-            // Si no hay Instance aún, el texto puede quedar en 0 o vacío
-            if (coinText != null) coinText.text = "0";
-        }
+        SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
     private void OnDisable()
     {
-        if (CurrencyManager.Instance != null)
-            CurrencyManager.Instance.OnCoinsChanged -= HandleCoinsChanged;
+        SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
-    private void HandleCoinsChanged(int newAmount)
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        if (coinText != null)
-            coinText.text = newAmount.ToString();
+        if (scene.name == "Menu")
+            UpdateCoinText();
     }
+
+
 }

@@ -23,11 +23,17 @@ public class CurrencyManager : MonoBehaviour
         }
     }
 
+    private void Update()
+    {
+        Debug.Log(GetCoins());
+    }
+
     public void AddCoins(int amount)
     {
         if (amount <= 0) return;
         coins += amount;
         OnCoinsChanged?.Invoke(coins);
+        Debug.Log("Coin added");
     }
 
     public void SpendCoins(int amount)

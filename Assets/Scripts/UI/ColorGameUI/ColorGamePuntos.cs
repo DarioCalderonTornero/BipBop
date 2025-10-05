@@ -33,9 +33,10 @@ public class ColorGamePuntos : MonoBehaviour
         return score;
     }
 
-    public int AddScore()
+    public void AddScore()
     {
-        return score++;
+        score++;
+        CurrencyManager.Instance.AddCoins(1);   
     }
 
     public void ShowScore()
