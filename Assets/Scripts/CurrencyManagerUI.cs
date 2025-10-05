@@ -13,10 +13,7 @@ public class CurrencyManagerUI : MonoBehaviour
 
     private void Update()
     {
-        if (SceneManager.GetActiveScene().name == "Menu")
-        {
-            UpdateCoinText();
-        }
+        UpdateCoinText();
     }
 
     private void UpdateCoinText()
