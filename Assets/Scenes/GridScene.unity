@@ -1342,9 +1342,10 @@ MonoBehaviour:
   warningPrefab: {fileID: 4364251431632778013, guid: 4c0a884d6db6efc4c93d6d7c30fe3089, type: 3}
   arrowPrefab: {fileID: 3150682109660879961, guid: f867430cda9c99e4b9259382237cff1e, type: 3}
   warningTime: 1
-  rowInterval: 2
-  moveDuration: 1
+  rowInterval: 4
+  moveDuration: 0.3
   coinTimeLimit: 15
+  multiArrowDelay: 0.1
   upButton: {fileID: 1637186492}
   downButton: {fileID: 235443593}
   leftButton: {fileID: 400555321}
