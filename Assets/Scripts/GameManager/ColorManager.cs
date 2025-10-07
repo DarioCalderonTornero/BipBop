@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.SocialPlatforms.Impl;
 using UnityEngine.UI;
 
 public class ColorManager : MonoBehaviour
@@ -188,6 +189,8 @@ public class ColorManager : MonoBehaviour
     private void EndGame()
     {
         ColorGamePuntos.Instance.SafeRecordIfNeeded();
+        // int xpEarned = ColorGamePuntos.Instance.GetScore() * 10;
+        // PlayerLevelManager.Instance.AddXP(xpEarned);
 
         OnGameOver?.Invoke(this, EventArgs.Empty);  
 

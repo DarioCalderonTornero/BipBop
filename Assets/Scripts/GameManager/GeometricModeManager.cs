@@ -175,6 +175,13 @@ public class GeometricModeManager : MonoBehaviour
     private void EndGame()
     {
         SaveRecordIfNeeded();
+        int xpEarned = score * 10;
+        PlayerLevelManager.Instance.AddXP(xpEarned);
+
+        if (PlayFabLoginManager.Instance != null && PlayFabLoginManager.Instance.IsLoggedIn)
+        {
+            PlayFabScoreManager.Instance.SubmitScore("GeometricScore", score);
+        }
         // Aquí puedes implementar lógica adicional (guardar récord, mostrar resultados, etc.)
         SceneManager.LoadScene("Menu");
 

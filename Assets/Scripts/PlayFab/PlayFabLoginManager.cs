@@ -138,22 +138,52 @@ public class PlayFabLoginManager : MonoBehaviour
     }
 
     // Settea displayName en PlayFab y guarda local
+    public TextMeshProUGUI feedbackText; // <- Asigna un TextMeshPro debajo del input
+
     public void SetDisplayName(string newName)
     {
         ShowLoading(true);
+
         var req = new UpdateUserTitleDisplayNameRequest { DisplayName = newName };
+
         PlayFabClientAPI.UpdateUserTitleDisplayName(req, res =>
         {
             ShowLoading(false);
+
             DisplayName = res.DisplayName;
             PlayerPrefs.SetString(PREF_DISPLAY_NAME, DisplayName);
             PlayerPrefs.Save();
 
             Debug.Log("DisplayName guardado: " + DisplayName);
+            if (feedbackText != null) feedbackText.text = ""; // limpiar mensaje si había error anterior
             if (namePanel != null) namePanel.SetActive(false);
 
             FinalizeLogin();
-        }, OnPlayFabError);
+
+        }, error =>
+        {
+            ShowLoading(false);
+
+            if (error.Error == PlayFabErrorCode.NameNotAvailable)
+            {
+                Debug.LogWarning("Ese nombre ya existe, elige otro.");
+                if (feedbackText != null)
+                    feedbackText.text = "Ese nombre ya existe, elige otro.";
+
+                if (nameInput != null)
+                {
+                    nameInput.text = "";
+                    nameInput.Select();
+                    nameInput.ActivateInputField(); // enfocar para volver a escribir
+                }
+            }
+            else
+            {
+                Debug.LogWarning("Error al establecer displayName: " + error.GenerateErrorReport());
+                if (feedbackText != null)
+                    feedbackText.text = "Error al asignar nombre, inténtalo de nuevo.";
+            }
+        });
     }
 
     // Si localName ya existía, forzamos su presencia en PlayFab

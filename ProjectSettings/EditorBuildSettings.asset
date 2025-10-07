@@ -20,6 +20,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/DodgeScene.unity
     guid: e60e45345d6da5740b69b0ae9def5090
+  - enabled: 1
+    path: Assets/Scenes/GridScene.unity
+    guid: 9e512e8845b9e244d8f54cf32307c8d3
   m_configObjects:
     com.unity.adaptiveperformance.google.android.provider_settings: {fileID: 11400000, guid: 173835b02766b5144aec85e4ba8ae39c, type: 2}
     com.unity.adaptiveperformance.loader_settings: {fileID: 11400000, guid: 692bcfd02ea2d044cba329e3eee8da53, type: 2}

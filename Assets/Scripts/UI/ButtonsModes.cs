@@ -11,6 +11,7 @@ public class ButtonsModes : MonoBehaviour
     [SerializeField] private Button GeometricButton;
     [SerializeField] private Button ColorButton;
     [SerializeField] private Button DodgeButton;
+    [SerializeField] private Button GridButton;
 
     void Awake()
     {
@@ -38,6 +39,13 @@ public class ButtonsModes : MonoBehaviour
         DodgeButton.onClick.AddListener(() =>
         {
             SceneManager.LoadScene("DodgeScene");
+            DailyMissionManager.Instance.AddProgress("juega_1_partida", 1);
+            DailyMissionManager.Instance.AddProgress("juega_3_partidas", 1);
+        });
+
+        GridButton.onClick.AddListener(() =>
+        {
+            SceneManager.LoadScene("GridScene");
             DailyMissionManager.Instance.AddProgress("juega_1_partida", 1);
             DailyMissionManager.Instance.AddProgress("juega_3_partidas", 1);
         });
