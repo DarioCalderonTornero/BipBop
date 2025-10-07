@@ -27,7 +27,13 @@ public class DodgeManager : MonoBehaviour
         scoreText.text = $"Score: {score}";
 
         // Subir dificultad
-        if (score >= 50) CurrentEnemySpeed = 6f;
-        else if (score >= 30) CurrentEnemySpeed = 4.5f;
+        if (score >= 50) CurrentEnemySpeed = 4f;
+        else if (score >= 30) CurrentEnemySpeed = 3.5f;
+    }
+
+    public void GameOver()
+    {
+        Debug.Log(" Game Over!");
+        Time.timeScale = 0f;
     }
 }

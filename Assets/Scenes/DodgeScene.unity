@@ -184,7 +184,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mainCamera: {fileID: 682853698}
   canvas: {fileID: 1643894528}
-  indicatorPrefab: {fileID: 9185570567784213527, guid: d855375f7a255274c802ead12852621b, type: 3}
+  indicatorPrefab: {fileID: 5952935435178245506, guid: a4e56fa372c63774da7a57bf1fe177c7, type: 3}
 --- !u!1 &661725933
 GameObject:
   m_ObjectHideFlags: 0
@@ -561,8 +561,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0.72, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

@@ -36,5 +36,10 @@ public class Enemy : MonoBehaviour
             if (EnemyIndicator.Instance != null)
                 EnemyIndicator.Instance.UnregisterEnemy(transform);
         }
+        else if (other.CompareTag("Player"))
+        {
+            // Cuando el enemigo toca al jugador  game over
+            DodgeManager.Instance.GameOver();
+        }
     }
 }
