@@ -6,6 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Scenes/FakeLoadingScreen.unity
+    guid: f316e473004b8da4c8a436bafbad6e0e
+  - enabled: 1
     path: Assets/Scenes/Menu.unity
     guid: 43bcfcab6e50df44eb20d86db28bb9ab
   - enabled: 1
