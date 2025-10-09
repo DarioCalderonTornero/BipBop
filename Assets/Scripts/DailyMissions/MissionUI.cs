@@ -9,6 +9,8 @@ public class MissionUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI descriptionText;
     [SerializeField] private TextMeshProUGUI progressText;
     [SerializeField] private Image iconImage;
+    [SerializeField] private Image xpIconImage;
+    [SerializeField] private TextMeshProUGUI xpRewardText;
 
     [Header("Estilo de misión completada")]
     [SerializeField] private Sprite completedIcon;              // Asigna un icono distinto en inspector
@@ -19,6 +21,8 @@ public class MissionUI : MonoBehaviour
 
     public void Setup(DailyMission mission, Sprite missionIcon)
     {
+        xpRewardText.text = mission.template.xpReward.ToString();
+
         if (mission == null)
         {
             Debug.LogError("DailyMission null detectada en Setup()");

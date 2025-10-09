@@ -78,10 +78,14 @@ public class DailyMissionManager : MonoBehaviour
             {
                 mission.rewardClaimed = true;
 
-                // Aquí sumas monedas (ejemplo con CurrencyManager)
+                // Monedas
                 CurrencyManager.Instance.AddCoins(mission.template.reward);
 
-                Debug.Log($"Misión completada: {mission.template.description}. ¡Has ganado {mission.template.reward} monedas!");
+                //  Añadir experiencia
+                PlayerLevelManager.Instance.AddXP(mission.template.xpReward);
+
+                Debug.Log($"Misión completada: {mission.template.description}. " +
+                          $"Recompensa: {mission.template.reward} monedas y {mission.template.xpReward} XP");
             }
 
             SaveMissions();
