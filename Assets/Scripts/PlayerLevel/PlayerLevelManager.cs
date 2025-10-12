@@ -19,7 +19,7 @@ public class PlayerLevelManager : MonoBehaviour
     public int currentLevel = 1;
     public int currentXP = 0;
     public int xpToNextLevel = 1000;
-    public float xpGrowthMultiplier = 1.2f; // Cada nivel requiere 20% más XP que el anterior
+    public float xpGrowthMultiplier = 1.2f; 
 
     private const string PREF_LEVEL = "PlayerLevel";
     private const string PREF_XP = "PlayerXP";

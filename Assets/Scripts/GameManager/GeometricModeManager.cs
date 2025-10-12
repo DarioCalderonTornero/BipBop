@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -26,6 +27,8 @@ public class GeometricModeManager : MonoBehaviour
     private float currentTime;
     private int score = 0;
     private BouncingShape currentTarget;
+
+    public event EventHandler OnGameOver;
 
     private void Awake()
     {
@@ -66,8 +69,8 @@ public class GeometricModeManager : MonoBehaviour
         {
             // Si se toca la figura objetivo, la ponemos verde y registramos el acierto
             shape.TemporarilyChangeColor(Color.green, 0.5f);
-            score++;
-            UpdateScoreText();
+
+            AddScore();
 
             // Ajustar el tiempo: disminuir en 0.1 segundos, pero no por debajo de 2.5 segundos
             startTime = Mathf.Max(1.5f, startTime - 0.1f);
@@ -89,9 +92,21 @@ public class GeometricModeManager : MonoBehaviour
         }
     }
 
+    private void AddScore()
+    {
+        score++;
+        UpdateScoreText();
+        PlayerLevelManager.Instance.AddXP(500);
+    }
+
     private void UpdateScoreText()
     {
         scoreText.text = "Puntos: " + score;
+    }
+
+    public int GetScore()
+    {
+        return score;
     }
 
     // Escoge una nueva figura objetivo entre las activas, evitando que se repita la misma consecutivamente
@@ -114,7 +129,7 @@ public class GeometricModeManager : MonoBehaviour
             BouncingShape newTarget;
             do
             {
-                int index = Random.Range(0, activeShapes.Count);
+                int index = UnityEngine.Random.Range(0, activeShapes.Count);
                 newTarget = activeShapes[index];
             } while (newTarget == currentTarget);
             currentTarget = newTarget;
@@ -174,18 +189,18 @@ public class GeometricModeManager : MonoBehaviour
 
     private void EndGame()
     {
+        OnGameOver?.Invoke(this, EventArgs.Empty);
+
         SaveRecordIfNeeded();
-        int xpEarned = score * 10;
-        PlayerLevelManager.Instance.AddXP(xpEarned);
+        //int xpEarned = score * 10;
+        //PlayerLevelManager.Instance.AddXP(xpEarned);
 
         if (PlayFabLoginManager.Instance != null && PlayFabLoginManager.Instance.IsLoggedIn)
         {
             PlayFabScoreManager.Instance.SubmitScore("GeometricScore", score);
         }
-        // Aquí puedes implementar lógica adicional (guardar récord, mostrar resultados, etc.)
-        SceneManager.LoadScene("Menu");
+        //SceneManager.LoadScene("Menu");
 
-        // Calcula las monedas ganadas en esta partida (1 moneda por cada 15 puntos)
         int coinsEarned = score / 10;
 
         // Recupera el total actual de monedas y suma las nuevas

@@ -45,3 +45,9 @@ TagManager:
   - name: 1
     uniqueID: 3889522411
     locked: 0
+  - name: UI  Overlay Sorting Layer
+    uniqueID: 2639873427
+    locked: 0
+  - name: UI Underlay Sorting Layer
+    uniqueID: 3321922807
+    locked: 0

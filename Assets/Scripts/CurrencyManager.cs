@@ -8,6 +8,7 @@ public class CurrencyManager : MonoBehaviour
     public event Action<int> OnCoinsChanged;
 
     private static int coins;
+    private const string CoinsKey = "CoinCount"; 
 
     private void Awake()
     {
@@ -15,7 +16,9 @@ public class CurrencyManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
-            //coins = 0; 
+
+            coins = PlayerPrefs.GetInt(CoinsKey, 0);
+            OnCoinsChanged?.Invoke(coins);
         }
         else
         {
@@ -32,6 +35,7 @@ public class CurrencyManager : MonoBehaviour
     {
         if (amount <= 0) return;
         coins += amount;
+        SaveCoins();
         OnCoinsChanged?.Invoke(coins);
         Debug.Log("Coin added");
     }
@@ -40,8 +44,20 @@ public class CurrencyManager : MonoBehaviour
     {
         if (amount <= 0) return;
         coins = Mathf.Max(0, coins - amount);
+        SaveCoins();
         OnCoinsChanged?.Invoke(coins);
     }
 
     public int GetCoins() => coins;
+
+    private void SaveCoins()
+    {
+        PlayerPrefs.SetInt(CoinsKey, coins);
+        PlayerPrefs.Save();
+    }
+
+    private void OnApplicationQuit()
+    {
+        SaveCoins();
+    }
 }
