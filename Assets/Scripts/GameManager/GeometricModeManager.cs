@@ -96,7 +96,10 @@ public class GeometricModeManager : MonoBehaviour
     {
         score++;
         UpdateScoreText();
-        PlayerLevelManager.Instance.AddXP(500);
+#if UNITY_ANDROID || UNITY_IOS
+        Handheld.Vibrate();
+#endif
+        PlayerLevelManager.Instance.AddXP(50);
     }
 
     private void UpdateScoreText()

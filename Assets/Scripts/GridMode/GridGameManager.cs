@@ -155,6 +155,9 @@ public class GridGameManager : MonoBehaviour
         {
             Destroy(coinObj);
             score++;
+#if UNITY_ANDROID || UNITY_IOS
+            Handheld.Vibrate();
+#endif
             Debug.Log("Score: " + score);
 
             // cada 2 puntos: bajar tiempos

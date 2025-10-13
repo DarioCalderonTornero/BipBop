@@ -41,11 +41,20 @@ public class PlayFabLoginManager : MonoBehaviour
         // seguridad: desactivar UI si están asignadas al inicio
         if (namePanel != null) namePanel.SetActive(false);
         if (loadingIndicator != null) loadingIndicator.SetActive(false);
+
+        if (nameInput != null)
+            nameInput.onValueChanged.AddListener(OnNameInputChanged);
     }
 
     private void Start()
     {
         StartLoginFlow();
+    }
+
+    private void OnNameInputChanged(string value)
+    {
+        if (feedbackText != null)
+            feedbackText.text = ""; // limpia mensajes anteriores mientras escribe
     }
 
     #region Login Flow
@@ -120,12 +129,24 @@ public class PlayFabLoginManager : MonoBehaviour
     public void SubmitNameFromUI()
     {
         string typed = nameInput != null ? nameInput.text?.Trim() : "";
+
+        // Validar nombre vacío
         if (string.IsNullOrEmpty(typed))
         {
-            Debug.Log("Nombre vacío. Ignorado.");
+            if (feedbackText != null)
+                feedbackText.text = "El nombre no puede estar vacío.";
             return;
         }
 
+        // Validar longitud máxima
+        if (typed.Length > 14)
+        {
+            if (feedbackText != null)
+                feedbackText.text = "Nombre demasiado largo, máximo de caracteres: 14.";
+            return;
+        }
+
+        // Si está OK, enviar
         SetDisplayName(typed);
     }
 

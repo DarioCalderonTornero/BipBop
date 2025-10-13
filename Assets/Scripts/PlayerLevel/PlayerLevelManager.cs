@@ -99,7 +99,6 @@ public class PlayerLevelManager : MonoBehaviour
                 { "PlayerXPNext", xpToNextLevel.ToString() }
             }
         };
-
         PlayFabClientAPI.UpdateUserData(request,
             result => Debug.Log("Nivel y XP guardados en PlayFab."),
             error => Debug.LogWarning("Error al guardar nivel/XP: " + error.GenerateErrorReport()));

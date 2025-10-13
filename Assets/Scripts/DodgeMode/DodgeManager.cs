@@ -26,6 +26,10 @@ public class DodgeManager : MonoBehaviour
         score += 2;
         scoreText.text = $"Score: {score}";
 
+#if UNITY_ANDROID || UNITY_IOS
+        Handheld.Vibrate();
+#endif
+
         // Subir dificultad
         if (score >= 50) CurrentEnemySpeed = 4f;
         else if (score >= 30) CurrentEnemySpeed = 3.5f;

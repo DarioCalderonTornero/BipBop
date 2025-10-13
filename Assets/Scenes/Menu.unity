@@ -1874,7 +1874,7 @@ MonoBehaviour:
   submitButton: {fileID: 657071239}
   skipButton: {fileID: 0}
   loadingIndicator: {fileID: 0}
-  feedbackText: {fileID: 0}
+  feedbackText: {fileID: 1716168298}
 --- !u!224 &317853033
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2408,7 +2408,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Modo esquivar
+  m_text: Modo casillas
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: eeeb8ca7ced9c05478f26f071b022def, type: 2}
   m_sharedMaterial: {fileID: -3600254890510268505, guid: eeeb8ca7ced9c05478f26f071b022def, type: 2}
@@ -3591,8 +3591,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0.000016227365, y: -0.000015275553}
-  m_SizeDelta: {x: 1080.3, y: 1920}
+  m_AnchoredPosition: {x: -6.364, y: -34.86}
+  m_SizeDelta: {x: 940.285, y: 1850.3}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &555925871
 MonoBehaviour:
@@ -8832,7 +8832,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.58296573, g: 0.9528302, b: 0.57079923, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -10014,7 +10014,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.9622642, g: 0.5310609, b: 0.5310609, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -11096,12 +11096,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Padding:
-    m_Left: 99
+    m_Left: 306
     m_Right: 0
     m_Top: 0
     m_Bottom: 0
   m_ChildAlignment: 0
-  m_Spacing: -1529.59
+  m_Spacing: -1230.91
   m_ChildForceExpandWidth: 1
   m_ChildForceExpandHeight: 1
   m_ChildControlWidth: 0
@@ -14342,7 +14342,7 @@ MonoBehaviour:
   m_Content: {fileID: 1531401924}
   m_Horizontal: 1
   m_Vertical: 1
-  m_MovementType: 1
+  m_MovementType: 2
   m_Elasticity: 0.1
   m_Inertia: 1
   m_DecelerationRate: 0.135

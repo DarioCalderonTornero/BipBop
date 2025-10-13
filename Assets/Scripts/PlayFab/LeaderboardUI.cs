@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using PlayFab;
 using PlayFab.ClientModels;
 using TMPro;
 using UnityEngine;
@@ -99,16 +101,27 @@ public class LeaderboardUI : MonoBehaviour
             {
                 var entry = leaderboard[i];
                 GameObject row = Instantiate(playerRowPrefab, contentParent);
-                var texts = row.GetComponentsInChildren<TextMeshProUGUI>();
 
-                if (texts.Length >= 3)
+                // Buscar referencias dentro del prefab
+                var texts = row.GetComponentsInChildren<TextMeshProUGUI>();
+                var levelIcon = row.transform.Find("LevelIcon");
+                var levelText = levelIcon?.GetComponentInChildren<TextMeshProUGUI>();
+
+                // Asignar datos básicos
+                texts[0].text = (entry.Position + 1).ToString();        // Rank
+                texts[1].text = entry.DisplayName ?? "Player";          // Nombre
+                texts[2].text = entry.StatValue.ToString();            // Score
+
+                // ----- NUEVO: Obtener nivel desde otra estadística -----
+                GetPlayerLevel(entry.PlayFabId, level =>
                 {
-                    texts[0].text = (entry.Position + 1).ToString();        // Rank
-                    texts[1].text = entry.DisplayName ?? "Player";          // Nombre
-                    texts[2].text = entry.StatValue.ToString();            // Score
-                }
+                    if (levelText != null)
+                        levelText.text = level.ToString(); // nivel dentro del iconito
+                });
             }
         });
+
+
 
         PlayFabScoreManager.Instance.GetPlayerRank(statisticName, myEntry =>
         {
@@ -123,6 +136,32 @@ public class LeaderboardUI : MonoBehaviour
                 myPositionText.text = "Aún no tienes puntuación en este modo.";
             }
         });
+    }
+
+    private void GetPlayerLevel(string playFabId, Action<int> onLevelFound)
+    {
+        var request = new PlayFab.ClientModels.GetUserDataRequest
+        {
+            PlayFabId = playFabId,
+            Keys = new List<string> { "PlayerLevel" }
+        };
+
+        PlayFabClientAPI.GetUserData(request,
+            result =>
+            {
+                int level = 1;
+                if (result.Data != null && result.Data.ContainsKey("PlayerLevel"))
+                {
+                    int.TryParse(result.Data["PlayerLevel"].Value, out level);
+                }
+                onLevelFound?.Invoke(level);
+            },
+            error =>
+            {
+                Debug.LogWarning("Error obteniendo PlayerLevel de UserData: " + error.GenerateErrorReport());
+                onLevelFound?.Invoke(1);
+            }
+        );
     }
 
     /// <summary>
