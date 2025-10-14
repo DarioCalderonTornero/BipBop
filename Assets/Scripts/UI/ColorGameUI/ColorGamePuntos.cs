@@ -9,7 +9,9 @@ public class ColorGamePuntos : MonoBehaviour
     public static ColorGamePuntos Instance { get; private set; }
 
     [SerializeField] private TextMeshProUGUI scoreText;
+    [SerializeField] private RectTransform scoreEffectGroup; // <- lo arrastras desde la UI
     private int score = 0;
+    private bool isAnimating = false;
 
     private void Awake()
     {
@@ -19,11 +21,8 @@ public class ColorGamePuntos : MonoBehaviour
     private void Start()
     {
         scoreText.text = "Puntos: 0";
-    }
-
-    private void Update()
-    {
-        //scoreText.text = "Puntos" + score;  
+        if (scoreEffectGroup != null)
+            scoreEffectGroup.localScale = Vector3.one; // aseguramos tamaño original
     }
 
     public int GetScore()
@@ -35,13 +34,14 @@ public class ColorGamePuntos : MonoBehaviour
     {
         score++;
         CurrencyManager.Instance.AddCoins(1);
-        PlayerLevelManager.Instance.AddXP(500);
+        PlayerLevelManager.Instance.AddXP(5);
+        ShowScore();
+        PlayScoreEffect(); // <- dispara el zoom
     }
-
 
     public void ShowScore()
     {
-        scoreText.text = "Puntos:  " + score;
+        scoreText.text = "Puntos: " + score;
     }
 
     public void SafeRecordIfNeeded()
@@ -52,6 +52,41 @@ public class ColorGamePuntos : MonoBehaviour
             PlayerPrefs.SetInt("MaxRecordColor", score);
             PlayerPrefs.Save();
         }
+    }
+
+    private void PlayScoreEffect()
+    {
+        if (!isAnimating)
+            StartCoroutine(AnimateScoreEffect());
+    }
+
+    private IEnumerator AnimateScoreEffect()
+    {
+        isAnimating = true;
+
+        float duration = 0.05f;
+        float halfDuration = duration / 2f;
+        Vector3 originalScale = Vector3.one;
+        Vector3 zoomScale = new Vector3(1.2f, 1.2f, 1); // pequeño zoom
+
+        float time = 0;
+        while (time < halfDuration)
+        {
+            scoreEffectGroup.localScale = Vector3.Lerp(originalScale, zoomScale, time / halfDuration);
+            time += Time.deltaTime;
+            yield return null;
+        }
+
+        time = 0;
+        while (time < halfDuration)
+        {
+            scoreEffectGroup.localScale = Vector3.Lerp(zoomScale, originalScale, time / halfDuration);
+            time += Time.deltaTime;
+            yield return null;
+        }
+
+        scoreEffectGroup.localScale = originalScale;
+        isAnimating = false;
     }
 }
 
