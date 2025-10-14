@@ -12,6 +12,8 @@ public static class SceneLoader
         GameScene,
         ColorScene,
         GeometricScene,
+        DodgeScene,
+        GridScene
     }
     public static void LoadScene(Scene scene)
     {
