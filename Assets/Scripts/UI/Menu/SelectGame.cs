@@ -17,18 +17,18 @@ public class SelectGame : MonoBehaviour
     [SerializeField] private Image gridImage;
 
     [Header("GameMode Buttons")]
-    [SerializeField] private Button bipbopButton;
-    [SerializeField] private Button colorButton;
-    [SerializeField] private Button geometricButton;
-    [SerializeField] private Button dodgeButton;
-    [SerializeField] private Button gridButton;
+    [SerializeField] private Button gameModeBipbopButton;
+    [SerializeField] private Button gameModeColorButton;
+    [SerializeField] private Button gameModeGeometricButton;
+    [SerializeField] private Button gameModeDodgeButton;
+    [SerializeField] private Button gameModeGridButton;
 
     [Header("Play GameMode Buttons")]
     [SerializeField] private Button playBipbopButton;
     [SerializeField] private Button playColorButton;
     [SerializeField] private Button playGeometricButton;
-    [SerializeField] private Button playEsquivarButton;
-    [SerializeField] private Button playMemoryButton;
+    [SerializeField] private Button playDodgeButton;
+    [SerializeField] private Button playGridButton;
 
     private void Awake()
     {
@@ -44,49 +44,34 @@ public class SelectGame : MonoBehaviour
 
         // --- GameMode Buttons --- 
 
-        bipbopButton.onClick.AddListener(() =>
+        gameModeBipbopButton.onClick.AddListener(() =>
         {
-            playBipbopButton.gameObject.SetActive(true);
-            colorButton.gameObject.SetActive(false);
-            geometricButton.gameObject.SetActive(false);
-            dodgeButton.gameObject.SetActive(false);
-            gridButton.gameObject.SetActive(false);
+            ShowBipBopButton();
+            Hide();
         });
 
-        colorButton.onClick.AddListener(() =>
+        gameModeColorButton.onClick.AddListener(() =>
         {
-            playBipbopButton.gameObject.SetActive(false);
-            colorButton.gameObject.SetActive(true);
-            geometricButton.gameObject.SetActive(false);
-            dodgeButton.gameObject.SetActive(false);
-            gridButton.gameObject.SetActive(false);
+            ShowColorButton();
+            Hide();
         });
 
-        geometricButton.onClick.AddListener(() =>
+        gameModeGeometricButton.onClick.AddListener(() =>
         {
-            playBipbopButton.gameObject.SetActive(false);
-            colorButton.gameObject.SetActive(false);
-            geometricButton.gameObject.SetActive(true);
-            dodgeButton.gameObject.SetActive(false);
-            gridButton.gameObject.SetActive(false);
+            ShowGeometricButton();
+            Hide();
         });
 
-        dodgeButton.onClick.AddListener(() =>
+        gameModeDodgeButton.onClick.AddListener(() =>
         {
-            playBipbopButton.gameObject.SetActive(false);
-            colorButton.gameObject.SetActive(false);
-            geometricButton.gameObject.SetActive(false);
-            dodgeButton.gameObject.SetActive(true);
-            gridButton.gameObject.SetActive(false);
+            ShowDodgeButton();
+            Hide();
         });
 
-        gridButton.onClick.AddListener(() =>
+        gameModeGridButton.onClick.AddListener(() =>
         {
-            playBipbopButton.gameObject.SetActive(false);
-            colorButton.gameObject.SetActive(false);
-            geometricButton.gameObject.SetActive(false);
-            dodgeButton.gameObject.SetActive(false);
-            gridButton.gameObject.SetActive(true);
+            ShowGridButton();
+            Hide();
         });
 
 
@@ -94,38 +79,34 @@ public class SelectGame : MonoBehaviour
 
         playBipbopButton.onClick.AddListener(() =>
         {
-            SceneLoader.LoadScene(SceneLoader.Scene.GameScene);
+            //SceneLoader.LoadScene(SceneLoader.Scene.GameScene);
         });
 
         playColorButton.onClick.AddListener(() =>
         {
-            SceneLoader.LoadScene(SceneLoader.Scene.ColorScene);
+            //SceneLoader.LoadScene(SceneLoader.Scene.ColorScene);
         });
 
         playGeometricButton.onClick.AddListener(() =>
         {
-            SceneLoader.LoadScene(SceneLoader.Scene.GeometricScene);
+            //SceneLoader.LoadScene(SceneLoader.Scene.GeometricScene);
         });
 
-        playEsquivarButton.onClick.AddListener(() =>
+        playDodgeButton.onClick.AddListener(() =>
         {
-            SceneLoader.LoadScene(SceneLoader.Scene.DodgeScene);
+            //SceneLoader.LoadScene(SceneLoader.Scene.DodgeScene);
         });
 
-        playMemoryButton.onClick.AddListener(() =>
+        playGridButton.onClick.AddListener(() =>
         {
-            SceneLoader.LoadScene(SceneLoader.Scene.GridScene);
+            //SceneLoader.LoadScene(SceneLoader.Scene.GridScene);
         });
     }
 
     private void Start()
     {
         Hide();
-        playBipbopButton.gameObject.SetActive(true);
-        colorButton.gameObject.SetActive(false);
-        geometricButton.gameObject.SetActive(false);
-        dodgeButton.gameObject.SetActive(false);
-        gridButton.gameObject.SetActive(false);
+        ShowBipBopButton();
     }
 
     private void Hide()
@@ -137,11 +118,10 @@ public class SelectGame : MonoBehaviour
         dodgeImage.gameObject.SetActive(false);
         gridImage.gameObject.SetActive(false);
 
-        bipbopButton.gameObject.SetActive(false);
-        colorButton.gameObject.SetActive(false);
-        geometricButton.gameObject.SetActive(false);
-        dodgeButton.gameObject.SetActive(false);
-        gridButton.gameObject.SetActive(false);
+        closeGameModeButton.gameObject.SetActive(false);
+        openGameModeButton.gameObject.SetActive(true);
+
+        HideGameModeButtons();
     }
 
     private void Show()
@@ -153,10 +133,70 @@ public class SelectGame : MonoBehaviour
         dodgeImage.gameObject.SetActive(true);
         gridImage.gameObject.SetActive(true);
 
-        bipbopButton.gameObject.SetActive(true);
-        colorButton.gameObject.SetActive(true);
-        geometricButton.gameObject.SetActive(true);
-        dodgeButton.gameObject.SetActive(true);
-        gridButton.gameObject.SetActive(true);
+        openGameModeButton.gameObject.SetActive(false);
+        closeGameModeButton.gameObject.SetActive(true);
+
+        ShowGameModeButtons();
     }
+
+    private void HideGameModeButtons()
+    {
+        gameModeBipbopButton.gameObject.SetActive(false);
+        gameModeColorButton.gameObject.SetActive(false);
+        gameModeGeometricButton.gameObject.SetActive(false);
+        gameModeDodgeButton.gameObject.SetActive(false);
+        gameModeGridButton.gameObject.SetActive(false);
+    }
+
+    private void ShowGameModeButtons()
+    {
+        gameModeBipbopButton.gameObject.SetActive(true);
+        gameModeColorButton.gameObject.SetActive(true);
+        gameModeGeometricButton.gameObject.SetActive(true);
+        gameModeDodgeButton.gameObject.SetActive(true);
+        gameModeGridButton.gameObject.SetActive(true);
+    }
+
+    private void ShowBipBopButton()
+    {
+        playBipbopButton.gameObject.SetActive(true);
+        playColorButton.gameObject.SetActive(false);
+        playGeometricButton.gameObject.SetActive(false);
+        playDodgeButton.gameObject.SetActive(false);
+        playGridButton.gameObject.SetActive(false);
+    }
+
+    private void ShowColorButton()
+    {
+        playBipbopButton.gameObject.SetActive(false);
+        playColorButton.gameObject.SetActive(true);
+        playGeometricButton.gameObject.SetActive(false);
+        playDodgeButton.gameObject.SetActive(false);
+        playGridButton.gameObject.SetActive(false);
+    }
+    private void ShowGeometricButton()
+    {
+        playBipbopButton.gameObject.SetActive(false);
+        playColorButton.gameObject.SetActive(false);
+        playGeometricButton.gameObject.SetActive(true);
+        playDodgeButton.gameObject.SetActive(false);
+        playGridButton.gameObject.SetActive(false);
+    }
+    private void ShowDodgeButton()
+    {
+        playBipbopButton.gameObject.SetActive(false);
+        playColorButton.gameObject.SetActive(false);
+        playGeometricButton.gameObject.SetActive(false);
+        playDodgeButton.gameObject.SetActive(true);
+        playGridButton.gameObject.SetActive(false);
+    }
+    private void ShowGridButton()
+    {
+        playBipbopButton.gameObject.SetActive(false);
+        playColorButton.gameObject.SetActive(false);
+        playGeometricButton.gameObject.SetActive(false);
+        playDodgeButton.gameObject.SetActive(false);
+        playGridButton.gameObject.SetActive(true);
+    }
+    
 }
