@@ -35,7 +35,7 @@ public class SwipeMenu : MonoBehaviour, IEndDragHandler
         currentPage = 1;
         targetPos = swipeContainerRect.localPosition;
         dragThresold = Screen.width / 15;
-        UpdateBar();
+        //UpdateBar();
         UpdateButtons();
 
         page1Button.onClick.AddListener(() =>
@@ -131,7 +131,7 @@ public class SwipeMenu : MonoBehaviour, IEndDragHandler
     private void MovePage()
     {
         swipeContainerRect.LeanMoveLocal(targetPos, tweenTime).setEase(tweenType);
-        UpdateBar();
+        //UpdateBar();
         UpdateButtons();
     }
 
