@@ -96,9 +96,7 @@ public class GeometricModeManager : MonoBehaviour
     {
         score++;
         UpdateScoreText();
-#if UNITY_ANDROID || UNITY_IOS
-        Handheld.Vibrate();
-#endif
+        Haptics.TryVibrate();
         PlayerLevelManager.Instance.AddXP(50);
     }
 
