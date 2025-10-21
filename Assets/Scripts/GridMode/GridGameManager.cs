@@ -21,7 +21,6 @@ public class GridGameManager : MonoBehaviour
     public float moveDuration = 1f;
     public float coinTimeLimit = 5f;
 
-    // Nuevo: retraso entre flechas cuando hay varias (ajustable en inspector)
     [Tooltip("Retraso entre el spawn/preview de flechas cuando se lanzan múltiples (0 = simultáneo)")]
     public float multiArrowDelay = 0.25f;
 
@@ -31,8 +30,13 @@ public class GridGameManager : MonoBehaviour
     public Button leftButton;
     public Button rightButton;
 
+    [Header("Timer Colors")]
+    public Color fullColor = Color.green;
+    public Color midColor = Color.yellow;
+    public Color lowColor = Color.red;
+
     [Header("UI Timer")]
-    public Slider coinTimerSlider;
+    public Image coinTimerImage; // <-- reemplaza el Slider por una imagen
 
     private int playerX, playerY;
     private GameObject playerObj;
@@ -46,63 +50,68 @@ public class GridGameManager : MonoBehaviour
     private float coinTimer;
     private Vector3 originalScale;
 
-    // valores mínimos y decrementos
     private const float minWarningTime = 0.5f;
     private const float minCoinTime = 7f;
     private const float decreaseAmount = 0.05f;
 
     private void Start()
     {
-        // Inicializar grid
         gridCells = new Transform[gridSize, gridSize];
         int index = 0;
         for (int y = 0; y < gridSize; y++)
         {
             for (int x = 0; x < gridSize; x++)
-            {
-                gridCells[x, y] = gridParent.GetChild(index);
-                index++;
-            }
+                gridCells[x, y] = gridParent.GetChild(index++);
         }
 
-        // Crear jugador
         playerX = 0;
         playerY = 0;
         playerObj = Instantiate(playerPrefab, gridCells[playerX, playerY].position, Quaternion.identity, gridParent);
         originalScale = playerObj.transform.localScale;
 
-        // Crear moneda
         SpawnCoin();
 
-        // Botones
         upButton.onClick.AddListener(() => TryMove(0, -1));
         downButton.onClick.AddListener(() => TryMove(0, 1));
         leftButton.onClick.AddListener(() => TryMove(-1, 0));
         rightButton.onClick.AddListener(() => TryMove(1, 0));
 
-        // Rutina flechas
         StartCoroutine(ArrowRoutine());
 
-        // Timer inicial
+        // Inicializar temporizador
         coinTimer = coinTimeLimit;
-        coinTimerSlider.maxValue = coinTimeLimit;
-        coinTimerSlider.value = coinTimeLimit;
+        coinTimerImage.fillAmount = 1f; // llena completamente
+
+        coinTimerImage.color = fullColor;
     }
 
     private void Update()
     {
         if (isGameOver) return;
 
-        // Timer de la moneda
         if (coinObj != null)
         {
             coinTimer -= Time.deltaTime;
-            coinTimerSlider.value = coinTimer;
+
+            float t = Mathf.Clamp01(coinTimer / coinTimeLimit);
+            coinTimerImage.fillAmount = t;
+
+            // Interpolación de color
+            if (t > 0.5f)
+            {
+                // Verde  Amarillo
+                float lerpT = (t - 0.5f) * 2f;
+                coinTimerImage.color = Color.Lerp(midColor, fullColor, lerpT);
+            }
+            else
+            {
+                // Amarillo  Rojo
+                float lerpT = t * 2f;
+                coinTimerImage.color = Color.Lerp(lowColor, midColor, lerpT);
+            }
 
             if (coinTimer <= 0f)
-            {
                 GameOver();
-            }
         }
     }
 
@@ -124,7 +133,6 @@ public class GridGameManager : MonoBehaviour
     IEnumerator MovePlayer(Vector3 targetPos)
     {
         isMoving = true;
-
         Vector3 startPos = playerObj.transform.position;
         Vector3 startScale = originalScale;
         Vector3 peakScale = originalScale * 1.3f;
@@ -133,7 +141,6 @@ public class GridGameManager : MonoBehaviour
         while (elapsed < moveDuration)
         {
             float t = elapsed / moveDuration;
-
             playerObj.transform.position = Vector3.Lerp(startPos, targetPos, t);
 
             if (t < 0.5f)
@@ -147,10 +154,8 @@ public class GridGameManager : MonoBehaviour
 
         playerObj.transform.position = targetPos;
         playerObj.transform.localScale = originalScale;
-
         isMoving = false;
 
-        // Recoge moneda
         if (coinObj != null && Vector3.Distance(playerObj.transform.position, coinObj.transform.position) < 0.1f)
         {
             Destroy(coinObj);
@@ -160,12 +165,10 @@ public class GridGameManager : MonoBehaviour
 #endif
             Debug.Log("Score: " + score);
 
-            // cada 2 puntos: bajar tiempos
             if (score % 2 == 0)
             {
                 warningTime = Mathf.Max(minWarningTime, warningTime - decreaseAmount);
                 coinTimeLimit = Mathf.Max(minCoinTime, coinTimeLimit - decreaseAmount);
-                Debug.Log($"Dificultad aumentada warningTime: {warningTime:F2}, coinTimeLimit: {coinTimeLimit:F2}");
             }
 
             SpawnCoin();
@@ -177,16 +180,16 @@ public class GridGameManager : MonoBehaviour
         int x, y;
         do
         {
-            x = UnityEngine.Random.Range(0, gridSize);
-            y = UnityEngine.Random.Range(0, gridSize);
+            x = Random.Range(0, gridSize);
+            y = Random.Range(0, gridSize);
         } while (x == playerX && y == playerY);
 
         coinObj = Instantiate(coinPrefab, gridCells[x, y].position, Quaternion.identity, gridParent);
 
-        // Reset timer
         coinTimer = coinTimeLimit;
-        coinTimerSlider.maxValue = coinTimeLimit;
-        coinTimerSlider.value = coinTimeLimit;
+        coinTimerImage.fillAmount = 1f; // reinicia la barra llena
+
+        coinTimerImage.color = fullColor;
     }
 
     IEnumerator ArrowRoutine()
@@ -321,5 +324,7 @@ public class GridGameManager : MonoBehaviour
         if (isGameOver) return;
         isGameOver = true;
         Debug.Log("GAME OVER - Score final: " + score);
+
+        PlayFabScoreManager.Instance.SubmitScore("GridScore", score);
     }
 }

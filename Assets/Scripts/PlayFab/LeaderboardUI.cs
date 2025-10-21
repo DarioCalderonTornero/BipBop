@@ -77,6 +77,16 @@ public class LeaderboardUI : MonoBehaviour
         LeaderboardUI.Instance.ShowLeaderboard("GeometricScore", 10); // Top 10 del modo colores
     }
 
+    public void OnGridLeaderboardButtonClicked()
+    {
+        LeaderboardUI.Instance.ShowLeaderboard("GridScore", 10);
+    }
+
+    public void OnDodgeLeaderboardButtonClicked()
+    {
+        LeaderboardUI.Instance.ShowLeaderboard("DodgeScore", 10);
+    }
+
     /// <summary>
     /// Abre el panel y carga el top N del leaderboard
     /// </summary>

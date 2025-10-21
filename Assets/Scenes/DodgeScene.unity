@@ -185,6 +185,7 @@ MonoBehaviour:
   mainCamera: {fileID: 682853698}
   canvas: {fileID: 1643894528}
   indicatorPrefab: {fileID: 5952935435178245506, guid: a4e56fa372c63774da7a57bf1fe177c7, type: 3}
+  screenMargin: 0.095
 --- !u!1 &661725933
 GameObject:
   m_ObjectHideFlags: 0
@@ -242,10 +243,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: New Text
+  m_text: Points
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 1b4a1f76817a44c4a886ba5c35919310, type: 2}
+  m_sharedMaterial: {fileID: -1839985413152155028, guid: 1b4a1f76817a44c4a886ba5c35919310, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -494,7 +495,7 @@ GameObject:
   - component: {fileID: 1509769158}
   m_Layer: 0
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -640,7 +641,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c9c77de8f0b9aa468b24b4a1976f777, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 1
+  moveSpeed: 2
 --- !u!1 &1643894525
 GameObject:
   m_ObjectHideFlags: 0

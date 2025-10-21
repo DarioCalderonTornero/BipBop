@@ -11,6 +11,10 @@ public class EnemyIndicator : MonoBehaviour
     public Canvas canvas;
     public RectTransform indicatorPrefab;
 
+    [Header("Settings")]
+    [Range(0f, 0.5f)]
+    public float screenMargin = 0.08f; // margen en viewport (0 = borde total, 0.1 = más separado)
+
     private Dictionary<Transform, RectTransform> activeIndicators = new Dictionary<Transform, RectTransform>();
 
     private void Awake()
@@ -28,7 +32,7 @@ public class EnemyIndicator : MonoBehaviour
             Transform enemy = kvp.Key;
             RectTransform indicator = kvp.Value;
 
-            if (enemy == null) // enemigo destruido
+            if (enemy == null)
             {
                 Destroy(indicator.gameObject);
                 toRemove.Add(enemy);
@@ -45,27 +49,39 @@ public class EnemyIndicator : MonoBehaviour
 
             if (!isVisible)
             {
-                // Clamp dentro de pantalla
-                viewportPos.x = Mathf.Clamp01(viewportPos.x);
-                viewportPos.y = Mathf.Clamp01(viewportPos.y);
+                Vector3 dir = viewportPos - new Vector3(0.5f, 0.5f, 0);
+                dir.z = 0;
 
-                Vector2 canvasPos;
+                float absX = Mathf.Abs(dir.x);
+                float absY = Mathf.Abs(dir.y);
+
+                Vector2 edgeViewportPos = new Vector2(0.5f, 0.5f);
+
+                if (absX > absY)
+                {
+                    // Izquierda o derecha
+                    edgeViewportPos.x = dir.x > 0 ? 1f - screenMargin : screenMargin;
+                    edgeViewportPos.y = Mathf.Clamp(viewportPos.y, screenMargin, 1f - screenMargin);
+                }
+                else
+                {
+                    // Arriba o abajo
+                    edgeViewportPos.y = dir.y > 0 ? 1f - screenMargin : screenMargin;
+                    edgeViewportPos.x = Mathf.Clamp(viewportPos.x, screenMargin, 1f - screenMargin);
+                }
+
+                // Convertir a posición en canvas
                 RectTransformUtility.ScreenPointToLocalPointInRectangle(
                     canvas.transform as RectTransform,
-                    mainCamera.ViewportToScreenPoint(viewportPos),
+                    mainCamera.ViewportToScreenPoint(edgeViewportPos),
                     canvas.worldCamera,
-                    out canvasPos);
+                    out Vector2 canvasPos);
 
                 indicator.localPosition = canvasPos;
-
-                // Rotar hacia el enemigo
-                Vector3 dir = enemy.position - mainCamera.transform.position;
-                float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-                indicator.rotation = Quaternion.Euler(0, 0, angle - 90f);
+                indicator.localRotation = Quaternion.identity;
             }
         }
 
-        // limpiar los destruidos
         foreach (var e in toRemove)
             activeIndicators.Remove(e);
     }
