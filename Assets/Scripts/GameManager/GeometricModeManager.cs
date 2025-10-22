@@ -98,6 +98,10 @@ public class GeometricModeManager : MonoBehaviour
         UpdateScoreText();
         Haptics.TryVibrate();
         PlayerLevelManager.Instance.AddXP(50);
+
+        // NUEVO: genera los objetos que caen
+        if (FallingShapesManager.Instance != null)
+            FallingShapesManager.Instance.SpawnFallingShapes();
     }
 
     private void UpdateScoreText()
