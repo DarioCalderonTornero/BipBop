@@ -18,8 +18,8 @@ public class GeometricModeManager : MonoBehaviour
 
     [Header("Game Settings")]
     public float speedMultiplier = 1f;         // Multiplicador de velocidad actual
-    public float speedIncreaseFactor = 1.1f;     // Factor de incremento de velocidad al acertar
-    public float timeDecreaseFactor = 0.95f;     // Factor de reducción del tiempo base al acertar
+    public float speedIncreaseFactor = 1.1f;   // Factor de incremento de velocidad al acertar
+    public float timeDecreaseFactor = 0.95f;   // Factor de reducción del tiempo base al acertar
 
     [Header("Shapes")]
     public List<BouncingShape> shapes;         // Lista de todas las figuras geométricas (prefabs o instancias en escena)
@@ -27,6 +27,7 @@ public class GeometricModeManager : MonoBehaviour
     private float currentTime;
     private int score = 0;
     private BouncingShape currentTarget;
+    private bool hasEnded = false; //  Nueva bandera de protección
 
     public event EventHandler OnGameOver;
 
@@ -37,6 +38,13 @@ public class GeometricModeManager : MonoBehaviour
 
     private void Start()
     {
+        StartGame();
+    }
+
+    private void StartGame()
+    {
+        hasEnded = false; //  Reinicia la bandera al comenzar
+        score = 0;
         currentTime = startTime;
         timeSlider.maxValue = startTime;
         timeSlider.value = startTime;
@@ -53,9 +61,12 @@ public class GeometricModeManager : MonoBehaviour
 
     private void Update()
     {
+        if (hasEnded) return; //  No seguir si el juego ya terminó
+
         currentTime -= Time.deltaTime;
         timeSlider.maxValue = startTime;
         timeSlider.value = currentTime;
+
         if (currentTime <= 0f)
         {
             EndGame();
@@ -65,29 +76,30 @@ public class GeometricModeManager : MonoBehaviour
     // Este método se llama cuando se toca una figura
     public void OnShapeTapped(BouncingShape shape)
     {
+        if (hasEnded) return; //  Bloquea interacción si el juego terminó
+
         if (shape == currentTarget)
         {
             // Si se toca la figura objetivo, la ponemos verde y registramos el acierto
             shape.TemporarilyChangeColor(Color.green, 0.5f);
-
             AddScore();
 
-            // Ajustar el tiempo: disminuir en 0.1 segundos, pero no por debajo de 2.5 segundos
+            // Ajustar el tiempo: disminuir en 0.1 segundos, pero no por debajo de 1.5 segundos
             startTime = Mathf.Max(1.5f, startTime - 0.1f);
             currentTime = startTime;
 
-            // Ajustar la velocidad: multiplicar por speedIncreaseFactor pero sin superar 2f
+            // Ajustar la velocidad: multiplicar por speedIncreaseFactor pero sin superar 4f
             speedMultiplier = Mathf.Min(4f, speedMultiplier * speedIncreaseFactor);
             UpdateShapesSpeed();
 
-            // Activar nuevas figuras según la puntuación:
+            // Activar nuevas figuras según la puntuación
             CheckForAdditionalShapes();
 
             ChooseNewTarget();
         }
         else
         {
-            // Si se toca una figura que no es objetivo, se pone roja durante 1 segundo
+            // Si se toca una figura que no es objetivo, se pone roja durante 0.5 segundos
             shape.TemporarilyChangeColor(Color.red, 0.5f);
         }
     }
@@ -114,21 +126,11 @@ public class GeometricModeManager : MonoBehaviour
         return score;
     }
 
-    // Escoge una nueva figura objetivo entre las activas, evitando que se repita la misma consecutivamente
+    // Escoge una nueva figura objetivo entre las activas, evitando repetir la misma
     private void ChooseNewTarget()
     {
-        /*
-        // Restaurar el color normal de todas las figuras activas
-        foreach (BouncingShape s in shapes)
-        {
-            if (s.gameObject.activeSelf)
-                s.SetNormalColor();
-        }
-        */
-
         List<BouncingShape> activeShapes = shapes.FindAll(s => s.gameObject.activeSelf);
 
-        // Si hay más de una figura activa y ya hay un objetivo anterior, selecciona una diferente
         if (activeShapes.Count > 1 && currentTarget != null)
         {
             BouncingShape newTarget;
@@ -147,7 +149,6 @@ public class GeometricModeManager : MonoBehaviour
         instructionText.text = "¡Toca " + currentTarget.shapeName + "!";
     }
 
-    // Actualiza la velocidad de todas las figuras en base al multiplicador
     private void UpdateShapesSpeed()
     {
         foreach (BouncingShape s in shapes)
@@ -156,10 +157,6 @@ public class GeometricModeManager : MonoBehaviour
         }
     }
 
-    // Activa figuras adicionales basadas en el puntaje:
-    // - Comienza con 3 figuras.
-    // - A los 25 puntos, activa la figura en el índice 3 (la 4ª).
-    // - A los 50 puntos, activa la figura en el índice 4 (la 5ª).
     private void CheckForAdditionalShapes()
     {
         if (score >= 25 && shapes.Count > 3 && !shapes[3].gameObject.activeSelf)
@@ -173,6 +170,7 @@ public class GeometricModeManager : MonoBehaviour
             StartCoroutine(ApplySpeedNextFrame(shapes[4]));
         }
     }
+
     private IEnumerator ApplySpeedNextFrame(BouncingShape shape)
     {
         yield return null; // espera un frame
@@ -181,10 +179,8 @@ public class GeometricModeManager : MonoBehaviour
 
     private void SaveRecordIfNeeded()
     {
-        // Recupera el récord actual
         int currentRecord = PlayerPrefs.GetInt("MaxRecordGeometric", 0);
 
-        // Si la puntuación actual supera el récord, actualiza el valor
         if (score > currentRecord)
         {
             PlayerPrefs.SetInt("MaxRecordGeometric", score);
@@ -194,24 +190,30 @@ public class GeometricModeManager : MonoBehaviour
 
     private void EndGame()
     {
-        OnGameOver?.Invoke(this, EventArgs.Empty);
+        if (hasEnded) return; // Previene llamadas múltiples
+        hasEnded = true;
 
+        OnGameOver?.Invoke(this, EventArgs.Empty);
         SaveRecordIfNeeded();
-        //int xpEarned = score * 10;
-        //PlayerLevelManager.Instance.AddXP(xpEarned);
 
         if (PlayFabLoginManager.Instance != null && PlayFabLoginManager.Instance.IsLoggedIn)
-        {
             PlayFabScoreManager.Instance.SubmitScore("GeometricScore", score);
+
+        // Calculamos las monedas ganadas (1 por punto)
+        int coinsEarned = score;
+
+        // Mostramos la animación de recompensa si existe el panel en la escena
+        CoinsRewardUI rewardUI = FindObjectOfType<CoinsRewardUI>(true);
+        if (rewardUI != null)
+        {
+            rewardUI.ShowReward(coinsEarned);
         }
-        //SceneManager.LoadScene("Menu");
+        else
+        {
+            // Fallback: suma directa sin animación
+            CurrencyManager.Instance.AddCoins(coinsEarned);
+        }
 
-        int coinsEarned = score / 10;
-
-        // Recupera el total actual de monedas y suma las nuevas
-        int totalCoins = PlayerPrefs.GetInt("CoinCount", 0);
-        totalCoins += coinsEarned;
-        PlayerPrefs.SetInt("CoinCount", totalCoins);
-        PlayerPrefs.Save();
+        Debug.Log($"Fin de partida — Recompensa: {coinsEarned} monedas");
     }
 }
