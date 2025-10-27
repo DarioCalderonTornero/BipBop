@@ -10,21 +10,12 @@ public class DailyMissionsUI : MonoBehaviour
     [SerializeField] private Image dailyMissionsPanel;
     [SerializeField] private TextMeshProUGUI timerDailyMissionsText;
     [SerializeField] private Button dailyMissionsButton;
-    [SerializeField] private Button closeDailyMissionButton;
 
     private bool isVisible = false;
 
     private void Awake()
     {
-        dailyMissionsButton.onClick.AddListener(() =>
-        {
-            Show();
-        });
-
-        /* closeDailyMissionButton.onClick.AddListener(() =>
-        {
-            Hide();
-        }); */
+        dailyMissionsButton.onClick.AddListener(OnDailyMissionsButtonClicked);
     }
 
     private void Start()
@@ -32,12 +23,20 @@ public class DailyMissionsUI : MonoBehaviour
         Hide();
     }
 
+    private void OnDailyMissionsButtonClicked()
+    {
+        // Si está abierto, se cierra; si está cerrado, se abre.
+        if (isVisible)
+            Hide();
+        else
+            Show();
+    }
+
     private void Hide()
     {
         isVisible = false;
         dailyMissionsPanel.gameObject.SetActive(false);
         timerDailyMissionsText.gameObject.SetActive(false);
-        closeDailyMissionButton.gameObject.SetActive(false);
     }
 
     private void Show()
@@ -45,37 +44,35 @@ public class DailyMissionsUI : MonoBehaviour
         isVisible = true;
         dailyMissionsPanel.gameObject.SetActive(true);
         timerDailyMissionsText.gameObject.SetActive(true);
-        closeDailyMissionButton.gameObject.SetActive(true);
     }
 
     private void Update()
     {
+        // Si el panel está visible y se toca cualquier parte de la pantalla
         if (isVisible && Input.GetMouseButtonDown(0))
         {
-            // Detecta si el click fue sobre la UI
-            if (!IsPointerOverUIObject(dailyMissionsPanel.gameObject))
+            GameObject clickedUI = GetClickedUIObject();
+
+            // Si se ha hecho clic en cualquier parte (botón o fuera del panel)
+            if (clickedUI == null ||
+                clickedUI == dailyMissionsButton.gameObject ||
+                !clickedUI.transform.IsChildOf(dailyMissionsPanel.transform))
             {
                 Hide();
             }
         }
     }
 
-    private bool IsPointerOverUIObject(GameObject panel)
+    private GameObject GetClickedUIObject()
     {
-        PointerEventData eventData = new PointerEventData(EventSystem.current);
-        eventData.position = Input.mousePosition;
+        PointerEventData eventData = new PointerEventData(EventSystem.current)
+        {
+            position = Input.mousePosition
+        };
 
-        var results = new System.Collections.Generic.List<RaycastResult>();
+        var results = new List<RaycastResult>();
         EventSystem.current.RaycastAll(eventData, results);
 
-        foreach (var result in results)
-        {
-            if (result.gameObject == panel || result.gameObject.transform.IsChildOf(panel.transform))
-            {
-                return true; // Click dentro del panel
-            }
-        }
-
-        return false; // Click fuera del panel
+        return results.Count > 0 ? results[0].gameObject : null;
     }
 }

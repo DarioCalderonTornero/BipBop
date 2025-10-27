@@ -5,21 +5,56 @@ using UnityEngine.UI;
 
 public class ButtonAnimation : MonoBehaviour
 {
-    private Button animButton;
-    private Vector3 normalScale;
-    private Vector3 upScale = new Vector3(1.2f, 1.2f, 1.0f);
+    [Header("Pop Settings")]
+    [Tooltip("Escala multiplicadora al hacer pop (0.85 = se encoge ligeramente)")]
+    [SerializeField] private float popScale = 0.85f;
+
+    [Tooltip("Velocidad del efecto pop (cuanto mayor, más rápido)")]
+    [SerializeField] private float popSpeed = 30f;
+
+    private Button button;
+    private Vector3 originalScale;
+    private Coroutine popCoroutine;
 
     private void Awake()
     {
-        normalScale = transform.localScale;
-        animButton = GetComponent<Button>();
-        animButton.onClick.AddListener(Anim);
+        button = GetComponent<Button>();
+        originalScale = transform.localScale;
+
+        if (button != null)
+            button.onClick.AddListener(OnButtonClicked);
     }
 
-    private void Anim()
+    private void OnButtonClicked()
     {
-        LeanTween.scale(gameObject, upScale, 0.1f).setEase(LeanTweenType.easeOutBack);
-        LeanTween.scale(gameObject, normalScale, 0.1f).setDelay(0.2f).setEase(LeanTweenType.easeInOutQuad);
+        if (popCoroutine != null)
+            StopCoroutine(popCoroutine);
+
+        popCoroutine = StartCoroutine(PopAnimation());
+    }
+
+    private IEnumerator PopAnimation()
+    {
+        Vector3 targetScale = originalScale * popScale;
+
+        float t = 0f;
+        while (t < 1f)
+        {
+            t += Time.deltaTime * popSpeed;
+            transform.localScale = Vector3.Lerp(originalScale, targetScale, t);
+            yield return null;
+        }
+
+        t = 0f;
+        while (t < 1f)
+        {
+            t += Time.deltaTime * popSpeed;
+            transform.localScale = Vector3.Lerp(targetScale, originalScale, t);
+            yield return null;
+        }
+
+        transform.localScale = originalScale;
+        popCoroutine = null;
     }
 }
 
