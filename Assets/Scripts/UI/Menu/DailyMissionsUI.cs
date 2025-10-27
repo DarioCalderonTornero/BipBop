@@ -10,7 +10,6 @@ public class DailyMissionsUI : MonoBehaviour
     [SerializeField] private Image dailyMissionsPanel;
     [SerializeField] private TextMeshProUGUI timerDailyMissionsText;
     [SerializeField] private Button dailyMissionsButton;
-    [SerializeField] private Button closeDailyMissionButton;
 
     private bool isVisible = false;
 
@@ -37,7 +36,6 @@ public class DailyMissionsUI : MonoBehaviour
         isVisible = false;
         dailyMissionsPanel.gameObject.SetActive(false);
         timerDailyMissionsText.gameObject.SetActive(false);
-        closeDailyMissionButton.gameObject.SetActive(false);
     }
 
     private void Show()
@@ -45,7 +43,6 @@ public class DailyMissionsUI : MonoBehaviour
         isVisible = true;
         dailyMissionsPanel.gameObject.SetActive(true);
         timerDailyMissionsText.gameObject.SetActive(true);
-        closeDailyMissionButton.gameObject.SetActive(true);
     }
 
     private void Update()
