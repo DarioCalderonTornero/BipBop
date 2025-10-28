@@ -48,10 +48,12 @@ public class SwipeMenu : MonoBehaviour, IEndDragHandler
             Page2();
         });
 
+        
         page3Button.onClick.AddListener(() =>
         {
             Page3();
         });
+        
         
     }
 

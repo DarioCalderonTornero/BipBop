@@ -119,7 +119,7 @@ public class SelectGame : MonoBehaviour
         gridImage.gameObject.SetActive(false);
 
         closeGameModeButton.gameObject.SetActive(false);
-        openGameModeButton.gameObject.SetActive(true);
+        //openGameModeButton.gameObject.SetActive(true);
 
         HideGameModeButtons();
     }
@@ -133,7 +133,7 @@ public class SelectGame : MonoBehaviour
         dodgeImage.gameObject.SetActive(true);
         gridImage.gameObject.SetActive(true);
 
-        openGameModeButton.gameObject.SetActive(false);
+        //openGameModeButton.gameObject.SetActive(false);
         closeGameModeButton.gameObject.SetActive(true);
 
         ShowGameModeButtons();
