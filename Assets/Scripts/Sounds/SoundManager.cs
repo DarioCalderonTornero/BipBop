@@ -5,28 +5,26 @@ using UnityEngine;
 
 public class SoundManager : MonoBehaviour
 {
-    public static SoundManager Instance { get; private set; }
     public event EventHandler OnSoundVolumeChanged;
 
     private const int SOUND_VOLUME_MAX = 10;
     private static int soundVolume = 6;
 
-    private void Awake()
-    {
-        if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
+    [SerializeField] private AudioClip onColorGameModePoint;
 
+
+    private void Awake()
+    { 
         DontDestroyOnLoad(gameObject);
     }
 
     private void Start()
+    {
+        //ColorGamePuntos.Instance.OnColorAddScore += ColorGamePuntos_OnColorAddScore;
+        AudioSource.PlayClipAtPoint(onColorGameModePoint, Camera.main.transform.position, GetSoundVolumeNormalized());
+    }
+
+    private void ColorGamePuntos_OnColorAddScore(object sender, EventArgs e)
     {
 
     }

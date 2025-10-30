@@ -8,6 +8,8 @@ public class ColorGamePuntos : MonoBehaviour
 {
     public static ColorGamePuntos Instance { get; private set; }
 
+    public event EventHandler OnColorAddScore;
+
     [SerializeField] private TextMeshProUGUI scoreText;
     [SerializeField] private RectTransform scoreEffectGroup; // <- lo arrastras desde la UI
     private int score = 0;
@@ -32,6 +34,7 @@ public class ColorGamePuntos : MonoBehaviour
 
     public void AddScore()
     {
+        OnColorAddScore?.Invoke(this, EventArgs.Empty);
         score++;
         CurrencyManager.Instance.AddCoins(1);
         PlayerLevelManager.Instance.AddXP(5);

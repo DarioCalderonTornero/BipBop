@@ -4950,7 +4950,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1234541625}
   m_HandleRect: {fileID: 1234541624}
   m_Direction: 0
-  m_Value: 0.000000051724708
+  m_Value: 0
   m_Size: 0.3139535
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -8068,6 +8068,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2eff30bc0b8ef934dbc2da7734fc0485, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  onColorGameModePoint: {fileID: 8300000, guid: 8e8b3f95a8366cd43be3d1a30b6676eb, type: 3}
 --- !u!1 &762026835
 GameObject:
   m_ObjectHideFlags: 0
@@ -13413,8 +13414,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1520036807}
   m_HandleRect: {fileID: 1520036806}
   m_Direction: 2
-  m_Value: 1
-  m_Size: 0.99999994
+  m_Value: 0
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
