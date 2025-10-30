@@ -14813,7 +14813,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   showAdButton: {fileID: 1361422792}
-  adUnitId: Rewarded_Android
+  adUnitIdAndroid: v7qohhoxn94w7lui
+  adUnitIdIOS: Rewarded_iOS
 --- !u!114 &1392068170
 MonoBehaviour:
   m_ObjectHideFlags: 0

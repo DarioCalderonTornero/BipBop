@@ -8,9 +8,11 @@ using System;
 public class MediationAds : MonoBehaviour
 {
     [SerializeField] private Button showAdButton;
-    [SerializeField] private string adUnitId = "Rewarded_Android"; // Pon aquí el Ad Unit ID real
+    [SerializeField] private string adUnitIdAndroid = "Rewarded_Androidd"; // Ad Unit ID Android
+    [SerializeField] private string adUnitIdIOS = "Rewarded_iOS"; // Ad Unit ID iOS
 
     private LevelPlayRewardedAd rewardedAd;
+    private string adUnitId;
 
     void OnEnable()
     {
@@ -24,6 +26,13 @@ public class MediationAds : MonoBehaviour
 
     private void InitializeAds()
     {
+        // Selecciona Ad Unit según la plataforma
+#if UNITY_ANDROID
+        adUnitId = adUnitIdAndroid;
+#elif UNITY_IOS
+        adUnitId = adUnitIdIOS;
+#endif
+
         rewardedAd = new LevelPlayRewardedAd(adUnitId);
 
         rewardedAd.OnAdLoaded += OnAdLoaded;
@@ -35,19 +44,29 @@ public class MediationAds : MonoBehaviour
         showAdButton.onClick.RemoveAllListeners();
         showAdButton.onClick.AddListener(TryShowAd);
 
+        // Cargar el anuncio
         rewardedAd.LoadAd();
     }
 
     private void OnAdLoaded(LevelPlayAdInfo adInfo)
     {
         Debug.Log("Ad loaded and ready.");
-        showAdButton.interactable = true; // Activa botón solo cuando el anuncio está listo
+        showAdButton.interactable = true; // Solo habilita botón cuando el anuncio está listo
     }
 
     private void OnAdLoadFailed(LevelPlayAdError error)
     {
         Debug.LogWarning($"Failed to load ad: {error}");
         showAdButton.interactable = false;
+
+        // Reintento automático opcional
+        Invoke(nameof(RetryLoadAd), 5f);
+    }
+
+    private void RetryLoadAd()
+    {
+        if (rewardedAd != null)
+            rewardedAd.LoadAd();
     }
 
     private void TryShowAd()
@@ -66,7 +85,7 @@ public class MediationAds : MonoBehaviour
     private void OnAdRewarded(LevelPlayAdInfo adInfo, LevelPlayReward reward)
     {
         Debug.Log($"User rewarded: {reward.Name} x {reward.Amount}");
-        // Aquí añade la lógica para otorgar la recompensa in-game.
+        // Aquí pones tu lógica para dar recompensa in-game
     }
 
     private void OnAdClosed(LevelPlayAdInfo adInfo)
