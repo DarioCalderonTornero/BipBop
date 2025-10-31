@@ -154,7 +154,7 @@ public class LogicaJuego : MonoBehaviour
 
         int coinsEarned = MainGamePoints.Instance.GetScore() / 15;
 
-        PlayFabScoreManager.Instance.SubmitScore("HighScore", MainGamePoints.Instance.GetScore());
+        //PlayFabScoreManager.Instance.SubmitScore("HighScore", MainGamePoints.Instance.GetScore());
         int totalCoins = PlayerPrefs.GetInt("CoinCount", 0);
         totalCoins += coinsEarned;
         PlayerPrefs.SetInt("CoinCount", totalCoins);
