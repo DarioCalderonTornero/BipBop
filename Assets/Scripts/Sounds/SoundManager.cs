@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class SoundManager : MonoBehaviour
 {
+    public static SoundManager Instance { get; private set; }
     public event EventHandler OnSoundVolumeChanged;
 
     private const int SOUND_VOLUME_MAX = 10;
@@ -14,7 +15,8 @@ public class SoundManager : MonoBehaviour
 
 
     private void Awake()
-    { 
+    {
+        Instance = this;
         DontDestroyOnLoad(gameObject);
     }
 

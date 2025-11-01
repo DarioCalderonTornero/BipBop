@@ -8,10 +8,17 @@ public class GamePause : MonoBehaviour
 
     private bool isGamePaused = false;
 
+    [Header("Main Buttons")]
     [SerializeField] private Button pauseGameButton;
     [SerializeField] private Button resumeGameButton;
     [SerializeField] private Button settingsButton;
     [SerializeField] private Button mainMenuButton;
+
+    [Header("Sound Buttons")]
+    [SerializeField] private Button soundChangeButton;
+    [SerializeField] private Button musicChangeButton;
+
+    [SerializeField] private Button closeGamePauseImage;
 
     [SerializeField] private Animator gamePauseAnimator;
 
@@ -20,7 +27,8 @@ public class GamePause : MonoBehaviour
         pauseGameButton.onClick.AddListener(() =>
         {
             gamePauseAnimator.SetBool("IsGamePaused", true);
-            pauseGameButton.gameObject.SetActive(false);    
+            pauseGameButton.gameObject.SetActive(false);
+            closeGamePauseImage.gameObject.SetActive(true);
         });
 
         resumeGameButton.onClick.AddListener(() =>
@@ -40,6 +48,16 @@ public class GamePause : MonoBehaviour
             SceneLoader.LoadScene(SceneLoader.Scene.Menu);
             Time.timeScale = 1.0f;  
         });
+
+        soundChangeButton.onClick.AddListener(() =>
+        {
+            SoundManager.Instance.ChangeSoundVolume();
+        });
+    }
+
+    private void Start()
+    {
+        closeGamePauseImage.gameObject.SetActive(false);
     }
 
     public void StopTime()
@@ -50,5 +68,10 @@ public class GamePause : MonoBehaviour
     public void ResumeTime()
     {
         Time.timeScale = 1f;
+    }
+
+    public void CloseGamePause()
+    {
+        Debug.Log("CloseGamePause");
     }
 }
