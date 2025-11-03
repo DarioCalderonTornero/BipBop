@@ -7,7 +7,7 @@ using System;
 
 public class MediationAds : MonoBehaviour
 {
-    [SerializeField] private Button showAdButton;
+    public Button showAdButton;
     [SerializeField] private string adUnitIdAndroid = "Rewarded_Androidd"; // Ad Unit ID Android
     [SerializeField] private string adUnitIdIOS = "Rewarded_iOS"; // Ad Unit ID iOS
 
@@ -82,15 +82,34 @@ public class MediationAds : MonoBehaviour
         }
     }
 
+    private System.Action onRewardedCallback;
+
     private void OnAdRewarded(LevelPlayAdInfo adInfo, LevelPlayReward reward)
     {
         Debug.Log($"User rewarded: {reward.Name} x {reward.Amount}");
-        // Aquí pones tu lógica para dar recompensa in-game
+        onRewardedCallback?.Invoke();
+        onRewardedCallback = null;
     }
 
     private void OnAdClosed(LevelPlayAdInfo adInfo)
     {
         Debug.Log("Ad closed, loading next ad.");
         rewardedAd.LoadAd();
+    }
+
+    public void ShowRewardedAd(System.Action onRewarded)
+    {
+        if (rewardedAd != null && rewardedAd.IsAdReady())
+        {
+            // Guarda el callback, lo llamas al recibir OnAdRewarded
+            this.onRewardedCallback = onRewarded;
+            rewardedAd.ShowAd();
+            showAdButton.interactable = false;
+        }
+    }
+
+    public bool IsAdReady()
+    {
+        return rewardedAd != null && rewardedAd.IsAdReady();
     }
 }
