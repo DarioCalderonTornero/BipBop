@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -19,6 +20,7 @@ public class GamePause : MonoBehaviour
     [SerializeField] private Button soundChangeButton;
     [SerializeField] private Button musicChangeButton;
     [SerializeField] private Button cancelVolumeButton;
+    [SerializeField] private Button closeSoundSettingsButton;
 
     [Header("Sound Texts")]
     [SerializeField] private TextMeshProUGUI soundChangeText;
@@ -46,6 +48,7 @@ public class GamePause : MonoBehaviour
         settingsButton.onClick.AddListener(() =>
         {
             gamePauseAnimator.SetBool("IsSettingsOpen", true);
+            //StartCoroutine(Anim());
             Debug.Log("Settigs Button");
         });
 
@@ -71,12 +74,24 @@ public class GamePause : MonoBehaviour
         {
             SoundManager.Instance.GetCancelVolume();
         });
+
+        closeSoundSettingsButton.onClick.AddListener(() =>
+        {
+            gamePauseAnimator.SetBool("IsSettingsClose", true);
+        });
     }
 
     private void Start()
     {
         closeGamePauseImage.gameObject.SetActive(false);
         soundChangeText.text = "Sound Volume: " + SoundManager.Instance.GetSoundVolume();
+    }
+
+    private IEnumerator Anim()
+    {
+        yield return new WaitForSecondsRealtime(1f);
+        Debug.Log("FALSE");
+        gamePauseAnimator.SetBool("IsSettingsOpen", false);
     }
 
     public void StopTime()
