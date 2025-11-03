@@ -1,4 +1,5 @@
 using System;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,6 +18,11 @@ public class GamePause : MonoBehaviour
     [Header("Sound Buttons")]
     [SerializeField] private Button soundChangeButton;
     [SerializeField] private Button musicChangeButton;
+    [SerializeField] private Button cancelVolumeButton;
+
+    [Header("Sound Texts")]
+    [SerializeField] private TextMeshProUGUI soundChangeText;
+    [SerializeField] private TextMeshProUGUI musicChangeText;
 
     [SerializeField] private Button closeGamePauseImage;
 
@@ -52,12 +58,25 @@ public class GamePause : MonoBehaviour
         soundChangeButton.onClick.AddListener(() =>
         {
             SoundManager.Instance.ChangeSoundVolume();
+            soundChangeText.text = "Sound Volume: " + SoundManager.Instance.GetSoundVolume();
+        });
+
+        musicChangeButton.onClick.AddListener(() =>
+        {
+            //SoundManager.Instance.ChangeSoundVolume();
+            //musicChangeText.text = "Sound Volume: " + SoundManager.Instance.GetSoundVolume();
+        });
+
+        cancelVolumeButton.onClick.AddListener(() =>
+        {
+            SoundManager.Instance.GetCancelVolume();
         });
     }
 
     private void Start()
     {
         closeGamePauseImage.gameObject.SetActive(false);
+        soundChangeText.text = "Sound Volume: " + SoundManager.Instance.GetSoundVolume();
     }
 
     public void StopTime()

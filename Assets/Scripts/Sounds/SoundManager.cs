@@ -13,6 +13,7 @@ public class SoundManager : MonoBehaviour
 
     [SerializeField] private AudioClip onColorGameModePoint;
 
+    private bool isVolumeCancel;
 
     private void Awake()
     {
@@ -45,5 +46,22 @@ public class SoundManager : MonoBehaviour
     public float GetSoundVolumeNormalized()
     {
         return ((float)soundVolume) / SOUND_VOLUME_MAX;
+    }
+
+    public int GetCancelVolume()
+    {
+        if (!isVolumeCancel)
+        {
+            isVolumeCancel = true;
+            return soundVolume;
+        }
+
+        if(isVolumeCancel)
+        {
+            isVolumeCancel = false;
+            return soundVolume = 0;
+        }
+
+        return soundVolume;
     }
 }
