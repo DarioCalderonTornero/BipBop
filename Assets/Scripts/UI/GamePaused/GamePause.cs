@@ -30,6 +30,16 @@ public class GamePause : MonoBehaviour
 
     [SerializeField] private Animator gamePauseAnimator;
 
+    public enum GamePauseState
+    {
+        Unpaused,
+        Paused,
+        Settings,
+    }
+
+    [SerializeField] private GamePauseState state;
+
+
     private void Awake()
     {
         pauseGameButton.onClick.AddListener(() =>
@@ -78,6 +88,7 @@ public class GamePause : MonoBehaviour
         closeSoundSettingsButton.onClick.AddListener(() =>
         {
             gamePauseAnimator.SetBool("IsSettingsClose", true);
+            StartCoroutine(Anim());
         });
     }
 
@@ -85,12 +96,33 @@ public class GamePause : MonoBehaviour
     {
         closeGamePauseImage.gameObject.SetActive(false);
         soundChangeText.text = "Sound Volume: " + SoundManager.Instance.GetSoundVolume();
+
+    }
+
+    private void Update()
+    {
+        switch(state)
+        {
+            case GamePauseState.Unpaused:
+                Debug.Log("Unpaused");
+                break;
+            case GamePauseState.Paused:
+                Debug.Log("Paused");
+                break;
+            case GamePauseState.Settings:
+                Debug.Log("Settings");
+                break;
+
+            default:
+                break;
+        }
     }
 
     private IEnumerator Anim()
     {
         yield return new WaitForSecondsRealtime(1f);
         Debug.Log("FALSE");
+        gamePauseAnimator.SetBool("IsSettingsClose", false);
         gamePauseAnimator.SetBool("IsSettingsOpen", false);
     }
 
