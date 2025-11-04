@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using PlayFab;
 using PlayFab.ClientModels;
@@ -12,145 +13,170 @@ public class LeaderboardUI : MonoBehaviour
     public static LeaderboardUI Instance { get; private set; }
 
     [Header("UI References")]
-    public GameObject panel;             // Panel principal del leaderboard
-    public Transform contentParent;      // Content del ScrollView
-    public GameObject playerRowPrefab;   // Prefab con Texts para Rank, Name, Score
-    public Button closeButton;           // Botón para cerrar
-
-    private Button openButton;           // Botón para abrir el ranking (por nombre)
+    public Transform contentParent;      // Content donde se instancian las filas
+    public GameObject playerRowPrefab;   // Prefab con Rank, Name, Score, Level
     public TextMeshProUGUI myPositionText;
+
+    [Header("Modo Botones")]
+    public Button classicButton;
+    public Button colorButton;
+    public Button geometricButton;
+    public Button gridButton;
+    public Button dodgeButton;
+
+    private Button currentSelectedButton;
 
     private void Awake()
     {
-
-        // Singleton
         if (Instance == null)
-        {
             Instance = this;
-            // DontDestroyOnLoad(gameObject); // Persistir entre escenas
-        }
         else
         {
             Destroy(gameObject);
             return;
         }
 
-        // Seguridad: desactivar panel al inicio
-        if (panel != null) panel.SetActive(false);
+        // Listeners de los botones
+        classicButton.onClick.AddListener(() => OnModeButtonClicked("HighScore", classicButton));
+        colorButton.onClick.AddListener(() => OnModeButtonClicked("ColorScore", colorButton));
+        geometricButton.onClick.AddListener(() => OnModeButtonClicked("GeometricScore", geometricButton));
+        gridButton.onClick.AddListener(() => OnModeButtonClicked("GridScore", gridButton));
+        dodgeButton.onClick.AddListener(() => OnModeButtonClicked("DodgeScore", dodgeButton));
+    }
 
-        // Asignar listener de cierre (ya asignado manualmente en inspector)
-        if (closeButton != null)
-            closeButton.onClick.AddListener(() => panel.SetActive(false));
+    private void Start()
+    {
+        // Mostrar mensaje inicial hasta que el jugador pulse un modo
+        if (myPositionText != null)
+            myPositionText.text = "¡Toca un botón para ver su tabla de clasificación online!";
 
-        // Buscar el botón de abrir ranking por nombre en la escena
-        GameObject openButtonObj = GameObject.Find("ButtonLeaderScore"); // <- reemplaza con el nombre real del botón
-        if (openButtonObj != null)
+        // Limpiar contenido inicial por si acaso
+        foreach (Transform child in contentParent)
+            Destroy(child.gameObject);
+    }
+
+    private void OnModeButtonClicked(string statisticName, Button clickedButton)
+    {
+        // Cambiar color del botón seleccionado
+        if (currentSelectedButton != null)
+            SetButtonSelected(currentSelectedButton, false);
+
+        SetButtonSelected(clickedButton, true);
+        currentSelectedButton = clickedButton;
+
+        // Cargar leaderboard de ese modo
+        ShowLeaderboard(statisticName, 10);
+    }
+
+    private void SetButtonSelected(Button button, bool selected)
+    {
+        ColorBlock colors = button.colors;
+        if (selected)
         {
-            openButton = openButtonObj.GetComponent<Button>();
-            if (openButton != null)
-            {
-                openButton.onClick.AddListener(OnOpenButtonClicked);
-            }
-            else
-            {
-                Debug.LogWarning("LeaderboardUI: No se encontró componente Button en BotonRanking.");
-            }
+            colors.normalColor = new Color(0.8f, 0.8f, 1f);  // azul clarito
+            colors.selectedColor = new Color(0.8f, 0.8f, 1f);
         }
         else
         {
-            Debug.LogWarning("LeaderboardUI: No se encontró objeto con nombre 'BotonRanking'.");
+            colors.normalColor = Color.white;
+            colors.selectedColor = Color.white;
         }
+        button.colors = colors;
     }
 
-    private void OnOpenButtonClicked()
-    {
-        ShowLeaderboard("HighScore", 10); // Cambia el nombre de la estadística si hace falta
-    }
-
-    public void OnColorLeaderboardButtonClicked()
-    {
-        LeaderboardUI.Instance.ShowLeaderboard("ColorScore", 10); // Top 10 del modo colores
-    }
-
-    public void OnGeometricLeaderboardButtonClicked()
-    {
-        LeaderboardUI.Instance.ShowLeaderboard("GeometricScore", 10); // Top 10 del modo colores
-    }
-
-    public void OnGridLeaderboardButtonClicked()
-    {
-        LeaderboardUI.Instance.ShowLeaderboard("GridScore", 10);
-    }
-
-    public void OnDodgeLeaderboardButtonClicked()
-    {
-        LeaderboardUI.Instance.ShowLeaderboard("DodgeScore", 10);
-    }
-
-    /// <summary>
-    /// Abre el panel y carga el top N del leaderboard
-    /// </summary>
     public void ShowLeaderboard(string statisticName, int top = 10)
     {
-        if (panel == null || contentParent == null || playerRowPrefab == null)
+        if (contentParent == null || playerRowPrefab == null)
         {
             Debug.LogWarning("LeaderboardUI: Falta asignar referencias en el inspector.");
             return;
         }
 
-        panel.SetActive(true);
-
         // Limpiar filas anteriores
         foreach (Transform child in contentParent)
             Destroy(child.gameObject);
 
-        // Pedir leaderboard a PlayFab
+        // Seguridad: si PlayFabScoreManager no está, evitar excepción y reintentar en un frame
+        if (PlayFabScoreManager.Instance == null)
+        {
+            Debug.LogWarning("PlayFabScoreManager no está listo. Reintentando en el siguiente frame.");
+            StartCoroutine(DelayedShow(statisticName, top));
+            return;
+        }
+
+        // Obtener top de PlayFab
         PlayFabScoreManager.Instance.GetLeaderboard(statisticName, top, leaderboard =>
         {
+            // Si no hay resultados, muestra mensaje sencillo
+            if (leaderboard == null || leaderboard.Count == 0)
+            {
+                myPositionText.text = "No hay puntuaciones todavía.";
+            }
+
             for (int i = 0; i < leaderboard.Count; i++)
             {
                 var entry = leaderboard[i];
                 GameObject row = Instantiate(playerRowPrefab, contentParent);
 
-                // Buscar referencias dentro del prefab
                 var texts = row.GetComponentsInChildren<TextMeshProUGUI>();
                 var levelIcon = row.transform.Find("LevelIcon");
                 var levelText = levelIcon?.GetComponentInChildren<TextMeshProUGUI>();
 
-                // Asignar datos básicos
-                texts[0].text = (entry.Position + 1).ToString();        // Rank
-                texts[1].text = entry.DisplayName ?? "Player";          // Nombre
-                texts[2].text = entry.StatValue.ToString();            // Score
-
-                // ----- NUEVO: Obtener nivel desde otra estadística -----
-                GetPlayerLevel(entry.PlayFabId, level =>
+                if (texts != null && texts.Length >= 3)
                 {
-                    if (levelText != null)
-                        levelText.text = level.ToString(); // nivel dentro del iconito
-                });
+                    texts[0].text = (entry.Position + 1).ToString();       // Rank
+                    texts[1].text = entry.DisplayName ?? "Player";         // Nombre
+                    texts[2].text = entry.StatValue.ToString();            // Score
+                }
+
+                if (!string.IsNullOrEmpty(entry.PlayFabId))
+                {
+                    GetPlayerLevel(entry.PlayFabId, level =>
+                    {
+                        if (levelText != null)
+                            levelText.text = level.ToString();
+                    });
+                }
             }
+
+            Canvas.ForceUpdateCanvases();
+            var rt = contentParent as RectTransform;
+            if (rt != null)
+                LayoutRebuilder.ForceRebuildLayoutImmediate(rt);
         });
 
-
-
-        PlayFabScoreManager.Instance.GetPlayerRank(statisticName, myEntry =>
+        // Mostrar posición del jugador
+        if (PlayFabScoreManager.Instance != null)
         {
-            if (myEntry != null)
+            PlayFabScoreManager.Instance.GetPlayerRank(statisticName, myEntry =>
             {
-                int rank = myEntry.Position + 1; // PlayFab empieza en 0
-                int score = myEntry.StatValue;
-                myPositionText.text = $"Tu posición actual: {rank}º con {score} puntos";
-            }
-            else
-            {
-                myPositionText.text = "Aún no tienes puntuación en este modo.";
-            }
-        });
+                if (myEntry != null)
+                {
+                    int rank = myEntry.Position + 1;
+                    int score = myEntry.StatValue;
+                    myPositionText.text = $"Tu posición actual: {rank}º con {score} puntos";
+                }
+                else
+                {
+                    myPositionText.text = "Aún no tienes puntuación en este modo.";
+                }
+            });
+        }
+        else
+        {
+            myPositionText.text = "Cargando posición...";
+        }
+    }
+
+    private IEnumerator DelayedShow(string statisticName, int top)
+    {
+        yield return new WaitForEndOfFrame();
+        ShowLeaderboard(statisticName, top);
     }
 
     private void GetPlayerLevel(string playFabId, Action<int> onLevelFound)
     {
-        var request = new PlayFab.ClientModels.GetUserDataRequest
+        var request = new GetUserDataRequest
         {
             PlayFabId = playFabId,
             Keys = new List<string> { "PlayerLevel" }
@@ -168,18 +194,9 @@ public class LeaderboardUI : MonoBehaviour
             },
             error =>
             {
-                Debug.LogWarning("Error obteniendo PlayerLevel de UserData: " + error.GenerateErrorReport());
+                Debug.LogWarning("Error obteniendo PlayerLevel: " + error.GenerateErrorReport());
                 onLevelFound?.Invoke(1);
             }
         );
-    }
-
-    /// <summary>
-    /// Método opcional para cerrar desde código
-    /// </summary>
-    public void CloseLeaderboard()
-    {
-        if (panel != null)
-            panel.SetActive(false);
     }
 }

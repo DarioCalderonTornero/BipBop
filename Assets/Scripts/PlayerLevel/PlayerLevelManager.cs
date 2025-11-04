@@ -93,14 +93,16 @@ public class PlayerLevelManager : MonoBehaviour
         var request = new UpdateUserDataRequest
         {
             Data = new Dictionary<string, string>
-            {
-                { "PlayerLevel", currentLevel.ToString() },
-                { "PlayerXP", currentXP.ToString() },
-                { "PlayerXPNext", xpToNextLevel.ToString() }
-            }
+        {
+            { "PlayerLevel", currentLevel.ToString() },
+            { "PlayerXP", currentXP.ToString() },
+            { "PlayerXPNext", xpToNextLevel.ToString() }
+        },
+            Permission = UserDataPermission.Public // ESTO ES LO IMPORTANTE
         };
+
         PlayFabClientAPI.UpdateUserData(request,
-            result => Debug.Log("Nivel y XP guardados en PlayFab."),
+            result => Debug.Log("Nivel y XP guardados en PlayFab (públicos)."),
             error => Debug.LogWarning("Error al guardar nivel/XP: " + error.GenerateErrorReport()));
     }
 
