@@ -14,14 +14,14 @@ public class ColorManager : MonoBehaviour
     public event EventHandler OnGameOver;
 
     [Header("UI Elements")]
-    public TextMeshProUGUI colorWordText;  
+    public TextMeshProUGUI colorWordText;
     public Image colorWordBackground;
-    public TextMeshProUGUI scoreText;        
-    public Slider timeSlider;               
-    public float startTime = 60f;            
+    public TextMeshProUGUI scoreText;
+    public Slider timeSlider;
+    public float startTime = 60f;
 
     [Header("Candidate Buttons")]
-    public List<Button> candidateButtons;    
+    public List<Button> candidateButtons;
 
     [Header("Color Data")]
     public string[] colorNames = { "Rojo", "Azul", "Verde", "Amarillo", "Morado", "Naranja", "Marrón", "Negro", "Blanco" };
@@ -29,9 +29,11 @@ public class ColorManager : MonoBehaviour
                                 new Color(0.6f, 0.3f, 0.1f), Color.black, Color.white };
 
     private float currentTime;
-    //private int score = 0;
     private int correctIndex;
-    private int lastCorrectIndex = -1; 
+    private int lastCorrectIndex = -1;
+
+    // Nueva bandera para evitar múltiples finales
+    private bool hasEnded = false;
 
     private void Awake()
     {
@@ -40,6 +42,7 @@ public class ColorManager : MonoBehaviour
 
     private void Start()
     {
+        hasEnded = false;
         currentTime = startTime;
         timeSlider.maxValue = startTime;
         timeSlider.value = startTime;
@@ -49,9 +52,12 @@ public class ColorManager : MonoBehaviour
 
     private void Update()
     {
+        if (hasEnded) return; // No actualizar si el juego terminó
+
         currentTime -= Time.deltaTime;
         timeSlider.value = currentTime;
         timeSlider.maxValue = startTime;
+
         if (currentTime <= 0f)
         {
             EndGame();
@@ -60,6 +66,8 @@ public class ColorManager : MonoBehaviour
 
     private void SetupRound()
     {
+        if (hasEnded) return; // No configurar rondas si el juego terminó
+
         int availableCount = 6;
         if (ColorGamePuntos.Instance.GetScore() >= 10) availableCount = 7;
         if (ColorGamePuntos.Instance.GetScore() >= 20) availableCount = 8;
@@ -141,6 +149,8 @@ public class ColorManager : MonoBehaviour
 
     public void OnCandidateSelected(int selectedIndex)
     {
+        if (hasEnded) return; // Bloquear interacción tras game over
+
         if (selectedIndex == correctIndex)
         {
             ColorGamePuntos.Instance.AddScore();
@@ -188,18 +198,30 @@ public class ColorManager : MonoBehaviour
 
     private void EndGame()
     {
+        if (hasEnded) return; // Previene múltiples ejecuciones
+        hasEnded = true;
+
         ColorGamePuntos.Instance.SafeRecordIfNeeded();
-        // int xpEarned = ColorGamePuntos.Instance.GetScore() * 10;
-        // PlayerLevelManager.Instance.AddXP(xpEarned);
 
-        OnGameOver?.Invoke(this, EventArgs.Empty);  
+        OnGameOver?.Invoke(this, EventArgs.Empty);
 
-        // Enviar puntuación a PlayFab
         if (PlayFabLoginManager.Instance != null && PlayFabLoginManager.Instance.IsLoggedIn)
         {
             PlayFabScoreManager.Instance.SubmitScore("ColorScore", ColorGamePuntos.Instance.GetScore());
         }
 
-        //SceneManager.LoadScene("Menu");
+        int coinsEarned = ColorGamePuntos.Instance.score;
+
+        CoinsRewardUI rewardUI = FindObjectOfType<CoinsRewardUI>(true);
+        if (rewardUI != null)
+        {
+            rewardUI.ShowReward(coinsEarned);
+        }
+        else
+        {
+            CurrencyManager.Instance.AddCoins(coinsEarned);
+        }
+
+        Debug.Log($"Fin de partida — Recompensa: {coinsEarned} monedas");
     }
 }

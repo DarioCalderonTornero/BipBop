@@ -12,7 +12,7 @@ public class ColorGamePuntos : MonoBehaviour
 
     [SerializeField] private TextMeshProUGUI scoreText;
     [SerializeField] private RectTransform scoreEffectGroup; // <- lo arrastras desde la UI
-    private int score = 0;
+    public int score = 0;
     private bool isAnimating = false;
 
     private void Awake()
