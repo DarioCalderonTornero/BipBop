@@ -3,9 +3,6 @@
     "displayName": "Unity Package",
     "packageURL": "https://github.com/ironsource-mobile/Unity-sdk/raw/master/${VERSION}/UnityLevelPlay_v${VERSION}.unitypackage",
     "versions": {
-      "9.1.0": {
-        "ironSourceSdkVersion": "[9.0.0, 10.0["
-      },
       "9.0.1": {
         "ironSourceSdkVersion": "[9.0.0, 10.0["
       },
@@ -552,17 +549,6 @@
       "dependencyXmlFileName": "ISPangleAdapterDependencies.xml",
       "SKAdNetworkIdXmlURL": "https://s3.amazonaws.com/ssa.public/Unity/SKAdNetwork-IDs/All/skadnetworks.pangle.plist.xml",
       "versions": {
-        "5.3.0.0": {
-          "ironSourceSdkVersion": "[9.0.0, 10.0[",
-          "android": {
-            "adapterVersion": "5.3.0",
-            "adNetworkVersion": "7.7.0.2"
-          },
-          "ios": {
-            "adapterVersion": "5.3.0.0",
-            "adNetworkVersion": "7.7.0.5"
-          }
-        },
         "5.2.0.0": {
           "ironSourceSdkVersion": "[9.0.0, 10.0[",
           "android": {
