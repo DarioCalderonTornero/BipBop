@@ -26,9 +26,14 @@ public class GamePause : MonoBehaviour
     [SerializeField] private TextMeshProUGUI soundChangeText;
     [SerializeField] private TextMeshProUGUI musicChangeText;
 
+    [Header("CountDown")]
+    [SerializeField] private TextMeshProUGUI countDownText;
+
     [SerializeField] private Button closeGamePauseImage;
 
     [SerializeField] private Animator gamePauseAnimator;
+
+    private int countdownTime = 3;
 
     public enum GamePauseState
     {
@@ -53,6 +58,7 @@ public class GamePause : MonoBehaviour
         {
             gamePauseAnimator.SetBool("IsGamePaused", false);
             pauseGameButton.gameObject.SetActive(true);
+            //StartCoroutine(CountDown());
         });
 
         settingsButton.onClick.AddListener(() =>
@@ -99,6 +105,22 @@ public class GamePause : MonoBehaviour
 
     }
 
+    private IEnumerator CountDown()
+    {
+        float time = countdownTime;
+        while(time > 0)
+        {
+            countDownText.text = Mathf.CeilToInt(time).ToString();
+
+            gamePauseAnimator.SetTrigger("PopUp");
+
+            yield return new WaitForSeconds(1);
+            time--;
+        }
+
+        countDownText.text = "GO!";
+    }
+
     private void Update()
     {
         switch(state)
@@ -120,7 +142,8 @@ public class GamePause : MonoBehaviour
 
     private IEnumerator Anim()
     {
-        yield return new WaitForSecondsRealtime(1f);
+        float wiatingTime = 0.6f;
+        yield return new WaitForSecondsRealtime(wiatingTime);
         Debug.Log("FALSE");
         gamePauseAnimator.SetBool("IsSettingsClose", false);
         gamePauseAnimator.SetBool("IsSettingsOpen", false);
