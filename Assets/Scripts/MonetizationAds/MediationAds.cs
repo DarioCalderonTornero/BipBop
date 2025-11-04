@@ -87,6 +87,18 @@ public class MediationAds : MonoBehaviour
     private void OnAdRewarded(LevelPlayAdInfo adInfo, LevelPlayReward reward)
     {
         Debug.Log($"User rewarded: {reward.Name} x {reward.Amount}");
+
+        // Aquí interprete el reward.Name y aplique reward.Amount según corresponda
+        if (reward.Name == "Coin")
+        {
+            CurrencyManager.Instance.AddCoins(5);
+        }
+        else
+        {
+            // Recuerda manejar o ignorar otros tipos de recompensa
+            CurrencyManager.Instance.AddCoins(5);
+        }
+
         onRewardedCallback?.Invoke();
         onRewardedCallback = null;
     }

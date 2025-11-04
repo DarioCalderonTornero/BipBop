@@ -7,7 +7,7 @@ public class CurrencyManager : MonoBehaviour
 
     public event Action<int> OnCoinsChanged;
 
-    private static int coins;
+    public static int coins;
     private const string CoinsKey = "CoinCount"; 
 
     private void Awake()
