@@ -36,6 +36,8 @@ public class LogicaJuego : MonoBehaviour
         "¡Gira a la izquierda!"
     };
 
+    private bool hasEnded = false;
+
     private void Awake()
     {
         Instance = this;
@@ -67,8 +69,7 @@ public class LogicaJuego : MonoBehaviour
 
     void Update()
     {
-        if (!isGameActive)
-            return;
+        if (!isGameActive || hasEnded) return;
 
         currentTime -= Time.deltaTime;
 
@@ -83,8 +84,7 @@ public class LogicaJuego : MonoBehaviour
 
     public void OnTaskAction(string action)
     {
-        if (!isGameActive || isTaskCompleted)
-            return;
+        if (!isGameActive || isTaskCompleted || hasEnded) return;
 
         // Verifica si la acción corresponde a la tarea actual
         if (action == currentTask) // Solo acepta acciones que coincidan exactamente
@@ -97,6 +97,8 @@ public class LogicaJuego : MonoBehaviour
 
     private void StartNewTask()
     {
+        if (hasEnded) return;
+
         MainGamePoints.Instance.AddScore();
         UpdateScoreText();
 
@@ -148,11 +150,23 @@ public class LogicaJuego : MonoBehaviour
 
     private void EndGame()
     {
+        if (hasEnded) return;
+
         isGameActive = false;
         instructionText.text = "¡Juego terminado!";
         SaveRecordIfNeeded(); 
 
         int coinsEarned = MainGamePoints.Instance.GetScore() / 15;
+
+        CoinsRewardUI rewardUI = FindObjectOfType<CoinsRewardUI>(true);
+        if (rewardUI != null)
+        {
+            rewardUI.ShowReward(coinsEarned);
+        }
+        else
+        {
+            CurrencyManager.Instance.AddCoins(coinsEarned);
+        }
 
         //PlayFabScoreManager.Instance.SubmitScore("HighScore", MainGamePoints.Instance.GetScore());
         int totalCoins = PlayerPrefs.GetInt("CoinCount", 0);
