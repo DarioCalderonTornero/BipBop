@@ -23,26 +23,33 @@ public class Settings : MonoBehaviour
     [SerializeField] private Image mainSettingsImage;
     [SerializeField] private Image challengesImage;
 
+    // Nuevas referencias a las dos imágenes hijas del botón de vibración
+    [Header("Vibration State Images")]
+    [SerializeField] private Image vibrationOnImage;
+    [SerializeField] private Image vibrationOffImage;
+
     private void Awake()
     {
         openSettingsButton.onClick.AddListener(Show);
-
         closeSettingsButton.onClick.AddListener(Hide);
-       
 
-        vibrationButton.onClick.AddListener(()=>
+        vibrationButton.onClick.AddListener(() =>
         {
-            Haptics.SetEnabled(!Haptics.enabled);
+            bool newState = !Haptics.enabled;
+            Haptics.SetEnabled(newState);
+
+            // Si el jugador acaba de ACTIVAR la vibración, haz una prueba breve
+            if (newState)
+                Haptics.TryVibrate();
+
             RefreshVibrationUI();
         });
 
-        volumeButton.onClick.AddListener(()=>
+        volumeButton.onClick.AddListener(() =>
         {
-
+            // Aquí podrías abrir un panel de volumen o alternar sonidos
         });
     }
-
-    
 
     private void Start()
     {
@@ -54,17 +61,17 @@ public class Settings : MonoBehaviour
     {
         if (vibrationButton == null) return;
 
-        Color on = new Color(1f, 0.75f, 0.2f, 1f);  
-        Color off = new Color(0.6f, 0.6f, 0.6f, 1f); 
+        Color on = new Color(1f, 0.75f, 0.2f, 1f);
+        Color off = new Color(0.6f, 0.6f, 0.6f, 1f);
 
+        bool enabled = Haptics.enabled;
+
+        // Colores del botón
         var cb = vibrationButton.colors;
-        bool enabled = Haptics.enabled; 
-
         Color baseCol = enabled ? on : off;
-
         cb.normalColor = baseCol;
-        cb.highlightedColor = baseCol * 1.05f; 
-        cb.pressedColor = baseCol * 0.9f;  
+        cb.highlightedColor = baseCol * 1.05f;
+        cb.pressedColor = baseCol * 0.9f;
         cb.selectedColor = baseCol;
         cb.disabledColor = new Color(baseCol.r, baseCol.g, baseCol.b, 0.5f);
         cb.colorMultiplier = 1f;
@@ -72,8 +79,14 @@ public class Settings : MonoBehaviour
 
         if (vibrationButton.image != null)
             vibrationButton.image.color = baseCol;
-    }
 
+        // Mostrar/ocultar imágenes según el estado
+        if (vibrationOnImage != null)
+            vibrationOnImage.gameObject.SetActive(enabled);
+
+        if (vibrationOffImage != null)
+            vibrationOffImage.gameObject.SetActive(!enabled);
+    }
 
     private void Show()
     {

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -20,8 +21,6 @@ public class GridGameManager : MonoBehaviour
     public float rowInterval = 2f;
     public float moveDuration = 1f;
     public float coinTimeLimit = 5f;
-
-    [Tooltip("Retraso entre el spawn/preview de flechas cuando se lanzan múltiples (0 = simultáneo)")]
     public float multiArrowDelay = 0.25f;
 
     [Header("UI Buttons")]
@@ -36,7 +35,9 @@ public class GridGameManager : MonoBehaviour
     public Color lowColor = Color.red;
 
     [Header("UI Timer")]
-    public Image coinTimerImage; // <-- reemplaza el Slider por una imagen
+    public Image coinTimerImage;
+
+    public event EventHandler OnGameOver; // Nuevo evento para UI o lógica externa
 
     private int playerX, playerY;
     private GameObject playerObj;
@@ -78,10 +79,8 @@ public class GridGameManager : MonoBehaviour
 
         StartCoroutine(ArrowRoutine());
 
-        // Inicializar temporizador
         coinTimer = coinTimeLimit;
-        coinTimerImage.fillAmount = 1f; // llena completamente
-
+        coinTimerImage.fillAmount = 1f;
         coinTimerImage.color = fullColor;
     }
 
@@ -99,13 +98,11 @@ public class GridGameManager : MonoBehaviour
             // Interpolación de color
             if (t > 0.5f)
             {
-                // Verde  Amarillo
                 float lerpT = (t - 0.5f) * 2f;
                 coinTimerImage.color = Color.Lerp(midColor, fullColor, lerpT);
             }
             else
             {
-                // Amarillo  Rojo
                 float lerpT = t * 2f;
                 coinTimerImage.color = Color.Lerp(lowColor, midColor, lerpT);
             }
@@ -160,9 +157,11 @@ public class GridGameManager : MonoBehaviour
         {
             Destroy(coinObj);
             score++;
+
 #if UNITY_ANDROID || UNITY_IOS
-            Handheld.Vibrate();
+            Haptics.TryVibrate(); // reemplazo moderno
 #endif
+
             Debug.Log("Score: " + score);
 
             if (score % 2 == 0)
@@ -180,15 +179,14 @@ public class GridGameManager : MonoBehaviour
         int x, y;
         do
         {
-            x = Random.Range(0, gridSize);
-            y = Random.Range(0, gridSize);
+            x = UnityEngine.Random.Range(0, gridSize);
+            y = UnityEngine.Random.Range(0, gridSize);
         } while (x == playerX && y == playerY);
 
         coinObj = Instantiate(coinPrefab, gridCells[x, y].position, Quaternion.identity, gridParent);
 
         coinTimer = coinTimeLimit;
-        coinTimerImage.fillAmount = 1f; // reinicia la barra llena
-
+        coinTimerImage.fillAmount = 1f;
         coinTimerImage.color = fullColor;
     }
 
@@ -200,26 +198,22 @@ public class GridGameManager : MonoBehaviour
         while (!isGameOver)
         {
             yield return new WaitForSeconds(rowInterval);
+            if (isGameOver) yield break;
 
-            if (isGameOver) yield break; // <--- CORTA AQUÍ TAMBIÉN POR SEGURIDAD
-
-            // --- determinar cuántas flechas lanzar según la puntuación ---
             int arrowCount = 1;
             if (score >= 40) arrowCount = 3;
             else if (score >= 20) arrowCount = 2;
 
-            // lista de combinaciones ya usadas (para no repetir líneas iguales)
             List<(int, int)> usedCombinations = new List<(int, int)>();
 
             for (int i = 0; i < arrowCount; i++)
             {
-                if (isGameOver) yield break; // <--- chequeo antes de lanzar cada flecha
+                if (isGameOver) yield break;
 
-                // elegir dirección y línea diferentes si es posible
                 int mode, index;
                 do
                 {
-                    mode = UnityEngine.Random.Range(0, 4); // 0=fila, 1=columna, 2=diag principal, 3=diag secundaria
+                    mode = UnityEngine.Random.Range(0, 4);
                     index = UnityEngine.Random.Range(0, gridSize);
                 }
                 while (usedCombinations.Contains((mode, index)) && usedCombinations.Count < gridSize * 4);
@@ -236,40 +230,19 @@ public class GridGameManager : MonoBehaviour
                 Vector3 worldEnd = reverse ? start.position : end.position;
                 Vector3 dir = (worldEnd - worldStart).normalized;
 
-                // --- warning line que atraviesa toda la pantalla ---
-                Vector3 warningStart = worldStart;
-                Vector3 warningEnd = worldEnd;
+                Vector3 warningStart = worldStart - dir * 10f;
+                Vector3 warningEnd = worldEnd + dir * 10f;
 
-                if (mode == 0)
-                {
-                    warningStart = new Vector3(cam.ViewportToWorldPoint(new Vector3(0, 0, 0)).x, worldStart.y, 0);
-                    warningEnd = new Vector3(cam.ViewportToWorldPoint(new Vector3(1, 0, 0)).x, worldStart.y, 0);
-                }
-                else if (mode == 1)
-                {
-                    warningStart = new Vector3(worldStart.x, cam.ViewportToWorldPoint(new Vector3(0, 0, 0)).y, 0);
-                    warningEnd = new Vector3(worldStart.x, cam.ViewportToWorldPoint(new Vector3(0, 1, 0)).y, 0);
-                }
-                else
-                {
-                    warningStart = worldStart - dir * 10f;
-                    warningEnd = worldEnd + dir * 10f;
-                }
-
-                // Si justo se activa el game over antes de instanciar
                 if (isGameOver) yield break;
 
-                // Instanciar el aviso
                 GameObject warning = Instantiate(warningPrefab, gridParent);
                 warning.transform.position = (warningStart + warningEnd) / 2f;
-                warning.transform.right = (warningEnd - warningStart).normalized;
+                warning.transform.right = dir;
                 float length = Vector3.Distance(warningStart, warningEnd);
                 warning.transform.localScale = new Vector3(length, 0.1f, 1f);
 
-                // Ejecutar la flecha asociada a este aviso en una coroutine separada
                 StartCoroutine(ShootArrowAfterWarning(warning, worldStart, worldEnd, dir, margin));
 
-                // ESPERA configurable entre múltiples flechas
                 if (i < arrowCount - 1 && multiArrowDelay > 0f)
                     yield return new WaitForSeconds(multiArrowDelay);
             }
@@ -279,18 +252,11 @@ public class GridGameManager : MonoBehaviour
     IEnumerator ShootArrowAfterWarning(GameObject warning, Vector3 worldStart, Vector3 worldEnd, Vector3 dir, float margin)
     {
         yield return new WaitForSeconds(warningTime);
-
-        if (isGameOver)
-        {
-            Destroy(warning);
-            yield break;
-        }
+        if (isGameOver) { Destroy(warning); yield break; }
 
         Destroy(warning);
+        if (isGameOver) yield break;
 
-        if (isGameOver) yield break; // <--- chequeo extra justo antes de crear la flecha
-
-        // Spawn de la flecha
         Vector3 offStart = worldStart - dir * margin;
         Vector3 offEnd = worldEnd + dir * margin;
 
@@ -323,8 +289,37 @@ public class GridGameManager : MonoBehaviour
     {
         if (isGameOver) return;
         isGameOver = true;
-        Debug.Log("GAME OVER - Score final: " + score);
+
+        Debug.Log($"GAME OVER - Score final: {score}");
 
         PlayFabScoreManager.Instance.SubmitScore("GridScore", score);
+
+        // Recompensa en monedas
+        int coinsEarned = score / 15;
+        int totalCoins = PlayerPrefs.GetInt("CoinCount", 0);
+        totalCoins += coinsEarned;
+        PlayerPrefs.SetInt("CoinCount", totalCoins);
+        PlayerPrefs.Save();
+
+        // Pausar juego
+        Time.timeScale = 0f;
+
+        // Mostramos la animación de recompensa si existe el panel en la escena
+        CoinsRewardUI rewardUI = FindObjectOfType<CoinsRewardUI>(true);
+        if (rewardUI != null)
+        {
+            rewardUI.ShowReward(coinsEarned);
+        }
+        else
+        {
+            // Fallback: suma directa sin animación
+            CurrencyManager.Instance.AddCoins(coinsEarned);
+        }
+
+        // Vibración de confirmación
+        Haptics.TryVibrate();
+
+        // Disparar evento
+        OnGameOver?.Invoke(this, EventArgs.Empty);
     }
 }
