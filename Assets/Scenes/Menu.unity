@@ -3219,6 +3219,52 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 540a5337342c5c3449eb850d75fd213e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &319449788
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 319449789}
+  - component: {fileID: 319449790}
+  m_Layer: 0
+  m_Name: MusicManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &319449789
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 319449788}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1490476021}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &319449790
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 319449788}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d912a792ff35be54a87803ba37df9b9d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mainMusicAudioClip: {fileID: 0}
+  gamePausedMusicAudioClip: {fileID: 0}
 --- !u!1 &331008682
 GameObject:
   m_ObjectHideFlags: 0
@@ -5718,7 +5764,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1234541625}
   m_HandleRect: {fileID: 1234541624}
   m_Direction: 0
-  m_Value: 0.000000051724708
+  m_Value: 0
   m_Size: 0.3139535
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -8938,12 +8984,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 757659591}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 343.35303, y: 199.13132, z: -2.318381}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1490476021}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &757659593
 MonoBehaviour:
@@ -14560,8 +14606,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1520036807}
   m_HandleRect: {fileID: 1520036806}
   m_Direction: 2
-  m_Value: 0.9999979
-  m_Size: 0.9850921
+  m_Value: 1
+  m_Size: 0.9850922
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -16934,8 +16980,8 @@ Transform:
   - {fileID: 195682655}
   - {fileID: 750348460}
   - {fileID: 1503217969}
-  - {fileID: 757659592}
   - {fileID: 1392068168}
+  - {fileID: 319449789}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1496833927
@@ -23783,6 +23829,7 @@ SceneRoots:
   - {fileID: 946034151}
   - {fileID: 1664615842}
   - {fileID: 317853033}
+  - {fileID: 757659592}
   - {fileID: 1288492771}
   - {fileID: 1490476021}
   - {fileID: 152005964}

@@ -78,6 +78,7 @@ public class GamePause : MonoBehaviour
         closeSoundSettingsButton.onClick.AddListener(() =>
         {
             gamePauseAnimator.SetBool("IsSettingsClose", true);
+            StartCoroutine(InvokeNormalAnim());
         });
     }
 
@@ -87,10 +88,11 @@ public class GamePause : MonoBehaviour
         soundChangeText.text = "Sound Volume: " + SoundManager.Instance.GetSoundVolume();
     }
 
-    private IEnumerator Anim()
+    private IEnumerator InvokeNormalAnim()
     {
         yield return new WaitForSecondsRealtime(1f);
         Debug.Log("FALSE");
+        gamePauseAnimator.SetBool("IsSettingsClose", false);
         gamePauseAnimator.SetBool("IsSettingsOpen", false);
     }
 

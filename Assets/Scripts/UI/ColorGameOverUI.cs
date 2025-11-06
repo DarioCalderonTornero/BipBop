@@ -22,7 +22,6 @@ public class ColorGameOverUI : MonoBehaviour
         retryButton.onClick.AddListener(() =>
         {
             SceneLoader.LoadScene(SceneLoader.Scene.ColorScene);
-
         });
 
         mainMenuButton.onClick.AddListener(() =>

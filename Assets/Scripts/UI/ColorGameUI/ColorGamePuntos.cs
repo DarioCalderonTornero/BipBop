@@ -8,7 +8,7 @@ public class ColorGamePuntos : MonoBehaviour
 {
     public static ColorGamePuntos Instance { get; private set; }
 
-    public event EventHandler OnColorAddScore;
+    public static event EventHandler OnColorAddScore;
 
     [SerializeField] private TextMeshProUGUI scoreText;
     [SerializeField] private RectTransform scoreEffectGroup; // <- lo arrastras desde la UI
