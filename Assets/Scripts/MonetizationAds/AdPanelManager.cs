@@ -10,7 +10,7 @@ public class AdPanelManager : MonoBehaviour
     [SerializeField] private Button closeButton;
     [SerializeField] private Image coinImage;
     [SerializeField] private Sprite coinSprite;
-    [SerializeField] private TextMeshProUGUI adPromptText;
+    // [SerializeField] private TextMeshProUGUI adPromptText;
 
     [SerializeField] private Button openAdPanelButton;
 
@@ -23,7 +23,7 @@ public class AdPanelManager : MonoBehaviour
     void Start()
     {
         adPanel.SetActive(false);
-        adPromptText.text = "¿Quieres ver un anuncio por 5 ";
+        // adPromptText.text = "¿Quieres ver un anuncio por 5 ";
         coinImage.sprite = coinSprite;
 
         watchAdButton.onClick.RemoveAllListeners();

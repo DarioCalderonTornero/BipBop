@@ -35,7 +35,7 @@ public class DodgeManager : MonoBehaviour
         scoreText.text = $"Score: {score}";
 
 #if UNITY_ANDROID || UNITY_IOS
-        Haptics.TryVibrate(); // Usa tu propio sistema de vibración
+        Haptics.TryVibrate(); // Vibración opcional
 #endif
 
         // Incrementar dificultad
@@ -53,17 +53,21 @@ public class DodgeManager : MonoBehaviour
 
         Time.timeScale = 0f;
 
-        // Guardar puntuación en PlayFab
-        PlayFabScoreManager.Instance.SubmitScore("DodgeScore", score);
+        // Guardar récord máximo
+        SaveRecordIfNeeded();
 
-        // Guardar monedas ganadas (por ejemplo 1 cada 15 puntos)
+        // Guardar puntuación en PlayFab
+        if (PlayFabLoginManager.Instance != null && PlayFabLoginManager.Instance.IsLoggedIn)
+            PlayFabScoreManager.Instance.SubmitScore("DodgeScore", score);
+
+        // Guardar monedas ganadas (1 cada 15 puntos)
         int coinsEarned = score / 15;
         int totalCoins = PlayerPrefs.GetInt("CoinCount", 0);
         totalCoins += coinsEarned;
         PlayerPrefs.SetInt("CoinCount", totalCoins);
         PlayerPrefs.Save();
 
-        // Mostramos la animación de recompensa si existe el panel en la escena
+        // Mostrar animación de recompensa
         CoinsRewardUI rewardUI = FindObjectOfType<CoinsRewardUI>(true);
         if (rewardUI != null)
         {
@@ -71,11 +75,21 @@ public class DodgeManager : MonoBehaviour
         }
         else
         {
-            // Fallback: suma directa sin animación
             CurrencyManager.Instance.AddCoins(coinsEarned);
         }
 
-        // Invocar evento para mostrar UI, reiniciar, etc.
+        // Notificar fin de partida
         OnGameOver?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void SaveRecordIfNeeded()
+    {
+        int currentRecord = PlayerPrefs.GetInt("MaxRecordDodge", 0);
+
+        if (score > currentRecord)
+        {
+            PlayerPrefs.SetInt("MaxRecordDodge", score);
+            PlayerPrefs.Save();
+        }
     }
 }

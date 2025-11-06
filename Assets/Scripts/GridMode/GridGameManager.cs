@@ -37,7 +37,7 @@ public class GridGameManager : MonoBehaviour
     [Header("UI Timer")]
     public Image coinTimerImage;
 
-    public event EventHandler OnGameOver; // Nuevo evento para UI o lógica externa
+    public event EventHandler OnGameOver;
 
     private int playerX, playerY;
     private GameObject playerObj;
@@ -159,7 +159,7 @@ public class GridGameManager : MonoBehaviour
             score++;
 
 #if UNITY_ANDROID || UNITY_IOS
-            Haptics.TryVibrate(); // reemplazo moderno
+            Haptics.TryVibrate();
 #endif
 
             Debug.Log("Score: " + score);
@@ -292,6 +292,10 @@ public class GridGameManager : MonoBehaviour
 
         Debug.Log($"GAME OVER - Score final: {score}");
 
+        // Guardar récord máximo
+        SaveRecordIfNeeded();
+
+        // Enviar puntuación a PlayFab
         PlayFabScoreManager.Instance.SubmitScore("GridScore", score);
 
         // Recompensa en monedas
@@ -301,10 +305,8 @@ public class GridGameManager : MonoBehaviour
         PlayerPrefs.SetInt("CoinCount", totalCoins);
         PlayerPrefs.Save();
 
-        // Pausar juego
         Time.timeScale = 0f;
 
-        // Mostramos la animación de recompensa si existe el panel en la escena
         CoinsRewardUI rewardUI = FindObjectOfType<CoinsRewardUI>(true);
         if (rewardUI != null)
         {
@@ -312,14 +314,23 @@ public class GridGameManager : MonoBehaviour
         }
         else
         {
-            // Fallback: suma directa sin animación
             CurrencyManager.Instance.AddCoins(coinsEarned);
         }
 
-        // Vibración de confirmación
         Haptics.TryVibrate();
 
-        // Disparar evento
         OnGameOver?.Invoke(this, EventArgs.Empty);
+    }
+
+    // Nuevo método para guardar récord máximo
+    private void SaveRecordIfNeeded()
+    {
+        int currentRecord = PlayerPrefs.GetInt("MaxRecordGrid", 0);
+
+        if (score > currentRecord)
+        {
+            PlayerPrefs.SetInt("MaxRecordGrid", score);
+            PlayerPrefs.Save();
+        }
     }
 }
