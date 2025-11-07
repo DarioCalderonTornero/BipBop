@@ -23,15 +23,26 @@ public class Settings : MonoBehaviour
     [SerializeField] private Image mainSettingsImage;
     [SerializeField] private Image challengesImage;
 
-    // Nuevas referencias a las dos imágenes hijas del botón de vibración
+    [SerializeField] private Image volumeOnImage;
+    [SerializeField] private Image volumeOffImage;
+
     [Header("Vibration State Images")]
     [SerializeField] private Image vibrationOnImage;
     [SerializeField] private Image vibrationOffImage;
 
+    [SerializeField] private Animator settingsAnimator;
+
+    private bool isVibrationImageOn = true;
+
     private void Awake()
     {
         openSettingsButton.onClick.AddListener(Show);
-        closeSettingsButton.onClick.AddListener(Hide);
+        closeSettingsButton.onClick.AddListener(() =>
+        {
+            settingsAnimator.SetBool("IsSettingsOpen", false);
+            settingsAnimator.SetBool("IsSettingsClose", true);
+            //Hide();
+        });
 
         vibrationButton.onClick.AddListener(() =>
         {
@@ -47,7 +58,8 @@ public class Settings : MonoBehaviour
 
         volumeButton.onClick.AddListener(() =>
         {
-            // Aquí podrías abrir un panel de volumen o alternar sonidos
+            SoundManager.Instance.GetCancelVolume();
+            SetCancelVolumeImage();
         });
     }
 
@@ -55,7 +67,17 @@ public class Settings : MonoBehaviour
     {
         Hide();
         RefreshVibrationUI();
+        SetCancelVolumeImage();
     }
+
+    private void SetCancelVolumeImage()
+    {
+        isVibrationImageOn = !isVibrationImageOn;
+
+        volumeOnImage.gameObject.SetActive(!isVibrationImageOn);
+        volumeOffImage.gameObject.SetActive(isVibrationImageOn);
+    }
+
 
     private void RefreshVibrationUI()
     {
@@ -90,6 +112,10 @@ public class Settings : MonoBehaviour
 
     private void Show()
     {
+        settingsAnimator.SetBool("IsSettingsOpen", true);
+        settingsAnimator.SetBool("IsSettingsClose", false);
+        //StartCoroutine(OpenSettingsAnimFalse());
+
         backgroundImage.gameObject.SetActive(true);
 
         mainSettingsButton.gameObject.SetActive(true);
@@ -104,7 +130,7 @@ public class Settings : MonoBehaviour
         challengesImage.gameObject.SetActive(true);
     }
 
-    private void Hide()
+    public void Hide()
     {
         backgroundImage.gameObject.SetActive(false);
 
