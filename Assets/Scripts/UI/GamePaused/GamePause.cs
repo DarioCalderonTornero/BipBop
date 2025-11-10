@@ -19,8 +19,17 @@ public class GamePause : MonoBehaviour
     [Header("Sound Buttons")]
     [SerializeField] private Button soundChangeButton;
     [SerializeField] private Button musicChangeButton;
-    [SerializeField] private Button cancelVolumeButton;
+    [SerializeField] private Button soundCancelVolumeButton;
+    [SerializeField] private Button musicCancelVolumeButton;
     [SerializeField] private Button closeSoundSettingsButton;
+
+    [Header("Sound Images")]
+    [SerializeField] private Image getCancelSoundVolumeImage;
+    [SerializeField] private Image getSoundVolumeImage;
+
+    [Header("Music Images")]
+    [SerializeField] private Image getCancelMusicVolumeImage;
+    [SerializeField] private Image getMusicVolumeImage;
 
     [Header("Sound Texts")]
     [SerializeField] private TextMeshProUGUI soundChangeText;
@@ -29,6 +38,8 @@ public class GamePause : MonoBehaviour
     [SerializeField] private Button closeGamePauseImage;
 
     [SerializeField] private Animator gamePauseAnimator;
+
+    bool cancelImage = true;
 
     private void Awake()
     {
@@ -48,31 +59,47 @@ public class GamePause : MonoBehaviour
         settingsButton.onClick.AddListener(() =>
         {
             gamePauseAnimator.SetBool("IsSettingsOpen", true);
-            //StartCoroutine(Anim());
             Debug.Log("Settigs Button");
         });
 
         mainMenuButton.onClick.AddListener(() =>
         {
             SceneLoader.LoadScene(SceneLoader.Scene.Menu);
-            Time.timeScale = 1.0f;  
+            Time.timeScale = 1.0f;
         });
 
         soundChangeButton.onClick.AddListener(() =>
         {
             SoundManager.Instance.ChangeSoundVolume();
             soundChangeText.text = "Sound Volume: " + SoundManager.Instance.GetSoundVolume();
+            bool isSoundMutedNow = SoundManager.Instance.GetSoundVolume() == 0;
+            getCancelSoundVolumeImage.gameObject.SetActive(isSoundMutedNow);
+            getSoundVolumeImage.gameObject.SetActive(!isSoundMutedNow);
         });
 
+        /*
         musicChangeButton.onClick.AddListener(() =>
         {
-            //SoundManager.Instance.ChangeSoundVolume();
-            //musicChangeText.text = "Sound Volume: " + SoundManager.Instance.GetSoundVolume();
+            MusicManager.Instance.ChangeMusicVolume();
+            musicChangeText.text = "Music Volume: " + MusicManager.Instance.GetMusicVolume();
+            bool isMusicMutedNow = MusicManager.Instance.GetMusicVolume() == 0;
+            getCancelMusicVolumeImage.gameObject.SetActive(isMusicMutedNow);
+            getMusicVolumeImage.gameObject.SetActive(!isMusicMutedNow);
         });
+        */
 
-        cancelVolumeButton.onClick.AddListener(() =>
+        soundCancelVolumeButton.onClick.AddListener(() =>
         {
             SoundManager.Instance.GetCancelVolume();
+            soundChangeText.text = "Sound Volume: " + SoundManager.Instance.GetSoundVolume();
+            bool isMutedNow = SoundManager.Instance.GetSoundVolume() == 0;
+            getCancelSoundVolumeImage.gameObject.SetActive(isMutedNow);
+            getSoundVolumeImage.gameObject.SetActive(!isMutedNow);
+        });
+
+        musicCancelVolumeButton.onClick.AddListener(() =>
+        {
+
         });
 
         closeSoundSettingsButton.onClick.AddListener(() =>
@@ -86,6 +113,10 @@ public class GamePause : MonoBehaviour
     {
         closeGamePauseImage.gameObject.SetActive(false);
         soundChangeText.text = "Sound Volume: " + SoundManager.Instance.GetSoundVolume();
+        bool isMuted = SoundManager.Instance.GetSoundVolume() == 0;
+        getCancelSoundVolumeImage.gameObject.SetActive(isMuted);
+        getSoundVolumeImage.gameObject.SetActive(!isMuted);
+        cancelImage = !isMuted;
     }
 
     private IEnumerator InvokeNormalAnim()

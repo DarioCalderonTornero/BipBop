@@ -1,5 +1,7 @@
+using DG.Tweening.Core.Easing;
 using System;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class MusicManager : MonoBehaviour
 {
@@ -14,8 +16,9 @@ public class MusicManager : MonoBehaviour
 
     private AudioSource musicAudioSource;
 
-    [SerializeField] private AudioClip mainMusicAudioClip;
-    [SerializeField] private AudioClip gamePausedMusicAudioClip;
+    [SerializeField] private AudioClip menuSceneMusicAudio;
+    [SerializeField] private AudioClip bipbopSceneMusicAudio;
+    [SerializeField] private AudioClip colorSceneMusicAudio;
 
     private void Awake()
     {
@@ -24,39 +27,46 @@ public class MusicManager : MonoBehaviour
 
     void Start()
     {
+
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+
+        else
+        {
+            Destroy(gameObject);
+            return;
+        }
+
         musicAudioSource = GetComponent<AudioSource>();
-        musicAudioSource.volume = GetSoundVolumeNormalized();
-
-        musicAudioSource.time = musicTime;
-
-        musicAudioSource.clip = mainMusicAudioClip;
-
+        SceneManager.sceneLoaded += SceneManager_OnSceneLoaded;
     }
 
-    private void GameManager_OnGameResumed(object sender, EventArgs e)
+    private void SceneManager_OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        PlayMusic(mainMusicAudioClip);
-    }
-
-    private void GameManager_OnGamePaused(object sender, EventArgs e)
-    {
-        PlayMusic(gamePausedMusicAudioClip);
+        switch (scene.name)
+        {
+            case "Menu":
+                PlayMusic(menuSceneMusicAudio);
+                break;
+            case "GameScene":
+                PlayMusic(bipbopSceneMusicAudio);
+                break;
+            case "ColorScene":
+                PlayMusic(colorSceneMusicAudio);
+                break;
+            default:
+                musicAudioSource.Stop();
+                break;
+        }
     }
 
     private void PlayMusic(AudioClip clip)
     {
-        if (clip == gamePausedMusicAudioClip)
-        {
-            musicAudioSource.clip = clip;
-            musicAudioSource.time = 0f;
-        }
-        else
-        {
-            musicTime = musicAudioSource.time;
-            musicAudioSource.clip = clip;
-            musicAudioSource.time = musicTime;
-        }
-
+        musicAudioSource.clip = clip;
+        musicAudioSource.time = 0f;
         musicAudioSource.Play();
     }
     void Update()
@@ -64,19 +74,19 @@ public class MusicManager : MonoBehaviour
         musicTime = musicAudioSource.time;
     }
 
-    public void ChangeSoundVolume()
+    public void ChangeMusicVolume()
     {
         musicVolume = (musicVolume + 1) % MUSIC_VOLUME_MAX;
-        musicAudioSource.volume = GetSoundVolumeNormalized();
+        musicAudioSource.volume = GetMusicVolumeNormalized();
         OnMusicVolumeChanged?.Invoke(this, EventArgs.Empty);
     }
 
-    public int GetSoundVolume()
+    public int GetMusicVolume()
     {
         return musicVolume;
     }
 
-    public float GetSoundVolumeNormalized()
+    public float GetMusicVolumeNormalized()
     {
         return ((float)musicVolume) / MUSIC_VOLUME_MAX;
     }

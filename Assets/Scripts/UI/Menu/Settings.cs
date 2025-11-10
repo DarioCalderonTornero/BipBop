@@ -49,7 +49,6 @@ public class Settings : MonoBehaviour
             bool newState = !Haptics.enabled;
             Haptics.SetEnabled(newState);
 
-            // Si el jugador acaba de ACTIVAR la vibración, haz una prueba breve
             if (newState)
                 Haptics.TryVibrate();
 
@@ -58,8 +57,8 @@ public class Settings : MonoBehaviour
 
         volumeButton.onClick.AddListener(() =>
         {
-            SoundManager.Instance.GetCancelVolume();
-            SetCancelVolumeImage();
+            //SoundManager.Instance.GetCancelVolume();
+            //SetCancelVolumeImage();
         });
     }
 

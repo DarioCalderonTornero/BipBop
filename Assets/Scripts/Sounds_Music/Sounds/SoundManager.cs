@@ -23,8 +23,16 @@ public class SoundManager : MonoBehaviour
 
     private void Awake()
     {
-        if (Instance == null) { Instance = this; DontDestroyOnLoad(gameObject); }
-        else { Destroy(gameObject); return; }
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+            return;
+        }
 
         if (PlayerPrefs.HasKey(PREFS_VOLUME))
             soundVolume = PlayerPrefs.GetInt(PREFS_VOLUME);
@@ -39,27 +47,33 @@ public class SoundManager : MonoBehaviour
 
         if (PlayerPrefs.HasKey(PREFS_STARTED_SOUND_PLAYED))
             startedSoundPlayed = PlayerPrefs.GetInt(PREFS_STARTED_SOUND_PLAYED) == 1;
+
+        ApplyVolumeToAudio();
     }
 
     private void Start()
-    {        
-         AudioSource.PlayClipAtPoint(onColorGameModePoint, Camera.main.transform.position, GetSoundVolumeNormalized());
-         startedSoundPlayed = true;
-         PlayerPrefs.SetInt(PREFS_STARTED_SOUND_PLAYED, 1);
+    {
+        if (onColorGameModePoint != null)
+        {
+            AudioSource.PlayClipAtPoint(onColorGameModePoint, Camera.main.transform.position, GetSoundVolumeNormalized());
+            startedSoundPlayed = true;
+            PlayerPrefs.SetInt(PREFS_STARTED_SOUND_PLAYED, 1);
+        }
 
-        ColorGamePuntos.OnColorAddScore += ColorGamePuntos_OnColorAddScore1;
+        ColorGamePuntos.OnColorAddScore += ColorGamePuntos_OnColorAddScore;
     }
 
-    private void ColorGamePuntos_OnColorAddScore1(object sender, EventArgs e)
+    private void ColorGamePuntos_OnColorAddScore(object sender, EventArgs e)
     {
-        Debug.Log("OnColorPointsSoundAdded");
-        AudioSource.PlayClipAtPoint(onColorGameModePoint, Camera.main.transform.position, GetSoundVolumeNormalized());
+        if (onColorGameModePoint != null && Camera.main != null)
+            AudioSource.PlayClipAtPoint(onColorGameModePoint, Camera.main.transform.position, GetSoundVolumeNormalized());
     }
 
     public void ChangeSoundVolume()
     {
         soundVolume = (soundVolume + 1) % (SOUND_VOLUME_MAX + 1);
         SaveVolume();
+        ApplyVolumeToAudio();
         OnSoundVolumeChanged?.Invoke(this, EventArgs.Empty);
     }
 
@@ -75,6 +89,8 @@ public class SoundManager : MonoBehaviour
 
     public int GetCancelVolume()
     {
+        if (GetSoundVolumeNormalized() == 0)
+            isVolumeCancel = true;
         if (!isVolumeCancel)
         {
             previousVolume = soundVolume;
@@ -85,15 +101,15 @@ public class SoundManager : MonoBehaviour
             PlayerPrefs.SetInt(PREFS_MUTED, 1);
             SaveVolume();
 
+            ApplyVolumeToAudio();
+
             OnSoundVolumeChanged?.Invoke(this, EventArgs.Empty);
             return soundVolume;
         }
         else
         {
             if (previousVolume >= 0)
-            {
                 soundVolume = previousVolume;
-            }
 
             previousVolume = -1;
             isVolumeCancel = false;
@@ -101,6 +117,8 @@ public class SoundManager : MonoBehaviour
             PlayerPrefs.DeleteKey(PREFS_PREVIOUS_VOLUME);
             PlayerPrefs.SetInt(PREFS_MUTED, 0);
             SaveVolume();
+
+            ApplyVolumeToAudio();
 
             OnSoundVolumeChanged?.Invoke(this, EventArgs.Empty);
             return soundVolume;
@@ -118,6 +136,12 @@ public class SoundManager : MonoBehaviour
         soundVolume = Mathf.Clamp(value, 0, SOUND_VOLUME_MAX);
         isVolumeCancel = (soundVolume == 0);
         SaveVolume();
+        ApplyVolumeToAudio();
         OnSoundVolumeChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void ApplyVolumeToAudio()
+    {
+        AudioListener.volume = GetSoundVolumeNormalized();
     }
 }
