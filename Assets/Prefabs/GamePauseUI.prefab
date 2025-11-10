@@ -1564,8 +1564,8 @@ MonoBehaviour:
   closeSoundSettingsButton: {fileID: 3960021287045002903}
   getCancelSoundVolumeImage: {fileID: 6245489132051053371}
   getSoundVolumeImage: {fileID: 3588267785165600755}
-  getCancelMusicVolumeImage: {fileID: 0}
-  getMusicVolumeImage: {fileID: 0}
+  getCancelMusicVolumeImage: {fileID: 7425316377644027975}
+  getMusicVolumeImage: {fileID: 351110155349829020}
   soundChangeText: {fileID: 6456151055365527217}
   musicChangeText: {fileID: 4607719102034859774}
   closeGamePauseImage: {fileID: 8053575600099229179}

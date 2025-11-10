@@ -75,9 +75,10 @@ public class GamePause : MonoBehaviour
             bool isSoundMutedNow = SoundManager.Instance.GetSoundVolume() == 0;
             getCancelSoundVolumeImage.gameObject.SetActive(isSoundMutedNow);
             getSoundVolumeImage.gameObject.SetActive(!isSoundMutedNow);
+            Debug.Log(MusicManager.Instance.GetMusicVolume());
         });
 
-        /*
+        
         musicChangeButton.onClick.AddListener(() =>
         {
             MusicManager.Instance.ChangeMusicVolume();
@@ -86,7 +87,7 @@ public class GamePause : MonoBehaviour
             getCancelMusicVolumeImage.gameObject.SetActive(isMusicMutedNow);
             getMusicVolumeImage.gameObject.SetActive(!isMusicMutedNow);
         });
-        */
+        
 
         soundCancelVolumeButton.onClick.AddListener(() =>
         {
@@ -99,7 +100,11 @@ public class GamePause : MonoBehaviour
 
         musicCancelVolumeButton.onClick.AddListener(() =>
         {
-
+            MusicManager.Instance.CancelMusicVolume();
+            musicChangeText.text = "Music Volume: " + MusicManager.Instance.GetMusicVolume();
+            bool isMusicMutedNow = MusicManager.Instance.GetMusicVolume() == 0;
+            getCancelMusicVolumeImage.gameObject.SetActive(isMusicMutedNow);
+            getMusicVolumeImage.gameObject.SetActive(!isMusicMutedNow);
         });
 
         closeSoundSettingsButton.onClick.AddListener(() =>
@@ -113,10 +118,18 @@ public class GamePause : MonoBehaviour
     {
         closeGamePauseImage.gameObject.SetActive(false);
         soundChangeText.text = "Sound Volume: " + SoundManager.Instance.GetSoundVolume();
-        bool isMuted = SoundManager.Instance.GetSoundVolume() == 0;
-        getCancelSoundVolumeImage.gameObject.SetActive(isMuted);
-        getSoundVolumeImage.gameObject.SetActive(!isMuted);
-        cancelImage = !isMuted;
+        musicChangeText.text = "Music Volume: " + MusicManager.Instance.GetMusicVolume();
+
+        //Set Sound Cancel Volume at start
+        bool isSoundMuted = SoundManager.Instance.GetSoundVolume() == 0;
+        getCancelSoundVolumeImage.gameObject.SetActive(isSoundMuted);
+        getSoundVolumeImage.gameObject.SetActive(!isSoundMuted);
+        cancelImage = !isSoundMuted;
+
+        //Set Music Cancel Volume at start
+        bool isMusicMuted = MusicManager.Instance.GetMusicVolume() == 0;
+        getCancelMusicVolumeImage.gameObject.SetActive(isMusicMuted);
+        getMusicVolumeImage.gameObject.SetActive(!isMusicMuted);    
     }
 
     private IEnumerator InvokeNormalAnim()

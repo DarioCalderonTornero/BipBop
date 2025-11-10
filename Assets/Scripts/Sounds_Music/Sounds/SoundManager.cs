@@ -14,6 +14,11 @@ public class SoundManager : MonoBehaviour
 
     private int soundVolume = 6;
 
+    private float soundVolumeNormalized
+    {
+        get { return (float)soundVolume / SOUND_VOLUME_MAX; }
+    }
+
     [SerializeField] private AudioClip onColorGameModePoint;
 
     private bool isVolumeCancel = false;
@@ -55,7 +60,7 @@ public class SoundManager : MonoBehaviour
     {
         if (onColorGameModePoint != null)
         {
-            AudioSource.PlayClipAtPoint(onColorGameModePoint, Camera.main.transform.position, GetSoundVolumeNormalized());
+            //AudioSource.PlayClipAtPoint(onColorGameModePoint, Camera.main.transform.position, soundVolumeNormalized);
             startedSoundPlayed = true;
             PlayerPrefs.SetInt(PREFS_STARTED_SOUND_PLAYED, 1);
         }
@@ -66,7 +71,7 @@ public class SoundManager : MonoBehaviour
     private void ColorGamePuntos_OnColorAddScore(object sender, EventArgs e)
     {
         if (onColorGameModePoint != null && Camera.main != null)
-            AudioSource.PlayClipAtPoint(onColorGameModePoint, Camera.main.transform.position, GetSoundVolumeNormalized());
+            AudioSource.PlayClipAtPoint(onColorGameModePoint, Camera.main.transform.position, soundVolumeNormalized);
     }
 
     public void ChangeSoundVolume()
@@ -142,6 +147,6 @@ public class SoundManager : MonoBehaviour
 
     private void ApplyVolumeToAudio()
     {
-        AudioListener.volume = GetSoundVolumeNormalized();
+        AudioListener.volume = soundVolumeNormalized;
     }
 }

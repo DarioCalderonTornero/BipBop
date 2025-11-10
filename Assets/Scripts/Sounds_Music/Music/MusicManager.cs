@@ -8,7 +8,7 @@ public class MusicManager : MonoBehaviour
     public static MusicManager Instance { get; private set; }
 
     private int MUSIC_VOLUME_MAX = 10;
-    public static int musicVolume = 4;
+    public static int musicVolume = 6;
 
     private static float musicTime;
 
@@ -16,18 +16,17 @@ public class MusicManager : MonoBehaviour
 
     private AudioSource musicAudioSource;
 
-    [SerializeField] private AudioClip menuSceneMusicAudio;
-    [SerializeField] private AudioClip bipbopSceneMusicAudio;
-    [SerializeField] private AudioClip colorSceneMusicAudio;
+    [SerializeField] private AudioClip menuSceneMusicClip;
+    [SerializeField] private AudioClip bipbopSceneMusicClip;
+    [SerializeField] private AudioClip colorSceneMusicClip;
+
+    //Cancel Music stuff
+    private bool isMusicCancel = false;
+    private int previousVolume = -1;
+
 
     private void Awake()
     {
-        Instance = this;
-    }
-
-    void Start()
-    {
-
         if (Instance == null)
         {
             Instance = this;
@@ -40,7 +39,14 @@ public class MusicManager : MonoBehaviour
             return;
         }
 
+    }
+
+    void Start()
+    {
         musicAudioSource = GetComponent<AudioSource>();
+        musicAudioSource.volume = GetMusicVolumeNormalized();
+        musicAudioSource.clip = menuSceneMusicClip;
+        musicAudioSource.Play();
         SceneManager.sceneLoaded += SceneManager_OnSceneLoaded;
     }
 
@@ -49,16 +55,17 @@ public class MusicManager : MonoBehaviour
         switch (scene.name)
         {
             case "Menu":
-                PlayMusic(menuSceneMusicAudio);
+                PlayMusic(menuSceneMusicClip);
                 break;
             case "GameScene":
-                PlayMusic(bipbopSceneMusicAudio);
+                PlayMusic(bipbopSceneMusicClip);
                 break;
             case "ColorScene":
-                PlayMusic(colorSceneMusicAudio);
+                PlayMusic(colorSceneMusicClip);
                 break;
             default:
-                musicAudioSource.Stop();
+                //musicAudioSource.Stop();
+                Debug.Log("Music default state");
                 break;
         }
     }
@@ -79,6 +86,34 @@ public class MusicManager : MonoBehaviour
         musicVolume = (musicVolume + 1) % MUSIC_VOLUME_MAX;
         musicAudioSource.volume = GetMusicVolumeNormalized();
         OnMusicVolumeChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    public int CancelMusicVolume()
+    {
+        if (GetMusicVolumeNormalized() == 0)
+            isMusicCancel = true;
+
+        if (!isMusicCancel)
+        {
+            previousVolume = musicVolume;
+            musicVolume = 0;
+            isMusicCancel = true;
+
+            OnMusicVolumeChanged?.Invoke(this, EventArgs.Empty);
+
+            return musicVolume;
+        }
+
+        else
+        {
+            if (previousVolume >= 0)
+                musicVolume = previousVolume;
+
+            previousVolume = -1;
+            isMusicCancel = false;
+
+            return musicVolume;
+        }
     }
 
     public int GetMusicVolume()

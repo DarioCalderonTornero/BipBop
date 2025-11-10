@@ -3590,12 +3590,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 319449788}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 343.35303, y: 199.13132, z: -2.318381}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1490476021}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &319449790
 MonoBehaviour:
@@ -3609,9 +3609,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d912a792ff35be54a87803ba37df9b9d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  menuSceneMusicAudio: {fileID: 0}
-  bipbopSceneMusicAudio: {fileID: 0}
-  colorSceneMusicAudio: {fileID: 0}
+  menuSceneMusicClip: {fileID: 8300000, guid: 63f629a809c081c47ae5266571670157, type: 3}
+  bipbopSceneMusicClip: {fileID: 8300000, guid: 87808d57c907bcc4c95e971e35bdb249, type: 3}
+  colorSceneMusicClip: {fileID: 8300000, guid: 17b8cba9768012140b9986b3bc8ca77c, type: 3}
 --- !u!82 &319449791
 AudioSource:
   m_ObjectHideFlags: 0
@@ -3624,10 +3624,10 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
-  m_PlayOnAwake: 1
+  m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
-  Loop: 0
+  Loop: 1
   Mute: 0
   Spatialize: 0
   SpatializePostEffects: 0
@@ -18014,7 +18014,6 @@ Transform:
   - {fileID: 750348460}
   - {fileID: 1503217969}
   - {fileID: 1392068168}
-  - {fileID: 319449789}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1496833927
@@ -25617,6 +25616,7 @@ SceneRoots:
   - {fileID: 1664615842}
   - {fileID: 317853033}
   - {fileID: 757659592}
+  - {fileID: 319449789}
   - {fileID: 1288492771}
   - {fileID: 1490476021}
   - {fileID: 152005964}
