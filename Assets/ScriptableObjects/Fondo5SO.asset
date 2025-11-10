@@ -10,8 +10,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4ad03392cd7844449b05512e140bd92a, type: 3}
-  m_Name: Fondo1SO
+  m_Name: Fondo5SO
   m_EditorClassIdentifier: 
-  id: Fondo1
-  sprite: {fileID: 21300000, guid: 2a7e632ce4e9b8542ba47d66b12b69dd, type: 3}
-  price: 10
+  id: Fondo5
+  sprite: {fileID: 7342517133069404205, guid: b5eb9bd6e16ee5048898d0946982d07d, type: 3}
+  price: 150

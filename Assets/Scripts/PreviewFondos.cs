@@ -41,7 +41,7 @@ public class PreviewFondos : MonoBehaviour
         currentPrice = backgroundDataSO.price;
 
         previewImage.sprite = backgroundDataSO.sprite;
-        priceText.text = "Precio: " + backgroundDataSO.price + " monedas";
+        priceText.text = "Precio:  " + backgroundDataSO.price;
 
         // Si es el fondo predeterminado, lo marcamos como comprado.
         bool purchased = (currentBackgroundID == "DefaultBackground")
