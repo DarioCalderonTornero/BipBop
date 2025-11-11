@@ -125,7 +125,7 @@ public class LogicaJuego : MonoBehaviour
         instructionText.text = currentTask;
 
         currentTime = startTime;
-        startTime = Mathf.Max(2f, startTime - 0.1f);
+        startTime = Mathf.Max(2f, startTime - 0.05f);
 
         timerUI.fillAmount = 0f;
     }

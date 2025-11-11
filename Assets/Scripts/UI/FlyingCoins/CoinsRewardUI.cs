@@ -33,6 +33,12 @@ public class CoinsRewardUI : MonoBehaviour
 
     public void ShowReward(int coins)
     {
+        if (coins <= 0)
+        {
+            gameObject.SetActive(false);
+            return;
+        }
+
         gameObject.SetActive(true);
         coinsEarned = coins;
         coinsArrived = 0;
