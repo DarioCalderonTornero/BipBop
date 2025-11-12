@@ -9,7 +9,7 @@ public class DodgeManager : MonoBehaviour
     public static DodgeManager Instance;
 
     public int score = 0;
-    public float CurrentEnemySpeed = 3f;
+    public float CurrentEnemySpeed = 2f;
 
     [SerializeField] private TextMeshProUGUI scoreText;
 
@@ -31,7 +31,7 @@ public class DodgeManager : MonoBehaviour
         Destroy(e1);
         Destroy(e2);
 
-        score += 2;
+        score += 1;
         scoreText.text = $"Score: {score}";
 
 #if UNITY_ANDROID || UNITY_IOS
@@ -39,8 +39,8 @@ public class DodgeManager : MonoBehaviour
 #endif
 
         // Incrementar dificultad
-        if (score >= 50) CurrentEnemySpeed = 4f;
-        else if (score >= 30) CurrentEnemySpeed = 3.5f;
+        if (score >= 50) CurrentEnemySpeed = 3.5f;
+        else if (score >= 30) CurrentEnemySpeed = 2.5f;
     }
 
     public void GameOver()

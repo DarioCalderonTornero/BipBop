@@ -17,7 +17,7 @@ public class ColorManager : MonoBehaviour
     public TextMeshProUGUI colorWordText;
     public Image colorWordBackground;
     public TextMeshProUGUI scoreText;
-    public Slider timeSlider;
+    public Image timeBarImage;
     public float startTime = 60f;
 
     [Header("Candidate Buttons")]
@@ -44,19 +44,22 @@ public class ColorManager : MonoBehaviour
     {
         hasEnded = false;
         currentTime = startTime;
-        timeSlider.maxValue = startTime;
-        timeSlider.value = startTime;
+
+        if (timeBarImage != null)
+            timeBarImage.fillAmount = 1f; // Llena al inicio
+
         UpdateScoreText();
         SetupRound();
     }
 
     private void Update()
     {
-        if (hasEnded) return; // No actualizar si el juego terminó
+        if (hasEnded) return;
 
         currentTime -= Time.deltaTime;
-        timeSlider.value = currentTime;
-        timeSlider.maxValue = startTime;
+
+        if (timeBarImage != null)
+            timeBarImage.fillAmount = Mathf.Clamp01(currentTime / startTime); // Actualiza el relleno
 
         if (currentTime <= 0f)
         {

@@ -13,12 +13,12 @@ public class GeometricModeManager : MonoBehaviour
     [Header("UI Elements")]
     public TextMeshProUGUI instructionText;  // Indica qué figura tocar
     public TextMeshProUGUI scoreText;        // Puntuación actual
-    public Slider timeSlider;                // Barra de tiempo
+    public Image timeBarImage;                // Barra de tiempo
     public float startTime = 60f;            // Tiempo inicial (en segundos)
 
     [Header("Game Settings")]
     public float speedMultiplier = 1f;         // Multiplicador de velocidad actual
-    public float speedIncreaseFactor = 1.1f;   // Factor de incremento de velocidad al acertar
+    public float speedIncreaseFactor = 1.05f;   // Factor de incremento de velocidad al acertar
     public float timeDecreaseFactor = 0.95f;   // Factor de reducción del tiempo base al acertar
 
     [Header("Shapes")]
@@ -43,14 +43,16 @@ public class GeometricModeManager : MonoBehaviour
 
     private void StartGame()
     {
-        hasEnded = false; //  Reinicia la bandera al comenzar
+        hasEnded = false;
         score = 0;
         currentTime = startTime;
-        timeSlider.maxValue = startTime;
-        timeSlider.value = startTime;
+
+        if (timeBarImage != null)
+            timeBarImage.fillAmount = 1f; // lleno al inicio
+
         UpdateScoreText();
 
-        // Activa solo las primeras 3 figuras al iniciar (índices 0, 1 y 2)
+        // Activa solo las primeras 3 figuras al iniciar
         for (int i = 0; i < shapes.Count; i++)
         {
             shapes[i].gameObject.SetActive(i < 3);
@@ -61,11 +63,13 @@ public class GeometricModeManager : MonoBehaviour
 
     private void Update()
     {
-        if (hasEnded) return; //  No seguir si el juego ya terminó
+        if (hasEnded) return;
 
         currentTime -= Time.deltaTime;
-        timeSlider.maxValue = startTime;
-        timeSlider.value = currentTime;
+
+        // Actualizar la barra de tiempo
+        if (timeBarImage != null)
+            timeBarImage.fillAmount = Mathf.Clamp01(currentTime / startTime);
 
         if (currentTime <= 0f)
         {
