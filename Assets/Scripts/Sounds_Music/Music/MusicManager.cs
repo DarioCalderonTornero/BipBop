@@ -21,7 +21,7 @@ public class MusicManager : MonoBehaviour
     [SerializeField] private AudioClip colorSceneMusicClip;
 
     //Cancel Music stuff
-    private bool isMusicCancel = false;
+    private bool isMusicCancel = false; 
     private int previousVolume = -1;
 
 
@@ -83,7 +83,7 @@ public class MusicManager : MonoBehaviour
 
     public void ChangeMusicVolume()
     {
-        musicVolume = (musicVolume + 1) % MUSIC_VOLUME_MAX;
+        musicVolume = (musicVolume + 1) % MUSIC_VOLUME_MAX + 1;
         musicAudioSource.volume = GetMusicVolumeNormalized();
         OnMusicVolumeChanged?.Invoke(this, EventArgs.Empty);
     }
@@ -99,6 +99,8 @@ public class MusicManager : MonoBehaviour
             musicVolume = 0;
             isMusicCancel = true;
 
+            musicAudioSource.volume = GetMusicVolumeNormalized();
+
             OnMusicVolumeChanged?.Invoke(this, EventArgs.Empty);
 
             return musicVolume;
@@ -111,6 +113,8 @@ public class MusicManager : MonoBehaviour
 
             previousVolume = -1;
             isMusicCancel = false;
+
+            musicAudioSource.volume = GetMusicVolumeNormalized();
 
             return musicVolume;
         }
