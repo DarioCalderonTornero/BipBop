@@ -73,7 +73,7 @@ public class GeometricModeManager : MonoBehaviour
 
         if (currentTime <= 0f)
         {
-            EndGame();
+            StartCoroutine(SlowMotionAndEnd(false, null));
         }
     }
 
@@ -104,7 +104,7 @@ public class GeometricModeManager : MonoBehaviour
         else
         {
             // Si se toca una figura que no es objetivo, se pone roja durante 0.5 segundos
-            shape.TemporarilyChangeColor(Color.red, 0.5f);
+            StartCoroutine(SlowMotionAndEnd(true, shape));
         }
     }
 
@@ -114,10 +114,49 @@ public class GeometricModeManager : MonoBehaviour
         UpdateScoreText();
         Haptics.TryVibrate();
         PlayerLevelManager.Instance.AddXP(50);
+        PlayScoreEffect();
 
         // NUEVO: genera los objetos que caen
         if (FallingShapesManager.Instance != null)
             FallingShapesManager.Instance.SpawnFallingShapes();
+    }
+
+    [SerializeField] private RectTransform scoreEffectGroup;
+    private bool isAnimating = false;
+
+    private void PlayScoreEffect()
+    {
+        if (!isAnimating)
+            StartCoroutine(AnimateScoreEffect());
+    }
+
+    private IEnumerator AnimateScoreEffect()
+    {
+        isAnimating = true;
+
+        float duration = 0.05f;
+        float halfDuration = duration / 2f;
+        Vector3 originalScale = Vector3.one;
+        Vector3 zoomScale = new Vector3(1.2f, 1.2f, 1); // pequeño zoom
+
+        float time = 0;
+        while (time < halfDuration)
+        {
+            scoreEffectGroup.localScale = Vector3.Lerp(originalScale, zoomScale, time / halfDuration);
+            time += Time.deltaTime;
+            yield return null;
+        }
+
+        time = 0;
+        while (time < halfDuration)
+        {
+            scoreEffectGroup.localScale = Vector3.Lerp(zoomScale, originalScale, time / halfDuration);
+            time += Time.deltaTime;
+            yield return null;
+        }
+
+        scoreEffectGroup.localScale = originalScale;
+        isAnimating = false;
     }
 
     private void UpdateScoreText()
@@ -190,6 +229,53 @@ public class GeometricModeManager : MonoBehaviour
             PlayerPrefs.SetInt("MaxRecordGeometric", score);
             PlayerPrefs.Save();
         }
+    }
+
+    private IEnumerator SlowMotionAndEnd(bool wrongShape, BouncingShape touchedShape = null)
+    {
+        if (hasEnded) yield break;
+        hasEnded = true;
+
+        // Guardamos los valores del tiempo antes de ralentizar
+        float previousTimeScale = Time.timeScale;
+        float previousFixedDelta = Time.fixedDeltaTime;
+
+        // Activar cámara lenta
+        Time.timeScale = 0.3f;
+        Time.fixedDeltaTime = 0.02f * Time.timeScale;
+
+        if (wrongShape && touchedShape != null)
+        {
+            // Intentamos obtener el SpriteRenderer principal de la figura
+            SpriteRenderer mainRenderer = touchedShape.GetComponentInChildren<SpriteRenderer>();
+
+            if (mainRenderer != null)
+            {
+                Color originalColor = mainRenderer.color;
+                Color redColor = Color.red;
+
+                int flashes = 4;
+                float flashInterval = 0.4f;
+
+                for (int i = 0; i < flashes; i++)
+                {
+                    mainRenderer.color = redColor;
+                    yield return new WaitForSecondsRealtime(flashInterval);
+                    mainRenderer.color = originalColor;
+                    yield return new WaitForSecondsRealtime(flashInterval);
+                }
+            }
+        }
+
+        // Espera un poco más en cámara lenta antes de terminar
+        yield return new WaitForSecondsRealtime(1.5f);
+
+        // Restaurar la velocidad normal del tiempo
+        Time.timeScale = previousTimeScale;
+        Time.fixedDeltaTime = previousFixedDelta;
+
+        // Llamar a EndGame()
+        EndGame();
     }
 
     private void EndGame()

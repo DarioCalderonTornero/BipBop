@@ -163,6 +163,7 @@ MonoBehaviour:
   - {fileID: 1430412339}
   - {fileID: 1206294052}
   - {fileID: 1220643770}
+  scoreEffectGroup: {fileID: 117584066}
 --- !u!4 &11155289
 Transform:
   m_ObjectHideFlags: 0
@@ -191,8 +192,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   fallingShapePrefab: {fileID: 7599401120750260644, guid: c09c82a6fc4e93a44b46346079656deb, type: 3}
-  minShapesPerScore: 2
-  maxShapesPerScore: 5
+  minShapesPerScore: 10
+  maxShapesPerScore: 20
   spawnRangeX: 3.5
   spawnHeight: 6
 --- !u!114 &11155291
@@ -341,6 +342,44 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &117584065
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 117584066}
+  m_Layer: 5
+  m_Name: AnimationScore
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &117584066
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 117584065}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1268789176}
+  - {fileID: 1520335299}
+  - {fileID: 2009711221}
+  m_Father: {fileID: 224702197}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &119732152
 GameObject:
   m_ObjectHideFlags: 0
@@ -572,9 +611,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 410516933}
-  - {fileID: 1268789176}
-  - {fileID: 1520335299}
-  - {fileID: 2009711221}
   - {fileID: 1234438468}
   - {fileID: 1852246772}
   - {fileID: 1308862462}
@@ -583,6 +619,7 @@ RectTransform:
   - {fileID: 1002463444}
   - {fileID: 87146362}
   - {fileID: 860487494}
+  - {fileID: 117584066}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -1953,7 +1990,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   shapeName: "C\xEDrculo"
-  initialSpeed: 2
+  initialSpeed: 1
 --- !u!212 &1095570195
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -2433,7 +2470,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   shapeName: Hexagono
-  initialSpeed: 2
+  initialSpeed: 1
 --- !u!212 &1206294053
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -2610,7 +2647,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   shapeName: Estrella
-  initialSpeed: 2
+  initialSpeed: 1
 --- !u!212 &1220643771
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -2934,12 +2971,12 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1268789175}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 224702197}
+  m_Father: {fileID: 117584066}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -3775,7 +3812,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   shapeName: Triangle
-  initialSpeed: 2
+  initialSpeed: 1
 --- !u!212 &1430412340
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -4041,12 +4078,12 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1520335298}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 224702197}
+  m_Father: {fileID: 117584066}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -5122,7 +5159,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   shapeName: Cuadrado
-  initialSpeed: 2
+  initialSpeed: 1
 --- !u!50 &1995083202
 Rigidbody2D:
   serializedVersion: 5
@@ -5291,16 +5328,16 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2009711220}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 224702197}
+  m_Father: {fileID: 117584066}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: 0, y: 496}
+  m_AnchoredPosition: {x: 0, y: -654.39355}
   m_SizeDelta: {x: 658.0433, y: 222.1424}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2009711222
