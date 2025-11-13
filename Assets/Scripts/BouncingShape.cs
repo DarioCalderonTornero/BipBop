@@ -1,12 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Localization;
 
 public class BouncingShape : MonoBehaviour
 {
     [Header("Shape Info")]
-    public string shapeName;         // Ejemplo: "C�rculo", "Cuadrado", etc.
-    public float initialSpeed = 2f;    // Velocidad inicial
+    public LocalizedString shapeName;     // 👈 Ahora LocalizedString
+    public float initialSpeed = 2f;
 
     private Rigidbody2D rb;
     private SpriteRenderer spriteRenderer;
@@ -21,14 +22,11 @@ public class BouncingShape : MonoBehaviour
 
     private void Start()
     {
-        // Si la figura se activa por primera vez, le asignamos una velocidad aleatoria
         SetRandomVelocity();
     }
 
-    // Este m�todo se llamar� cada vez que el objeto se active
     private void OnEnable()
     {
-        // Vuelve a asignar una velocidad aleatoria al activarse
         SetRandomVelocity();
     }
 
@@ -41,7 +39,6 @@ public class BouncingShape : MonoBehaviour
         }
     }
 
-    // Actualiza la velocidad basada en el multiplicador (se llama desde el gestor del modo)
     public void UpdateSpeed(float multiplier)
     {
         if (rb != null && rb.linearVelocity != Vector2.zero)
@@ -55,7 +52,6 @@ public class BouncingShape : MonoBehaviour
         spriteRenderer.color = normalColor;
     }
 
-    // Cambia el color temporalmente y vuelve a normal despu�s de un tiempo
     public void TemporarilyChangeColor(Color newColor, float duration)
     {
         StopAllCoroutines();
@@ -69,20 +65,14 @@ public class BouncingShape : MonoBehaviour
         spriteRenderer.color = normalColor;
     }
 
-    // Detecta el toque de la figura
     private void OnMouseDown()
     {
         GeometricModeManager.Instance.OnShapeTapped(this);
     }
 
-    // Este m�todo se ejecuta cuando la figura colisiona con otro collider
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        // Opcional: Si quieres aplicar este comportamiento solo con los bordes, puedes comprobar:
-        // if(collision.gameObject.CompareTag("Wall")) { ... }
-
-        // Aplica una peque�a rotaci�n aleatoria a la velocidad para evitar estancamientos
-        float randomAngle = Random.Range(-40f, 40f); // Puedes ajustar este rango seg�n necesites
+        float randomAngle = Random.Range(-40f, 40f);
         Vector2 newVelocity = Quaternion.Euler(0, 0, randomAngle) * rb.linearVelocity;
         rb.linearVelocity = newVelocity;
     }

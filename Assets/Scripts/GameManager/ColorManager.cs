@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization;
 using UnityEngine.SceneManagement;
 using UnityEngine.SocialPlatforms.Impl;
 using UnityEngine.UI;
@@ -24,7 +25,7 @@ public class ColorManager : MonoBehaviour
     public List<Button> candidateButtons;
 
     [Header("Color Data")]
-    public string[] colorNames = { "Rojo", "Azul", "Verde", "Amarillo", "Morado", "Naranja", "Marrón", "Negro", "Blanco" };
+    public LocalizedString[] colorNames;
     public Color[] colorValues = { Color.red, Color.blue, Color.green, Color.yellow, new Color(0.5f, 0f, 0.5f), new Color(1f, 0.5f, 0f),
                                 new Color(0.6f, 0.3f, 0.1f), Color.black, Color.white };
 
@@ -69,14 +70,14 @@ public class ColorManager : MonoBehaviour
 
     private void SetupRound()
     {
-        if (hasEnded) return; // No configurar rondas si el juego terminó
+        if (hasEnded) return;
 
         int availableCount = 6;
         if (ColorGamePuntos.Instance.GetScore() >= 10) availableCount = 7;
         if (ColorGamePuntos.Instance.GetScore() >= 20) availableCount = 8;
         if (ColorGamePuntos.Instance.GetScore() >= 30) availableCount = 9;
 
-        // aseguramos que no se repita el mismo color correcto dos veces seguidas
+        // no repetir mismo color correcto
         do
         {
             correctIndex = UnityEngine.Random.Range(0, availableCount);
@@ -84,7 +85,8 @@ public class ColorManager : MonoBehaviour
 
         lastCorrectIndex = correctIndex;
 
-        string correctColorName = colorNames[correctIndex];
+        // nombre del color CORRECTO, ahora localizado
+        string correctColorName = colorNames[correctIndex].GetLocalizedString();
 
         // Color del texto (distinto al correcto)
         int textColorIndex;
@@ -105,7 +107,7 @@ public class ColorManager : MonoBehaviour
         } while (backgroundColorIndex == textColorIndex);
         colorWordBackground.color = colorValues[backgroundColorIndex];
 
-        // Opciones de los botones
+        // Resto de tu código tal cual...
         List<int> candidateIndices = new List<int> { correctIndex, textColorIndex };
 
         List<int> remainingIndices = new List<int>();
@@ -115,7 +117,6 @@ public class ColorManager : MonoBehaviour
                 remainingIndices.Add(i);
         }
 
-        // barajamos la lista
         for (int i = 0; i < remainingIndices.Count; i++)
         {
             int r = UnityEngine.Random.Range(i, remainingIndices.Count);
@@ -132,14 +133,12 @@ public class ColorManager : MonoBehaviour
             candidateIndices.Add(remainingIndices[0]);
         }
 
-        // barajar botones
         for (int i = 0; i < candidateIndices.Count; i++)
         {
             int r = UnityEngine.Random.Range(i, candidateIndices.Count);
             (candidateIndices[i], candidateIndices[r]) = (candidateIndices[r], candidateIndices[i]);
         }
 
-        // asignar a botones
         for (int i = 0; i < candidateButtons.Count; i++)
         {
             int assignedIndex = candidateIndices[i];
@@ -148,6 +147,7 @@ public class ColorManager : MonoBehaviour
             int indexCaptured = assignedIndex;
             candidateButtons[i].onClick.AddListener(() => OnCandidateSelected(indexCaptured));
         }
+    
     }
 
     public void OnCandidateSelected(int selectedIndex)

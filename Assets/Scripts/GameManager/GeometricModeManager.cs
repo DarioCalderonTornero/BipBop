@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -13,27 +15,41 @@ public class GeometricModeManager : MonoBehaviour
     [Header("UI Elements")]
     public TextMeshProUGUI instructionText;  // Indica qué figura tocar
     public TextMeshProUGUI scoreText;        // Puntuación actual
-    public Image timeBarImage;                // Barra de tiempo
+    public Image timeBarImage;               // Barra de tiempo
     public float startTime = 60f;            // Tiempo inicial (en segundos)
 
     [Header("Game Settings")]
     public float speedMultiplier = 1f;         // Multiplicador de velocidad actual
-    public float speedIncreaseFactor = 1.05f;   // Factor de incremento de velocidad al acertar
-    public float timeDecreaseFactor = 0.95f;   // Factor de reducción del tiempo base al acertar
+    public float speedIncreaseFactor = 1.05f;  // Factor de incremento de velocidad al acertar
+    public float timeDecreaseFactor = 0.95f;   // (no lo usas ahora, pero lo dejo)
 
     [Header("Shapes")]
-    public List<BouncingShape> shapes;         // Lista de todas las figuras geométricas (prefabs o instancias en escena)
+    public List<BouncingShape> shapes;         // Lista de figuras en escena
+
+    [Header("Localization")]
+    public LocalizedString scoreLabel;              // Smart String: "Puntos: {0}" / "Points: {0}"
+    public LocalizedString tapShapeInstruction;     // Smart String: "¡Toca {0}!" / "Tap the {0}!"
 
     private float currentTime;
     private int score = 0;
     private BouncingShape currentTarget;
-    private bool hasEnded = false; //  Nueva bandera de protección
+    private bool hasEnded = false;
 
     public event EventHandler OnGameOver;
 
     private void Awake()
     {
         Instance = this;
+    }
+
+    private void OnEnable()
+    {
+        LocalizationSettings.SelectedLocaleChanged += OnLocaleChanged;
+    }
+
+    private void OnDisable()
+    {
+        LocalizationSettings.SelectedLocaleChanged -= OnLocaleChanged;
     }
 
     private void Start()
@@ -48,7 +64,7 @@ public class GeometricModeManager : MonoBehaviour
         currentTime = startTime;
 
         if (timeBarImage != null)
-            timeBarImage.fillAmount = 1f; // lleno al inicio
+            timeBarImage.fillAmount = 1f;
 
         UpdateScoreText();
 
@@ -67,7 +83,6 @@ public class GeometricModeManager : MonoBehaviour
 
         currentTime -= Time.deltaTime;
 
-        // Actualizar la barra de tiempo
         if (timeBarImage != null)
             timeBarImage.fillAmount = Mathf.Clamp01(currentTime / startTime);
 
@@ -77,33 +92,27 @@ public class GeometricModeManager : MonoBehaviour
         }
     }
 
-    // Este método se llama cuando se toca una figura
+    // Se llama cuando se toca una figura
     public void OnShapeTapped(BouncingShape shape)
     {
-        if (hasEnded) return; //  Bloquea interacción si el juego terminó
+        if (hasEnded) return;
 
         if (shape == currentTarget)
         {
-            // Si se toca la figura objetivo, la ponemos verde y registramos el acierto
             shape.TemporarilyChangeColor(Color.green, 0.5f);
             AddScore();
 
-            // Ajustar el tiempo: disminuir en 0.1 segundos, pero no por debajo de 1.5 segundos
             startTime = Mathf.Max(1.5f, startTime - 0.1f);
             currentTime = startTime;
 
-            // Ajustar la velocidad: multiplicar por speedIncreaseFactor pero sin superar 4f
             speedMultiplier = Mathf.Min(4f, speedMultiplier * speedIncreaseFactor);
             UpdateShapesSpeed();
 
-            // Activar nuevas figuras según la puntuación
             CheckForAdditionalShapes();
-
             ChooseNewTarget();
         }
         else
         {
-            // Si se toca una figura que no es objetivo, se pone roja durante 0.5 segundos
             StartCoroutine(SlowMotionAndEnd(true, shape));
         }
     }
@@ -116,7 +125,6 @@ public class GeometricModeManager : MonoBehaviour
         PlayerLevelManager.Instance.AddXP(50);
         PlayScoreEffect();
 
-        // NUEVO: genera los objetos que caen
         if (FallingShapesManager.Instance != null)
             FallingShapesManager.Instance.SpawnFallingShapes();
     }
@@ -137,7 +145,7 @@ public class GeometricModeManager : MonoBehaviour
         float duration = 0.05f;
         float halfDuration = duration / 2f;
         Vector3 originalScale = Vector3.one;
-        Vector3 zoomScale = new Vector3(1.2f, 1.2f, 1); // pequeño zoom
+        Vector3 zoomScale = new Vector3(1.2f, 1.2f, 1);
 
         float time = 0;
         while (time < halfDuration)
@@ -161,7 +169,8 @@ public class GeometricModeManager : MonoBehaviour
 
     private void UpdateScoreText()
     {
-        scoreText.text = "Puntos: " + score;
+        // Localizado: "Puntos: {0}" / "Points: {0}"
+        scoreText.text = scoreLabel.GetLocalizedString(score);
     }
 
     public int GetScore()
@@ -169,7 +178,7 @@ public class GeometricModeManager : MonoBehaviour
         return score;
     }
 
-    // Escoge una nueva figura objetivo entre las activas, evitando repetir la misma
+    // Escoge una nueva figura objetivo entre las activas
     private void ChooseNewTarget()
     {
         List<BouncingShape> activeShapes = shapes.FindAll(s => s.gameObject.activeSelf);
@@ -189,7 +198,14 @@ public class GeometricModeManager : MonoBehaviour
             currentTarget = activeShapes[0];
         }
 
-        instructionText.text = "¡Toca " + currentTarget.shapeName + "!";
+        if (currentTarget != null)
+        {
+            // Primero localizamos el nombre de la figura
+            string shapeNameText = currentTarget.shapeName.GetLocalizedString();
+
+            // Luego lo metemos en la Smart String "Tap the {0}!"
+            instructionText.text = tapShapeInstruction.GetLocalizedString(shapeNameText);
+        }
     }
 
     private void UpdateShapesSpeed()
@@ -216,7 +232,7 @@ public class GeometricModeManager : MonoBehaviour
 
     private IEnumerator ApplySpeedNextFrame(BouncingShape shape)
     {
-        yield return null; // espera un frame
+        yield return null;
         shape.UpdateSpeed(speedMultiplier);
     }
 
@@ -236,17 +252,14 @@ public class GeometricModeManager : MonoBehaviour
         if (hasEnded) yield break;
         hasEnded = true;
 
-        // Guardamos los valores del tiempo antes de ralentizar
         float previousTimeScale = Time.timeScale;
         float previousFixedDelta = Time.fixedDeltaTime;
 
-        // Activar cámara lenta
         Time.timeScale = 0.3f;
         Time.fixedDeltaTime = 0.02f * Time.timeScale;
 
         if (wrongShape && touchedShape != null)
         {
-            // Intentamos obtener el SpriteRenderer principal de la figura
             SpriteRenderer mainRenderer = touchedShape.GetComponentInChildren<SpriteRenderer>();
 
             if (mainRenderer != null)
@@ -267,20 +280,17 @@ public class GeometricModeManager : MonoBehaviour
             }
         }
 
-        // Espera un poco más en cámara lenta antes de terminar
         yield return new WaitForSecondsRealtime(1.5f);
 
-        // Restaurar la velocidad normal del tiempo
         Time.timeScale = previousTimeScale;
         Time.fixedDeltaTime = previousFixedDelta;
 
-        // Llamar a EndGame()
         EndGame();
     }
 
     private void EndGame()
     {
-        if (hasEnded) return; // Previene llamadas múltiples
+        if (hasEnded) return;
         hasEnded = true;
 
         OnGameOver?.Invoke(this, EventArgs.Empty);
@@ -289,10 +299,8 @@ public class GeometricModeManager : MonoBehaviour
         if (PlayFabLoginManager.Instance != null && PlayFabLoginManager.Instance.IsLoggedIn)
             PlayFabScoreManager.Instance.SubmitScore("GeometricScore", score);
 
-        // Calculamos las monedas ganadas (1 por punto)
         int coinsEarned = score;
 
-        // Mostramos la animación de recompensa si existe el panel en la escena
         CoinsRewardUI rewardUI = FindObjectOfType<CoinsRewardUI>(true);
         if (rewardUI != null)
         {
@@ -300,10 +308,20 @@ public class GeometricModeManager : MonoBehaviour
         }
         else
         {
-            // Fallback: suma directa sin animación
             CurrencyManager.Instance.AddCoins(coinsEarned);
         }
 
         Debug.Log($"Fin de partida — Recompensa: {coinsEarned} monedas");
+    }
+
+    private void OnLocaleChanged(Locale locale)
+    {
+        UpdateScoreText();
+
+        if (currentTarget != null)
+        {
+            string shapeNameText = currentTarget.shapeName.GetLocalizedString();
+            instructionText.text = tapShapeInstruction.GetLocalizedString(shapeNameText);
+        }
     }
 }

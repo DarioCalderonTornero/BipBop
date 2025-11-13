@@ -179,6 +179,94 @@ MonoBehaviour:
     m_Localized: Turn the phone to the left!
     m_Metadata:
       m_Items: []
+  - m_Id: 92462652555264
+    m_Localized: 'Points: {0}'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93960195244032
+    m_Localized: Red
+    m_Metadata:
+      m_Items: []
+  - m_Id: 94010795327488
+    m_Localized: Blue
+    m_Metadata:
+      m_Items: []
+  - m_Id: 94064117514240
+    m_Localized: Green
+    m_Metadata:
+      m_Items: []
+  - m_Id: 94104403804160
+    m_Localized: Yellow
+    m_Metadata:
+      m_Items: []
+  - m_Id: 94153384886272
+    m_Localized: Purple
+    m_Metadata:
+      m_Items: []
+  - m_Id: 94221361971200
+    m_Localized: Orange
+    m_Metadata:
+      m_Items: []
+  - m_Id: 94273509752832
+    m_Localized: Brown
+    m_Metadata:
+      m_Items: []
+  - m_Id: 94340627005440
+    m_Localized: Black
+    m_Metadata:
+      m_Items: []
+  - m_Id: 94409837215744
+    m_Localized: White
+    m_Metadata:
+      m_Items: []
+  - m_Id: 95364959928320
+    m_Localized: Time
+    m_Metadata:
+      m_Items: []
+  - m_Id: 97419011260416
+    m_Localized: 'Price: {0}'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 97490964545536
+    m_Localized: Buy
+    m_Metadata:
+      m_Items: []
+  - m_Id: 97550947287040
+    m_Localized: Not enough coins
+    m_Metadata:
+      m_Items: []
+  - m_Id: 97614960754688
+    m_Localized: Equipped
+    m_Metadata:
+      m_Items: []
+  - m_Id: 97672112340992
+    m_Localized: Equip
+    m_Metadata:
+      m_Items: []
+  - m_Id: 101333290942464
+    m_Localized: Tap the {0}!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 101846778609664
+    m_Localized: Square
+    m_Metadata:
+      m_Items: []
+  - m_Id: 101913065390080
+    m_Localized: Circle
+    m_Metadata:
+      m_Items: []
+  - m_Id: 101960595243008
+    m_Localized: Triangle
+    m_Metadata:
+      m_Items: []
+  - m_Id: 102052345643008
+    m_Localized: Star
+    m_Metadata:
+      m_Items: []
+  - m_Id: 102129587945472
+    m_Localized: Hexagon
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
 
 public class PreviewFondos : MonoBehaviour
@@ -16,8 +18,14 @@ public class PreviewFondos : MonoBehaviour
     [SerializeField] private Button confirmButton;
     [SerializeField] private GameObject botonesPantallas;
 
-    // Nuevo: referencia al ScrollRect que controla el desplazamiento lateral
     [SerializeField] private ScrollRect scrollRectLateral;
+
+    [Header("Localization")]
+    public LocalizedString priceLabel;               // Smart String: "Precio: {0}" / "Price: {0}"
+    public LocalizedString buyText;                  // "Comprar" / "Buy"
+    public LocalizedString insufficientCoinsText;    // "Monedas insuficientes" / "Not enough coins"
+    public LocalizedString equippedText;             // "Equipado" / "Equipped"
+    public LocalizedString equipText;                // "Equipar" / "Equip"
 
     private int currentPrice;
     private string currentBackgroundID;
@@ -31,6 +39,16 @@ public class PreviewFondos : MonoBehaviour
             Destroy(gameObject);
     }
 
+    private void OnEnable()
+    {
+        LocalizationSettings.SelectedLocaleChanged += OnLocaleChanged;
+    }
+
+    private void OnDisable()
+    {
+        LocalizationSettings.SelectedLocaleChanged -= OnLocaleChanged;
+    }
+
     public void ShowPreview(BackgroundDataSO backgroundDataSO)
     {
         CurrentSelectedSprite = backgroundDataSO.sprite;
@@ -38,34 +56,47 @@ public class PreviewFondos : MonoBehaviour
         currentPrice = backgroundDataSO.price;
 
         previewImage.sprite = backgroundDataSO.sprite;
-        priceText.text = "Precio: " + backgroundDataSO.price;
+
+        // 1) Activamos primero el panel
+        previewPanel.SetActive(true);
+        botonesPantallas.SetActive(false);
+
+        if (scrollRectLateral != null)
+            scrollRectLateral.enabled = false;
+
+        // 2) AHORA refrescamos textos
+        RefreshTexts();
+    }
+
+    private void RefreshTexts()
+    {
+        if (priceText == null || confirmButton == null) return;
+
+        // Precio localizado
+        priceText.text = priceLabel.GetLocalizedString(currentPrice);
 
         bool purchased = (currentBackgroundID == "DefaultBackground")
                          || (PlayerPrefs.GetInt("Purchased_" + currentBackgroundID, 0) == 1);
 
         int coins = CurrencyManager.Instance.GetCoins();
+        var buttonLabel = confirmButton.GetComponentInChildren<TextMeshProUGUI>();
 
         if (!purchased)
         {
             confirmButton.interactable = coins >= currentPrice;
-            confirmButton.GetComponentInChildren<TextMeshProUGUI>().text =
-                coins >= currentPrice ? "Comprar" : "Monedas insuficientes";
+            buttonLabel.text = coins >= currentPrice
+                ? buyText.GetLocalizedString()
+                : insufficientCoinsText.GetLocalizedString();
         }
         else
         {
             string equipped = PlayerPrefs.GetString("SelectedBackground", "");
             bool isEquipped = equipped == currentBackgroundID;
             confirmButton.interactable = !isEquipped;
-            confirmButton.GetComponentInChildren<TextMeshProUGUI>().text =
-                isEquipped ? "Equipado" : "Equipar";
+            buttonLabel.text = isEquipped
+                ? equippedText.GetLocalizedString()
+                : equipText.GetLocalizedString();
         }
-
-        previewPanel.SetActive(true);
-        botonesPantallas.SetActive(false);
-
-        // Desactivar desplazamiento lateral
-        if (scrollRectLateral != null)
-            scrollRectLateral.enabled = false;
     }
 
     public void ConfirmBackground()
@@ -85,6 +116,7 @@ public class PreviewFondos : MonoBehaviour
             }
             else
             {
+                // No llega, el botón ya estará en "Monedas insuficientes"
                 return;
             }
         }
@@ -111,5 +143,11 @@ public class PreviewFondos : MonoBehaviour
         // Volver a activar el desplazamiento lateral
         if (scrollRectLateral != null)
             scrollRectLateral.enabled = true;
+    }
+
+    private void OnLocaleChanged(Locale newLocale)
+    {
+        // Si cambias el idioma con el panel abierto, refrescamos los textos
+        RefreshTexts();
     }
 }
