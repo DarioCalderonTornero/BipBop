@@ -31,3 +31,6 @@ EditorBuildSettings:
     com.unity.adaptiveperformance.loader_settings: {fileID: 11400000, guid: 692bcfd02ea2d044cba329e3eee8da53, type: 2}
     com.unity.adaptiveperformance.samsung.android.provider_settings: {fileID: 11400000, guid: f7553f7c548f10e4cb4ce210482b2dce, type: 2}
     com.unity.adaptiveperformance.simulator.provider_settings: {fileID: 11400000, guid: 06e7b25985d584248af7477ae45611ae, type: 2}
+    com.unity.addressableassets: {fileID: 11400000, guid: f664f25a62086754ea58c89852a29abf, type: 2}
+    com.unity.localization.settings: {fileID: 11400000, guid: 2377fb11a3ce5304288734d8f8d55c0a, type: 2}
+  m_UseUCBPForAssetBundles: 0

@@ -1,0 +1,108 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9620f8c34305754d8cc9a7e49e852d9, type: 3}
+  m_Name: UI_en
+  m_EditorClassIdentifier: 
+  m_LocaleId:
+    m_Code: en
+  m_SharedData: {fileID: 11400000, guid: a56000387c1aa2149885fc7996968516, type: 2}
+  m_Metadata:
+    m_Items: []
+  m_TableData:
+  - m_Id: 49149870080
+    m_Localized: Start
+    m_Metadata:
+      m_Items: []
+  - m_Id: 224933150720
+    m_Localized: Shop
+    m_Metadata:
+      m_Items: []
+  - m_Id: 365710770176
+    m_Localized: Ranking
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4001199259648
+    m_Localized: Classic
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4065074315264
+    m_Localized: Colors
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4129486241792
+    m_Localized: Forms
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4190538530816
+    m_Localized: Dodge
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4282364428288
+    m_Localized: Arrow
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15089399726080
+    m_Localized: Classic
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15237534154752
+    m_Localized: Follow the instructions on the screen to earn points. If you don't
+      do them in time, you lose.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15467910496256
+    m_Localized: Best Score
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15638367010816
+    m_Localized: Colors
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15699473825792
+    m_Localized: Forms
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15767681597440
+    m_Localized: Dodge
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15822371127296
+    m_Localized: Platforms
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15925622308864
+    m_Localized: Tap the image of the color that matches the word correctly. If you
+      tap another color, or run out of time, you lose.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16136419639296
+    m_Localized: Tap the correct geometric shape shown on the screen. If you tap
+      another one, or the time runs out, you lose.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16400878895104
+    m_Localized: Dodge the enemies that chase you endlessly. Make them collide with
+      each other to earn points. If one catches up with you, you lose.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16809341190144
+    m_Localized: Use the arrows to move between the platforms and reach the coin
+      to earn a point. If you are hit by an arrow, you lose.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 18157428244480
+    m_Localized: Play
+    m_Metadata:
+      m_Items: []
+  references:
+    version: 2
+    RefIds: []

@@ -13,8 +13,8 @@ public class LeaderboardUI : MonoBehaviour
     public static LeaderboardUI Instance { get; private set; }
 
     [Header("UI References")]
-    public Transform contentParent;      // Content donde se instancian las filas
-    public GameObject playerRowPrefab;   // Prefab con Rank, Name, Score, Level
+    public Transform contentParent;
+    public GameObject playerRowPrefab;
     public TextMeshProUGUI myPositionText;
 
     [Header("Modo Botones")]
@@ -25,6 +25,9 @@ public class LeaderboardUI : MonoBehaviour
     public Button dodgeButton;
 
     private Button currentSelectedButton;
+
+    private bool isLoading = false;             // Evita llamadas simultáneas
+    private string currentRequestedStat = "";   // Guarda el modo solicitado actual
 
     private void Awake()
     {
@@ -46,17 +49,17 @@ public class LeaderboardUI : MonoBehaviour
 
     private void Start()
     {
-        // Mostrar mensaje inicial hasta que el jugador pulse un modo
         if (myPositionText != null)
             myPositionText.text = "¡Toca un botón para ver su tabla de clasificación online!";
 
-        // Limpiar contenido inicial por si acaso
         foreach (Transform child in contentParent)
             Destroy(child.gameObject);
     }
 
     private void OnModeButtonClicked(string statisticName, Button clickedButton)
     {
+        if (isLoading) return; // Ignorar clicks mientras carga
+
         // Cambiar color del botón seleccionado
         if (currentSelectedButton != null)
             SetButtonSelected(currentSelectedButton, false);
@@ -64,23 +67,14 @@ public class LeaderboardUI : MonoBehaviour
         SetButtonSelected(clickedButton, true);
         currentSelectedButton = clickedButton;
 
-        // Cargar leaderboard de ese modo
         ShowLeaderboard(statisticName, 10);
     }
 
     private void SetButtonSelected(Button button, bool selected)
     {
         ColorBlock colors = button.colors;
-        if (selected)
-        {
-            colors.normalColor = new Color(0.8f, 0.8f, 1f);  // azul clarito
-            colors.selectedColor = new Color(0.8f, 0.8f, 1f);
-        }
-        else
-        {
-            colors.normalColor = Color.white;
-            colors.selectedColor = Color.white;
-        }
+        colors.normalColor = selected ? new Color(0.8f, 0.8f, 1f) : Color.white;
+        colors.selectedColor = colors.normalColor;
         button.colors = colors;
     }
 
@@ -88,61 +82,73 @@ public class LeaderboardUI : MonoBehaviour
     {
         if (contentParent == null || playerRowPrefab == null)
         {
-            Debug.LogWarning("LeaderboardUI: Falta asignar referencias en el inspector.");
+            Debug.LogWarning("LeaderboardUI: Falta asignar referencias.");
             return;
         }
 
-        // Limpiar filas anteriores
+        isLoading = true;
+        currentRequestedStat = statisticName;
+
+        // Limpiar contenido anterior
         foreach (Transform child in contentParent)
             Destroy(child.gameObject);
 
-        // Seguridad: si PlayFabScoreManager no está, evitar excepción y reintentar en un frame
+        myPositionText.text = "Cargando puntuaciones...";
+
         if (PlayFabScoreManager.Instance == null)
         {
-            Debug.LogWarning("PlayFabScoreManager no está listo. Reintentando en el siguiente frame.");
             StartCoroutine(DelayedShow(statisticName, top));
             return;
         }
 
-        // Obtener top de PlayFab
         PlayFabScoreManager.Instance.GetLeaderboard(statisticName, top, leaderboard =>
         {
-            // Si no hay resultados, muestra mensaje sencillo
+            // Verifica que este resultado corresponde al último botón pulsado
+            if (statisticName != currentRequestedStat)
+                return;
+
+            foreach (Transform child in contentParent)
+                Destroy(child.gameObject);
+
             if (leaderboard == null || leaderboard.Count == 0)
             {
                 myPositionText.text = "No hay puntuaciones todavía.";
             }
-
-            for (int i = 0; i < leaderboard.Count; i++)
+            else
             {
-                var entry = leaderboard[i];
-                GameObject row = Instantiate(playerRowPrefab, contentParent);
-
-                var texts = row.GetComponentsInChildren<TextMeshProUGUI>();
-                var levelIcon = row.transform.Find("LevelIcon");
-                var levelText = levelIcon?.GetComponentInChildren<TextMeshProUGUI>();
-
-                if (texts != null && texts.Length >= 3)
+                int count = Mathf.Min(leaderboard.Count, top);
+                for (int i = 0; i < count; i++)
                 {
-                    texts[0].text = (entry.Position + 1).ToString();       // Rank
-                    texts[1].text = entry.DisplayName ?? "Player";         // Nombre
-                    texts[2].text = entry.StatValue.ToString();            // Score
-                }
+                    var entry = leaderboard[i];
+                    GameObject row = Instantiate(playerRowPrefab, contentParent);
 
-                if (!string.IsNullOrEmpty(entry.PlayFabId))
-                {
-                    GetPlayerLevel(entry.PlayFabId, level =>
+                    var texts = row.GetComponentsInChildren<TextMeshProUGUI>();
+                    var levelIcon = row.transform.Find("LevelIcon");
+                    var levelText = levelIcon?.GetComponentInChildren<TextMeshProUGUI>();
+
+                    if (texts != null && texts.Length >= 3)
                     {
-                        if (levelText != null)
-                            levelText.text = level.ToString();
-                    });
+                        texts[0].text = (entry.Position + 1).ToString();
+                        texts[1].text = entry.DisplayName ?? "Player";
+                        texts[2].text = entry.StatValue.ToString();
+                    }
+
+                    if (!string.IsNullOrEmpty(entry.PlayFabId))
+                    {
+                        GetPlayerLevel(entry.PlayFabId, level =>
+                        {
+                            if (levelText != null)
+                                levelText.text = level.ToString();
+                        });
+                    }
                 }
             }
 
             Canvas.ForceUpdateCanvases();
-            var rt = contentParent as RectTransform;
-            if (rt != null)
+            if (contentParent is RectTransform rt)
                 LayoutRebuilder.ForceRebuildLayoutImmediate(rt);
+
+            isLoading = false; // Libera bloqueo
         });
 
         // Mostrar posición del jugador
@@ -150,21 +156,13 @@ public class LeaderboardUI : MonoBehaviour
         {
             PlayFabScoreManager.Instance.GetPlayerRank(statisticName, myEntry =>
             {
+                if (statisticName != currentRequestedStat) return; // Evita resultados antiguos
+
                 if (myEntry != null)
-                {
-                    int rank = myEntry.Position + 1;
-                    int score = myEntry.StatValue;
-                    myPositionText.text = $"Tu posición actual: {rank}º con {score} puntos";
-                }
+                    myPositionText.text = $"Tu posición actual: {myEntry.Position + 1}º con {myEntry.StatValue} puntos";
                 else
-                {
                     myPositionText.text = "Aún no tienes puntuación en este modo.";
-                }
             });
-        }
-        else
-        {
-            myPositionText.text = "Cargando posición...";
         }
     }
 
@@ -187,14 +185,11 @@ public class LeaderboardUI : MonoBehaviour
             {
                 int level = 1;
                 if (result.Data != null && result.Data.ContainsKey("PlayerLevel"))
-                {
                     int.TryParse(result.Data["PlayerLevel"].Value, out level);
-                }
                 onLevelFound?.Invoke(level);
             },
             error =>
             {
-                Debug.LogWarning("Error obteniendo PlayerLevel: " + error.GenerateErrorReport());
                 onLevelFound?.Invoke(1);
             }
         );

@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using DG.Tweening;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 
 public class MiniGameSelector : MonoBehaviour
 {
@@ -11,8 +13,12 @@ public class MiniGameSelector : MonoBehaviour
     public class MiniGameInfo
     {
         public Sprite image;
-        public string name;
-        public string description;
+
+        // Localized strings para nombre, descripción y label de récord
+        public LocalizedString name;
+        public LocalizedString description;
+        public LocalizedString recordLabel;   // <-- NUEVO
+
         public string recordKey;
         public string sceneName;
     }
@@ -121,14 +127,37 @@ public class MiniGameSelector : MonoBehaviour
     private void UpdateTextUI(int index)
     {
         var game = miniGames[index];
-        nameText.text = game.name;
-        descriptionText.text = game.description;
+
+        // Textos localizados según idioma actual
+        nameText.text = game.name.GetLocalizedString();
+        descriptionText.text = game.description.GetLocalizedString();
+
         int record = PlayerPrefs.GetInt(game.recordKey, 0);
-        recordText.text = $"Récord Máximo: {record}";
+
+        // Label del récord también localizado (ej: "Récord Máximo" / "Best Score")
+        string recordLabel = game.recordLabel.GetLocalizedString();
+
+        recordText.text = $"{recordLabel}: {record}";
     }
 
     public void OnPlayButton()
     {
         SceneManager.LoadScene(miniGames[currentIndex].sceneName);
+    }
+
+    void OnEnable()
+    {
+        LocalizationSettings.SelectedLocaleChanged += OnLocaleChanged;
+    }
+
+    void OnDisable()
+    {
+        LocalizationSettings.SelectedLocaleChanged -= OnLocaleChanged;
+    }
+
+    void OnLocaleChanged(Locale newLocale)
+    {
+        // Re-actualizamos el texto del minijuego actual con el nuevo idioma
+        UpdateTextUI(currentIndex);
     }
 }

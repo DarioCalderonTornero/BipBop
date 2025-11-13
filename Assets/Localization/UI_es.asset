@@ -1,0 +1,108 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9620f8c34305754d8cc9a7e49e852d9, type: 3}
+  m_Name: UI_es
+  m_EditorClassIdentifier: 
+  m_LocaleId:
+    m_Code: es
+  m_SharedData: {fileID: 11400000, guid: a56000387c1aa2149885fc7996968516, type: 2}
+  m_Metadata:
+    m_Items: []
+  m_TableData:
+  - m_Id: 49149870080
+    m_Localized: Inicio
+    m_Metadata:
+      m_Items: []
+  - m_Id: 224933150720
+    m_Localized: Tienda
+    m_Metadata:
+      m_Items: []
+  - m_Id: 365710770176
+    m_Localized: Tablas
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4001199259648
+    m_Localized: "Cl\xE1sico"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4065074315264
+    m_Localized: Colores
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4129486241792
+    m_Localized: Formas
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4190538530816
+    m_Localized: Rapidez
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4282364428288
+    m_Localized: Flecha
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15089399726080
+    m_Localized: "Cl\xE1sico"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15237534154752
+    m_Localized: Sigue las instrucciones que se indican en la pantalla para conseguir
+      puntos. Si no las haces a tiempo, pierdes.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15467910496256
+    m_Localized: "R\xE9cord"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15638367010816
+    m_Localized: Colores
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15699473825792
+    m_Localized: Formas
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15767681597440
+    m_Localized: Rapidez
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15822371127296
+    m_Localized: Plataformas
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15925622308864
+    m_Localized: Toca la imagen del color que indica la palabra correctamente. Si
+      tocas otro color, o se agota el tiempo, pierdes.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16136419639296
+    m_Localized: "Toca la figura geom\xE9trica correcta que se indica en la pantalla.
+      Si tocas otra, o se agota el tiempo, pierdes. "
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16400878895104
+    m_Localized: "Esquiva a los enemigos que te persiguen de forma infinita. Haz
+      que se choquen entre s\xED para conseguir puntos. Si te alcanza alguno, pierdes."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16809341190144
+    m_Localized: Utiliza las flechas para moverte entre las plataformas y llega a
+      la moneda para conseguir un punto. Si eres golpeado por una flecha, pierdes.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 18157428244480
+    m_Localized: Jugar
+    m_Metadata:
+      m_Items: []
+  references:
+    version: 2
+    RefIds: []
