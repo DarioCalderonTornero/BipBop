@@ -103,6 +103,82 @@ MonoBehaviour:
     m_Localized: Play
     m_Metadata:
       m_Items: []
+  - m_Id: 35365273436160
+    m_Localized: Tap a button to see its online leaderboard!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 35632354131968
+    m_Localized: Loading scores...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 35707096629248
+    m_Localized: There are no scores yet.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39993046171648
+    m_Localized: "Your current position: {0}\xBA with {1} points"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 35828207157248
+    m_Localized: You don't have a score in this mode yet.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 43771124219904
+    m_Localized: Get ready...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 43894914908160
+    m_Localized: GO!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 44002830155776
+    m_Localized: Game Over!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 44192848904192
+    m_Localized: Touch the screen!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 44361548005376
+    m_Localized: Zoom in!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 44543366889472
+    m_Localized: Zoom out!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 44609041301504
+    m_Localized: Shake your phone!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 44798418321408
+    m_Localized: Turn your phone upside down!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 44946506612736
+    m_Localized: Swipe right!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 45102178205696
+    m_Localized: Swipe left!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 45178564870144
+    m_Localized: Swipe up!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 45250073559040
+    m_Localized: Swipe down!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 45334840442880
+    m_Localized: Turn the phone to the right!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 45502721654784
+    m_Localized: Turn the phone to the left!
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

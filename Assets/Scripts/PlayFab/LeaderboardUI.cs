@@ -7,6 +7,8 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SocialPlatforms.Impl;
 using UnityEngine.UI;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 
 public class LeaderboardUI : MonoBehaviour
 {
@@ -24,10 +26,30 @@ public class LeaderboardUI : MonoBehaviour
     public Button gridButton;
     public Button dodgeButton;
 
+    [Header("Localization")]
+    public LocalizedString touchButtonPrompt;      // "¡Toca un botón..." / "Tap a button..."
+    public LocalizedString loadingScoresText;      // "Cargando..." / "Loading..."
+    public LocalizedString noScoresText;           // "No hay puntuaciones..." / "No scores yet..."
+    public LocalizedString noScoreThisModeText;    // "Aún no tienes puntuación..." / "You don't have a score yet..."
+    public LocalizedString leaderboardHasScore;    // Smart String con rank y score
+
+    private MyPosState myPosState = MyPosState.Prompt;
+    private int lastRank = -1;
+    private int lastScore = 0;
+
     private Button currentSelectedButton;
 
-    private bool isLoading = false;             // Evita llamadas simultáneas
-    private string currentRequestedStat = "";   // Guarda el modo solicitado actual
+    private bool isLoading = false;
+    private string currentRequestedStat = "";
+
+    public enum MyPosState
+    {
+        Prompt,             // "Toca un botón..."
+        Loading,            // "Cargando..."
+        NoScores,           // "No hay puntuaciones..."
+        HasScore,           // "Tu posición actual: ..."
+        NoScoreThisMode     // "Aún no tienes puntuación..."
+    }
 
     private void Awake()
     {
@@ -50,7 +72,10 @@ public class LeaderboardUI : MonoBehaviour
     private void Start()
     {
         if (myPositionText != null)
-            myPositionText.text = "¡Toca un botón para ver su tabla de clasificación online!";
+        {
+            myPosState = MyPosState.Prompt;
+            myPositionText.text = touchButtonPrompt.GetLocalizedString();
+        }
 
         foreach (Transform child in contentParent)
             Destroy(child.gameObject);
@@ -89,11 +114,11 @@ public class LeaderboardUI : MonoBehaviour
         isLoading = true;
         currentRequestedStat = statisticName;
 
-        // Limpiar contenido anterior
         foreach (Transform child in contentParent)
             Destroy(child.gameObject);
 
-        myPositionText.text = "Cargando puntuaciones...";
+        myPosState = MyPosState.Loading;
+        myPositionText.text = loadingScoresText.GetLocalizedString();
 
         if (PlayFabScoreManager.Instance == null)
         {
@@ -112,7 +137,8 @@ public class LeaderboardUI : MonoBehaviour
 
             if (leaderboard == null || leaderboard.Count == 0)
             {
-                myPositionText.text = "No hay puntuaciones todavía.";
+                myPosState = MyPosState.NoScores;
+                myPositionText.text = noScoresText.GetLocalizedString();
             }
             else
             {
@@ -159,9 +185,19 @@ public class LeaderboardUI : MonoBehaviour
                 if (statisticName != currentRequestedStat) return; // Evita resultados antiguos
 
                 if (myEntry != null)
-                    myPositionText.text = $"Tu posición actual: {myEntry.Position + 1}º con {myEntry.StatValue} puntos";
+                {
+                    myPosState = MyPosState.HasScore;
+                    lastRank = myEntry.Position + 1;
+                    lastScore = myEntry.StatValue;
+
+                    // Smart String: una sola entrada localizada que recibe {0} (rank) y {1} (score)
+                    myPositionText.text = leaderboardHasScore.GetLocalizedString(lastRank, lastScore);
+                }
                 else
-                    myPositionText.text = "Aún no tienes puntuación en este modo.";
+                {
+                    myPosState = MyPosState.NoScoreThisMode;
+                    myPositionText.text = noScoreThisModeText.GetLocalizedString();
+                }
             });
         }
     }
@@ -193,5 +229,43 @@ public class LeaderboardUI : MonoBehaviour
                 onLevelFound?.Invoke(1);
             }
         );
+    }
+
+    private void OnEnable()
+    {
+        LocalizationSettings.SelectedLocaleChanged += OnLocaleChanged;
+    }
+
+    private void OnDisable()
+    {
+        LocalizationSettings.SelectedLocaleChanged -= OnLocaleChanged;
+    }
+
+    private void OnLocaleChanged(Locale newLocale)
+    {
+        // Cuando cambia el idioma, rehacemos el texto según el estado actual
+        switch (myPosState)
+        {
+            case MyPosState.Prompt:
+                myPositionText.text = touchButtonPrompt.GetLocalizedString();
+                break;
+
+            case MyPosState.Loading:
+                myPositionText.text = loadingScoresText.GetLocalizedString();
+                break;
+
+            case MyPosState.NoScores:
+                myPositionText.text = noScoresText.GetLocalizedString();
+                break;
+
+            case MyPosState.NoScoreThisMode:
+                myPositionText.text = noScoreThisModeText.GetLocalizedString();
+                break;
+
+            case MyPosState.HasScore:
+                // Volvemos a pedir la Smart String con los mismos parámetros
+                myPositionText.text = leaderboardHasScore.GetLocalizedString(lastRank, lastScore);
+                break;
+        }
     }
 }

@@ -16601,6 +16601,54 @@ MonoBehaviour:
   geometricButton: {fileID: 331008684}
   gridButton: {fileID: 1562536056}
   dodgeButton: {fileID: 627039178}
+  touchButtonPrompt:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 35365273436160
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  loadingScoresText:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 35632354131968
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  noScoresText:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 35707096629248
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  noScoreThisModeText:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 35828207157248
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  leaderboardHasScore:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 39993046171648
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  references:
+    version: 2
+    RefIds: []
 --- !u!4 &1288492771
 Transform:
   m_ObjectHideFlags: 0

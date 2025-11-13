@@ -2,6 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
+using static LogicaJuego;
 
 public class TouchInputs : MonoBehaviour
 {
@@ -49,7 +52,7 @@ public class TouchInputs : MonoBehaviour
                 if (touch.phase == TouchPhase.Began)
                 {
                     OnOneTouch?.Invoke(this, EventArgs.Empty);
-                    LogicaJuego.Instance.OnTaskAction("¡Toca la pantalla!");
+                    LogicaJuego.Instance.OnTaskAction(TaskType.Tap);
 
                     // Guarda la posición inicial del toque para detectar deslizamientos
                     swipeStartPos = touch.position;
@@ -71,12 +74,12 @@ public class TouchInputs : MonoBehaviour
                             if (swipeDelta.x > 0)
                             {
                                 OnSwipeRight?.Invoke(this, EventArgs.Empty);
-                                LogicaJuego.Instance.OnTaskAction("¡Desliza hacia la derecha!");
+                                LogicaJuego.Instance.OnTaskAction(TaskType.SwipeRight);
                             }
                             else
                             {
                                 OnSwipeLeft?.Invoke(this, EventArgs.Empty);
-                                LogicaJuego.Instance.OnTaskAction("¡Desliza hacia la izquierda!");
+                                LogicaJuego.Instance.OnTaskAction(TaskType.SwipeLeft);
                             }
                         }
                         else
@@ -85,12 +88,12 @@ public class TouchInputs : MonoBehaviour
                             if (swipeDelta.y > 0)
                             {
                                 OnSwipeUp?.Invoke(this, EventArgs.Empty);
-                                LogicaJuego.Instance.OnTaskAction("¡Desliza hacia arriba!");
+                                LogicaJuego.Instance.OnTaskAction(TaskType.SwipeUp);
                             }
                             else
                             {
                                 OnSwipeDown?.Invoke(this, EventArgs.Empty);
-                                LogicaJuego.Instance.OnTaskAction("¡Desliza hacia abajo!");
+                                LogicaJuego.Instance.OnTaskAction(TaskType.SwipeDown);
                             }
                         }
                     }
@@ -119,13 +122,13 @@ public class TouchInputs : MonoBehaviour
                 if (currentPinchDistance > initialPinchDistance * 1.2f) // Zoom In
                 {
                     OnZoomIn?.Invoke(this, EventArgs.Empty);
-                    LogicaJuego.Instance.OnTaskAction("¡Haz zoom hacia dentro!");
+                    LogicaJuego.Instance.OnTaskAction(TaskType.ZoomIn);
                     isZooming = false;
                 }
                 else if (currentPinchDistance < initialPinchDistance * 0.8f) // Zoom Out
                 {
                     OnZoomOut?.Invoke(this, EventArgs.Empty);
-                    LogicaJuego.Instance.OnTaskAction("¡Haz zoom hacia fuera!");
+                    LogicaJuego.Instance.OnTaskAction(TaskType.ZoomOut);
                     isZooming = false;
                 }
             }
@@ -139,14 +142,14 @@ public class TouchInputs : MonoBehaviour
         if (Input.acceleration.magnitude > 4.0f)
         {
             OnShake?.Invoke(this, EventArgs.Empty);
-            LogicaJuego.Instance.OnTaskAction("¡Agita el teléfono!");
+            LogicaJuego.Instance.OnTaskAction(TaskType.Shake);
         }
 
         // Detecta cuando el dispositivo está boca abajo
         if (Input.deviceOrientation == DeviceOrientation.FaceDown)
         {
             OnLookDown?.Invoke(this, EventArgs.Empty);
-            LogicaJuego.Instance.OnTaskAction("¡Ponlo boca abajo!");
+            LogicaJuego.Instance.OnTaskAction(TaskType.LookDown);
         }
 
         // Detecta rotación hacia la derecha o izquierda
@@ -167,7 +170,7 @@ public class TouchInputs : MonoBehaviour
         {
             hasRotatedRight = true;
             OnRotateRight?.Invoke(this, EventArgs.Empty);
-            LogicaJuego.Instance.OnTaskAction("¡Gira a la derecha!");
+            LogicaJuego.Instance.OnTaskAction(TaskType.RotateRight);
         }
         else if (hasRotatedRight && (zRotation - previousZRotation) < -rotationSensitivity / 2f)
         {
@@ -179,7 +182,7 @@ public class TouchInputs : MonoBehaviour
         {
             hasRotatedLeft = true;
             OnRotateLeft?.Invoke(this, EventArgs.Empty);
-            LogicaJuego.Instance.OnTaskAction("¡Gira a la izquierda!");
+            LogicaJuego.Instance.OnTaskAction(TaskType.RotateLeft);
         }
         else if (hasRotatedLeft && (zRotation - previousZRotation) > rotationSensitivity / 2f)
         {

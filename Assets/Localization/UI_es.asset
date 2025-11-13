@@ -103,6 +103,82 @@ MonoBehaviour:
     m_Localized: Jugar
     m_Metadata:
       m_Items: []
+  - m_Id: 35365273436160
+    m_Localized: "\xA1Toca un bot\xF3n para ver su tabla de clasificaci\xF3n online!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 35632354131968
+    m_Localized: Cargando puntuaciones...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 35707096629248
+    m_Localized: "No hay puntuaciones todav\xEDa."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39993046171648
+    m_Localized: "Tu posici\xF3n actual: {0}\xBA con {1} puntos"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 35828207157248
+    m_Localized: "A\xFAn no tienes puntuaci\xF3n en este modo."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 43771124219904
+    m_Localized: "Prep\xE1rate..."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 43894914908160
+    m_Localized: "\xA1Vamos!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 44002830155776
+    m_Localized: "\xA1Juego terminado!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 44192848904192
+    m_Localized: "\xA1Toca la pantalla!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 44361548005376
+    m_Localized: "\xA1Haz zoom hacia dentro!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 44543366889472
+    m_Localized: "\xA1Haz zoom hacia fuera!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 44609041301504
+    m_Localized: "\xA1Agita el tel\xE9fono!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 44798418321408
+    m_Localized: "\xA1Pon el tel\xE9fono boca abajo!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 44946506612736
+    m_Localized: "\xA1Desliza hacia la derecha!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 45102178205696
+    m_Localized: "\xA1Desliza hacia la izquierda!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 45178564870144
+    m_Localized: "\xA1Desliza hacia arriba!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 45250073559040
+    m_Localized: "\xA1Desliza hacia abajo!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 45334840442880
+    m_Localized: "\xA1Rota el tel\xE9fono hacia la derecha!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 45502721654784
+    m_Localized: "\xA1Rota el tel\xE9fono hacia la izquierda!"
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

@@ -5,7 +5,29 @@ using UnityEngine.Localization.Settings;
 
 public class LanguageToggleButton : MonoBehaviour
 {
+    const string LanguageKey = "language";   // PlayerPrefs key
     bool isSwitching;
+
+    private IEnumerator Start()
+    {
+        // Al entrar al juego, aplicamos el idioma guardado
+        yield return LocalizationSettings.InitializationOperation;
+
+        var locales = LocalizationSettings.AvailableLocales.Locales;
+        if (locales == null || locales.Count == 0)
+            yield break;
+
+        // "es" por defecto si no hay nada guardado
+        string savedLang = PlayerPrefs.GetString(LanguageKey, "es");
+
+        // Buscamos un Locale cuyo código empiece por "es" o "en"
+        Locale target = locales.Find(l => l.Identifier.Code.StartsWith(savedLang));
+
+        if (target != null)
+        {
+            LocalizationSettings.SelectedLocale = target;
+        }
+    }
 
     public void ToggleLanguage()
     {
@@ -22,20 +44,28 @@ public class LanguageToggleButton : MonoBehaviour
         var current = LocalizationSettings.SelectedLocale;
         var locales = LocalizationSettings.AvailableLocales.Locales;
 
-        Locale target = null;
-
-        string currentCode = current.Identifier.Code;
-
-        if (currentCode == "es")
+        if (locales == null || locales.Count == 0)
         {
-            target = locales.Find(l => l.Identifier.Code == "en");
-        }
-        else
-        {
-            target = locales.Find(l => l.Identifier.Code == "es");
+            isSwitching = false;
+            yield break;
         }
 
-        LocalizationSettings.SelectedLocale = target;
+        // Si por lo que sea es null, asumimos español actual
+        string currentCode = current != null ? current.Identifier.Code : "es";
+
+        bool isSpanish = currentCode.StartsWith("es");   // cubre "es", "es-ES", etc.
+        string targetPrefix = isSpanish ? "en" : "es";
+
+        Locale target = locales.Find(l => l.Identifier.Code.StartsWith(targetPrefix));
+
+        if (target != null)
+        {
+            LocalizationSettings.SelectedLocale = target;
+
+            // Guardamos SOLO el prefijo ("es" o "en")
+            PlayerPrefs.SetString(LanguageKey, targetPrefix);
+            PlayerPrefs.Save();
+        }
 
         isSwitching = false;
     }

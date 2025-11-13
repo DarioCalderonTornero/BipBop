@@ -95,6 +95,82 @@ MonoBehaviour:
     m_Key: Jugar_button
     m_Metadata:
       m_Items: []
+  - m_Id: 35365273436160
+    m_Key: leaderboard_touch_prompt
+    m_Metadata:
+      m_Items: []
+  - m_Id: 35632354131968
+    m_Key: leaderboard_loading
+    m_Metadata:
+      m_Items: []
+  - m_Id: 35707096629248
+    m_Key: leaderboard_no_scores
+    m_Metadata:
+      m_Items: []
+  - m_Id: 35828207157248
+    m_Key: leaderboard_no_score_mode
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39993046171648
+    m_Key: leaderboard_has_score
+    m_Metadata:
+      m_Items: []
+  - m_Id: 43771124219904
+    m_Key: Ready_Text_Classic
+    m_Metadata:
+      m_Items: []
+  - m_Id: 43894914908160
+    m_Key: Go_Text_Classic
+    m_Metadata:
+      m_Items: []
+  - m_Id: 44002830155776
+    m_Key: Game_Over_Text_Classic
+    m_Metadata:
+      m_Items: []
+  - m_Id: 44192848904192
+    m_Key: Tap_Classic
+    m_Metadata:
+      m_Items: []
+  - m_Id: 44361548005376
+    m_Key: ZoomIn_Classic
+    m_Metadata:
+      m_Items: []
+  - m_Id: 44543366889472
+    m_Key: ZoomOut_Classic
+    m_Metadata:
+      m_Items: []
+  - m_Id: 44609041301504
+    m_Key: Shake_Classic
+    m_Metadata:
+      m_Items: []
+  - m_Id: 44798418321408
+    m_Key: LookDown_Classic
+    m_Metadata:
+      m_Items: []
+  - m_Id: 44946506612736
+    m_Key: SwipeRight_Classic
+    m_Metadata:
+      m_Items: []
+  - m_Id: 45102178205696
+    m_Key: SwipeLeft_Classic
+    m_Metadata:
+      m_Items: []
+  - m_Id: 45178564870144
+    m_Key: SwipeUp_Classic
+    m_Metadata:
+      m_Items: []
+  - m_Id: 45250073559040
+    m_Key: SwipeDown_Classic
+    m_Metadata:
+      m_Items: []
+  - m_Id: 45334840442880
+    m_Key: RotateRight_Classic
+    m_Metadata:
+      m_Items: []
+  - m_Id: 45502721654784
+    m_Key: RotateLeft_Classic
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

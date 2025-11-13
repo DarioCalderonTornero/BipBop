@@ -5,6 +5,8 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 
 public class LogicaJuego : MonoBehaviour
 {
@@ -20,29 +22,44 @@ public class LogicaJuego : MonoBehaviour
     public event EventHandler OnGameOver;
 
     private bool isTaskCompleted = false; // Verifica si la tarea actual ya fue completada
-    private string currentTask; // Tarea actual
-    private string lastTask;    // Última tarea realizada
-    private string[] tasks = {
-        "¡Toca la pantalla!",
-        "¡Haz zoom hacia dentro!",
-        "¡Haz zoom hacia fuera!",
-        "¡Agita el teléfono!",
-        "¡Ponlo boca abajo!",
-        "¡Desliza hacia la derecha!",
-        "¡Desliza hacia la izquierda!",
-        "¡Desliza hacia arriba!",
-        "¡Desliza hacia abajo!",
-        "¡Gira a la derecha!",
-        "¡Gira a la izquierda!"
-    };
+    private TaskInfo currentTask;
+    private TaskType lastTaskType;
+    public TaskInfo[] tasks;
 
     private bool hasEnded = false;
+
+    public enum TaskType
+    {
+        Tap,
+        ZoomIn,
+        ZoomOut,
+        Shake,
+        LookDown,
+        SwipeRight,
+        SwipeLeft,
+        SwipeUp,
+        SwipeDown,
+        RotateRight,
+        RotateLeft
+    }
+
+    [System.Serializable]
+    public class TaskInfo
+    {
+        public TaskType type;             // Identificador lógico
+        public LocalizedString text;      // Texto localizado (ES/EN), ej: "¡Toca la pantalla!"
+    }
+
+    [Header("Localization")]
+    public LocalizedString readyText;        // "Prepárate..." / "Get ready..."
+    public LocalizedString goText;           // "GO!"
+    public LocalizedString gameOverText;
 
     private void Awake()
     {
         Instance = this;
-        instructionText.text = "Prepárate..."; 
-        timerUI.fillAmount = 1; 
+        instructionText.text = readyText.GetLocalizedString();
+        timerUI.fillAmount = 1;
     }
 
     void Start()
@@ -56,13 +73,13 @@ public class LogicaJuego : MonoBehaviour
 
         yield return new WaitForSeconds(delay);
 
-        CountDownUI.Instance.ShowMessage("GO!");
+        CountDownUI.Instance.ShowMessage(goText.GetLocalizedString());
 
         yield return new WaitForSeconds(0.8f);
 
         CountDownUI.Instance.Hide();
-        isGameActive = true; 
-        instructionText.text = ""; 
+        isGameActive = true;
+        instructionText.text = "";
 
         StartNewTask();
     }
@@ -82,16 +99,15 @@ public class LogicaJuego : MonoBehaviour
         }
     }
 
-    public void OnTaskAction(string action)
+    public void OnTaskAction(TaskType actionType)
     {
-        if (!isGameActive || isTaskCompleted || hasEnded) return;
+        if (!isGameActive || isTaskCompleted || hasEnded || currentTask == null) return;
 
-        // Verifica si la acción corresponde a la tarea actual
-        if (action == currentTask) // Solo acepta acciones que coincidan exactamente
+        if (actionType == currentTask.type)
         {
-            isTaskCompleted = true; // Marca la tarea como completada
+            isTaskCompleted = true;
             StartNewTask();
-            isTaskCompleted = false; // Resetea la bandera para la próxima tarea
+            isTaskCompleted = false;
         }
     }
 
@@ -102,31 +118,34 @@ public class LogicaJuego : MonoBehaviour
         MainGamePoints.Instance.AddScore();
         UpdateScoreText();
 
-        // Filtrar tareas según las configuraciones
-        List<string> availableTasks = new List<string>(tasks);
+        // Copia lista de tareas disponibles
+        List<TaskInfo> availableTasks = new List<TaskInfo>(tasks);
 
-        // Si las tareas de movimiento están deshabilitadas
+        // Filtrar por PlayerPrefs
         if (PlayerPrefs.GetInt("MotionTasks", 1) == 0)
         {
-            availableTasks.Remove("¡Agita el teléfono!");
-            availableTasks.Remove("¡Ponlo boca abajo!");
-            availableTasks.Remove("¡Gira a la derecha!");
-            availableTasks.Remove("¡Gira a la izquierda!");
+            availableTasks.RemoveAll(t =>
+                t.type == TaskType.Shake ||
+                t.type == TaskType.LookDown ||
+                t.type == TaskType.RotateRight ||
+                t.type == TaskType.RotateLeft
+            );
         }
 
-        // Seleccionar una nueva tarea diferente
-        string newTask;
+        // Elegir nueva tarea distinta de la anterior
+        TaskInfo newTask;
         do
         {
             newTask = availableTasks[UnityEngine.Random.Range(0, availableTasks.Count)];
-        } while (newTask == currentTask);
+        } while (currentTask != null && newTask.type == currentTask.type);
 
         currentTask = newTask;
-        instructionText.text = currentTask;
+
+        // Texto localizado según idioma actual
+        instructionText.text = currentTask.text.GetLocalizedString();
 
         currentTime = startTime;
         startTime = Mathf.Max(2f, startTime - 0.05f);
-
         timerUI.fillAmount = 0f;
     }
 
@@ -153,8 +172,8 @@ public class LogicaJuego : MonoBehaviour
         if (hasEnded) return;
 
         isGameActive = false;
-        instructionText.text = "¡Juego terminado!";
-        SaveRecordIfNeeded(); 
+        hasEnded = true;
+        instructionText.text = gameOverText.GetLocalizedString();
 
         int coinsEarned = MainGamePoints.Instance.GetScore() / 15;
 
