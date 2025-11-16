@@ -26,15 +26,26 @@ public class ColorManager : MonoBehaviour
 
     [Header("Color Data")]
     public LocalizedString[] colorNames;
-    public Color[] colorValues = { Color.red, Color.blue, Color.green, Color.yellow, new Color(0.5f, 0f, 0.5f), new Color(1f, 0.5f, 0f),
-                                new Color(0.6f, 0.3f, 0.1f), Color.black, Color.white };
+    public Color[] colorValues = {
+        Color.red,
+        Color.blue,
+        Color.green,
+        Color.yellow,
+        new Color(0.5f, 0f, 0.5f),
+        new Color(1f, 0.5f, 0f),
+        new Color(0.6f, 0.3f, 0.1f),
+        Color.black,
+        Color.white
+    };
 
     private float currentTime;
     private int correctIndex;
     private int lastCorrectIndex = -1;
 
-    // Nueva bandera para evitar múltiples finales
+    // Bandera para evitar múltiples finales
     private bool hasEnded = false;
+    // Bandera para saber si el minijuego ha empezado realmente (tras el Countdown)
+    private bool hasStarted = false;
 
     private void Awake()
     {
@@ -43,24 +54,21 @@ public class ColorManager : MonoBehaviour
 
     private void Start()
     {
-        hasEnded = false;
-        currentTime = startTime;
-
-        if (timeBarImage != null)
-            timeBarImage.fillAmount = 1f; // Llena al inicio
-
-        UpdateScoreText();
-        SetupRound();
+        if (ColorGameState.Instance != null)
+        {
+            ColorGameState.Instance.OnPlayingColorGame += HandleOnPlayingColorGame;
+        }
     }
 
     private void Update()
     {
         if (hasEnded) return;
+        if (!hasStarted) return; 
 
         currentTime -= Time.deltaTime;
 
         if (timeBarImage != null)
-            timeBarImage.fillAmount = Mathf.Clamp01(currentTime / startTime); // Actualiza el relleno
+            timeBarImage.fillAmount = Mathf.Clamp01(currentTime / startTime);
 
         if (currentTime <= 0f)
         {
@@ -68,9 +76,34 @@ public class ColorManager : MonoBehaviour
         }
     }
 
+    private void HandleOnPlayingColorGame(object sender, EventArgs e)
+    {
+        Debug.Log("PlayingColorGame");
+        if (!hasStarted)
+        {
+            StartColorGame();
+        }
+    }
+
+    private void StartColorGame()
+    {
+        hasEnded = false;
+        hasStarted = true;
+
+        currentTime = startTime;
+
+        if (timeBarImage != null)
+            timeBarImage.fillAmount = 1f;
+
+        UpdateScoreText();
+        SetupRound();
+        UpdateCandidateButtonsSize();
+    }
+
     private void SetupRound()
     {
         if (hasEnded) return;
+        if (!hasStarted) return; 
 
         int availableCount = 6;
         if (ColorGamePuntos.Instance.GetScore() >= 10) availableCount = 7;
@@ -107,7 +140,7 @@ public class ColorManager : MonoBehaviour
         } while (backgroundColorIndex == textColorIndex);
         colorWordBackground.color = colorValues[backgroundColorIndex];
 
-        // Resto de tu código tal cual...
+        // Construcción de la lista de candidatos
         List<int> candidateIndices = new List<int> { correctIndex, textColorIndex };
 
         List<int> remainingIndices = new List<int>();
@@ -117,6 +150,7 @@ public class ColorManager : MonoBehaviour
                 remainingIndices.Add(i);
         }
 
+        // Barajar remainingIndices
         for (int i = 0; i < remainingIndices.Count; i++)
         {
             int r = UnityEngine.Random.Range(i, remainingIndices.Count);
@@ -133,12 +167,14 @@ public class ColorManager : MonoBehaviour
             candidateIndices.Add(remainingIndices[0]);
         }
 
+        // Barajar candidateIndices
         for (int i = 0; i < candidateIndices.Count; i++)
         {
             int r = UnityEngine.Random.Range(i, candidateIndices.Count);
             (candidateIndices[i], candidateIndices[r]) = (candidateIndices[r], candidateIndices[i]);
         }
 
+        // Asignar colores a los botones
         for (int i = 0; i < candidateButtons.Count; i++)
         {
             int assignedIndex = candidateIndices[i];
@@ -147,12 +183,12 @@ public class ColorManager : MonoBehaviour
             int indexCaptured = assignedIndex;
             candidateButtons[i].onClick.AddListener(() => OnCandidateSelected(indexCaptured));
         }
-    
     }
 
     public void OnCandidateSelected(int selectedIndex)
     {
-        if (hasEnded) return; // Bloquear interacción tras game over
+        if (hasEnded) return;   // Bloquear interacción tras game over
+        if (!hasStarted) return; // Bloquear interacción durante Countdown / antes de empezar
 
         if (selectedIndex == correctIndex)
         {
@@ -176,6 +212,7 @@ public class ColorManager : MonoBehaviour
     {
         float size1 = 419.92f;
         float size2 = 262.141f;
+
         if (ColorGamePuntos.Instance.GetScore() >= 50)
         {
             size1 = 220f;

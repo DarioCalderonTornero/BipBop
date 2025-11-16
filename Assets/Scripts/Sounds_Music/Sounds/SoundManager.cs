@@ -11,7 +11,7 @@ public class SoundManager : MonoBehaviour
     private const string PREFS_PREVIOUS_VOLUME = "PreviousSoundVolume";
     private const string PREFS_MUTED = "SoundIsMuted";
 
-    private int soundVolume = 6;
+    private int soundVolume = 5;
 
     private float soundVolumeNormalized
     {

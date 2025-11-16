@@ -8,7 +8,7 @@ public class MusicManager : MonoBehaviour
     public static MusicManager Instance { get; private set; }
 
     private int MUSIC_VOLUME_MAX = 10;
-    public static int musicVolume = 6;
+    public static int musicVolume = 5;
 
     private static float musicTime;
 
@@ -72,6 +72,16 @@ public class MusicManager : MonoBehaviour
 
     private void PlayMusic(AudioClip clip)
     {
+        float previousTime = musicAudioSource.time;
+
+        if (clip == menuSceneMusicClip)
+        {
+            musicAudioSource.clip = clip;
+            musicAudioSource.time = previousTime;
+            musicAudioSource.Play();
+            return;
+        }
+
         musicAudioSource.clip = clip;
         musicAudioSource.time = 0f;
         musicAudioSource.Play();
@@ -83,7 +93,7 @@ public class MusicManager : MonoBehaviour
 
     public void ChangeMusicVolume()
     {
-        musicVolume = (musicVolume + 1) % MUSIC_VOLUME_MAX + 1;
+        musicVolume = (musicVolume + 1) % MUSIC_VOLUME_MAX;
         musicAudioSource.volume = GetMusicVolumeNormalized();
         OnMusicVolumeChanged?.Invoke(this, EventArgs.Empty);
     }
