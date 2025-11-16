@@ -9,9 +9,6 @@ public class DailyMissionsTimer : MonoBehaviour
 {
     public static DailyMissionsTimer Instance;
 
-    [SerializeField] private string timerTextName = "DailyMissionsTimerText"; // nombre del objeto en la escena
-    private TextMeshProUGUI timerText;
-
     [Header("Debug")]
     [SerializeField] private bool useCustomResetTime = false;
     [SerializeField] private int resetHour = 0;
@@ -58,15 +55,7 @@ public class DailyMissionsTimer : MonoBehaviour
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        // Reasignar TMP por nombre en la nueva escena
-        if (timerText == null && !string.IsNullOrEmpty(timerTextName))
-        {
-            GameObject timerObj = GameObject.Find(timerTextName);
-            if (timerObj != null)
-                timerText = timerObj.GetComponent<TextMeshProUGUI>();
-            else
-                Debug.LogWarning($"No se encontró '{timerTextName}' en la escena.");
-        }
+        // Ya no hace falta buscar ningún TextMeshPro aquí
     }
 
     private void Update()
@@ -88,8 +77,8 @@ public class DailyMissionsTimer : MonoBehaviour
             remaining = NextResetTime - DateTime.Now; // recalcular
         }
 
-        if (timerText != null)
-            timerText.text = $"Misiones diarias {remaining:hh\\:mm\\:ss}";
+        // MPORTANTE: ya NO escribimos en ningún timerText aquí
+        // El texto lo actualiza DailyMissionManager.RefreshTimerText()
     }
 
     private DateTime CalculateNextReset()

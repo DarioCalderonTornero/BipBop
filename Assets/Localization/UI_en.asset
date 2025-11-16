@@ -267,6 +267,34 @@ MonoBehaviour:
     m_Localized: Hexagon
     m_Metadata:
       m_Items: []
+  - m_Id: 1133328871686144
+    m_Localized: OPTIONS
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1133442260500480
+    m_Localized: CREDITS
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1133510334054400
+    m_Localized: BACK
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1144078537293824
+    m_Localized: Play {0} game
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1144432050012160
+    m_Localized: Play {0} games
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1144528112156672
+    m_Localized: Score {0} points in Geometric Mode
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1156087655923712
+    m_Localized: Daily missions {0}
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

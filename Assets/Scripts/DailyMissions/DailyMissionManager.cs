@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 using UnityEngine.SceneManagement;
 
 public class DailyMissionManager : MonoBehaviour
@@ -24,6 +26,9 @@ public class DailyMissionManager : MonoBehaviour
     private Transform missionsContainer;
     private TextMeshProUGUI timerText;
 
+    [Header("Localization")]
+    [SerializeField] private LocalizedString dailyMissionsTimerLabel;
+
     private void Awake()
     {
         if (Instance == null)
@@ -43,25 +48,35 @@ public class DailyMissionManager : MonoBehaviour
     private void OnEnable()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
+        LocalizationSettings.SelectedLocaleChanged += OnLocaleChanged;
     }
 
     private void OnDisable()
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
+        LocalizationSettings.SelectedLocaleChanged -= OnLocaleChanged;
+    }
+
+    private void OnLocaleChanged(Locale newLocale)
+    {
+        RefreshTimerText();
+        // Si quisieras, también podrías refrescar la UI de misiones aquí
+        RefreshUI();
+    }
+
+    public void RegisterTimerText(TextMeshProUGUI text)
+    {
+        timerText = text;
+        RefreshTimerText();
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        // Reasignar UI
+        // Ya NO hace falta buscar el timer por nombre
         GameObject containerObj = GameObject.Find(missionsContainerName);
         if (containerObj != null)
             missionsContainer = containerObj.transform;
 
-        GameObject timerObj = GameObject.Find(timerTextName);
-        if (timerObj != null)
-            timerText = timerObj.GetComponent<TextMeshProUGUI>();
-
-        // Instanciar o refrescar UI
         GenerateAndDisplayMissions();
         RefreshTimerText();
     }
@@ -182,7 +197,14 @@ public class DailyMissionManager : MonoBehaviour
     public void RefreshTimerText()
     {
         if (timerText != null && DailyMissionsTimer.Instance != null)
-            timerText.text = $"Misiones diarias {DailyMissionsTimer.Instance.GetRemainingTimeString()}";
+        {
+            string remaining = DailyMissionsTimer.Instance.GetRemainingTimeString();
+            string localized = dailyMissionsTimerLabel.GetLocalizedString(remaining);
+
+            Debug.Log($"[DailyMissionManager] Timer -> '{localized}'");
+
+            timerText.text = localized;
+        }
     }
 
     public void ResetMissions()

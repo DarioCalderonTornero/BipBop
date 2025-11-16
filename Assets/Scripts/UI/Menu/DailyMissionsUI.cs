@@ -42,6 +42,9 @@ public class DailyMissionsUI : MonoBehaviour
 
         dailyMissionsPanel.anchoredPosition = hiddenPanelPos;
         timerDailyMissionsText.gameObject.SetActive(false);
+        
+        if (DailyMissionManager.Instance != null)
+            DailyMissionManager.Instance.RegisterTimerText(timerDailyMissionsText);
     }
 
     private void OnDailyMissionsButtonClicked()

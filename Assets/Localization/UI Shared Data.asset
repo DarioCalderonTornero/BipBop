@@ -259,6 +259,34 @@ MonoBehaviour:
     m_Key: geom_hexagon
     m_Metadata:
       m_Items: []
+  - m_Id: 1133328871686144
+    m_Key: settings_options
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1133442260500480
+    m_Key: settings_credits
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1133510334054400
+    m_Key: settings_back
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1144078537293824
+    m_Key: dailymissions_juega1partida
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1144432050012160
+    m_Key: dailymissions_juega3partidas
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1144528112156672
+    m_Key: "dailymissions_consigue10puntosgeom\xE9trico"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1156087655923712
+    m_Key: dailymissions_timer
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

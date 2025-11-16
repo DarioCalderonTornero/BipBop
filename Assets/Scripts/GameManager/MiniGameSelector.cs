@@ -142,7 +142,18 @@ public class MiniGameSelector : MonoBehaviour
 
     public void OnPlayButton()
     {
-        SceneManager.LoadScene(miniGames[currentIndex].sceneName);
+        string sceneName = miniGames[currentIndex].sceneName;
+        string modeName = miniGames[currentIndex].name.GetLocalizedString(); // si ya lo tienes localizado
+
+        if (TransitionScript.Instance != null)
+        {
+            TransitionScript.Instance.TransitionToScene(sceneName, modeName);
+        }
+        else
+        {
+            // Fallback por si no está el sistema de transición
+            SceneManager.LoadScene(sceneName);
+        }
     }
 
     void OnEnable()

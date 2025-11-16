@@ -267,6 +267,34 @@ MonoBehaviour:
     m_Localized: "Hex\xE1gono"
     m_Metadata:
       m_Items: []
+  - m_Id: 1133328871686144
+    m_Localized: OPCIONES
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1133442260500480
+    m_Localized: "CR\xC9DITOS"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1133510334054400
+    m_Localized: "ATR\xC1S"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1144078537293824
+    m_Localized: Juega {0} partida
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1144432050012160
+    m_Localized: Juega {0} partidas
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1144528112156672
+    m_Localized: "Consigue {0} puntos en el modo Geom\xE9trico"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1156087655923712
+    m_Localized: Misiones diarias {0}
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

@@ -54,6 +54,29 @@ public class GeometricModeManager : MonoBehaviour
 
     private void Start()
     {
+        // En lugar de llamar a StartGame() directamente,
+        // nos sincronizamos con la transición si existe.
+        if (TransitionScript.Instance != null)
+        {
+            // Nos suscribimos y esperamos
+            TransitionScript.Instance.OnTransitionOutFinished += HandleTransitionFinished;
+        }
+        else
+        {
+            // Si no hay transición, empezamos normal
+            StartGame();
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (TransitionScript.Instance != null)
+            TransitionScript.Instance.OnTransitionOutFinished -= HandleTransitionFinished;
+    }
+
+    private void HandleTransitionFinished()
+    {
+        // Ya ha bajado el panel  empezamos el juego
         StartGame();
     }
 

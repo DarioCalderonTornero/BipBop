@@ -13,7 +13,19 @@ MonoBehaviour:
   m_Name: juega_3_partidas
   m_EditorClassIdentifier: 
   id: juega_3_partidas
-  description: Juega 3 partidas
+  description:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 1144432050012160
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
   goal: 3
   reward: 10
+  xpReward: 10
   icon: {fileID: 21300000, guid: 70141d51621e24facbca9196bbde84b4, type: 3}
+  references:
+    version: 2
+    RefIds: []

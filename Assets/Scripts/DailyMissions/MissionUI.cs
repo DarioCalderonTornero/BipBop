@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
 
 public class MissionUI : MonoBehaviour
@@ -13,23 +15,30 @@ public class MissionUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI xpRewardText;
 
     [Header("Estilo de misión completada")]
-    [SerializeField] private Sprite completedIcon;              // Asigna un icono distinto en inspector
+    [SerializeField] private Sprite completedIcon;
     [SerializeField] private Color completedTextColor = Color.gray;
 
     private DailyMission mission;
     private Color defaultTextColor;
+    private bool initialized = false;
+
+    private void OnEnable()
+    {
+        LocalizationSettings.SelectedLocaleChanged += OnLocaleChanged;
+    }
+
+    private void OnDisable()
+    {
+        LocalizationSettings.SelectedLocaleChanged -= OnLocaleChanged;
+    }
 
     public void Setup(DailyMission mission, Sprite missionIcon)
     {
-        xpRewardText.text = mission.template.xpReward.ToString();
-
         if (mission == null)
         {
             Debug.LogError("DailyMission null detectada en Setup()");
             return;
         }
-
-        this.mission = mission;
 
         if (mission.template == null)
         {
@@ -37,24 +46,40 @@ public class MissionUI : MonoBehaviour
             return;
         }
 
-        // Guardamos color original para poder restaurarlo si hace falta
+        this.mission = mission;
+
+        xpRewardText.text = mission.template.xpReward.ToString();
+
+        // Guardamos color original
         defaultTextColor = descriptionText.color;
 
-        descriptionText.text = mission.template.description;
+        // Icono
         iconImage.sprite = missionIcon != null ? missionIcon : mission.template.icon;
 
+        // Texto localizado
+        UpdateDescriptionText();
+
         Refresh();
+        initialized = true;
+    }
+
+    private void UpdateDescriptionText()
+    {
+        if (mission == null || mission.template == null) return;
+
+        // Si la descripción es Smart String tipo "Juega {0} partidas...", pasamos goal
+        descriptionText.text = mission.template.description.GetLocalizedString(mission.template.goal);
     }
 
     public void Refresh()
     {
-        if (mission == null) return;
+        if (mission == null || mission.template == null) return;
 
+        // Progreso numérico (esto normalmente no hace falta localizarlo)
         progressText.text = $"{mission.currentProgress}/{mission.template.goal}";
 
         if (mission.IsCompleted)
         {
-            // Estilo completado
             descriptionText.color = completedTextColor;
             descriptionText.fontStyle = FontStyles.Italic;
             if (completedIcon != null)
@@ -62,10 +87,19 @@ public class MissionUI : MonoBehaviour
         }
         else
         {
-            // Estilo normal
             descriptionText.color = defaultTextColor;
             descriptionText.fontStyle = FontStyles.Normal;
             iconImage.sprite = mission.template.icon;
         }
+    }
+
+    private void OnLocaleChanged(Locale newLocale)
+    {
+        if (!initialized || mission == null) return;
+
+        // Re-localizar descripción al cambiar de idioma
+        UpdateDescriptionText();
+        // El estilo (completado o no) se mantiene igual
+        Refresh();
     }
 }
