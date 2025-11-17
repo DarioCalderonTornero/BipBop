@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 4de93b9bf381f65408151f62e5c27cf0
+guid: 7e73d50e92d661749b81bb657aa8981a
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 5112659177225850855
-    second: ChatGPT Image 17 nov 2025, 22_31_58_0
+      213: 1618036454705851656
+    second: "IconoModoGeom\xE9trico_0"
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: ChatGPT Image 17 nov 2025, 22_31_58_0
+      name: "IconoModoGeom\xE9trico_0"
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 1024
-        height: 1024
+        width: 886
+        height: 876
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 7ef00340f60d3f640800000000000000
-      internalID: 5112659177225850855
+      spriteID: 80def54359b647610800000000000000
+      internalID: 1618036454705851656
       vertices: []
       indices: 
       edges: []
