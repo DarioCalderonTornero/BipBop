@@ -1,52 +1,89 @@
 using TMPro;
 using UnityEngine;
+using System.Collections;
 
 public class ColorCountDownUI : MonoBehaviour
 {
-  public static ColorCountDownUI Instance { get; private set; }
+    public static ColorCountDownUI Instance { get; private set; }
 
-  public TextMeshProUGUI countDownText;
+    public TextMeshProUGUI countDownText;
 
-  private Animator myAnimator;
+    private Animator myAnimator;
 
-  private bool isCustomMessage = false;
+    private bool isCustomMessage = false;
 
-  private void Awake()
-  {
-    Instance = this;
-  }
-  private void Start()
-  {
-    myAnimator = GetComponent<Animator>();
-  }
+    private void Awake()
+    {
+        Instance = this;
+    }
 
-  private void Update()
-  {
-      if (!isCustomMessage)
-      {
-          countDownText.text = Mathf.Ceil(ColorGameState.Instance.GetCountDownTimer()).ToString();
-      }
-  }
+    private void Start()
+    {
+        myAnimator = GetComponent<Animator>();
+    }
 
-  public void Show()
-  {
-      countDownText.gameObject.SetActive(true);
-      myAnimator.SetBool("IsCountDown", true);
-  }
+    private void Update()
+    {
+        if (!isCustomMessage)
+        {
+            float t = ColorGameState.Instance.GetCountDownTimer();
 
-  public void Hide()
-  {
-      countDownText.gameObject.SetActive(false);
-  }
+            if (t > 0f)
+            {
+                countDownText.text = Mathf.Ceil(t).ToString();
+            }
+        }
+    }
 
-  public void ShowMessage(string message)
-  {
-      isCustomMessage = true;
-      countDownText.text = message;
-  }
+    public void Show()
+    {
+        isCustomMessage = false;
+        countDownText.gameObject.SetActive(true);
 
-  public void SetAnimatorFalse()
-  {
-      myAnimator.SetBool("IsCountDown", false);
-  }
+        if (myAnimator != null)
+        {
+            myAnimator.SetBool("IsCountDown", true);
+        }
+    }
+
+    public void Hide()
+    {
+        countDownText.gameObject.SetActive(false);
+    }
+
+    public void ShowMessage(string message)
+    {
+        isCustomMessage = true;
+        countDownText.gameObject.SetActive(true);
+        countDownText.text = message;
+    }
+
+    public void ShowGo(float duration = 0.7f)
+    {
+        StartCoroutine(ShowGoRoutine(duration));
+    }
+
+    private IEnumerator ShowGoRoutine(float duration)
+    {
+        isCustomMessage = true;
+
+        countDownText.gameObject.SetActive(true);
+        countDownText.text = "GO!";
+
+        yield return new WaitForSeconds(duration);
+
+        if (myAnimator != null)
+        {
+            myAnimator.SetBool("IsCountDown", false);
+            myAnimator.SetBool("CountDownFinish", true); 
+        }
+
+        countDownText.gameObject.SetActive(false);
+        isCustomMessage = false;
+
+        if (ColorGameState.Instance != null)
+        {
+            ColorGameState.Instance.StartGameAfterGo();
+        }
+    }
 }

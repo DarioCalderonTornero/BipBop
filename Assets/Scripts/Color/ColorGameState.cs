@@ -12,6 +12,7 @@ public class ColorGameState : MonoBehaviour
     {
         None,
         Countdown,
+        Go,       
         Playing,
         GameOver,
     }
@@ -57,8 +58,16 @@ public class ColorGameState : MonoBehaviour
 
                 if (countDownTimer <= 0f)
                 {
-                    colorGameState = ColorGameStateEnum.Playing;
+                    colorGameState = ColorGameStateEnum.Go;
+
+                    if (ColorCountDownUI.Instance != null)
+                    {
+                        ColorCountDownUI.Instance.ShowGo(0.7f);
+                    }
                 }
+                break;
+
+            case ColorGameStateEnum.Go:
                 break;
 
             case ColorGameStateEnum.Playing:
@@ -74,5 +83,9 @@ public class ColorGameState : MonoBehaviour
     public float GetCountDownTimer()
     {
         return countDownTimer;
+    }
+    public void StartGameAfterGo()
+    {
+        colorGameState = ColorGameStateEnum.Playing;
     }
 }
