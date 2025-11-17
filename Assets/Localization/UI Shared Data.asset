@@ -287,6 +287,26 @@ MonoBehaviour:
     m_Key: dailymissions_timer
     m_Metadata:
       m_Items: []
+  - m_Id: 1390474423140352
+    m_Key: Pausa_resumen
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1390586297810944
+    m_Key: Pausa_settings
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1390686046748672
+    m_Key: Pausa_menu
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1390775179902976
+    m_Key: Pausa_sound
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1390845409329152
+    m_Key: Pausa_volume
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

@@ -295,6 +295,26 @@ MonoBehaviour:
     m_Localized: Daily missions {0}
     m_Metadata:
       m_Items: []
+  - m_Id: 1390474423140352
+    m_Localized: RESUME
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1390586297810944
+    m_Localized: SETTINGS
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1390686046748672
+    m_Localized: MENU
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1390775179902976
+    m_Localized: 'Music Volume: {0}'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1390845409329152
+    m_Localized: 'Sound Volume: {0}'
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

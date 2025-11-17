@@ -295,6 +295,26 @@ MonoBehaviour:
     m_Localized: Misiones diarias {0}
     m_Metadata:
       m_Items: []
+  - m_Id: 1390474423140352
+    m_Localized: CONTINUAR
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1390586297810944
+    m_Localized: OPCIONES
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1390686046748672
+    m_Localized: "MEN\xDA"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1390775179902976
+    m_Localized: "Volumen m\xFAsica: {0}"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1390845409329152
+    m_Localized: 'Volumen sonido: {0}'
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

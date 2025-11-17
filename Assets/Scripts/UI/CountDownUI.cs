@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization;
 
 public class CountDownUI : MonoBehaviour
 {
@@ -9,8 +10,11 @@ public class CountDownUI : MonoBehaviour
 
     public TextMeshProUGUI countDownText;
 
-    private Animator myAnimator;
+    [Header("Localization")]
+    public LocalizedString readyMessage;  // "Prepárate..." / "Get ready..."
+    public LocalizedString goMessage;     // "GO!" / "Go!"
 
+    private Animator myAnimator;
     private bool isCustomMessage = false;
 
     private void Awake()
@@ -36,17 +40,39 @@ public class CountDownUI : MonoBehaviour
     {
         countDownText.gameObject.SetActive(true);
         myAnimator.SetBool("IsCountDown", true);
+        isCustomMessage = false;
     }
 
     public void Hide()
     {
         countDownText.gameObject.SetActive(false);
+        isCustomMessage = false;
     }
 
+    // Versión genérica, para mantener compatibilidad
     public void ShowMessage(string message)
     {
         isCustomMessage = true;
         countDownText.text = message;
+    }
+
+    // (Opcional) Versión genérica pero con LocalizedString
+    public void ShowMessage(LocalizedString localizedMessage)
+    {
+        isCustomMessage = true;
+        countDownText.text = localizedMessage.GetLocalizedString();
+    }
+
+    public void ShowReadyMessage()
+    {
+        isCustomMessage = true;
+        countDownText.text = readyMessage.GetLocalizedString();
+    }
+
+    public void ShowGoMessage()
+    {
+        isCustomMessage = true;
+        countDownText.text = goMessage.GetLocalizedString();
     }
 
     public void SetAnimatorFalse()

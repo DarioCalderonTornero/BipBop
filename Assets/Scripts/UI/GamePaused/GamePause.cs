@@ -2,6 +2,8 @@ using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
 
 public class GamePause : MonoBehaviour
@@ -36,10 +38,23 @@ public class GamePause : MonoBehaviour
     [SerializeField] private TextMeshProUGUI musicChangeText;
 
     [SerializeField] private Button closeGamePauseImage;
-
     [SerializeField] private Animator gamePauseAnimator;
 
+    [Header("Localization")]
+    [SerializeField] private LocalizedString soundVolumeLabel; // "Sound Volume: {0}" / "Volumen de sonido: {0}"
+    [SerializeField] private LocalizedString musicVolumeLabel; // "Music Volume: {0}" / "Volumen de música: {0}"
+
     bool cancelImage = true;
+
+    private void OnEnable()
+    {
+        LocalizationSettings.SelectedLocaleChanged += OnLocaleChanged;
+    }
+
+    private void OnDisable()
+    {
+        LocalizationSettings.SelectedLocaleChanged -= OnLocaleChanged;
+    }
 
     private void Awake()
     {
@@ -71,28 +86,25 @@ public class GamePause : MonoBehaviour
         soundChangeButton.onClick.AddListener(() =>
         {
             SoundManager.Instance.ChangeSoundVolume();
-            soundChangeText.text = "Sound Volume: " + SoundManager.Instance.GetSoundVolume();
+            UpdateSoundText(); //  en vez de texto hardcode
             bool isSoundMutedNow = SoundManager.Instance.GetSoundVolume() == 0;
             getCancelSoundVolumeImage.gameObject.SetActive(isSoundMutedNow);
             getSoundVolumeImage.gameObject.SetActive(!isSoundMutedNow);
-            Debug.Log(MusicManager.Instance.GetMusicVolume());
         });
 
-        
         musicChangeButton.onClick.AddListener(() =>
         {
             MusicManager.Instance.ChangeMusicVolume();
-            musicChangeText.text = "Music Volume: " + MusicManager.Instance.GetMusicVolume();
+            UpdateMusicText(); //  en vez de texto hardcode
             bool isMusicMutedNow = MusicManager.Instance.GetMusicVolume() == 0;
             getCancelMusicVolumeImage.gameObject.SetActive(isMusicMutedNow);
             getMusicVolumeImage.gameObject.SetActive(!isMusicMutedNow);
         });
-        
 
         soundCancelVolumeButton.onClick.AddListener(() =>
         {
             SoundManager.Instance.GetCancelVolume();
-            soundChangeText.text = "Sound Volume: " + SoundManager.Instance.GetSoundVolume();
+            UpdateSoundText(); // 
             bool isMutedNow = SoundManager.Instance.GetSoundVolume() == 0;
             getCancelSoundVolumeImage.gameObject.SetActive(isMutedNow);
             getSoundVolumeImage.gameObject.SetActive(!isMutedNow);
@@ -101,7 +113,7 @@ public class GamePause : MonoBehaviour
         musicCancelVolumeButton.onClick.AddListener(() =>
         {
             MusicManager.Instance.CancelMusicVolume();
-            musicChangeText.text = "Music Volume: " + MusicManager.Instance.GetMusicVolume();
+            UpdateMusicText(); // 
             bool isMusicMutedNow = MusicManager.Instance.GetMusicVolume() == 0;
             getCancelMusicVolumeImage.gameObject.SetActive(isMusicMutedNow);
             getMusicVolumeImage.gameObject.SetActive(!isMusicMutedNow);
@@ -117,19 +129,45 @@ public class GamePause : MonoBehaviour
     private void Start()
     {
         closeGamePauseImage.gameObject.SetActive(false);
-        soundChangeText.text = "Sound Volume: " + SoundManager.Instance.GetSoundVolume();
-        musicChangeText.text = "Music Volume: " + MusicManager.Instance.GetMusicVolume();
 
-        //Set Sound Cancel Volume at start
+        // Textos iniciales localizados
+        UpdateSoundText();
+        UpdateMusicText();
+
+        // Sound
         bool isSoundMuted = SoundManager.Instance.GetSoundVolume() == 0;
         getCancelSoundVolumeImage.gameObject.SetActive(isSoundMuted);
         getSoundVolumeImage.gameObject.SetActive(!isSoundMuted);
         cancelImage = !isSoundMuted;
 
-        //Set Music Cancel Volume at start
+        // Music
         bool isMusicMuted = MusicManager.Instance.GetMusicVolume() == 0;
         getCancelMusicVolumeImage.gameObject.SetActive(isMusicMuted);
-        getMusicVolumeImage.gameObject.SetActive(!isMusicMuted);    
+        getMusicVolumeImage.gameObject.SetActive(!isMusicMuted);
+    }
+
+    private void OnLocaleChanged(Locale locale)
+    {
+        // Si cambias el idioma dentro del juego, refrescamos los textos
+        UpdateSoundText();
+        UpdateMusicText();
+    }
+
+    private void UpdateSoundText()
+    {
+        if (soundChangeText == null) return;
+
+        float vol = SoundManager.Instance.GetSoundVolume();
+        // Si es float 0–1 o 0–10, puedes adaptar. De momento lo pasamos tal cual:
+        soundChangeText.text = soundVolumeLabel.GetLocalizedString(vol);
+    }
+
+    private void UpdateMusicText()
+    {
+        if (musicChangeText == null) return;
+
+        float vol = MusicManager.Instance.GetMusicVolume();
+        musicChangeText.text = musicVolumeLabel.GetLocalizedString(vol);
     }
 
     private IEnumerator InvokeNormalAnim()
