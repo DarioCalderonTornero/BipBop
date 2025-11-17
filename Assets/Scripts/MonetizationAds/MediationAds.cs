@@ -27,12 +27,16 @@ public class MediationAds : MonoBehaviour
     private void InitializeAds()
     {
         // Selecciona Ad Unit según la plataforma
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+        // Lanza el modo de prueba oficial de LevelPlay
+        LevelPlay.LaunchTestSuite();
+#endif
+
 #if UNITY_ANDROID
         adUnitId = adUnitIdAndroid;
 #elif UNITY_IOS
-        adUnitId = adUnitIdIOS;
+    adUnitId = adUnitIdIOS;
 #endif
-
         rewardedAd = new LevelPlayRewardedAd(adUnitId);
 
         rewardedAd.OnAdLoaded += OnAdLoaded;

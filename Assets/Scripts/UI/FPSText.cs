@@ -10,7 +10,7 @@ public class FPSText : MonoBehaviour
 
     void Update()
     {
-        Application.targetFrameRate = 60;
+        // Application.targetFrameRate = 60;
 
         timer += Time.deltaTime;
         if (timer >= updateInterval)
