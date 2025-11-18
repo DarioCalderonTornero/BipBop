@@ -819,6 +819,19 @@ MonoBehaviour:
   coinText: {fileID: 1132583560}
   gameOverText: {fileID: 515188709}
   myanimator: {fileID: 372005143}
+  mainMenuSceneName: Menu
+  mainMenuTransitionLabel:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 1902503428849664
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  references:
+    version: 2
+    RefIds: []
 --- !u!225 &372005142
 CanvasGroup:
   m_ObjectHideFlags: 0

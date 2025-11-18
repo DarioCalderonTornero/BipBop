@@ -22,8 +22,9 @@ public class CoinsRewardUI : MonoBehaviour
     private int totalBefore;
 
     private Vector3 originalIconScale;
-    private int pendingPops = 0;
-    private bool isPopping = false;
+
+    // NUEVO: referencia al coroutine del pop
+    private Coroutine popCoroutine;
 
     private void Start()
     {
@@ -98,10 +99,14 @@ public class CoinsRewardUI : MonoBehaviour
         coinsArrived++;
         totalCoinsText.text = (totalBefore + coinsArrived).ToString();
 
-        // Contar pops pendientes y lanzar animación si no está corriendo
-        pendingPops++;
-        if (!isPopping)
-            StartCoroutine(PopIcon());
+        // POP: si hay una animación en curso, la paramos y la reiniciamos
+        if (popCoroutine != null)
+        {
+            StopCoroutine(popCoroutine);
+            targetIcon.localScale = originalIconScale;
+        }
+
+        popCoroutine = StartCoroutine(PopIconOnce());
 
         // Cuando llegan todas, actualizar en el CurrencyManager
         if (coinsArrived == coinsEarned)
@@ -110,39 +115,31 @@ public class CoinsRewardUI : MonoBehaviour
         }
     }
 
-    // Pop rápido y leve del icono del panel
-    private IEnumerator PopIcon()
+    // Pop rápido y simple, SIN acumular
+    private IEnumerator PopIconOnce()
     {
-        isPopping = true;
+        float popTime = 0.05f;
+        Vector3 targetScale = originalIconScale * 1.2f;
 
-        while (pendingPops > 0)
+        // Agrandar
+        float t = 0f;
+        while (t < popTime)
         {
-            pendingPops--;
-
-            float popTime = 0.05f;
-            Vector3 targetScale = originalIconScale * 1.2f; // agranda 20%
-
-            // Agrandar
-            float t = 0f;
-            while (t < popTime)
-            {
-                t += Time.deltaTime;
-                targetIcon.localScale = Vector3.Lerp(originalIconScale, targetScale, t / popTime);
-                yield return null;
-            }
-
-            // Volver a tamaño original
-            t = 0f;
-            while (t < popTime)
-            {
-                t += Time.deltaTime;
-                targetIcon.localScale = Vector3.Lerp(targetScale, originalIconScale, t / popTime);
-                yield return null;
-            }
-
-            targetIcon.localScale = originalIconScale; // asegurar tamaño final exacto
+            t += Time.deltaTime;
+            targetIcon.localScale = Vector3.Lerp(originalIconScale, targetScale, t / popTime);
+            yield return null;
         }
 
-        isPopping = false;
+        // Volver a tamaño original
+        t = 0f;
+        while (t < popTime)
+        {
+            t += Time.deltaTime;
+            targetIcon.localScale = Vector3.Lerp(targetScale, originalIconScale, t / popTime);
+            yield return null;
+        }
+
+        targetIcon.localScale = originalIconScale; // asegurar tamaño final exacto
+        popCoroutine = null;
     }
 }

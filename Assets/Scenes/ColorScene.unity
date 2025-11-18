@@ -1358,8 +1358,11 @@ MonoBehaviour:
   panelCanvasGroup: {fileID: 879476448}
   totalCoinsText: {fileID: 368887587}
   scatterRadius: 164.6
-  spawnDelay: 0.05
+  spawnDelay: 0.01
   fadeDuration: 0.5
+  preFadeInDelay: 0.5
+  postCoinsDelay: 1
+  speedMultiplier: 1
 --- !u!1 &717125637
 GameObject:
   m_ObjectHideFlags: 0

@@ -307,6 +307,10 @@ MonoBehaviour:
     m_Key: Pausa_volume
     m_Metadata:
       m_Items: []
+  - m_Id: 1902503428849664
+    m_Key: GameOver_menu
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
