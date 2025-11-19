@@ -20,6 +20,7 @@ public class Settings : MonoBehaviour
     [SerializeField] private Button volumeButton;
 
     [Header("Images")]
+    [SerializeField] private Image blackBackgroundImage;
     [SerializeField] private Image mainSettingsImage;
     [SerializeField] private Image challengesImage;
 
@@ -116,6 +117,7 @@ public class Settings : MonoBehaviour
         //StartCoroutine(OpenSettingsAnimFalse());
 
         backgroundImage.gameObject.SetActive(true);
+        blackBackgroundImage.gameObject.SetActive(true);
 
         mainSettingsButton.gameObject.SetActive(true);
         challengesButton.gameObject.SetActive(true);
@@ -132,6 +134,7 @@ public class Settings : MonoBehaviour
     public void Hide()
     {
         backgroundImage.gameObject.SetActive(false);
+        blackBackgroundImage.gameObject.SetActive(false);
 
         mainSettingsButton.gameObject.SetActive(false);
         challengesButton.gameObject.SetActive(false);
