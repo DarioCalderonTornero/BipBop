@@ -105,6 +105,12 @@ public class LogicaJuego : MonoBehaviour
 
         if (actionType == currentTask.type)
         {
+            // Aquí lanzamos el efecto de UI
+            if (ClassicModeUIEffects.Instance != null)
+            {
+                ClassicModeUIEffects.Instance.PlayEffectForTask(actionType);
+            }
+
             isTaskCompleted = true;
             StartNewTask();
             isTaskCompleted = false;
@@ -177,6 +183,8 @@ public class LogicaJuego : MonoBehaviour
 
         int coinsEarned = MainGamePoints.Instance.GetScore() / 15;
 
+        SaveRecordIfNeeded();
+
         CoinsRewardUI rewardUI = FindObjectOfType<CoinsRewardUI>(true);
         if (rewardUI != null)
         {
@@ -185,6 +193,11 @@ public class LogicaJuego : MonoBehaviour
         else
         {
             CurrencyManager.Instance.AddCoins(coinsEarned);
+        }
+
+        if (PlayFabLoginManager.Instance != null && PlayFabLoginManager.Instance.IsLoggedIn)
+        {
+            PlayFabScoreManager.Instance.SubmitScore("HighScore", MainGamePoints.Instance.GetScore());
         }
 
         //PlayFabScoreManager.Instance.SubmitScore("HighScore", MainGamePoints.Instance.GetScore());
