@@ -9,8 +9,6 @@ public class Settings : MonoBehaviour
     [SerializeField] private Image backgroundImage;
 
     [Header("Buttons")]
-    [SerializeField] private Button mainSettingsButton;
-    [SerializeField] private Button challengesButton;
     [SerializeField] private Button creditsButton;
 
     [SerializeField] private Button openSettingsButton;
@@ -22,8 +20,6 @@ public class Settings : MonoBehaviour
 
     [Header("Images")]
     [SerializeField] private Image blackBackgroundImage;
-    [SerializeField] private Image mainSettingsImage;
-    [SerializeField] private Image challengesImage;
 
     [SerializeField] private Image soundVolumeOnImage;
     [SerializeField] private Image soundVolumeOffImage;
@@ -147,16 +143,12 @@ public class Settings : MonoBehaviour
         backgroundImage.gameObject.SetActive(true);
         blackBackgroundImage.gameObject.SetActive(true);
 
-        mainSettingsButton.gameObject.SetActive(true);
-        challengesButton.gameObject.SetActive(true);
         creditsButton.gameObject.SetActive(true);
         closeSettingsButton.gameObject.SetActive(true);
 
         vibrationButton.gameObject.SetActive(true);
         soundVolumeButton.gameObject.SetActive(true);
 
-        mainSettingsImage.gameObject.SetActive(true);
-        challengesImage.gameObject.SetActive(true);
     }
 
     public void Hide()
@@ -164,15 +156,11 @@ public class Settings : MonoBehaviour
         backgroundImage.gameObject.SetActive(false);
         blackBackgroundImage.gameObject.SetActive(false);
 
-        mainSettingsButton.gameObject.SetActive(false);
-        challengesButton.gameObject.SetActive(false);
         creditsButton.gameObject.SetActive(false);
         closeSettingsButton.gameObject.SetActive(false);
 
         vibrationButton.gameObject.SetActive(false);
         soundVolumeButton.gameObject.SetActive(false);
 
-        mainSettingsImage.gameObject.SetActive(false);
-        challengesImage.gameObject.SetActive(false);
     }
 }
