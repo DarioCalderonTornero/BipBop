@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -20,6 +20,7 @@ public class ColorManager : MonoBehaviour
     public TextMeshProUGUI scoreText;
     public Image timeBarImage;
     public float startTime = 60f;
+    public TextMeshProUGUI TimeText;
 
     [Header("Candidate Buttons")]
     public List<Button> candidateButtons;
@@ -42,7 +43,7 @@ public class ColorManager : MonoBehaviour
     private int correctIndex;
     private int lastCorrectIndex = -1;
 
-    // Bandera para evitar múltiples finales
+    // Bandera para evitar mÃºltiples finales
     private bool hasEnded = false;
     // Bandera para saber si el minijuego ha empezado realmente (tras el Countdown)
     private bool hasStarted = false;
@@ -140,7 +141,7 @@ public class ColorManager : MonoBehaviour
         } while (backgroundColorIndex == textColorIndex);
         colorWordBackground.color = colorValues[backgroundColorIndex];
 
-        // Construcción de la lista de candidatos
+        // ConstrucciÃ³n de la lista de candidatos
         List<int> candidateIndices = new List<int> { correctIndex, textColorIndex };
 
         List<int> remainingIndices = new List<int>();
@@ -187,13 +188,14 @@ public class ColorManager : MonoBehaviour
 
     public void OnCandidateSelected(int selectedIndex)
     {
-        if (hasEnded) return;   // Bloquear interacción tras game over
-        if (!hasStarted) return; // Bloquear interacción durante Countdown / antes de empezar
+        if (hasEnded || !hasStarted) return;
 
         if (selectedIndex == correctIndex)
         {
-            ColorGamePuntos.Instance.AddScore();
+            // NUEVO â†’ flash de color
+            TriggerColorFlash(colorValues[correctIndex]);
 
+            ColorGamePuntos.Instance.AddScore();
             UpdateScoreText();
 
             startTime = Mathf.Max(1f, startTime - 0.1f);
@@ -206,6 +208,17 @@ public class ColorManager : MonoBehaviour
         {
             EndGame();
         }
+    }
+
+    private void TriggerColorFlash(Color flashColor)
+    {
+        float fade = 0.3f; // velocidad del fade
+
+        TimeText.GetComponent<ColorFlash>().Flash(flashColor, fade);
+        scoreText.GetComponent<ColorFlash>().Flash(flashColor, fade);
+
+        // opcional:
+        timeBarImage.GetComponent<ColorFlash>().Flash(flashColor, fade);
     }
 
     private void UpdateCandidateButtonsSize()
@@ -238,7 +251,7 @@ public class ColorManager : MonoBehaviour
 
     private void EndGame()
     {
-        if (hasEnded) return; // Previene múltiples ejecuciones
+        if (hasEnded) return; // Previene mÃºltiples ejecuciones
         hasEnded = true;
 
         ColorGamePuntos.Instance.SafeRecordIfNeeded();
@@ -262,6 +275,6 @@ public class ColorManager : MonoBehaviour
             CurrencyManager.Instance.AddCoins(coinsEarned);
         }
 
-        Debug.Log($"Fin de partida — Recompensa: {coinsEarned} monedas");
+        Debug.Log($"Fin de partida â€” Recompensa: {coinsEarned} monedas");
     }
 }

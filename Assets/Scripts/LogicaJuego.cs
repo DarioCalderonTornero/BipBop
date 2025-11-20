@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -12,7 +12,7 @@ public class LogicaJuego : MonoBehaviour
 {
     public static LogicaJuego Instance { get; private set; }
 
-    public TextMeshProUGUI instructionText; // Texto para mostrar la instrucción
+    public TextMeshProUGUI instructionText; // Texto para mostrar la instrucciÃ³n
     public Image timerUI; // Slider para mostrar el tiempo restante
     public float startTime; // Tiempo inicial en segundos
 
@@ -46,12 +46,12 @@ public class LogicaJuego : MonoBehaviour
     [System.Serializable]
     public class TaskInfo
     {
-        public TaskType type;             // Identificador lógico
-        public LocalizedString text;      // Texto localizado (ES/EN), ej: "¡Toca la pantalla!"
+        public TaskType type;             // Identificador lÃ³gico
+        public LocalizedString text;      // Texto localizado (ES/EN), ej: "Â¡Toca la pantalla!"
     }
 
     [Header("Localization")]
-    public LocalizedString readyText;        // "Prepárate..." / "Get ready..."
+    public LocalizedString readyText;        // "PrepÃ¡rate..." / "Get ready..."
     public LocalizedString goText;           // "GO!"
     public LocalizedString gameOverText;
 
@@ -105,7 +105,7 @@ public class LogicaJuego : MonoBehaviour
 
         if (actionType == currentTask.type)
         {
-            // Aquí lanzamos el efecto de UI
+            // AquÃ­ lanzamos el efecto de UI
             if (ClassicModeUIEffects.Instance != null)
             {
                 ClassicModeUIEffects.Instance.PlayEffectForTask(actionType);
@@ -147,7 +147,7 @@ public class LogicaJuego : MonoBehaviour
 
         currentTask = newTask;
 
-        // Texto localizado según idioma actual
+        // Texto localizado segÃºn idioma actual
         instructionText.text = currentTask.text.GetLocalizedString();
 
         currentTime = startTime;
@@ -167,7 +167,7 @@ public class LogicaJuego : MonoBehaviour
 
     private void SaveRecordIfNeeded()
     {
-        // Recupera el récord actual
+        // Recupera el rÃ©cord actual
         int currentRecord = PlayerPrefs.GetInt("MaxRecord", 0);
 
         MainGamePoints.Instance.SafeRecordIfNeeded();

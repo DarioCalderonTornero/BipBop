@@ -76,7 +76,14 @@ public class GeometricModeManager : MonoBehaviour
 
     private void HandleTransitionFinished()
     {
-        // Ya ha bajado el panel  empezamos el juego
+        StartCoroutine(StartGameDelayed());
+    }
+
+    private IEnumerator StartGameDelayed()
+    {
+        // Un frame para que el panel desaparecido no cause picos visuales
+        yield return null;
+
         StartGame();
     }
 

@@ -1043,6 +1043,7 @@ GameObject:
   - component: {fileID: 494727578}
   - component: {fileID: 494727580}
   - component: {fileID: 494727579}
+  - component: {fileID: 494727581}
   m_Layer: 5
   m_Name: ImageXP
   m_TagString: Untagged
@@ -1107,6 +1108,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 494727577}
   m_CullTransparentMesh: 1
+--- !u!114 &494727581
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 494727577}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d87222b49e4edd48880190c463216ee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -1234,6 +1247,7 @@ MonoBehaviour:
   scoreText: {fileID: 2009711222}
   timeBarImage: {fileID: 494727579}
   startTime: 5
+  TimeText: {fileID: 1520335300}
   candidateButtons:
   - {fileID: 2093562845}
   - {fileID: 1648415246}
@@ -1360,9 +1374,6 @@ MonoBehaviour:
   scatterRadius: 164.6
   spawnDelay: 0.01
   fadeDuration: 0.5
-  preFadeInDelay: 0.5
-  postCoinsDelay: 1
-  speedMultiplier: 1
 --- !u!1 &717125637
 GameObject:
   m_ObjectHideFlags: 0
@@ -3382,6 +3393,7 @@ GameObject:
   - component: {fileID: 1520335301}
   - component: {fileID: 1520335300}
   - component: {fileID: 1520335302}
+  - component: {fileID: 1520335303}
   m_Layer: 5
   m_Name: Tiempo
   m_TagString: Untagged
@@ -3549,6 +3561,18 @@ MonoBehaviour:
   references:
     version: 2
     RefIds: []
+--- !u!114 &1520335303
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1520335298}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d87222b49e4edd48880190c463216ee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1578115932
 GameObject:
   m_ObjectHideFlags: 0
@@ -5065,6 +5089,7 @@ GameObject:
   - component: {fileID: 2009711221}
   - component: {fileID: 2009711223}
   - component: {fileID: 2009711222}
+  - component: {fileID: 2009711224}
   m_Layer: 5
   m_Name: Score
   m_TagString: Untagged
@@ -5190,6 +5215,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2009711220}
   m_CullTransparentMesh: 1
+--- !u!114 &2009711224
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2009711220}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d87222b49e4edd48880190c463216ee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2093562841
 GameObject:
   m_ObjectHideFlags: 0
@@ -5452,7 +5489,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6206122451312572187, guid: e3d7c91ec435a8d41a75a45fbf3e38d2, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6813163647669248191, guid: e3d7c91ec435a8d41a75a45fbf3e38d2, type: 3}
       propertyPath: m_Pivot.x

@@ -51,7 +51,7 @@ public class ColorGamePuntos : MonoBehaviour
         CurrencyManager.Instance.AddCoins(1);
         PlayerLevelManager.Instance.AddXP(5);
         UpdateLocalizedScore();
-        PlayScoreEffect(); // <- dispara el zoom
+        // PlayScoreEffect(); // <- dispara el zoom
     }
 
     public void ShowScore()
