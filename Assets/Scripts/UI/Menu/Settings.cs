@@ -17,15 +17,19 @@ public class Settings : MonoBehaviour
     [SerializeField] private Button closeSettingsButton;
 
     [SerializeField] private Button vibrationButton;
-    [SerializeField] private Button volumeButton;
+    [SerializeField] private Button soundVolumeButton;
+    [SerializeField] private Button musicVolumeButton;
 
     [Header("Images")]
     [SerializeField] private Image blackBackgroundImage;
     [SerializeField] private Image mainSettingsImage;
     [SerializeField] private Image challengesImage;
 
-    [SerializeField] private Image volumeOnImage;
-    [SerializeField] private Image volumeOffImage;
+    [SerializeField] private Image soundVolumeOnImage;
+    [SerializeField] private Image soundVolumeOffImage;
+
+    [SerializeField] private Image musicVolumeOnImage;
+    [SerializeField] private Image musicVolumeOffImage;
 
     [Header("Vibration State Images")]
     [SerializeField] private Image vibrationOnImage;
@@ -56,11 +60,23 @@ public class Settings : MonoBehaviour
             RefreshVibrationUI();
         });
 
-        volumeButton.onClick.AddListener(() =>
+        
+        soundVolumeButton.onClick.AddListener(() =>
         {
-            //SoundManager.Instance.GetCancelVolume();
-            //SetCancelVolumeImage();
+            SoundManager.Instance.GetCancelVolume();
+            bool isSoundMuted = SoundManager.Instance.GetSoundVolumeNormalized() == 0;
+            soundVolumeOffImage.gameObject.SetActive(isSoundMuted);
+            soundVolumeOnImage.gameObject.SetActive(!isSoundMuted);  
         });
+
+        musicVolumeButton.onClick.AddListener(() =>
+        {
+            MusicManager.Instance.CancelMusicVolume();
+            bool isMusicMuted = MusicManager.Instance.GetMusicVolumeNormalized() == 0; ;
+            musicVolumeOffImage.gameObject.SetActive(isMusicMuted);
+            musicVolumeOnImage.gameObject.SetActive(!isMusicMuted);
+        });
+        
     }
 
     private void Start()
@@ -68,14 +84,26 @@ public class Settings : MonoBehaviour
         Hide();
         RefreshVibrationUI();
         SetCancelVolumeImage();
+
+        
+        //Update sound in start
+        bool isSoundMuted = SoundManager.Instance.GetSoundVolumeNormalized() == 0;
+        soundVolumeOffImage.gameObject.SetActive(isSoundMuted);
+        soundVolumeOnImage.gameObject.SetActive(!isSoundMuted);
+
+        //Update music in start
+        bool isMusicMuted = MusicManager.Instance.GetMusicVolumeNormalized() == 0; ;
+        musicVolumeOffImage.gameObject.SetActive(isMusicMuted);
+        musicVolumeOnImage.gameObject.SetActive(!isMusicMuted);
+        
     }
 
     private void SetCancelVolumeImage()
     {
         isVibrationImageOn = !isVibrationImageOn;
 
-        volumeOnImage.gameObject.SetActive(!isVibrationImageOn);
-        volumeOffImage.gameObject.SetActive(isVibrationImageOn);
+        soundVolumeOnImage.gameObject.SetActive(!isVibrationImageOn);
+        soundVolumeOffImage.gameObject.SetActive(isVibrationImageOn);
     }
 
 
@@ -125,7 +153,7 @@ public class Settings : MonoBehaviour
         closeSettingsButton.gameObject.SetActive(true);
 
         vibrationButton.gameObject.SetActive(true);
-        volumeButton.gameObject.SetActive(true);
+        soundVolumeButton.gameObject.SetActive(true);
 
         mainSettingsImage.gameObject.SetActive(true);
         challengesImage.gameObject.SetActive(true);
@@ -142,7 +170,7 @@ public class Settings : MonoBehaviour
         closeSettingsButton.gameObject.SetActive(false);
 
         vibrationButton.gameObject.SetActive(false);
-        volumeButton.gameObject.SetActive(false);
+        soundVolumeButton.gameObject.SetActive(false);
 
         mainSettingsImage.gameObject.SetActive(false);
         challengesImage.gameObject.SetActive(false);

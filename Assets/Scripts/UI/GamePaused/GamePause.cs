@@ -10,8 +10,6 @@ public class GamePause : MonoBehaviour
 {
     public event EventHandler OnPauseMenu;
 
-    private bool isGamePaused = false;
-
     [Header("Main Buttons")]
     [SerializeField] private Button pauseGameButton;
     [SerializeField] private Button resumeGameButton;
@@ -41,8 +39,8 @@ public class GamePause : MonoBehaviour
     [SerializeField] private Animator gamePauseAnimator;
 
     [Header("Localization")]
-    [SerializeField] private LocalizedString soundVolumeLabel; // "Sound Volume: {0}" / "Volumen de sonido: {0}"
-    [SerializeField] private LocalizedString musicVolumeLabel; // "Music Volume: {0}" / "Volumen de música: {0}"
+    [SerializeField] private LocalizedString soundVolumeLabel; 
+    [SerializeField] private LocalizedString musicVolumeLabel; 
 
     bool cancelImage = true;
 
@@ -130,7 +128,6 @@ public class GamePause : MonoBehaviour
     {
         closeGamePauseImage.gameObject.SetActive(false);
 
-        // Textos iniciales localizados
         UpdateSoundText();
         UpdateMusicText();
 
@@ -158,7 +155,6 @@ public class GamePause : MonoBehaviour
         if (soundChangeText == null) return;
 
         float vol = SoundManager.Instance.GetSoundVolume();
-        // Si es float 0–1 o 0–10, puedes adaptar. De momento lo pasamos tal cual:
         soundChangeText.text = soundVolumeLabel.GetLocalizedString(vol);
     }
 
