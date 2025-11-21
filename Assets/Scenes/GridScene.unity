@@ -1807,6 +1807,7 @@ MonoBehaviour:
   midColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   lowColor: {r: 1, g: 0, b: 0, a: 1}
   coinTimerImage: {fileID: 109620211}
+  cellHitRadius: 0.4
 --- !u!4 &755297624
 Transform:
   m_ObjectHideFlags: 0
@@ -5278,5 +5279,5 @@ SceneRoots:
   - {fileID: 880321149}
   - {fileID: 755297624}
   - {fileID: 1283795566}
-  - {fileID: 335612945}
   - {fileID: 1203008041}
+  - {fileID: 335612945}

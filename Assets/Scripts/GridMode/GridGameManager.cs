@@ -1,4 +1,4 @@
-using System;
+Ôªøusing System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -55,6 +55,9 @@ public class GridGameManager : MonoBehaviour
     private const float minCoinTime = 7f;
     private const float decreaseAmount = 0.05f;
 
+    [Header("Hit Settings")]
+    [SerializeField] private float cellHitRadius = 0.4f;
+
     private void Start()
     {
         gridCells = new Transform[gridSize, gridSize];
@@ -95,7 +98,7 @@ public class GridGameManager : MonoBehaviour
             float t = Mathf.Clamp01(coinTimer / coinTimeLimit);
             coinTimerImage.fillAmount = t;
 
-            // InterpolaciÛn de color
+            // Interpolaci√≥n de color
             if (t > 0.5f)
             {
                 float lerpT = (t - 0.5f) * 2f;
@@ -237,11 +240,38 @@ public class GridGameManager : MonoBehaviour
 
                 GameObject warning = Instantiate(warningPrefab, gridParent);
                 warning.transform.position = (warningStart + warningEnd) / 2f;
+
+                // IMPORTANTE: el sprite de warning apunta hacia la DERECHA (eje X local)
                 warning.transform.right = dir;
+
                 float length = Vector3.Distance(warningStart, warningEnd);
                 warning.transform.localScale = new Vector3(length, 0.1f, 1f);
 
-                StartCoroutine(ShootArrowAfterWarning(warning, worldStart, worldEnd, dir, margin));
+                // === NUEVO: lista de casillas por las que pasa ESTA flecha ===
+                List<Vector2Int> cellsOnLine = new List<Vector2Int>();
+
+                if (mode == 0) // fila horizontal
+                {
+                    for (int x = 0; x < gridSize; x++)
+                        cellsOnLine.Add(new Vector2Int(x, index));
+                }
+                else if (mode == 1) // columna vertical
+                {
+                    for (int y = 0; y < gridSize; y++)
+                        cellsOnLine.Add(new Vector2Int(index, y));
+                }
+                else if (mode == 2) // diagonal principal
+                {
+                    for (int k = 0; k < gridSize; k++)
+                        cellsOnLine.Add(new Vector2Int(k, k));
+                }
+                else if (mode == 3) // diagonal secundaria
+                {
+                    for (int k = 0; k < gridSize; k++)
+                        cellsOnLine.Add(new Vector2Int(gridSize - 1 - k, k));
+                }
+
+                StartCoroutine(ShootArrowAfterWarning(warning, worldStart, worldEnd, dir, margin, cellsOnLine));
 
                 if (i < arrowCount - 1 && multiArrowDelay > 0f)
                     yield return new WaitForSeconds(multiArrowDelay);
@@ -249,8 +279,15 @@ public class GridGameManager : MonoBehaviour
         }
     }
 
-    IEnumerator ShootArrowAfterWarning(GameObject warning, Vector3 worldStart, Vector3 worldEnd, Vector3 dir, float margin)
+    IEnumerator ShootArrowAfterWarning(
+    GameObject warning,
+    Vector3 worldStart,
+    Vector3 worldEnd,
+    Vector3 dir,
+    float margin,
+    List<Vector2Int> cellsOnLine)
     {
+        // Espera de aviso
         yield return new WaitForSeconds(warningTime);
         if (isGameOver) { Destroy(warning); yield break; }
 
@@ -262,7 +299,7 @@ public class GridGameManager : MonoBehaviour
 
         GameObject arrow = Instantiate(arrowPrefab, gridParent);
         arrow.transform.position = offStart;
-        arrow.transform.right = dir;
+        arrow.transform.up = dir; // respeta la orientaci√≥n del prefab
 
         float speed = 8f;
         float travelDist = Vector3.Distance(offStart, offEnd);
@@ -277,7 +314,28 @@ public class GridGameManager : MonoBehaviour
                 yield break;
             }
 
-            arrow.transform.position = Vector3.Lerp(offStart, offEnd, elapsed / travelTime);
+            float t = elapsed / travelTime;
+            arrow.transform.position = Vector3.Lerp(offStart, offEnd, t);
+
+            // --- AQU√ç comprobamos SOLO si la flecha pasa por la casilla del jugador ---
+            foreach (var cell in cellsOnLine)
+            {
+                // Solo nos interesa la casilla donde EST√Å el jugador ahora mismo
+                if (cell.x == playerX && cell.y == playerY)
+                {
+                    Vector3 cellPos = gridCells[cell.x, cell.y].position;
+                    float dist = Vector3.Distance(arrow.transform.position, cellPos);
+
+                    // Solo si el centro de la flecha est√° cerca del centro de ESA casilla
+                    if (dist <= cellHitRadius)
+                    {
+                        GameOver();
+                        Destroy(arrow);
+                        yield break;
+                    }
+                }
+            }
+
             elapsed += Time.deltaTime;
             yield return null;
         }
@@ -292,10 +350,10 @@ public class GridGameManager : MonoBehaviour
 
         Debug.Log($"GAME OVER - Score final: {score}");
 
-        // Guardar rÈcord m·ximo
+        // Guardar r√©cord m√°ximo
         SaveRecordIfNeeded();
 
-        // Enviar puntuaciÛn a PlayFab
+        // Enviar puntuaci√≥n a PlayFab
         PlayFabScoreManager.Instance.SubmitScore("GridScore", score);
 
         // Recompensa en monedas
@@ -322,7 +380,33 @@ public class GridGameManager : MonoBehaviour
         OnGameOver?.Invoke(this, EventArgs.Empty);
     }
 
-    // Nuevo mÈtodo para guardar rÈcord m·ximo
+    private bool TryGetCellFromWorld(Vector3 worldPos, out int cellX, out int cellY)
+    {
+        float bestDist = float.MaxValue;
+        int bestX = -1;
+        int bestY = -1;
+
+        for (int x = 0; x < gridSize; x++)
+        {
+            for (int y = 0; y < gridSize; y++)
+            {
+                float d = Vector3.Distance(worldPos, gridCells[x, y].position);
+                if (d < bestDist)
+                {
+                    bestDist = d;
+                    bestX = x;
+                    bestY = y;
+                }
+            }
+        }
+
+        cellX = bestX;
+        cellY = bestY;
+
+        return bestX != -1;
+    }
+
+    // Nuevo m√©todo para guardar r√©cord m√°ximo
     private void SaveRecordIfNeeded()
     {
         int currentRecord = PlayerPrefs.GetInt("MaxRecordGrid", 0);
