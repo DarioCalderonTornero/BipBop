@@ -1,31 +1,68 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Settings : MonoBehaviour
+public class SettingsUI : MonoBehaviour
 {
-    [SerializeField] private Image backgroundImage;
+    [Header("Images")]
+    [SerializeField] private Image blackBackgroundImage;
+    [SerializeField] private Image settingsBackgroundImage;
+    [SerializeField] private Image idiomaBackgroundImage;
+    [SerializeField] private Image vibrationBackgroundImage;
+    [SerializeField] private Image soundBackgroundImage;
+    [SerializeField] private Image musicBackgroundImage;
+    [SerializeField] private Image creditsBackgroundImage;
+    [SerializeField] private Image resetSettingsImage;
+    [SerializeField] private Image generalNextLineImage;
+    [SerializeField] private Image audioNextLineImage;
+    [SerializeField] private Image extrasNextLineImage;
 
     [Header("Buttons")]
     [SerializeField] private Button creditsButton;
-
     [SerializeField] private Button openSettingsButton;
     [SerializeField] private Button closeSettingsButton;
 
     [SerializeField] private Button vibrationButton;
     [SerializeField] private Button soundVolumeButton;
     [SerializeField] private Button musicVolumeButton;
+    [SerializeField] private Image resetSettingsButton;
 
-    [Header("Images")]
-    [SerializeField] private Image blackBackgroundImage;
+    [Header("General Texts")]
+    [SerializeField] private TextMeshProUGUI settingsText;
+    [SerializeField] private TextMeshProUGUI generalSettingsText;
+    [SerializeField] private TextMeshProUGUI audioSettingsText;
+    [SerializeField] private TextMeshProUGUI extraSettingsText;
 
+    [Header("Settings Texts")]
+    [SerializeField] private TextMeshProUGUI idiomaText;
+    [SerializeField] private TextMeshProUGUI vibrationText;
+    [SerializeField] private TextMeshProUGUI soundText;
+    [SerializeField] private TextMeshProUGUI musicText;
+    [SerializeField] private TextMeshProUGUI creditsText;
+    [SerializeField] private TextMeshProUGUI resetText;
+
+
+    
+
+    [Header("Sound Logic Images")]
     [SerializeField] private Image soundVolumeOnImage;
     [SerializeField] private Image soundVolumeOffImage;
 
     [SerializeField] private Image musicVolumeOnImage;
     [SerializeField] private Image musicVolumeOffImage;
+
+    [Header("Sprite Images")]
+    [SerializeField] private Image settingsImage;
+    [SerializeField] private Image idiomaImage;
+    [SerializeField] private Image vibrationImage;
+    [SerializeField] private Image soundImage;
+    [SerializeField] private Image musicImage;
+    [SerializeField] private Image creditsImage;
+    [SerializeField] private Image resetImage;
+
 
     [Header("Vibration State Images")]
     [SerializeField] private Image vibrationOnImage;
@@ -136,13 +173,32 @@ public class Settings : MonoBehaviour
 
     private void Show()
     {
+        //Animations
         settingsAnimator.SetBool("IsSettingsOpen", true);
         settingsAnimator.SetBool("IsSettingsClose", false);
         //StartCoroutine(OpenSettingsAnimFalse());
 
-        backgroundImage.gameObject.SetActive(true);
+        //-----GENERAL SHOW/HIDE LOGIC------//
+
+        //Texts Show
+        settingsText.gameObject.SetActive(true);
+        generalSettingsText.gameObject.SetActive(true);
+        audioSettingsText.gameObject.SetActive(true);
+        extraSettingsText.gameObject.SetActive(true);
+
+        idiomaText.gameObject.SetActive(true);
+        vibrationText.gameObject.SetActive(true);
+        soundText.gameObject.SetActive(true);
+        musicText.gameObject.SetActive(true);
+        creditsText.gameObject.SetActive(true);
+        resetText.gameObject.SetActive(true);
+
+        //Images Show
+        settingsBackgroundImage.gameObject.SetActive(true);
         blackBackgroundImage.gameObject.SetActive(true);
 
+
+        //Buttons Show
         creditsButton.gameObject.SetActive(true);
         closeSettingsButton.gameObject.SetActive(true);
 
@@ -153,7 +209,23 @@ public class Settings : MonoBehaviour
 
     public void Hide()
     {
-        backgroundImage.gameObject.SetActive(false);
+        //-----GENERAL SHOW/HIDE LOGIC------//
+
+        //Texts Show
+        settingsText.gameObject.SetActive(false);
+        generalSettingsText.gameObject.SetActive(false);
+        audioSettingsText.gameObject.SetActive(false);
+        extraSettingsText.gameObject.SetActive(false);
+
+        idiomaText.gameObject.SetActive(false);
+        vibrationText.gameObject.SetActive(false);
+        soundText.gameObject.SetActive(false);
+        musicText.gameObject.SetActive(false);
+        creditsText.gameObject.SetActive(false);
+        resetText.gameObject.SetActive(false);
+
+
+        settingsBackgroundImage.gameObject.SetActive(false);
         blackBackgroundImage.gameObject.SetActive(false);
 
         creditsButton.gameObject.SetActive(false);
