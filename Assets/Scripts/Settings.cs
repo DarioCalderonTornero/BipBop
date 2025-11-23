@@ -13,7 +13,7 @@ public class Settings : MonoBehaviour
     {
         if (languageToggleButton != null)
         {
-            languageToggleButton.ForceSpanish();
+            // languageToggleButton.ForceSpanish();
         }
 
         //Reset Haptics

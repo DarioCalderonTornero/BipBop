@@ -129,7 +129,7 @@ public class SettingsUI : MonoBehaviour
         SetCancelVolumeImage();
 
         LocalizationSettings.SelectedLocaleChanged += LocalizationSettings_SelectedLocaleChanged;
-        RefreshLenguage(LocalizationSettings.SelectedLocale);   
+        // RefreshLenguage(LocalizationSettings.SelectedLocale);   
         
         //Update sound in start
         

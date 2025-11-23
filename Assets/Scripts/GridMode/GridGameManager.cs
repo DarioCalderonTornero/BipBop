@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
 
 public class GridGameManager : MonoBehaviour
@@ -58,6 +61,17 @@ public class GridGameManager : MonoBehaviour
     [Header("Hit Settings")]
     [SerializeField] private float cellHitRadius = 0.4f;
 
+    [Header("Arrow Settings")]
+    public float arrowSpeed = 8f;
+
+    [Header("UI Score")]
+    [SerializeField] private TextMeshProUGUI scoreText;
+
+    [Header("Localization")]
+    [SerializeField] private LocalizedString scoreLabel;
+
+    private bool isDyingByArrow = false;
+
     private void Start()
     {
         gridCells = new Transform[gridSize, gridSize];
@@ -85,11 +99,13 @@ public class GridGameManager : MonoBehaviour
         coinTimer = coinTimeLimit;
         coinTimerImage.fillAmount = 1f;
         coinTimerImage.color = fullColor;
+
+        UpdateScoreText();
     }
 
     private void Update()
     {
-        if (isGameOver) return;
+        if (isGameOver || isDyingByArrow) return;
 
         if (coinObj != null)
         {
@@ -115,9 +131,15 @@ public class GridGameManager : MonoBehaviour
         }
     }
 
+    private void UpdateScoreText()
+    {
+        if (scoreText == null) return;
+        scoreText.text = scoreLabel.GetLocalizedString(score);
+    }
+
     void TryMove(int dx, int dy)
     {
-        if (isGameOver || isMoving) return;
+        if (isGameOver || isDyingByArrow || isMoving) return;
 
         int newX = playerX + dx;
         int newY = playerY + dy;
@@ -167,6 +189,8 @@ public class GridGameManager : MonoBehaviour
 
             Debug.Log("Score: " + score);
 
+            UpdateScoreText();
+
             if (score % 2 == 0)
             {
                 warningTime = Mathf.Max(minWarningTime, warningTime - decreaseAmount);
@@ -198,14 +222,14 @@ public class GridGameManager : MonoBehaviour
         Camera cam = Camera.main;
         float margin = 2f;
 
-        while (!isGameOver)
+        while (!isGameOver && !isDyingByArrow)
         {
             yield return new WaitForSeconds(rowInterval);
-            if (isGameOver) yield break;
+            if (isGameOver || isDyingByArrow) yield break;
 
             int arrowCount = 1;
-            if (score >= 40) arrowCount = 3;
-            else if (score >= 20) arrowCount = 2;
+            if (score >= 30) arrowCount = 3;
+            else if (score >= 15) arrowCount = 2;
 
             List<(int, int)> usedCombinations = new List<(int, int)>();
 
@@ -289,49 +313,63 @@ public class GridGameManager : MonoBehaviour
     {
         // Espera de aviso
         yield return new WaitForSeconds(warningTime);
-        if (isGameOver) { Destroy(warning); yield break; }
+        if (isGameOver || isDyingByArrow) { Destroy(warning); yield break; }
 
         Destroy(warning);
-        if (isGameOver) yield break;
+        if (isGameOver || isDyingByArrow) yield break;
 
         Vector3 offStart = worldStart - dir * margin;
         Vector3 offEnd = worldEnd + dir * margin;
 
         GameObject arrow = Instantiate(arrowPrefab, gridParent);
         arrow.transform.position = offStart;
-        arrow.transform.up = dir; // respeta la orientación del prefab
 
-        float speed = 8f;
+        // IMPORTANTE: tu sprite de flecha debe estar "mirando" en el eje Y local
+        arrow.transform.up = dir;
+
         float travelDist = Vector3.Distance(offStart, offEnd);
-        float travelTime = travelDist / speed;
+        float travelTime = travelDist / arrowSpeed;
 
         float elapsed = 0f;
+        bool playerAttached = false;   // ¿ya hemos clavado al jugador?
+
         while (elapsed < travelTime)
         {
-            if (isGameOver)
-            {
-                Destroy(arrow);
-                yield break;
-            }
-
+            // la flecha se sigue moviendo incluso si ya ha clavado al jugador
             float t = elapsed / travelTime;
             arrow.transform.position = Vector3.Lerp(offStart, offEnd, t);
 
-            // --- AQUÍ comprobamos SOLO si la flecha pasa por la casilla del jugador ---
-            foreach (var cell in cellsOnLine)
+            // Si está clavado, movemos al jugador con la flecha
+            if (playerAttached && playerObj != null)
             {
-                // Solo nos interesa la casilla donde ESTÁ el jugador ahora mismo
-                if (cell.x == playerX && cell.y == playerY)
-                {
-                    Vector3 cellPos = gridCells[cell.x, cell.y].position;
-                    float dist = Vector3.Distance(arrow.transform.position, cellPos);
+                playerObj.transform.position = arrow.transform.position;
+            }
 
-                    // Solo si el centro de la flecha está cerca del centro de ESA casilla
-                    if (dist <= cellHitRadius)
+            // Si todavía no está clavado, comprobamos impacto SOLO en la casilla actual del jugador
+            if (!playerAttached && !isGameOver && !isDyingByArrow)
+            {
+                foreach (var cell in cellsOnLine)
+                {
+                    if (cell.x == playerX && cell.y == playerY)
                     {
-                        GameOver();
-                        Destroy(arrow);
-                        yield break;
+                        Vector3 cellPos = gridCells[cell.x, cell.y].position;
+                        float dist = Vector3.Distance(arrow.transform.position, cellPos);
+
+                        if (dist <= cellHitRadius)
+                        {
+                            // Marcar que estamos en animación de muerte por flecha
+                            isDyingByArrow = true;
+                            playerAttached = true;
+
+                            // "Clavamos" al jugador en la flecha
+                            playerObj.transform.SetParent(arrow.transform);
+                            playerObj.transform.position = arrow.transform.position;
+
+#if UNITY_ANDROID || UNITY_IOS
+                            Haptics.TryVibrate();
+#endif
+                            break;
+                        }
                     }
                 }
             }
@@ -340,7 +378,14 @@ public class GridGameManager : MonoBehaviour
             yield return null;
         }
 
+        // La flecha sale de pantalla
         Destroy(arrow);
+
+        // Si hemos llevado al jugador con la flecha, ahora sí hacemos GameOver
+        if (playerAttached)
+        {
+            GameOver();
+        }
     }
 
     public void GameOver()
@@ -363,7 +408,7 @@ public class GridGameManager : MonoBehaviour
         PlayerPrefs.SetInt("CoinCount", totalCoins);
         PlayerPrefs.Save();
 
-        Time.timeScale = 0f;
+        // Time.timeScale = 0f;
 
         CoinsRewardUI rewardUI = FindObjectOfType<CoinsRewardUI>(true);
         if (rewardUI != null)
@@ -416,5 +461,20 @@ public class GridGameManager : MonoBehaviour
             PlayerPrefs.SetInt("MaxRecordGrid", score);
             PlayerPrefs.Save();
         }
+    }
+
+    private void OnEnable()
+    {
+        LocalizationSettings.SelectedLocaleChanged += OnLocaleChanged;
+    }
+
+    private void OnDisable()
+    {
+        LocalizationSettings.SelectedLocaleChanged -= OnLocaleChanged;
+    }
+
+    private void OnLocaleChanged(Locale newLocale)
+    {
+        UpdateScoreText();
     }
 }

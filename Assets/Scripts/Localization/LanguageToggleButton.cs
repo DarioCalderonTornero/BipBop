@@ -1,38 +1,15 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.Localization;
 using UnityEngine.Localization.Settings;
 
 public class LanguageToggleButton : MonoBehaviour
 {
-    const string LanguageKey = "language";   
+    const string LanguageKey = "language";
     bool isSwitching;
 
-    private IEnumerator Start()
-    {
-        yield return LocalizationSettings.InitializationOperation;
-
-        var locales = LocalizationSettings.AvailableLocales.Locales;
-        if (locales == null || locales.Count == 0)
-            yield break;
-
-        string savedLang = PlayerPrefs.GetString(LanguageKey, "es");
-
-        // Buscamos un Locale cuyo c�digo empiece por "es" o "en"
-        Locale target = locales.Find(l => l.Identifier.Code.StartsWith(savedLang));
-
-        if (target != null)
-        {
-            LocalizationSettings.SelectedLocale = target;
-        }
-
-        Locale current = LocalizationSettings.SelectedLocale;
-
-        string code = current.Identifier.Code;
-
-        bool isSpanish = code.StartsWith("es");
-        bool isEnglish = code.StartsWith("en");
-    }
+    // 🔹 YA NO NECESITAMOS Start() aquí para leer PlayerPrefs
+    // Todo lo de aplicar el idioma al arrancar lo hace el método estático de abajo.
 
     public void ToggleLanguage()
     {
@@ -57,7 +34,7 @@ public class LanguageToggleButton : MonoBehaviour
 
         string currentCode = current != null ? current.Identifier.Code : "es";
 
-        bool isSpanish = currentCode.StartsWith("es");   
+        bool isSpanish = currentCode.StartsWith("es");
         string targetPrefix = isSpanish ? "en" : "es";
 
         Locale target = locales.Find(l => l.Identifier.Code.StartsWith(targetPrefix));
@@ -97,9 +74,27 @@ public class LanguageToggleButton : MonoBehaviour
         {
             LocalizationSettings.SelectedLocale = target;
 
-            PlayerPrefs.SetString("language", "es");
+            PlayerPrefs.SetString(LanguageKey, "es");
             PlayerPrefs.Save();
         }
     }
 
+    private static void ApplySavedLanguage()
+    {
+        const string LanguageKey = "language";
+
+        var locales = LocalizationSettings.AvailableLocales.Locales;
+        if (locales == null || locales.Count == 0)
+            return;
+
+        // "es" por defecto si no hay nada guardado
+        string savedLang = PlayerPrefs.GetString(LanguageKey, "es");
+
+        Locale target = locales.Find(l => l.Identifier.Code.StartsWith(savedLang));
+
+        if (target != null && LocalizationSettings.SelectedLocale != target)
+        {
+            LocalizationSettings.SelectedLocale = target;
+        }
+    }
 }
