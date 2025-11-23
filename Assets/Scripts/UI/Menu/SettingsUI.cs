@@ -21,6 +21,7 @@ public class SettingsUI : MonoBehaviour
     [SerializeField] private Image generalNextLineImage;
     [SerializeField] private Image audioNextLineImage;
     [SerializeField] private Image extrasNextLineImage;
+    [SerializeField] private Image FPSNextLineImage;
 
     [Header("Buttons")]
     [SerializeField] private Button creditsButton;
@@ -32,6 +33,7 @@ public class SettingsUI : MonoBehaviour
     [SerializeField] private Button soundVolumeButton;
     [SerializeField] private Button musicVolumeButton;
     [SerializeField] private Button resetSettingsButton;
+    [SerializeField] private Button FPSSettingsButton;
 
     [Header("General Texts")]
     [SerializeField] private TextMeshProUGUI settingsText;
@@ -48,6 +50,7 @@ public class SettingsUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI musicText;
     [SerializeField] private TextMeshProUGUI creditsText;
     [SerializeField] private TextMeshProUGUI resetText;
+    [SerializeField] private TextMeshProUGUI FPSText;
 
     [Header("Sound Logic Images")]
     [SerializeField] private Image soundVolumeOnImage;
@@ -64,6 +67,7 @@ public class SettingsUI : MonoBehaviour
     [SerializeField] private Image musicImage;
     [SerializeField] private Image creditsImage;
     [SerializeField] private Image resetImage;
+    [SerializeField] private Image FPSImage;
 
 
     [Header("Vibration State Images")]
@@ -236,6 +240,7 @@ public class SettingsUI : MonoBehaviour
         musicText.gameObject.SetActive(true);
         creditsText.gameObject.SetActive(true);
         resetText.gameObject.SetActive(true);
+        FPSText.gameObject.SetActive(true);
 
         //Images Show
         settingsBackgroundImage.gameObject.SetActive(true);
@@ -250,6 +255,7 @@ public class SettingsUI : MonoBehaviour
         audioNextLineImage.gameObject.SetActive(true);
         extrasNextLineImage.gameObject.SetActive(true);
         generalNextLineImage.gameObject.SetActive(true);
+        FPSNextLineImage.gameObject.SetActive(true);
 
         //Images sprites Show
         settingsImage.gameObject.SetActive(true);
@@ -258,7 +264,8 @@ public class SettingsUI : MonoBehaviour
         soundImage.gameObject.SetActive(true);  
         musicImage.gameObject.SetActive(true);  
         creditsImage.gameObject.SetActive(true);
-        resetImage.gameObject.SetActive(true);  
+        resetImage.gameObject.SetActive(true);
+        FPSImage.gameObject.SetActive(true);
 
         //Buttons Show
         creditsButton.gameObject.SetActive(true);
@@ -268,6 +275,7 @@ public class SettingsUI : MonoBehaviour
         soundVolumeButton.gameObject.SetActive(true);
         musicVolumeButton.gameObject.SetActive(true);  
         resetSettingsButton.gameObject.SetActive(true);
+        FPSSettingsButton.gameObject.SetActive(true);
     }
 
     public void Hide()
@@ -286,6 +294,7 @@ public class SettingsUI : MonoBehaviour
         musicText.gameObject.SetActive(false);
         creditsText.gameObject.SetActive(false);
         resetText.gameObject.SetActive(false);
+        FPSText.gameObject.SetActive(false);
 
         //Images Hide
         settingsBackgroundImage.gameObject.SetActive(false);
@@ -300,6 +309,7 @@ public class SettingsUI : MonoBehaviour
         audioNextLineImage.gameObject.SetActive(false);
         extrasNextLineImage.gameObject.SetActive(false);
         generalNextLineImage.gameObject.SetActive(false);
+        FPSNextLineImage.gameObject.SetActive(false);
 
         //Images sprites Show
         settingsImage.gameObject.SetActive(false);
@@ -309,6 +319,7 @@ public class SettingsUI : MonoBehaviour
         musicImage.gameObject.SetActive(false);
         creditsImage.gameObject.SetActive(false);
         resetImage.gameObject.SetActive(false);
+        FPSImage.gameObject.SetActive(false);
 
         //Buttons Hide
         creditsButton.gameObject.SetActive(false);
@@ -318,6 +329,7 @@ public class SettingsUI : MonoBehaviour
         soundVolumeButton.gameObject.SetActive(false);
         musicVolumeButton.gameObject.SetActive(false);
         resetSettingsButton.gameObject.SetActive(false);
+        FPSSettingsButton.gameObject.SetActive(false);
     }
 
     void OnDestroy()

@@ -547,6 +547,19 @@ MonoBehaviour:
   coinText: {fileID: 4497493182453217596}
   gameOverText: {fileID: 4216481595644159573}
   myanimator: {fileID: 0}
+  mainMenuSceneName: Menu
+  mainMenuTransitionLabel:
+    m_TableReference:
+      m_TableCollectionName: 
+    m_TableEntryReference:
+      m_KeyId: 0
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  references:
+    version: 2
+    RefIds: []
 --- !u!95 &2336675006729575505
 Animator:
   serializedVersion: 7

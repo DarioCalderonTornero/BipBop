@@ -53,7 +53,7 @@ public class FPSButtonController : MonoBehaviour
         Application.targetFrameRate = newFPS;
 
         // Actualizar UI
-        fpsText.text = "FPS: " + newFPS;
+        fpsText.text = "" + newFPS;
 
         // Guardar
         PlayerPrefs.SetInt(PREF_KEY, newFPS);
