@@ -3,7 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
+using UnityEngine.Localization;
 
 public class SettingsUI : MonoBehaviour
 {
@@ -24,17 +26,20 @@ public class SettingsUI : MonoBehaviour
     [SerializeField] private Button creditsButton;
     [SerializeField] private Button openSettingsButton;
     [SerializeField] private Button closeSettingsButton;
+    [SerializeField] private Button idiomaButton;
 
     [SerializeField] private Button vibrationButton;
     [SerializeField] private Button soundVolumeButton;
     [SerializeField] private Button musicVolumeButton;
-    [SerializeField] private Image resetSettingsButton;
+    [SerializeField] private Button resetSettingsButton;
 
     [Header("General Texts")]
     [SerializeField] private TextMeshProUGUI settingsText;
     [SerializeField] private TextMeshProUGUI generalSettingsText;
     [SerializeField] private TextMeshProUGUI audioSettingsText;
     [SerializeField] private TextMeshProUGUI extraSettingsText;
+
+    [SerializeField] private TextMeshProUGUI idiomaButtonText;
 
     [Header("Settings Texts")]
     [SerializeField] private TextMeshProUGUI idiomaText;
@@ -43,9 +48,6 @@ public class SettingsUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI musicText;
     [SerializeField] private TextMeshProUGUI creditsText;
     [SerializeField] private TextMeshProUGUI resetText;
-
-
-    
 
     [Header("Sound Logic Images")]
     [SerializeField] private Image soundVolumeOnImage;
@@ -118,6 +120,7 @@ public class SettingsUI : MonoBehaviour
         RefreshVibrationUI();
         SetCancelVolumeImage();
 
+        LocalizationSettings.SelectedLocaleChanged += LocalizationSettings_SelectedLocaleChanged;
         
         //Update sound in start
         bool isSoundMuted = SoundManager.Instance.GetSoundVolumeNormalized() == 0;
@@ -129,6 +132,26 @@ public class SettingsUI : MonoBehaviour
         musicVolumeOffImage.gameObject.SetActive(isMusicMuted);
         musicVolumeOnImage.gameObject.SetActive(!isMusicMuted);
         
+    }
+
+    private void LocalizationSettings_SelectedLocaleChanged(Locale newLocale)
+    {
+        RefreshLenguage(newLocale);
+    }
+
+    private void RefreshLenguage(Locale locale)
+    {
+        string code = locale.Identifier.Code;
+
+        if (code.StartsWith("es"))
+        {
+            idiomaButtonText.text = "ESP";
+        }
+
+        if (code.StartsWith("en"))
+        {
+            idiomaButtonText.text = "ENG";
+        }
     }
 
     private void SetCancelVolumeImage()
@@ -197,21 +220,40 @@ public class SettingsUI : MonoBehaviour
         settingsBackgroundImage.gameObject.SetActive(true);
         blackBackgroundImage.gameObject.SetActive(true);
 
+        idiomaBackgroundImage.gameObject.SetActive(true);
+        vibrationBackgroundImage.gameObject.SetActive(true);
+        soundBackgroundImage.gameObject.SetActive(true);    
+        musicBackgroundImage.gameObject.SetActive(true);
+        creditsBackgroundImage.gameObject.SetActive(true);
+        resetSettingsImage.gameObject.SetActive(true); 
+        audioNextLineImage.gameObject.SetActive(true);
+        extrasNextLineImage.gameObject.SetActive(true);
+        generalNextLineImage.gameObject.SetActive(true);
+
+        //Images sprites Show
+        settingsImage.gameObject.SetActive(true);
+        idiomaImage.gameObject.SetActive(true); 
+        vibrationImage.gameObject.SetActive(true);
+        soundImage.gameObject.SetActive(true);  
+        musicImage.gameObject.SetActive(true);  
+        creditsImage.gameObject.SetActive(true);
+        resetImage.gameObject.SetActive(true);  
 
         //Buttons Show
         creditsButton.gameObject.SetActive(true);
         closeSettingsButton.gameObject.SetActive(true);
-
+        idiomaButton.gameObject.SetActive(true);    
         vibrationButton.gameObject.SetActive(true);
         soundVolumeButton.gameObject.SetActive(true);
-
+        musicVolumeButton.gameObject.SetActive(true);  
+        resetSettingsButton.gameObject.SetActive(true);
     }
 
     public void Hide()
     {
         //-----GENERAL SHOW/HIDE LOGIC------//
 
-        //Texts Show
+        //Texts Hide
         settingsText.gameObject.SetActive(false);
         generalSettingsText.gameObject.SetActive(false);
         audioSettingsText.gameObject.SetActive(false);
@@ -224,15 +266,41 @@ public class SettingsUI : MonoBehaviour
         creditsText.gameObject.SetActive(false);
         resetText.gameObject.SetActive(false);
 
-
+        //Images Hide
         settingsBackgroundImage.gameObject.SetActive(false);
         blackBackgroundImage.gameObject.SetActive(false);
 
+        idiomaBackgroundImage.gameObject.SetActive(false);
+        vibrationBackgroundImage.gameObject.SetActive(false);
+        soundBackgroundImage.gameObject.SetActive(false);
+        musicBackgroundImage.gameObject.SetActive(false);
+        creditsBackgroundImage.gameObject.SetActive(false);
+        resetSettingsImage.gameObject.SetActive(false);
+        audioNextLineImage.gameObject.SetActive(false);
+        extrasNextLineImage.gameObject.SetActive(false);
+        generalNextLineImage.gameObject.SetActive(false);
+
+        //Images sprites Show
+        settingsImage.gameObject.SetActive(false);
+        idiomaImage.gameObject.SetActive(false);
+        vibrationImage.gameObject.SetActive(false);
+        soundImage.gameObject.SetActive(false);
+        musicImage.gameObject.SetActive(false);
+        creditsImage.gameObject.SetActive(false);
+        resetImage.gameObject.SetActive(false);
+
+        //Buttons Hide
         creditsButton.gameObject.SetActive(false);
         closeSettingsButton.gameObject.SetActive(false);
-
+        idiomaButton.gameObject.SetActive(false);
         vibrationButton.gameObject.SetActive(false);
         soundVolumeButton.gameObject.SetActive(false);
+        musicVolumeButton.gameObject.SetActive(false);
+        resetSettingsButton.gameObject.SetActive(false);
+    }
 
+    void OnDestroy()
+    {
+        LocalizationSettings.SelectedLocaleChanged += LocalizationSettings_SelectedLocaleChanged;
     }
 }

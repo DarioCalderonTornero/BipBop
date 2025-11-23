@@ -20160,14 +20160,16 @@ MonoBehaviour:
   creditsButton: {fileID: 1802104893}
   openSettingsButton: {fileID: 2023754358}
   closeSettingsButton: {fileID: 1813839080}
+  idiomaButton: {fileID: 1895723119}
   vibrationButton: {fileID: 1050572125}
   soundVolumeButton: {fileID: 1226446900}
   musicVolumeButton: {fileID: 543873228}
-  resetSettingsButton: {fileID: 0}
+  resetSettingsButton: {fileID: 1474799757}
   settingsText: {fileID: 671899740}
   generalSettingsText: {fileID: 1681980568}
   audioSettingsText: {fileID: 410289047}
   extraSettingsText: {fileID: 957785628}
+  idiomaButtonText: {fileID: 57390929}
   idiomaText: {fileID: 1267040574}
   vibrationText: {fileID: 1753003178}
   soundText: {fileID: 773516593}
