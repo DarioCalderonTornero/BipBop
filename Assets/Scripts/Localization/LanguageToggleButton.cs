@@ -72,4 +72,34 @@ public class LanguageToggleButton : MonoBehaviour
 
         isSwitching = false;
     }
+
+    public void ForceSpanish()
+    {
+        StartCoroutine(ForceSpanishCoroutine());
+    }
+
+    private IEnumerator ForceSpanishCoroutine()
+    {
+        yield return LocalizationSettings.InitializationOperation;
+
+        var locales = LocalizationSettings.AvailableLocales.Locales;
+
+        if (locales == null || locales.Count == 0)
+            yield break;
+
+        string currentCode = LocalizationSettings.SelectedLocale.Identifier.Code;
+        if (currentCode.StartsWith("es"))
+            yield break;
+
+        Locale target = locales.Find(l => l.Identifier.Code.StartsWith("es"));
+
+        if (target != null)
+        {
+            LocalizationSettings.SelectedLocale = target;
+
+            PlayerPrefs.SetString("language", "es");
+            PlayerPrefs.Save();
+        }
+    }
+
 }

@@ -71,6 +71,7 @@ public class SettingsUI : MonoBehaviour
     [SerializeField] private Image vibrationOffImage;
 
     [SerializeField] private Animator settingsAnimator;
+    [SerializeField] private Settings settings;
 
     private bool isVibrationImageOn = true;
 
@@ -99,19 +100,26 @@ public class SettingsUI : MonoBehaviour
         soundVolumeButton.onClick.AddListener(() =>
         {
             SoundManager.Instance.GetCancelVolume();
-            bool isSoundMuted = SoundManager.Instance.GetSoundVolumeNormalized() == 0;
-            soundVolumeOffImage.gameObject.SetActive(isSoundMuted);
-            soundVolumeOnImage.gameObject.SetActive(!isSoundMuted);  
+            HandleCancelSoundImage();
         });
 
         musicVolumeButton.onClick.AddListener(() =>
         {
             MusicManager.Instance.CancelMusicVolume();
-            bool isMusicMuted = MusicManager.Instance.GetMusicVolumeNormalized() == 0; ;
-            musicVolumeOffImage.gameObject.SetActive(isMusicMuted);
-            musicVolumeOnImage.gameObject.SetActive(!isMusicMuted);
+            HandleCancelMusicImage();
         });
-        
+
+        resetSettingsButton.onClick.AddListener(() =>
+        {
+            settings.ResetSettings();
+            RefreshVibrationUI();
+
+            //Change sound UI
+            HandleCancelSoundImage();
+
+            //Change music UI
+            HandleCancelMusicImage();
+        });
     }
 
     private void Start()
@@ -121,17 +129,30 @@ public class SettingsUI : MonoBehaviour
         SetCancelVolumeImage();
 
         LocalizationSettings.SelectedLocaleChanged += LocalizationSettings_SelectedLocaleChanged;
+        RefreshLenguage(LocalizationSettings.SelectedLocale);   
         
         //Update sound in start
-        bool isSoundMuted = SoundManager.Instance.GetSoundVolumeNormalized() == 0;
-        soundVolumeOffImage.gameObject.SetActive(isSoundMuted);
-        soundVolumeOnImage.gameObject.SetActive(!isSoundMuted);
+        
 
         //Update music in start
         bool isMusicMuted = MusicManager.Instance.GetMusicVolumeNormalized() == 0; ;
         musicVolumeOffImage.gameObject.SetActive(isMusicMuted);
         musicVolumeOnImage.gameObject.SetActive(!isMusicMuted);
         
+    }
+
+    private void HandleCancelSoundImage()
+    {
+        bool isSoundMuted = SoundManager.Instance.GetSoundVolumeNormalized() == 0;
+        soundVolumeOffImage.gameObject.SetActive(isSoundMuted);
+        soundVolumeOnImage.gameObject.SetActive(!isSoundMuted);
+    }
+
+    private void HandleCancelMusicImage()
+    {
+        bool isMusicMuted = MusicManager.Instance.GetMusicVolumeNormalized() == 0; ;
+        musicVolumeOffImage.gameObject.SetActive(isMusicMuted);
+        musicVolumeOnImage.gameObject.SetActive(!isMusicMuted);
     }
 
     private void LocalizationSettings_SelectedLocaleChanged(Locale newLocale)
@@ -301,6 +322,6 @@ public class SettingsUI : MonoBehaviour
 
     void OnDestroy()
     {
-        LocalizationSettings.SelectedLocaleChanged += LocalizationSettings_SelectedLocaleChanged;
+        LocalizationSettings.SelectedLocaleChanged -= LocalizationSettings_SelectedLocaleChanged;
     }
 }

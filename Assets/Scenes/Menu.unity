@@ -10772,6 +10772,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 961dbf425f1e89f4e8b3e41288d17364, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  languageToggleButton: {fileID: 1895723118}
 --- !u!1 &750348458
 GameObject:
   m_ObjectHideFlags: 0
@@ -13793,7 +13794,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -170, y: -313}
+  m_AnchoredPosition: {x: -170, y: -298}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &957785628
@@ -20190,6 +20191,7 @@ MonoBehaviour:
   vibrationOnImage: {fileID: 209735043}
   vibrationOffImage: {fileID: 2135739853}
   settingsAnimator: {fileID: 1464133903}
+  settings: {fileID: 745481787}
 --- !u!225 &1464133902
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -23287,7 +23289,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 220.97412, y: -319}
+  m_AnchoredPosition: {x: 220.97412, y: -307}
   m_SizeDelta: {x: 337.5918, y: 12.1101}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1644062243

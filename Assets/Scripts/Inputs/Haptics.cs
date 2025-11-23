@@ -5,7 +5,7 @@ using UnityEngine;
 public static class Haptics
 {
      private const string key = "HAPTICS_ENABLED";
-    public static bool enabled { private set; get; }
+     public static bool enabled { private set; get; }
 
     static Haptics()
     {

@@ -2,15 +2,33 @@ using UnityEngine;
 
 public class Settings : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    [SerializeField] private LanguageToggleButton languageToggleButton;
+
     void Start()
     {
         
     }
 
-    // Update is called once per frame
-    void Update()
+    public void ResetSettings()
     {
-        
+        if (languageToggleButton != null)
+        {
+            languageToggleButton.ForceSpanish();
+        }
+
+        //Reset Haptics
+        Haptics.SetEnabled(true);
+
+        if (SoundManager.Instance.GetSoundVolumeNormalized() == 0)
+        {
+            //Reset sound
+            SoundManager.Instance.RestoreVolumeTo(5);
+        }
+
+        if (MusicManager.Instance.GetMusicVolumeNormalized() == 0)
+        {
+            //Reset music
+            MusicManager.Instance.RestoreVolumeTo(5);
+        }     
     }
 }
