@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,13 +14,15 @@ public class MiniGameSelector : MonoBehaviour
     {
         public Sprite image;
 
-        // Localized strings para nombre, descripción y label de récord
+        // Localized strings para nombre, descripciÃ³n y label de rÃ©cord
         public LocalizedString name;
         public LocalizedString description;
         public LocalizedString recordLabel;   // <-- NUEVO
 
         public string recordKey;
         public string sceneName;
+
+        public bool showMotionTasksToggle;
     }
 
     public MiniGameInfo[] miniGames;
@@ -43,9 +45,12 @@ public class MiniGameSelector : MonoBehaviour
 
     private Vector3 initialPos;
 
+    [Header("Mode Options")]
+    [SerializeField] private Toggle motionTasksToggle;
+
     void Start()
     {
-        // Guardar posición inicial
+        // Guardar posiciÃ³n inicial
         initialPos = currentImage.rectTransform.localPosition;
 
         // Escala inicial correcta
@@ -66,7 +71,7 @@ public class MiniGameSelector : MonoBehaviour
 
     private void OnArrowClicked(bool toRight)
     {
-        // Desactivar botones durante animación
+        // Desactivar botones durante animaciÃ³n
         leftArrowButton.interactable = false;
         rightArrowButton.interactable = false;
         playButton.interactable = false;
@@ -91,7 +96,7 @@ public class MiniGameSelector : MonoBehaviour
         nextImage.color = new Color(1, 1, 1, 0);
         nextImage.sprite = miniGames[nextIndex].image;
 
-        // Crear secuencia de animación
+        // Crear secuencia de animaciÃ³n
         Sequence seq = DOTween.Sequence();
         seq.Join(currentImage.rectTransform.DOLocalMove(outPos, animDuration).SetEase(Ease.OutQuad));
         seq.Join(currentImage.DOFade(0, animDuration));
@@ -100,7 +105,7 @@ public class MiniGameSelector : MonoBehaviour
 
         seq.OnComplete(() =>
         {
-            // Intercambiar imágenes
+            // Intercambiar imÃ¡genes
             var temp = currentImage;
             currentImage = nextImage;
             nextImage = temp;
@@ -128,16 +133,19 @@ public class MiniGameSelector : MonoBehaviour
     {
         var game = miniGames[index];
 
-        // Textos localizados según idioma actual
         nameText.text = game.name.GetLocalizedString();
         descriptionText.text = game.description.GetLocalizedString();
 
         int record = PlayerPrefs.GetInt(game.recordKey, 0);
-
-        // Label del récord también localizado (ej: "Récord Máximo" / "Best Score")
         string recordLabel = game.recordLabel.GetLocalizedString();
-
         recordText.text = $"{recordLabel}: {record}";
+
+        // ðŸ”¹ AquÃ­ decidimos si el toggle se ve o no
+        if (motionTasksToggle != null)
+        {
+            bool shouldShow = game.showMotionTasksToggle;
+            motionTasksToggle.gameObject.SetActive(shouldShow);
+        }
     }
 
     public void OnPlayButton()
@@ -151,7 +159,7 @@ public class MiniGameSelector : MonoBehaviour
         }
         else
         {
-            // Fallback por si no está el sistema de transición
+            // Fallback por si no estÃ¡ el sistema de transiciÃ³n
             SceneManager.LoadScene(sceneName);
         }
     }
