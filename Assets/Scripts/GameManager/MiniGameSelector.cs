@@ -14,10 +14,9 @@ public class MiniGameSelector : MonoBehaviour
     {
         public Sprite image;
 
-        // Localized strings para nombre, descripción y label de récord
         public LocalizedString name;
         public LocalizedString description;
-        public LocalizedString recordLabel;   // <-- NUEVO
+        public LocalizedString recordLabel;
 
         public string recordKey;
         public string sceneName;
@@ -45,11 +44,17 @@ public class MiniGameSelector : MonoBehaviour
 
     private Vector3 initialPos;
 
+    private const string LastMiniGameIndexKey = "LastMiniGameIndex";
+
     [Header("Mode Options")]
     [SerializeField] private Toggle motionTasksToggle;
 
     void Start()
     {
+        // --- Restaurar el último minijuego guardado ---
+        currentIndex = PlayerPrefs.GetInt(LastMiniGameIndexKey, 0);
+        currentIndex = Mathf.Clamp(currentIndex, 0, miniGames.Length - 1);
+
         // Guardar posición inicial
         initialPos = currentImage.rectTransform.localPosition;
 
@@ -57,7 +62,7 @@ public class MiniGameSelector : MonoBehaviour
         currentImage.rectTransform.localScale = targetScale;
         nextImage.rectTransform.localScale = targetScale;
 
-        // Configurar minijuego inicial
+        // Configurar minijuego inicial restaurado
         UpdateTextUI(currentIndex);
         currentImage.sprite = miniGames[currentIndex].image;
         currentImage.color = Color.white;
@@ -71,7 +76,6 @@ public class MiniGameSelector : MonoBehaviour
 
     private void OnArrowClicked(bool toRight)
     {
-        // Desactivar botones durante animación
         leftArrowButton.interactable = false;
         rightArrowButton.interactable = false;
         playButton.interactable = false;
@@ -81,22 +85,20 @@ public class MiniGameSelector : MonoBehaviour
 
     void AnimateTransition(bool toRight)
     {
-        int nextIndex = toRight ? (currentIndex + 1) % miniGames.Length : (currentIndex - 1 + miniGames.Length) % miniGames.Length;
+        int nextIndex = toRight ? (currentIndex + 1) % miniGames.Length
+                                : (currentIndex - 1 + miniGames.Length) % miniGames.Length;
 
         Vector3 startPos = initialPos;
         Vector3 outPos = startPos + (toRight ? Vector3.right : Vector3.left) * moveDistance;
         Vector3 inPos = startPos - (toRight ? Vector3.right : Vector3.left) * moveDistance;
 
-        // Asegurar escalas correctas antes de animar
         currentImage.rectTransform.localScale = targetScale;
         nextImage.rectTransform.localScale = targetScale;
 
-        // Preparar la siguiente imagen
         nextImage.rectTransform.localPosition = inPos;
         nextImage.color = new Color(1, 1, 1, 0);
         nextImage.sprite = miniGames[nextIndex].image;
 
-        // Crear secuencia de animación
         Sequence seq = DOTween.Sequence();
         seq.Join(currentImage.rectTransform.DOLocalMove(outPos, animDuration).SetEase(Ease.OutQuad));
         seq.Join(currentImage.DOFade(0, animDuration));
@@ -105,24 +107,25 @@ public class MiniGameSelector : MonoBehaviour
 
         seq.OnComplete(() =>
         {
-            // Intercambiar imágenes
             var temp = currentImage;
             currentImage = nextImage;
             nextImage = temp;
+
             currentIndex = nextIndex;
             UpdateTextUI(currentIndex);
 
-            // Restaurar escalas y posiciones
+            // --- Guardar el último índice ---
+            PlayerPrefs.SetInt(LastMiniGameIndexKey, currentIndex);
+            PlayerPrefs.Save();
+
             currentImage.rectTransform.localScale = targetScale;
             nextImage.rectTransform.localScale = targetScale;
 
             currentImage.rectTransform.localPosition = initialPos;
             nextImage.rectTransform.localPosition = initialPos;
 
-            // Preparar la siguiente imagen invisible
             nextImage.color = new Color(1, 1, 1, 0);
 
-            // Reactivar botones
             leftArrowButton.interactable = true;
             rightArrowButton.interactable = true;
             playButton.interactable = true;
@@ -140,28 +143,23 @@ public class MiniGameSelector : MonoBehaviour
         string recordLabel = game.recordLabel.GetLocalizedString();
         recordText.text = $"{recordLabel}: {record}";
 
-        // 🔹 Aquí decidimos si el toggle se ve o no
         if (motionTasksToggle != null)
-        {
-            bool shouldShow = game.showMotionTasksToggle;
-            motionTasksToggle.gameObject.SetActive(shouldShow);
-        }
+            motionTasksToggle.gameObject.SetActive(game.showMotionTasksToggle);
     }
 
     public void OnPlayButton()
     {
+        // Guardar por seguridad también al jugar
+        PlayerPrefs.SetInt(LastMiniGameIndexKey, currentIndex);
+        PlayerPrefs.Save();
+
         string sceneName = miniGames[currentIndex].sceneName;
-        string modeName = miniGames[currentIndex].name.GetLocalizedString(); // si ya lo tienes localizado
+        string modeName = miniGames[currentIndex].name.GetLocalizedString();
 
         if (TransitionScript.Instance != null)
-        {
             TransitionScript.Instance.TransitionToScene(sceneName, modeName);
-        }
         else
-        {
-            // Fallback por si no está el sistema de transición
             SceneManager.LoadScene(sceneName);
-        }
     }
 
     void OnEnable()
@@ -176,7 +174,6 @@ public class MiniGameSelector : MonoBehaviour
 
     void OnLocaleChanged(Locale newLocale)
     {
-        // Re-actualizamos el texto del minijuego actual con el nuevo idioma
         UpdateTextUI(currentIndex);
     }
 }
