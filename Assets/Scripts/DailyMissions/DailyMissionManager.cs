@@ -29,6 +29,10 @@ public class DailyMissionManager : MonoBehaviour
     [Header("Localization")]
     [SerializeField] private LocalizedString dailyMissionsTimerLabel;
 
+    [Header("Timer Refresh")]
+    [SerializeField] private float timerRefreshInterval = 1f;
+    private float timerRefreshElapsed = 0f;
+
     private void Awake()
     {
         if (Instance == null)
@@ -45,6 +49,17 @@ public class DailyMissionManager : MonoBehaviour
         }
     }
 
+    private void Update()
+    {
+        if (timerText == null || DailyMissionsTimer.Instance == null) return;
+
+        timerRefreshElapsed += Time.unscaledDeltaTime; // que funcione aunque el juego esté pausado
+        if (timerRefreshElapsed >= timerRefreshInterval)
+        {
+            timerRefreshElapsed = 0f;
+            RefreshTimerText();
+        }
+    }
     private void OnEnable()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
@@ -94,13 +109,13 @@ public class DailyMissionManager : MonoBehaviour
                 mission.rewardClaimed = true;
 
                 // Monedas
-                CurrencyManager.Instance.AddCoins(mission.template.reward);
+                CurrencyManager.Instance.AddCoins(mission.template.coinReward);
 
                 //  Añadir experiencia
                 PlayerLevelManager.Instance.AddXP(mission.template.xpReward);
 
                 Debug.Log($"Misión completada: {mission.template.description}. " +
-                          $"Recompensa: {mission.template.reward} monedas y {mission.template.xpReward} XP");
+          $"Recompensa: {mission.template.coinReward} monedas y {mission.template.xpReward} XP");
             }
 
             SaveMissions();
@@ -150,7 +165,7 @@ public class DailyMissionManager : MonoBehaviour
         foreach (var mission in activeMissions)
         {
             MissionUI ui = Instantiate(missionUIPrefab, missionsContainer);
-            ui.Setup(mission, null);
+            ui.Setup(mission);
             missionUIList.Add(ui);
         }
     }

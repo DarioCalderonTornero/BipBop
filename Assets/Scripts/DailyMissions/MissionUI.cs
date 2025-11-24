@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Localization;
 using UnityEngine.Localization.Settings;
@@ -10,17 +11,21 @@ public class MissionUI : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI descriptionText;
     [SerializeField] private TextMeshProUGUI progressText;
-    [SerializeField] private Image iconImage;
+
+    [Header("XP Reward")]
     [SerializeField] private Image xpIconImage;
     [SerializeField] private TextMeshProUGUI xpRewardText;
 
-    [Header("Estilo de misión completada")]
-    [SerializeField] private Sprite completedIcon;
-    [SerializeField] private Color completedTextColor = Color.gray;
+    [Header("Coin Reward")]
+    [SerializeField] private Image coinIconImage;
+    [SerializeField] private TextMeshProUGUI coinRewardText;
+
+    [Header("Completed Style")]
+    [SerializeField] private Color completedColor = Color.gray;
 
     private DailyMission mission;
-    private Color defaultTextColor;
-    private bool initialized = false;
+    private Color defaultColor;
+    private bool initialized;
 
     private void OnEnable()
     {
@@ -32,74 +37,75 @@ public class MissionUI : MonoBehaviour
         LocalizationSettings.SelectedLocaleChanged -= OnLocaleChanged;
     }
 
-    public void Setup(DailyMission mission, Sprite missionIcon)
+    public void Setup(DailyMission mission)
     {
-        if (mission == null)
-        {
-            Debug.LogError("DailyMission null detectada en Setup()");
-            return;
-        }
-
-        if (mission.template == null)
-        {
-            Debug.LogError($"MissionUI.Setup: El template es null en la misión con progreso {mission.currentProgress}");
-            return;
-        }
-
         this.mission = mission;
 
-        xpRewardText.text = mission.template.xpReward.ToString();
+        defaultColor = descriptionText.color;
 
-        // Guardamos color original
-        defaultTextColor = descriptionText.color;
+        // --- XP ---
+        xpRewardText.text = "+" + mission.template.xpReward;
+        xpIconImage.sprite = mission.template.xpIcon;
 
-        // Icono
-        iconImage.sprite = missionIcon != null ? missionIcon : mission.template.icon;
+        // --- Monedas ---
+        coinRewardText.text = "+" + mission.template.coinReward;
+        coinIconImage.sprite = mission.template.coinIcon;
 
-        // Texto localizado
         UpdateDescriptionText();
-
         Refresh();
+
         initialized = true;
     }
 
     private void UpdateDescriptionText()
     {
-        if (mission == null || mission.template == null) return;
-
-        // Si la descripción es Smart String tipo "Juega {0} partidas...", pasamos goal
-        descriptionText.text = mission.template.description.GetLocalizedString(mission.template.goal);
+        descriptionText.text =
+            mission.template.description.GetLocalizedString(mission.template.goal);
     }
 
     public void Refresh()
     {
-        if (mission == null || mission.template == null) return;
-
-        // Progreso numérico (esto normalmente no hace falta localizarlo)
         progressText.text = $"{mission.currentProgress}/{mission.template.goal}";
 
         if (mission.IsCompleted)
         {
-            descriptionText.color = completedTextColor;
-            descriptionText.fontStyle = FontStyles.Italic;
-            if (completedIcon != null)
-                iconImage.sprite = completedIcon;
+            SetCompletedColors();
         }
         else
         {
-            descriptionText.color = defaultTextColor;
-            descriptionText.fontStyle = FontStyles.Normal;
-            iconImage.sprite = mission.template.icon;
+            SetNormalColors();
         }
     }
 
-    private void OnLocaleChanged(Locale newLocale)
+    private void SetCompletedColors()
     {
-        if (!initialized || mission == null) return;
+        descriptionText.color = completedColor;
+        progressText.color = completedColor;
 
-        // Re-localizar descripción al cambiar de idioma
+        xpIconImage.color = completedColor;
+        coinIconImage.color = completedColor;
+
+        xpRewardText.color = completedColor;
+        coinRewardText.color = completedColor;
+    }
+
+    private void SetNormalColors()
+    {
+        descriptionText.color = defaultColor;
+        progressText.color = defaultColor;
+
+        xpIconImage.color = Color.white;
+        coinIconImage.color = Color.white;
+
+        xpRewardText.color = Color.black;
+        coinRewardText.color = Color.black;
+    }
+
+    private void OnLocaleChanged(Locale locale)
+    {
+        if (!initialized) return;
+
         UpdateDescriptionText();
-        // El estilo (completado o no) se mantiene igual
         Refresh();
     }
 }

@@ -4,10 +4,14 @@ using UnityEngine.Localization;
 [CreateAssetMenu(fileName = "NewMissionTemplate", menuName = "DailyMissions/MissionTemplate")]
 public class MissionTemplate : ScriptableObject
 {
-    public string id;                 // Identificador único de la misión
-    public LocalizedString description;        // Texto de la misión (ej: "Juega 3 partidas al modo Geométrico")
-    public int goal = 1;              // Objetivo de la misión (ej: 3 partidas)
-    public int reward = 10;           // Recompensa (ej: monedas)
+    public string id;
+
+    public LocalizedString description;
+    public int goal = 1;
+
+    public int coinReward = 10;
     public int xpReward = 10;
-    public Sprite icon;               // Icono que se muestra en UI
+
+    public Sprite xpIcon;
+    public Sprite coinIcon;
 }
