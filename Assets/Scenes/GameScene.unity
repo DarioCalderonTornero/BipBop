@@ -4059,7 +4059,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1011597880602472387, guid: e3d7c91ec435a8d41a75a45fbf3e38d2, type: 3}
       propertyPath: m_Alpha
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3857302625861003977, guid: e3d7c91ec435a8d41a75a45fbf3e38d2, type: 3}
       propertyPath: pauseGameButton

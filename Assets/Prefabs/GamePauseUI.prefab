@@ -1670,6 +1670,8 @@ MonoBehaviour:
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
+  soundSettingsPanel: {fileID: 0}
+  mainButtonsPanel: {fileID: 0}
   references:
     version: 2
     RefIds: []
@@ -2279,7 +2281,7 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1.724381, y: 1.724381, z: 1.724381}
-  m_ConstrainProportionsScale: 0
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 6813163647669248191}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
