@@ -34,6 +34,8 @@ public class GeometricModeManager : MonoBehaviour
     private int score = 0;
     private BouncingShape currentTarget;
     private bool hasEnded = false;
+    private bool gameOverInvoked = false;
+    private bool hasGameStarted = false; //nuevo guard
 
     public event EventHandler OnGameOver;
 
@@ -54,17 +56,17 @@ public class GeometricModeManager : MonoBehaviour
 
     private void Start()
     {
-        // En lugar de llamar a StartGame() directamente,
-        // nos sincronizamos con la transición si existe.
+        // Aseguramos siempre tiempo normal al entrar
+        Time.timeScale = 1f;
+        Time.fixedDeltaTime = 0.02f * Time.timeScale;
+
+        // Iniciamos siempre el juego (currentTime, barra, shapes...)
+        StartGame();
+
+        // Mantenemos la lógica de transición (para efectos visuales si los usas)
         if (TransitionScript.Instance != null)
         {
-            // Nos suscribimos y esperamos
             TransitionScript.Instance.OnTransitionOutFinished += HandleTransitionFinished;
-        }
-        else
-        {
-            // Si no hay transición, empezamos normal
-            StartGame();
         }
     }
 
@@ -84,12 +86,16 @@ public class GeometricModeManager : MonoBehaviour
         // Un frame para que el panel desaparecido no cause picos visuales
         yield return null;
 
-        StartGame();
+        StartGame(); // si ya empezó, no hará nada
     }
 
     private void StartGame()
     {
+        if (hasGameStarted) return;  // evita dobles inicializaciones
+        hasGameStarted = true;
+
         hasEnded = false;
+        gameOverInvoked = false;
         score = 0;
         currentTime = startTime;
 
@@ -111,6 +117,11 @@ public class GeometricModeManager : MonoBehaviour
     {
         if (hasEnded) return;
 
+        // No empezamos a gastar tiempo hasta que el estado sea Playing
+        if (GeometricState.Instance != null &&
+            GeometricState.Instance.geometricGameState != GeometricState.GeometricGameStateEnum.Playing)
+            return;
+
         currentTime -= Time.deltaTime;
 
         if (timeBarImage != null)
@@ -126,6 +137,10 @@ public class GeometricModeManager : MonoBehaviour
     public void OnShapeTapped(BouncingShape shape)
     {
         if (hasEnded) return;
+
+        if (GeometricState.Instance != null &&
+            GeometricState.Instance.geometricGameState != GeometricState.GeometricGameStateEnum.Playing)
+            return;
 
         if (shape == currentTarget)
         {
@@ -310,18 +325,21 @@ public class GeometricModeManager : MonoBehaviour
             }
         }
 
+        EndGame();
+
         yield return new WaitForSecondsRealtime(1.5f);
 
         Time.timeScale = previousTimeScale;
         Time.fixedDeltaTime = previousFixedDelta;
-
-        EndGame();
     }
 
     private void EndGame()
     {
-        if (hasEnded) return;
-        hasEnded = true;
+        if (gameOverInvoked) return;
+        gameOverInvoked = true;
+
+        if (GeometricState.Instance != null)
+            GeometricState.Instance.geometricGameState = GeometricState.GeometricGameStateEnum.GameOver;
 
         OnGameOver?.Invoke(this, EventArgs.Empty);
         SaveRecordIfNeeded();

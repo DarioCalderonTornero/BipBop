@@ -37,6 +37,7 @@ public class GeometricGameOverUI : MonoBehaviour
 
     private void GeometricModeManager_OnGameOver(object sender, System.EventArgs e)
     {
+        Debug.Log("OnGeometricGameOver");
         coinText.text = "Coins: " + GeometricModeManager.Instance.GetScore();
         myanimator.SetBool("IsGameOver", true);
     }
