@@ -14,6 +14,8 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
+        if (DodgeState.Instance.dodgeGameState != DodgeState.DodgeGameStateEnum.Playing)
+            return;
 #if UNITY_EDITOR
         // PC - seguir mouse
         if (Input.GetMouseButton(0))

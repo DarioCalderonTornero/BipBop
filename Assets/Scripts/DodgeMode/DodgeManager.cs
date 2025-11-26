@@ -23,6 +23,11 @@ public class DodgeManager : MonoBehaviour
         scoreText.text = $"Score: {score}";
     }
 
+    private void Start()
+    {
+        Time.timeScale = 1f;
+    }
+
     public void EnemiesCollided(GameObject e1, GameObject e2)
     {
         if (isGameOver)
@@ -51,7 +56,10 @@ public class DodgeManager : MonoBehaviour
         isGameOver = true;
         Debug.Log("GAME OVER!");
 
-        Time.timeScale = 0f;
+        DodgeState.Instance.dodgeGameState = DodgeState.DodgeGameStateEnum.GameOver;
+        OnGameOver?.Invoke(this, EventArgs.Empty);
+
+        Time.timeScale = .3f;
 
         // Guardar récord máximo
         SaveRecordIfNeeded();
@@ -79,7 +87,6 @@ public class DodgeManager : MonoBehaviour
         }
 
         // Notificar fin de partida
-        OnGameOver?.Invoke(this, EventArgs.Empty);
     }
 
     private void SaveRecordIfNeeded()
@@ -91,5 +98,10 @@ public class DodgeManager : MonoBehaviour
             PlayerPrefs.SetInt("MaxRecordDodge", score);
             PlayerPrefs.Save();
         }
+    }
+
+    public int GetScore()
+    {
+        return score;
     }
 }
