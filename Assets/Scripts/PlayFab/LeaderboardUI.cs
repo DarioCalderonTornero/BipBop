@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using PlayFab;
@@ -9,6 +9,16 @@ using UnityEngine.SocialPlatforms.Impl;
 using UnityEngine.UI;
 using UnityEngine.Localization;
 using UnityEngine.Localization.Settings;
+
+[System.Serializable]
+public class TopPlayerSlot
+{
+    public GameObject root;
+    public Image trophyImage;         // la copa (no hace falta tocarla por cÃ³digo si ya tiene el sprite)
+    public Image avatarImage;         // cÃ­rculo / avatar
+    public TextMeshProUGUI nameText;  // nombre del jugador
+    public TextMeshProUGUI scoreText; // puntos
+}
 
 public class LeaderboardUI : MonoBehaviour
 {
@@ -27,10 +37,10 @@ public class LeaderboardUI : MonoBehaviour
     public Button dodgeButton;
 
     [Header("Localization")]
-    public LocalizedString touchButtonPrompt;      // "¡Toca un botón..." / "Tap a button..."
+    public LocalizedString touchButtonPrompt;      // "Â¡Toca un botÃ³n..." / "Tap a button..."
     public LocalizedString loadingScoresText;      // "Cargando..." / "Loading..."
     public LocalizedString noScoresText;           // "No hay puntuaciones..." / "No scores yet..."
-    public LocalizedString noScoreThisModeText;    // "Aún no tienes puntuación..." / "You don't have a score yet..."
+    public LocalizedString noScoreThisModeText;    // "AÃºn no tienes puntuaciÃ³n..." / "You don't have a score yet..."
     public LocalizedString leaderboardHasScore;    // Smart String con rank y score
 
     private MyPosState myPosState = MyPosState.Prompt;
@@ -42,13 +52,20 @@ public class LeaderboardUI : MonoBehaviour
     private bool isLoading = false;
     private string currentRequestedStat = "";
 
+    [Header("Top 3 UI")]
+    public TopPlayerSlot[] top3Slots;
+
+    [Header("Top 3 Placeholders")]
+    public string noRegisteredName = "No registrado";
+    public string noRegisteredScore = "--";
+
     public enum MyPosState
     {
-        Prompt,             // "Toca un botón..."
+        Prompt,             // "Toca un botÃ³n..."
         Loading,            // "Cargando..."
         NoScores,           // "No hay puntuaciones..."
-        HasScore,           // "Tu posición actual: ..."
-        NoScoreThisMode     // "Aún no tienes puntuación..."
+        HasScore,           // "Tu posiciÃ³n actual: ..."
+        NoScoreThisMode     // "AÃºn no tienes puntuaciÃ³n..."
     }
 
     private void Awake()
@@ -79,13 +96,54 @@ public class LeaderboardUI : MonoBehaviour
 
         foreach (Transform child in contentParent)
             Destroy(child.gameObject);
+
+        // Esperar un frame para que PlayFabScoreManager se inicialice
+        StartCoroutine(InitLastMode());
+    }
+
+    private IEnumerator InitLastMode()
+    {
+        yield return null; // ðŸ”¥ Espera 1 frame
+
+        // Recuperar Ãºltimo modo o usar HighScore por defecto
+        string lastMode = PlayerPrefs.GetString("LastLeaderboardMode", "HighScore");
+
+        switch (lastMode)
+        {
+            case "HighScore":
+                OnModeButtonClicked("HighScore", classicButton);
+                break;
+
+            case "ColorScore":
+                OnModeButtonClicked("ColorScore", colorButton);
+                break;
+
+            case "GeometricScore":
+                OnModeButtonClicked("GeometricScore", geometricButton);
+                break;
+
+            case "GridScore":
+                OnModeButtonClicked("GridScore", gridButton);
+                break;
+
+            case "DodgeScore":
+                OnModeButtonClicked("DodgeScore", dodgeButton);
+                break;
+
+            default:
+                OnModeButtonClicked("HighScore", classicButton);
+                break;
+        }
     }
 
     private void OnModeButtonClicked(string statisticName, Button clickedButton)
     {
         if (isLoading) return; // Ignorar clicks mientras carga
 
-        // Cambiar color del botón seleccionado
+        PlayerPrefs.SetString("LastLeaderboardMode", statisticName);
+        PlayerPrefs.Save();
+
+        // Cambiar color del botÃ³n seleccionado
         if (currentSelectedButton != null)
             SetButtonSelected(currentSelectedButton, false);
 
@@ -128,56 +186,43 @@ public class LeaderboardUI : MonoBehaviour
 
         PlayFabScoreManager.Instance.GetLeaderboard(statisticName, top, leaderboard =>
         {
-            // Verifica que este resultado corresponde al último botón pulsado
             if (statisticName != currentRequestedStat)
                 return;
 
+            // Limpia lista y top3
             foreach (Transform child in contentParent)
                 Destroy(child.gameObject);
+            ClearTop3Slots();
 
             if (leaderboard == null || leaderboard.Count == 0)
             {
                 myPosState = MyPosState.NoScores;
                 myPositionText.text = noScoresText.GetLocalizedString();
+
+                // Rellena top3 sÃ³lo con placeholders
+                FillTop3(null);
+
+                // Limpia la lista de 4â€“10 (no hay nadie aÃºn)
+                foreach (Transform child in contentParent)
+                    Destroy(child.gameObject);
             }
             else
             {
-                int count = Mathf.Min(leaderboard.Count, top);
-                for (int i = 0; i < count; i++)
-                {
-                    var entry = leaderboard[i];
-                    GameObject row = Instantiate(playerRowPrefab, contentParent);
+                // Top 3 (con reales + placeholders si faltan)
+                FillTop3(leaderboard);
 
-                    var texts = row.GetComponentsInChildren<TextMeshProUGUI>();
-                    var levelIcon = row.transform.Find("LevelIcon");
-                    var levelText = levelIcon?.GetComponentInChildren<TextMeshProUGUI>();
-
-                    if (texts != null && texts.Length >= 3)
-                    {
-                        texts[0].text = (entry.Position + 1).ToString();
-                        texts[1].text = entry.DisplayName ?? "Player";
-                        texts[2].text = entry.StatValue.ToString();
-                    }
-
-                    if (!string.IsNullOrEmpty(entry.PlayFabId))
-                    {
-                        GetPlayerLevel(entry.PlayFabId, level =>
-                        {
-                            if (levelText != null)
-                                levelText.text = level.ToString();
-                        });
-                    }
-                }
+                // Del 4 en adelante
+                FillListFromFourth(leaderboard, top);
             }
 
             Canvas.ForceUpdateCanvases();
             if (contentParent is RectTransform rt)
                 LayoutRebuilder.ForceRebuildLayoutImmediate(rt);
 
-            isLoading = false; // Libera bloqueo
+            isLoading = false;
         });
 
-        // Mostrar posición del jugador
+        // Mostrar posiciÃ³n del jugador
         if (PlayFabScoreManager.Instance != null)
         {
             PlayFabScoreManager.Instance.GetPlayerRank(statisticName, myEntry =>
@@ -231,6 +276,93 @@ public class LeaderboardUI : MonoBehaviour
         );
     }
 
+    private void ClearTop3Slots()
+    {
+        if (top3Slots == null) return;
+
+        foreach (var slot in top3Slots)
+        {
+            if (slot == null || slot.root == null) continue;
+            slot.root.SetActive(false);
+        }
+    }
+
+    private void FillListFromFourth(List<PlayerLeaderboardEntry> leaderboard, int top)
+    {
+        foreach (Transform child in contentParent)
+            Destroy(child.gameObject);
+
+        int startIndex = Mathf.Min(3, leaderboard.Count); // empezamos en el 4Âº puesto
+
+        int count = Mathf.Min(leaderboard.Count, top);
+
+        for (int i = startIndex; i < count; i++)
+        {
+            var entry = leaderboard[i];
+            GameObject row = Instantiate(playerRowPrefab, contentParent);
+
+            var texts = row.GetComponentsInChildren<TextMeshProUGUI>();
+            var levelIcon = row.transform.Find("LevelIcon");
+            var levelText = levelIcon?.GetComponentInChildren<TextMeshProUGUI>();
+
+            if (texts != null && texts.Length >= 3)
+            {
+                texts[0].text = (entry.Position + 1).ToString();
+                texts[1].text = entry.DisplayName ?? "Player";
+                texts[2].text = entry.StatValue.ToString();
+            }
+
+            if (!string.IsNullOrEmpty(entry.PlayFabId))
+            {
+                GetPlayerLevel(entry.PlayFabId, level =>
+                {
+                    if (levelText != null)
+                        levelText.text = level.ToString();
+                });
+            }
+        }
+    }
+
+    private void FillTop3(List<PlayerLeaderboardEntry> leaderboard)
+    {
+        if (top3Slots == null) return;
+
+        // Evita nulls
+        if (leaderboard == null)
+            leaderboard = new List<PlayerLeaderboardEntry>();
+
+        for (int i = 0; i < top3Slots.Length; i++)   // siempre recorre 0,1,2
+        {
+            var slot = top3Slots[i];
+            if (slot == null || slot.root == null)
+                continue;
+
+            // Queremos que los tres se vean SIEMPRE
+            slot.root.SetActive(true);
+
+            if (i < leaderboard.Count)
+            {
+                // Hay datos reales para este puesto
+                var entry = leaderboard[i];
+
+                if (slot.nameText != null)
+                    slot.nameText.text = entry.DisplayName ?? "Player";
+
+                if (slot.scoreText != null)
+                    slot.scoreText.text = entry.StatValue + " pts";
+            }
+            else
+            {
+                // No hay nadie aÃºn en este puesto â†’ placeholder
+                if (slot.nameText != null)
+                    slot.nameText.text = noRegisteredName;
+
+                if (slot.scoreText != null)
+                    slot.scoreText.text = noRegisteredScore;
+            }
+        }
+    }
+
     private void OnEnable()
     {
         LocalizationSettings.SelectedLocaleChanged += OnLocaleChanged;
@@ -243,7 +375,7 @@ public class LeaderboardUI : MonoBehaviour
 
     private void OnLocaleChanged(Locale newLocale)
     {
-        // Cuando cambia el idioma, rehacemos el texto según el estado actual
+        // Cuando cambia el idioma, rehacemos el texto segÃºn el estado actual
         switch (myPosState)
         {
             case MyPosState.Prompt:
@@ -263,7 +395,7 @@ public class LeaderboardUI : MonoBehaviour
                 break;
 
             case MyPosState.HasScore:
-                // Volvemos a pedir la Smart String con los mismos parámetros
+                // Volvemos a pedir la Smart String con los mismos parÃ¡metros
                 myPositionText.text = leaderboardHasScore.GetLocalizedString(lastRank, lastScore);
                 break;
         }
