@@ -71,4 +71,8 @@ public class GameOver : MonoBehaviour
         }
     }
 
+    private void OnDestroy()
+    {
+        LogicaJuego.Instance.OnGameOver -= LogicaPuntos_OnGameOver;
+    }
 }

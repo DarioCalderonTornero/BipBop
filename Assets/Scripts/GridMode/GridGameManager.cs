@@ -9,6 +9,10 @@ using UnityEngine.UI;
 
 public class GridGameManager : MonoBehaviour
 {
+    public static GridGameManager Instance { get; private set; }
+
+    public event EventHandler OnGridGameOver;
+
     [Header("Grid")]
     public Transform gridParent;
     public int gridSize = 4;
@@ -72,6 +76,11 @@ public class GridGameManager : MonoBehaviour
 
     private bool isDyingByArrow = false;
 
+    private void Awake()
+    {
+        Instance = this;
+    }
+
     private void Start()
     {
         gridCells = new Transform[gridSize, gridSize];
@@ -107,29 +116,34 @@ public class GridGameManager : MonoBehaviour
     {
         if (isGameOver || isDyingByArrow) return;
 
-        if (coinObj != null)
+        // Solo actualizamos el temporizador si el estado del juego es "Playing"
+        if (GridState.Instance.gridGameState == GridState.GridGameStateEnum.Playing)
         {
-            coinTimer -= Time.deltaTime;
-
-            float t = Mathf.Clamp01(coinTimer / coinTimeLimit);
-            coinTimerImage.fillAmount = t;
-
-            // Interpolación de color
-            if (t > 0.5f)
+            if (coinObj != null)
             {
-                float lerpT = (t - 0.5f) * 2f;
-                coinTimerImage.color = Color.Lerp(midColor, fullColor, lerpT);
-            }
-            else
-            {
-                float lerpT = t * 2f;
-                coinTimerImage.color = Color.Lerp(lowColor, midColor, lerpT);
-            }
+                coinTimer -= Time.deltaTime;
 
-            if (coinTimer <= 0f)
-                GameOver();
+                float t = Mathf.Clamp01(coinTimer / coinTimeLimit);
+                coinTimerImage.fillAmount = t;
+
+                // Interpolación de color
+                if (t > 0.5f)
+                {
+                    float lerpT = (t - 0.5f) * 2f;
+                    coinTimerImage.color = Color.Lerp(midColor, fullColor, lerpT);
+                }
+                else
+                {
+                    float lerpT = t * 2f;
+                    coinTimerImage.color = Color.Lerp(lowColor, midColor, lerpT);
+                }
+
+                if (coinTimer <= 0f)
+                    GameOver();
+            }
         }
     }
+
 
     private void UpdateScoreText()
     {
@@ -140,6 +154,9 @@ public class GridGameManager : MonoBehaviour
     void TryMove(int dx, int dy)
     {
         if (isGameOver || isDyingByArrow || isMoving) return;
+
+        if (GridState.Instance.gridGameState != GridState.GridGameStateEnum.Playing)
+            return;
 
         int newX = playerX + dx;
         int newY = playerY + dy;
@@ -388,12 +405,19 @@ public class GridGameManager : MonoBehaviour
         }
     }
 
+    public int GetScore()
+    {
+        return score;
+    }
+
     public void GameOver()
     {
         if (isGameOver) return;
         isGameOver = true;
 
         Debug.Log($"GAME OVER - Score final: {score}");
+
+        OnGridGameOver?.Invoke(this, EventArgs.Empty);  
 
         // Guardar récord máximo
         SaveRecordIfNeeded();

@@ -1,13 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class ColorGameOverUI : MonoBehaviour
+public class GridGameOverUI : MonoBehaviour
 {
-
     [SerializeField] private Button retryButton;
     [SerializeField] private Button mainMenuButton;
     [SerializeField] private Image backGround;
@@ -21,7 +17,8 @@ public class ColorGameOverUI : MonoBehaviour
         //Hide();
         retryButton.onClick.AddListener(() =>
         {
-            SceneLoader.LoadScene(SceneLoader.Scene.ColorScene);
+            SceneLoader.LoadScene(SceneLoader.Scene.GridScene);
+
         });
 
         mainMenuButton.onClick.AddListener(() =>
@@ -33,18 +30,18 @@ public class ColorGameOverUI : MonoBehaviour
     void Start()
     {
         myanimator = GetComponent<Animator>();
-        ColorManager.Instance.OnGameOver += ColorManager_OnGameOver;
+        GridGameManager.Instance.OnGameOver += GridGameManager_OnGameOver;
     }
 
-    private void ColorManager_OnGameOver(object sender, System.EventArgs e)
+    private void GridGameManager_OnGameOver(object sender, System.EventArgs e)
     {
-        coinText.text = "Coins: " + ColorGamePuntos.Instance.GetScore();
+        Debug.Log("OnGeometricGameOver");
+        coinText.text = "Coins: " + GridGameManager.Instance.GetScore();
         myanimator.SetBool("IsGameOver", true);
     }
 
     private void OnDestroy()
     {
-        ColorManager.Instance.OnGameOver -= ColorManager_OnGameOver;
+        GridGameManager.Instance.OnGameOver -= GridGameManager_OnGameOver;
     }
 }
-

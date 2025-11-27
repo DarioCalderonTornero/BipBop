@@ -40,5 +40,10 @@ public class DodgeGameOverUI : MonoBehaviour
         coinText.text = "Coins: " + DodgeManager.Instance.GetScore();
         myanimator.SetBool("IsGameOver", true);
     }
+
+    private void OnDestroy()
+    {
+        DodgeManager.Instance.OnGameOver -= DodgeManager_OnGameOver;
+    }
 }
 

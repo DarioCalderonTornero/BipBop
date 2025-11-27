@@ -1,10 +1,10 @@
-using System.Collections;
 using TMPro;
 using UnityEngine;
+using System.Collections;
 
-public class DodgeCountDownUI : MonoBehaviour
+public class GridCountDownUI : MonoBehaviour
 {
-    public static DodgeCountDownUI Instance { get; private set; }
+    public static GridCountDownUI Instance { get; private set; }
 
     public TextMeshProUGUI countDownText;
 
@@ -81,9 +81,9 @@ public class DodgeCountDownUI : MonoBehaviour
         countDownText.gameObject.SetActive(false);
         isCustomMessage = false;
 
-        if (DodgeState.Instance != null)
+        if (GridState.Instance != null)
         {
-            DodgeState.Instance.StartGameAfterGo();
+            GridState.Instance.StartGameAfterGo();
         }
     }
 }
