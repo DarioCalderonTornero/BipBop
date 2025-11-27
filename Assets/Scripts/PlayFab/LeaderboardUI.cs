@@ -18,6 +18,9 @@ public class TopPlayerSlot
     public Image avatarImage;         // círculo / avatar
     public TextMeshProUGUI nameText;  // nombre del jugador
     public TextMeshProUGUI scoreText; // puntos
+    public GameObject levelIcon;     // Icono de nivel
+    public TextMeshProUGUI levelText; // Texto del nivel
+    public Sprite defaultAvatarSprite;
 }
 
 public class LeaderboardUI : MonoBehaviour
@@ -350,6 +353,23 @@ public class LeaderboardUI : MonoBehaviour
 
                 if (slot.scoreText != null)
                     slot.scoreText.text = entry.StatValue + " pts";
+
+                // Aquí asignamos el sprite predeterminado del avatar si no hay avatar
+                if (slot.avatarImage != null)
+                {
+                    // Si hay avatar (que más adelante implementaremos), lo asignamos
+                    // Pero de momento, siempre asignamos el sprite predeterminado
+                    slot.avatarImage.sprite = slot.defaultAvatarSprite;
+                }
+
+                // Mostrar el nivel
+                if (slot.levelText != null)
+                {
+                    GetPlayerLevel(entry.PlayFabId, level =>
+                    {
+                        slot.levelText.text = level.ToString();
+                    });
+                }
             }
             else
             {
@@ -359,6 +379,14 @@ public class LeaderboardUI : MonoBehaviour
 
                 if (slot.scoreText != null)
                     slot.scoreText.text = noRegisteredScore;
+
+                // Asignar el sprite predeterminado del avatar
+                if (slot.avatarImage != null)
+                    slot.avatarImage.sprite = slot.defaultAvatarSprite;
+
+                // Para el nivel, no mostrar nada si no hay datos
+                if (slot.levelText != null)
+                    slot.levelText.text = "";
             }
         }
     }
