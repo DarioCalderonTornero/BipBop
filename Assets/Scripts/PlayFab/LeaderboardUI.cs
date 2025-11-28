@@ -61,6 +61,11 @@ public class LeaderboardUI : MonoBehaviour
     [Header("Top 3 Placeholders")]
     public string noRegisteredName = "No registrado";
     public string noRegisteredScore = "--";
+    
+    [Header("Avatares")]
+    public AvatarDataSO[] avatarDatabase;   // TODOS los AvatarDataSO del juego
+    public Sprite fallbackAvatarSprite;     // Sprite genérico si no hay datos
+
 
     public enum MyPosState
     {
@@ -296,7 +301,6 @@ public class LeaderboardUI : MonoBehaviour
             Destroy(child.gameObject);
 
         int startIndex = Mathf.Min(3, leaderboard.Count); // empezamos en el 4º puesto
-
         int count = Mathf.Min(leaderboard.Count, top);
 
         for (int i = startIndex; i < count; i++)
@@ -307,6 +311,9 @@ public class LeaderboardUI : MonoBehaviour
             var texts = row.GetComponentsInChildren<TextMeshProUGUI>();
             var levelIcon = row.transform.Find("LevelIcon");
             var levelText = levelIcon?.GetComponentInChildren<TextMeshProUGUI>();
+
+            var avatarImgTransform = row.transform.Find("AvatarImage");
+            Image avatarImg = avatarImgTransform != null ? avatarImgTransform.GetComponent<Image>() : null;
 
             if (texts != null && texts.Length >= 3)
             {
@@ -322,8 +329,73 @@ public class LeaderboardUI : MonoBehaviour
                     if (levelText != null)
                         levelText.text = level.ToString();
                 });
+
+                if (avatarImg != null)
+                {
+                    SetAvatarForPlayFabId(entry.PlayFabId, avatarImg, fallbackAvatarSprite);
+                }
             }
         }
+    }
+
+    // Busca el AvatarDataSO por id
+    private AvatarDataSO GetAvatarDataById(string id)
+    {
+        if (string.IsNullOrEmpty(id) || avatarDatabase == null) return null;
+
+        foreach (var avatar in avatarDatabase)
+        {
+            if (avatar != null && avatar.id == id)
+                return avatar;
+        }
+        return null;
+    }
+
+    // Pide a PlayFab el EquippedAvatarId de ese jugador y asigna sprite al Image dado
+    private void SetAvatarForPlayFabId(string playFabId, Image targetImage, Sprite defaultSprite)
+    {
+        if (targetImage == null) return;
+        if (string.IsNullOrEmpty(playFabId)) return;
+
+        var request = new GetUserDataRequest
+        {
+            PlayFabId = playFabId,
+            Keys = new List<string> { "EquippedAvatarId" }
+        };
+
+        PlayFabClientAPI.GetUserData(
+            request,
+            result =>
+            {
+                string avatarId = null;
+
+                if (result.Data != null && result.Data.ContainsKey("EquippedAvatarId"))
+                    avatarId = result.Data["EquippedAvatarId"].Value;
+
+                Debug.Log($"[LeaderboardUI] User {playFabId} EquippedAvatarId = {avatarId}");
+
+                // Si no tiene avatar guardado → NO tocamos la imagen
+                if (string.IsNullOrEmpty(avatarId))
+                    return;
+
+                var data = GetAvatarDataById(avatarId);
+                if (data != null && data.sprite != null)
+                {
+                    Debug.Log($"[LeaderboardUI] Aplicando avatar '{avatarId}' sprite '{data.sprite.name}' en {targetImage.name}");
+                    targetImage.sprite = data.sprite;
+                }
+                else
+                {
+                    // Si el id no coincide con ningún SO, tampoco tocamos la imagen
+                    Debug.LogWarning($"[LeaderboardUI] No se encontró AvatarDataSO para id '{avatarId}'. No se modifica el sprite.");
+                }
+            },
+            error =>
+            {
+                Debug.LogWarning("Error al obtener EquippedAvatarId de " + playFabId + ": " + error.GenerateErrorReport());
+                // En caso de error, no tocamos la imagen.
+            }
+        );
     }
 
     private void FillTop3(List<PlayerLeaderboardEntry> leaderboard)
@@ -334,7 +406,7 @@ public class LeaderboardUI : MonoBehaviour
         if (leaderboard == null)
             leaderboard = new List<PlayerLeaderboardEntry>();
 
-        for (int i = 0; i < top3Slots.Length; i++)   // siempre recorre 0,1,2
+        for (int i = 0; i < top3Slots.Length; i++)   // siempre 0,1,2
         {
             var slot = top3Slots[i];
             if (slot == null || slot.root == null)
@@ -342,6 +414,12 @@ public class LeaderboardUI : MonoBehaviour
 
             // Queremos que los tres se vean SIEMPRE
             slot.root.SetActive(true);
+
+            // 🔹 SIEMPRE, antes de nada, reseteamos el avatar a su sprite base
+            if (slot.avatarImage != null && slot.defaultAvatarSprite != null)
+            {
+                slot.avatarImage.sprite = slot.defaultAvatarSprite;
+            }
 
             if (i < leaderboard.Count)
             {
@@ -354,12 +432,10 @@ public class LeaderboardUI : MonoBehaviour
                 if (slot.scoreText != null)
                     slot.scoreText.text = entry.StatValue + " pts";
 
-                // Aquí asignamos el sprite predeterminado del avatar si no hay avatar
-                if (slot.avatarImage != null)
+                // Solo cambiamos el avatar si el jugador tiene EquipppedAvatarId
+                if (slot.avatarImage != null && !string.IsNullOrEmpty(entry.PlayFabId))
                 {
-                    // Si hay avatar (que más adelante implementaremos), lo asignamos
-                    // Pero de momento, siempre asignamos el sprite predeterminado
-                    slot.avatarImage.sprite = slot.defaultAvatarSprite;
+                    SetAvatarForPlayFabId(entry.PlayFabId, slot.avatarImage, null);
                 }
 
                 // Mostrar el nivel
@@ -373,18 +449,14 @@ public class LeaderboardUI : MonoBehaviour
             }
             else
             {
-                // No hay nadie aún en este puesto → placeholder
+                // No hay nadie aún en este puesto → placeholder de texto
                 if (slot.nameText != null)
                     slot.nameText.text = noRegisteredName;
 
                 if (slot.scoreText != null)
                     slot.scoreText.text = noRegisteredScore;
 
-                // Asignar el sprite predeterminado del avatar
-                if (slot.avatarImage != null)
-                    slot.avatarImage.sprite = slot.defaultAvatarSprite;
-
-                // Para el nivel, no mostrar nada si no hay datos
+                // Nivel vacío
                 if (slot.levelText != null)
                     slot.levelText.text = "";
             }

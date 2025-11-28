@@ -1,7 +1,11 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
+using PlayFab;
+using PlayFab.ClientModels;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+
 
 public class AvatarItem : MonoBehaviour
 {
@@ -141,10 +145,26 @@ public class AvatarItem : MonoBehaviour
             // --- EQUIPAR ---
             Debug.Log($"Equipar avatar: {avatarData.id}");
 
+            // 1) Guardar localmente
             PlayerPrefs.SetString("EquippedAvatarId", avatarData.id);
             PlayerPrefs.Save();
 
-            // Actualizar avatar del menú (misma escena)
+            // 2) Subir a PlayFab como UserData para que otros vean tu avatar en el ranking
+            var request = new UpdateUserDataRequest
+            {
+                Data = new Dictionary<string, string>
+        {
+            { "EquippedAvatarId", avatarData.id }
+        }
+            };
+
+            PlayFabClientAPI.UpdateUserData(
+                request,
+                result => { Debug.Log("EquippedAvatarId actualizado en PlayFab"); },
+                error => { Debug.LogWarning("Error al actualizar EquippedAvatarId: " + error.GenerateErrorReport()); }
+            );
+
+            // 3) Actualizar avatar del menú (misma escena)
             MainMenuAvatar menuAvatar = FindObjectOfType<MainMenuAvatar>();
             if (menuAvatar != null)
                 menuAvatar.LoadEquippedAvatar();

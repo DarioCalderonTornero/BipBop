@@ -20685,6 +20685,10 @@ MonoBehaviour:
     defaultAvatarSprite: {fileID: 4096687751673324164, guid: da0abe826c217814380e0ad7239943e2, type: 3}
   noRegisteredName: No registrado
   noRegisteredScore: --
+  avatarDatabase:
+  - {fileID: 11400000, guid: 59bcca4b27e96124598345127de73316, type: 2}
+  - {fileID: 11400000, guid: 51cc965b48570b646a043fc91dc9a879, type: 2}
+  fallbackAvatarSprite: {fileID: 21300000, guid: bd3249e8aae01e748aaca0c062e2c19c, type: 3}
   references:
     version: 2
     RefIds: []
