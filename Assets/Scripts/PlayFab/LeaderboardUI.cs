@@ -40,10 +40,10 @@ public class LeaderboardUI : MonoBehaviour
     public Button dodgeButton;
 
     [Header("Localization")]
-    public LocalizedString touchButtonPrompt;      // "¡Toca un botón..." / "Tap a button..."
-    public LocalizedString loadingScoresText;      // "Cargando..." / "Loading..."
-    public LocalizedString noScoresText;           // "No hay puntuaciones..." / "No scores yet..."
-    public LocalizedString noScoreThisModeText;    // "Aún no tienes puntuación..." / "You don't have a score yet..."
+    public LocalizedString touchButtonPrompt;      // "¡Toca un botón..."
+    public LocalizedString loadingScoresText;      // "Cargando..."
+    public LocalizedString noScoresText;           // "No hay puntuaciones..."
+    public LocalizedString noScoreThisModeText;    // "Aún no tienes puntuación..."
     public LocalizedString leaderboardHasScore;    // Smart String con rank y score
 
     private MyPosState myPosState = MyPosState.Prompt;
@@ -51,7 +51,6 @@ public class LeaderboardUI : MonoBehaviour
     private int lastScore = 0;
 
     private Button currentSelectedButton;
-
     private bool isLoading = false;
     private string currentRequestedStat = "";
 
@@ -61,11 +60,10 @@ public class LeaderboardUI : MonoBehaviour
     [Header("Top 3 Placeholders")]
     public string noRegisteredName = "No registrado";
     public string noRegisteredScore = "--";
-    
+
     [Header("Avatares")]
     public AvatarDataSO[] avatarDatabase;   // TODOS los AvatarDataSO del juego
-    public Sprite fallbackAvatarSprite;     // Sprite genérico si no hay datos
-
+    public Sprite fallbackAvatarSprite;     // Sprite genérico si no hay datos (por si lo quieres usar luego)
 
     public enum MyPosState
     {
@@ -111,7 +109,7 @@ public class LeaderboardUI : MonoBehaviour
 
     private IEnumerator InitLastMode()
     {
-        yield return null; // 🔥 Espera 1 frame
+        yield return null; // Espera 1 frame
 
         // Recuperar último modo o usar HighScore por defecto
         string lastMode = PlayerPrefs.GetString("LastLeaderboardMode", "HighScore");
@@ -121,23 +119,18 @@ public class LeaderboardUI : MonoBehaviour
             case "HighScore":
                 OnModeButtonClicked("HighScore", classicButton);
                 break;
-
             case "ColorScore":
                 OnModeButtonClicked("ColorScore", colorButton);
                 break;
-
             case "GeometricScore":
                 OnModeButtonClicked("GeometricScore", geometricButton);
                 break;
-
             case "GridScore":
                 OnModeButtonClicked("GridScore", gridButton);
                 break;
-
             case "DodgeScore":
                 OnModeButtonClicked("DodgeScore", dodgeButton);
                 break;
-
             default:
                 OnModeButtonClicked("HighScore", classicButton);
                 break;
@@ -332,7 +325,7 @@ public class LeaderboardUI : MonoBehaviour
 
                 if (avatarImg != null)
                 {
-                    SetAvatarForPlayFabId(entry.PlayFabId, avatarImg, fallbackAvatarSprite);
+                    SetAvatarForPlayFabId(entry.PlayFabId, avatarImg, null);
                 }
             }
         }
@@ -351,7 +344,7 @@ public class LeaderboardUI : MonoBehaviour
         return null;
     }
 
-    // Pide a PlayFab el EquippedAvatarId de ese jugador y asigna sprite al Image dado
+    // Pide a PlayFab el EquippedAvatarIdPublic de ese jugador y asigna sprite al Image dado
     private void SetAvatarForPlayFabId(string playFabId, Image targetImage, Sprite defaultSprite)
     {
         if (targetImage == null) return;
@@ -360,7 +353,7 @@ public class LeaderboardUI : MonoBehaviour
         var request = new GetUserDataRequest
         {
             PlayFabId = playFabId,
-            Keys = new List<string> { "EquippedAvatarId" }
+            Keys = new List<string> { "EquippedAvatarIdPublic" } // 👈 clave pública
         };
 
         PlayFabClientAPI.GetUserData(
@@ -369,10 +362,10 @@ public class LeaderboardUI : MonoBehaviour
             {
                 string avatarId = null;
 
-                if (result.Data != null && result.Data.ContainsKey("EquippedAvatarId"))
-                    avatarId = result.Data["EquippedAvatarId"].Value;
+                if (result.Data != null && result.Data.ContainsKey("EquippedAvatarIdPublic"))
+                    avatarId = result.Data["EquippedAvatarIdPublic"].Value;
 
-                Debug.Log($"[LeaderboardUI] User {playFabId} EquippedAvatarId = {avatarId}");
+                Debug.Log($"[LeaderboardUI] User {playFabId} EquippedAvatarIdPublic = {avatarId}");
 
                 // Si no tiene avatar guardado → NO tocamos la imagen
                 if (string.IsNullOrEmpty(avatarId))
@@ -386,13 +379,12 @@ public class LeaderboardUI : MonoBehaviour
                 }
                 else
                 {
-                    // Si el id no coincide con ningún SO, tampoco tocamos la imagen
                     Debug.LogWarning($"[LeaderboardUI] No se encontró AvatarDataSO para id '{avatarId}'. No se modifica el sprite.");
                 }
             },
             error =>
             {
-                Debug.LogWarning("Error al obtener EquippedAvatarId de " + playFabId + ": " + error.GenerateErrorReport());
+                Debug.LogWarning("Error al obtener EquippedAvatarIdPublic de " + playFabId + ": " + error.GenerateErrorReport());
                 // En caso de error, no tocamos la imagen.
             }
         );
@@ -415,7 +407,7 @@ public class LeaderboardUI : MonoBehaviour
             // Queremos que los tres se vean SIEMPRE
             slot.root.SetActive(true);
 
-            // 🔹 SIEMPRE, antes de nada, reseteamos el avatar a su sprite base
+            // Resetear avatar SIEMPRE al default de ese slot
             if (slot.avatarImage != null && slot.defaultAvatarSprite != null)
             {
                 slot.avatarImage.sprite = slot.defaultAvatarSprite;
@@ -432,13 +424,13 @@ public class LeaderboardUI : MonoBehaviour
                 if (slot.scoreText != null)
                     slot.scoreText.text = entry.StatValue + " pts";
 
-                // Solo cambiamos el avatar si el jugador tiene EquipppedAvatarId
+                // Avatar (solo si el jugador tiene uno público)
                 if (slot.avatarImage != null && !string.IsNullOrEmpty(entry.PlayFabId))
                 {
                     SetAvatarForPlayFabId(entry.PlayFabId, slot.avatarImage, null);
                 }
 
-                // Mostrar el nivel
+                // Nivel
                 if (slot.levelText != null)
                 {
                     GetPlayerLevel(entry.PlayFabId, level =>
@@ -449,14 +441,13 @@ public class LeaderboardUI : MonoBehaviour
             }
             else
             {
-                // No hay nadie aún en este puesto → placeholder de texto
+                // No hay nadie aún en este puesto → placeholder
                 if (slot.nameText != null)
                     slot.nameText.text = noRegisteredName;
 
                 if (slot.scoreText != null)
                     slot.scoreText.text = noRegisteredScore;
 
-                // Nivel vacío
                 if (slot.levelText != null)
                     slot.levelText.text = "";
             }
@@ -475,27 +466,21 @@ public class LeaderboardUI : MonoBehaviour
 
     private void OnLocaleChanged(Locale newLocale)
     {
-        // Cuando cambia el idioma, rehacemos el texto según el estado actual
         switch (myPosState)
         {
             case MyPosState.Prompt:
                 myPositionText.text = touchButtonPrompt.GetLocalizedString();
                 break;
-
             case MyPosState.Loading:
                 myPositionText.text = loadingScoresText.GetLocalizedString();
                 break;
-
             case MyPosState.NoScores:
                 myPositionText.text = noScoresText.GetLocalizedString();
                 break;
-
             case MyPosState.NoScoreThisMode:
                 myPositionText.text = noScoreThisModeText.GetLocalizedString();
                 break;
-
             case MyPosState.HasScore:
-                // Volvemos a pedir la Smart String con los mismos parámetros
                 myPositionText.text = leaderboardHasScore.GetLocalizedString(lastRank, lastScore);
                 break;
         }
