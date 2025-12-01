@@ -454,6 +454,21 @@ public class LeaderboardUI : MonoBehaviour
         }
     }
 
+    public void RefreshCurrentLeaderboard()
+    {
+        // Si aún no se ha mostrado ningún modo, no hacemos nada
+        if (string.IsNullOrEmpty(currentRequestedStat))
+            return;
+
+        // Si ya está cargando, mejor no pisar la petición
+        if (isLoading)
+            return;
+
+        // Volvemos a pedir el mismo leaderboard que está activo ahora
+        ShowLeaderboard(currentRequestedStat, 10);
+    }
+
+
     private void OnEnable()
     {
         LocalizationSettings.SelectedLocaleChanged += OnLocaleChanged;

@@ -149,27 +149,41 @@ public class AvatarItem : MonoBehaviour
             PlayerPrefs.SetString("EquippedAvatarId", avatarData.id);
             PlayerPrefs.Save();
 
-            // 2) Subir a PlayFab como UserData para que otros vean tu avatar en el ranking
+            // 2) Subir a PlayFab como dato PÚBLICO
             var request = new UpdateUserDataRequest
             {
                 Data = new Dictionary<string, string>
         {
-            { "EquippedAvatarId", avatarData.id }
-        }
+            { "EquippedAvatarIdPublic", avatarData.id }
+        },
+                Permission = UserDataPermission.Public
             };
 
             PlayFabClientAPI.UpdateUserData(
                 request,
-                result => { Debug.Log("EquippedAvatarId actualizado en PlayFab"); },
-                error => { Debug.LogWarning("Error al actualizar EquippedAvatarId: " + error.GenerateErrorReport()); }
+                result =>
+                {
+                    Debug.Log("EquippedAvatarIdPublic actualizado en PlayFab (PUBLIC)");
+
+                    // 🔥 REFRESCAR RANKING DESPUÉS DE QUE PLAYFAB GUARDE
+                    var lb = LeaderboardUI.Instance;
+                    if (lb != null)
+                    {
+                        lb.RefreshCurrentLeaderboard();
+                    }
+                },
+                error =>
+                {
+                    Debug.LogWarning("Error al actualizar EquippedAvatarIdPublic: " + error.GenerateErrorReport());
+                }
             );
 
             // 3) Actualizar avatar del menú (misma escena)
-            MainMenuAvatar menuAvatar = FindObjectOfType<MainMenuAvatar>();
+            MainMenuAvatar menuAvatar = FindFirstObjectByType<MainMenuAvatar>();
             if (menuAvatar != null)
                 menuAvatar.LoadEquippedAvatar();
 
-            OnCancelClicked(); // opcional: cerrar selección
+            OnCancelClicked(); // cerrar selección
         }
     }
 
