@@ -1,0 +1,5 @@
+C:/Users/usuario/Documents/GitHub/BipBop/.utmp/RelWithDebInfo/2e1l3q5u/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/usuario/Documents/GitHub/BipBop/.utmp/RelWithDebInfo/2e1l3q5u/armeabi-v7a/CMakeFiles/rebuild_cache.dir
+C:/Users/usuario/Documents/GitHub/BipBop/.utmp/RelWithDebInfo/2e1l3q5u/armeabi-v7a/FramePacing/CMakeFiles/swappywrapper.dir
+C:/Users/usuario/Documents/GitHub/BipBop/.utmp/RelWithDebInfo/2e1l3q5u/armeabi-v7a/FramePacing/CMakeFiles/edit_cache.dir
+C:/Users/usuario/Documents/GitHub/BipBop/.utmp/RelWithDebInfo/2e1l3q5u/armeabi-v7a/FramePacing/CMakeFiles/rebuild_cache.dir

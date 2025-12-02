@@ -26,7 +26,7 @@ public class DodgeCountDownUI : MonoBehaviour
     {
         if (!isCustomMessage)
         {
-            float t = GridState.Instance.GetCountDownTimer();
+            float t = DodgeState.Instance.GetCountDownTimer();
 
             if (t > 0f)
             {
