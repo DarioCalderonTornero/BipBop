@@ -183,7 +183,7 @@ public class XPUIAnimation : MonoBehaviour
 
     // --------- AVATAR ---------
 
-    private void LoadCurrentAvatarSprite()
+    public void LoadCurrentAvatarSprite()
     {
         if (avatarImage == null) return;
 

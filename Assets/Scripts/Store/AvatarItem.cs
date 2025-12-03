@@ -102,9 +102,11 @@ public class AvatarItem : MonoBehaviour
 
     private void OnSelectClicked()
     {
+        Debug.Log($"Avatar seleccionado: {avatarData.displayName}");
+
+        // Si ya está seleccionado, no hacemos nada
         if (_isSelected)
         {
-            // Si ya está seleccionado, no hacemos nada
             return;
         }
 
@@ -120,7 +122,16 @@ public class AvatarItem : MonoBehaviour
         StartCoroutine(ScaleRoutine(_originalScale, _originalScale * selectedScale));
 
         // Mostramos los botones de "Comprar"
-        if (buyButton != null) buyButton.gameObject.SetActive(true);
+        if (!_isPurchased)  // Solo mostramos el botón de compra si no está comprado
+        {
+            if (buyButton != null) buyButton.gameObject.SetActive(true);
+        }
+        else
+        {
+            // Si ya está comprado, no mostrar el botón de "Equipar"
+            if (buyButton != null) buyButton.gameObject.SetActive(false);
+        }
+
         if (cancelButton != null) cancelButton.gameObject.SetActive(true);
     }
 

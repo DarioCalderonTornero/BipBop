@@ -157,6 +157,8 @@ public class AvatarInventoryManager : MonoBehaviour
     // Se llama cuando se selecciona un avatar
     public void OnAvatarSelected(InventoryAvatarItem avatarItem)
     {
+        Debug.Log($"Avatar seleccionado: {avatarItem.GetAvatarData().displayName}");
+
         // Si ya hay un avatar seleccionado y es el mismo que el clickeado, no hacemos nada
         if (selectedAvatarItem == avatarItem)
         {
@@ -185,12 +187,23 @@ public class AvatarInventoryManager : MonoBehaviour
             ClosePanel();  // Cerramos el panel
 
             // Actualizamos el avatar de inmediato (sin esperar a salir y reabrir el panel)
-            MainMenuAvatar menuAvatar = FindObjectOfType<MainMenuAvatar>();
-            if (menuAvatar != null)
-            {
-                menuAvatar.LoadEquippedAvatar();  // Reflejamos el cambio de avatar en el menú
-            }
+            StartCoroutine(WaitAndUpdateAvatar());
         }
+    }
+
+    private IEnumerator WaitAndUpdateAvatar()
+    {
+        // Esperamos un segundo para permitir que el panel se cierre correctamente
+        yield return new WaitForSeconds(1);
+
+        // Ahora actualizamos el avatar en el menú principal
+        XPUIAnimation menuAvatar = FindFirstObjectByType<XPUIAnimation>();
+        if (menuAvatar != null)
+        {
+            menuAvatar.LoadCurrentAvatarSprite();  // Reflejamos el cambio de avatar en el menú
+        }
+
+        LeaderboardUI.Instance.RefreshCurrentLeaderboard();
     }
 
     private void EquipAvatar(AvatarDataSO avatarData)
@@ -214,9 +227,9 @@ public class AvatarInventoryManager : MonoBehaviour
             Debug.Log("Avatar equipados en PlayFab");
 
             // Actualizar UI del avatar
-            MainMenuAvatar menuAvatar = FindObjectOfType<MainMenuAvatar>();
+            XPUIAnimation menuAvatar = FindFirstObjectByType<XPUIAnimation>();
             if (menuAvatar != null)
-                menuAvatar.LoadEquippedAvatar();
+                menuAvatar.LoadCurrentAvatarSprite();
         }, error =>
         {
             Debug.LogWarning("Error al actualizar avatar en PlayFab: " + error.GenerateErrorReport());
