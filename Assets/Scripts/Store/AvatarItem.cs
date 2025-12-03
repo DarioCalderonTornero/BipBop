@@ -19,7 +19,7 @@ public class AvatarItem : MonoBehaviour
 
     [Header("Botones")]
     [SerializeField] private Button selectButton;      // botón de la tarjeta (o el propio botón del avatar)
-    [SerializeField] private Button buyEquipButton;    // botón que dice "Comprar" o "Equipar"
+    [SerializeField] private Button buyButton;         // botón de "Comprar"
     [SerializeField] private Button cancelButton;      // botón "Cancelar"
 
     [Header("Animación")]
@@ -30,20 +30,22 @@ public class AvatarItem : MonoBehaviour
     private bool _isSelected = false;
     private bool _isPurchased = false;
 
+    private static AvatarItem currentlySelectedItem = null;  // Para controlar qué avatar está "hecho grande"
+
     private void Awake()
     {
         _originalScale = transform.localScale;
 
         // Ocultamos botones al inicio
-        if (buyEquipButton != null) buyEquipButton.gameObject.SetActive(false);
+        if (buyButton != null) buyButton.gameObject.SetActive(false);
         if (cancelButton != null) cancelButton.gameObject.SetActive(false);
 
         // Listeners
         if (selectButton != null)
             selectButton.onClick.AddListener(OnSelectClicked);
 
-        if (buyEquipButton != null)
-            buyEquipButton.onClick.AddListener(OnBuyEquipClicked);
+        if (buyButton != null)
+            buyButton.onClick.AddListener(OnBuyClicked);
 
         if (cancelButton != null)
             cancelButton.onClick.AddListener(OnCancelClicked);
@@ -73,17 +75,27 @@ public class AvatarItem : MonoBehaviour
         string key = "AvatarPurchased_" + avatarData.id;
         _isPurchased = PlayerPrefs.GetInt(key, 0) == 1;
 
-        UpdateBuyEquipText();
+        UpdateBuyText();  // Actualizamos el texto del botón de compra
     }
 
-    private void UpdateBuyEquipText()
+    private void UpdateBuyText()
     {
-        if (buyEquipButton == null) return;
+        if (buyButton == null) return;
 
-        var tmp = buyEquipButton.GetComponentInChildren<TextMeshProUGUI>();
+        var tmp = buyButton.GetComponentInChildren<TextMeshProUGUI>();
         if (tmp == null) return;
 
-        tmp.text = _isPurchased ? "Equipar" : "Comprar";
+        // Si está comprado, desactivamos el botón de comprar
+        if (_isPurchased)
+        {
+            tmp.text = "Equipar";
+            buyButton.gameObject.SetActive(false); // Si ya está comprado, ocultamos el botón de compra
+        }
+        else
+        {
+            tmp.text = "Comprar";
+            buyButton.gameObject.SetActive(true); // Si no está comprado, mostramos el botón de compra
+        }
     }
 
     // --------- Interacciones ---------
@@ -92,14 +104,23 @@ public class AvatarItem : MonoBehaviour
     {
         if (_isSelected)
         {
-            // Si ya está seleccionado, no hacemos nada (o podrías replegarlo)
+            // Si ya está seleccionado, no hacemos nada
             return;
         }
 
+        // Si hay otro avatar seleccionado, lo colapsamos
+        if (currentlySelectedItem != null && currentlySelectedItem != this)
+        {
+            currentlySelectedItem.Deselect();
+        }
+
+        // Hacemos este avatar grande
         _isSelected = true;
+        currentlySelectedItem = this;
         StartCoroutine(ScaleRoutine(_originalScale, _originalScale * selectedScale));
 
-        if (buyEquipButton != null) buyEquipButton.gameObject.SetActive(true);
+        // Mostramos los botones de "Comprar"
+        if (buyButton != null) buyButton.gameObject.SetActive(true);
         if (cancelButton != null) cancelButton.gameObject.SetActive(true);
     }
 
@@ -107,14 +128,17 @@ public class AvatarItem : MonoBehaviour
     {
         if (!_isSelected) return;
 
+        // Desmarcamos este avatar
         _isSelected = false;
+        currentlySelectedItem = null;
         StartCoroutine(ScaleRoutine(transform.localScale, _originalScale));
 
-        if (buyEquipButton != null) buyEquipButton.gameObject.SetActive(false);
+        // Ocultamos los botones de "Comprar"
+        if (buyButton != null) buyButton.gameObject.SetActive(false);
         if (cancelButton != null) cancelButton.gameObject.SetActive(false);
     }
 
-    private void OnBuyEquipClicked()
+    private void OnBuyClicked()
     {
         if (!_isPurchased)
         {
@@ -131,7 +155,8 @@ public class AvatarItem : MonoBehaviour
                 PlayerPrefs.SetInt("AvatarPurchased_" + avatarData.id, 1);
                 PlayerPrefs.Save();
 
-                UpdateBuyEquipText();
+                UpdateBuyText();  // Actualizamos el texto del botón para reflejar que ya fue comprado
+
                 Debug.Log($"Avatar comprado: {avatarData.id}");
             }
             else
@@ -142,48 +167,8 @@ public class AvatarItem : MonoBehaviour
         }
         else
         {
-            // --- EQUIPAR ---
-            Debug.Log($"Equipar avatar: {avatarData.id}");
-
-            // 1) Guardar localmente
-            PlayerPrefs.SetString("EquippedAvatarId", avatarData.id);
-            PlayerPrefs.Save();
-
-            // 2) Subir a PlayFab como dato PÚBLICO
-            var request = new UpdateUserDataRequest
-            {
-                Data = new Dictionary<string, string>
-        {
-            { "EquippedAvatarIdPublic", avatarData.id }
-        },
-                Permission = UserDataPermission.Public
-            };
-
-            PlayFabClientAPI.UpdateUserData(
-                request,
-                result =>
-                {
-                    Debug.Log("EquippedAvatarIdPublic actualizado en PlayFab (PUBLIC)");
-
-                    // 🔥 REFRESCAR RANKING DESPUÉS DE QUE PLAYFAB GUARDE
-                    var lb = LeaderboardUI.Instance;
-                    if (lb != null)
-                    {
-                        lb.RefreshCurrentLeaderboard();
-                    }
-                },
-                error =>
-                {
-                    Debug.LogWarning("Error al actualizar EquippedAvatarIdPublic: " + error.GenerateErrorReport());
-                }
-            );
-
-            // 3) Actualizar avatar del menú (misma escena)
-            MainMenuAvatar menuAvatar = FindFirstObjectByType<MainMenuAvatar>();
-            if (menuAvatar != null)
-                menuAvatar.LoadEquippedAvatar();
-
-            OnCancelClicked(); // cerrar selección
+            // Si ya está comprado, no hacemos nada
+            Debug.Log("Este avatar ya está comprado.");
         }
     }
 
@@ -202,5 +187,18 @@ public class AvatarItem : MonoBehaviour
         }
 
         transform.localScale = to;
+    }
+
+    // --------- Deselect (desmarcar) ---------
+
+    public void Deselect()
+    {
+        _isSelected = false;
+        currentlySelectedItem = null;
+        StartCoroutine(ScaleRoutine(transform.localScale, _originalScale));
+
+        // Ocultamos los botones de "Comprar"
+        if (buyButton != null) buyButton.gameObject.SetActive(false);
+        if (cancelButton != null) cancelButton.gameObject.SetActive(false);
     }
 }
