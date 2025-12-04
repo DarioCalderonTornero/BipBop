@@ -32,7 +32,9 @@ public class XPUIAnimation : MonoBehaviour
     // --------- AVATAR ---------
     [Header("Avatar del usuario")]
     [SerializeField] private Image avatarImage;          // Imagen circular grande
-    [SerializeField] private AvatarDataSO[] avatarDB;    // TODOS los AvatarDataSO
+
+    [SerializeField] private AvatarCatalogSO avatarCatalog; // Catálogo de avatares (ScriptableObject)
+    [SerializeField] private BackgroundCatalogSO backgroundCatalog;
     [SerializeField] private Sprite fallbackAvatar;      // por si falla algo
 
     // --------- NIVEL / XP ---------
@@ -51,6 +53,10 @@ public class XPUIAnimation : MonoBehaviour
     [SerializeField] private TextMeshProUGUI geometricRecordText; // GeometricScore
     [SerializeField] private TextMeshProUGUI gridRecordText;      // GridScore
     [SerializeField] private TextMeshProUGUI dodgeRecordText;     // DodgeScore
+
+    [Header("Conteo de Avatares y Fondos")]
+    [SerializeField] private TextMeshProUGUI avatarCountText;  
+    [SerializeField] private TextMeshProUGUI backgroundCountText;
 
     private void Awake()
     {
@@ -94,6 +100,26 @@ public class XPUIAnimation : MonoBehaviour
         UpdateLevelUI();
         LoadUsername();
         UpdateRecordsUI();   // <- inicializamos también los récords
+
+        UpdateAvatarAndBackgroundCount(); // Llamada para actualizar los contadores
+    }
+
+    private void UpdateAvatarAndBackgroundCount()
+    {
+        // Contamos los avatares y fondos disponibles
+        int avatarCount = avatarCatalog != null ? avatarCatalog.avatarDataSO.Count : 0;
+        int backgroundCount = backgroundCatalog != null ? backgroundCatalog.backgroundDataSO.Count : 0;
+
+        // Actualizamos los textos
+        if (avatarCountText != null)
+        {
+            avatarCountText.text = $"{avatarCount} / {avatarCatalog.avatarDataSO.Count}";  // X / X
+        }
+
+        if (backgroundCountText != null)
+        {
+            backgroundCountText.text = $"{backgroundCount} / {backgroundCatalog.backgroundDataSO.Count}";  // X / X
+        }
     }
 
     private void Update()
@@ -116,6 +142,9 @@ public class XPUIAnimation : MonoBehaviour
         UpdateLevelUI();
         LoadUsername();
         UpdateRecordsUI();
+
+        // Actualizar los textos de avatares y fondos
+        UpdateAvatarAndBackgroundCount();
 
         if (currentRoutine != null) StopCoroutine(currentRoutine);
         currentRoutine = StartCoroutine(SlidePanel(panel.anchoredPosition, shownPosition));
@@ -198,9 +227,9 @@ public class XPUIAnimation : MonoBehaviour
 
     private AvatarDataSO GetAvatarById(string id)
     {
-        if (string.IsNullOrEmpty(id) || avatarDB == null) return null;
+        if (string.IsNullOrEmpty(id) || avatarCatalog == null) return null;
 
-        foreach (var a in avatarDB)
+        foreach (var a in avatarCatalog.avatarDataSO)
         {
             if (a != null && a.id == id)
                 return a;

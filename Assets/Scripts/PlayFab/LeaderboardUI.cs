@@ -62,8 +62,7 @@ public class LeaderboardUI : MonoBehaviour
     public string noRegisteredScore = "--";
 
     [Header("Avatares")]
-    public AvatarDataSO[] avatarDatabase;   // TODOS los AvatarDataSO del juego
-    public Sprite fallbackAvatarSprite;     // Sprite genérico si no hay datos (por si lo quieres usar luego)
+    [SerializeField] private AvatarCatalogSO avatarCatalog;
 
     public enum MyPosState
     {
@@ -334,17 +333,16 @@ public class LeaderboardUI : MonoBehaviour
     // Busca el AvatarDataSO por id
     private AvatarDataSO GetAvatarDataById(string id)
     {
-        if (string.IsNullOrEmpty(id) || avatarDatabase == null) return null;
+        if (string.IsNullOrEmpty(id) || avatarCatalog == null) return null;
 
-        foreach (var avatar in avatarDatabase)
+        foreach (var a in avatarCatalog.avatarDataSO)
         {
-            if (avatar != null && avatar.id == id)
-                return avatar;
+            if (a != null && a.id == id)
+                return a;
         }
         return null;
     }
 
-    // Pide a PlayFab el EquippedAvatarIdPublic de ese jugador y asigna sprite al Image dado
     private void SetAvatarForPlayFabId(string playFabId, Image targetImage, Sprite defaultSprite)
     {
         if (targetImage == null) return;
@@ -353,7 +351,7 @@ public class LeaderboardUI : MonoBehaviour
         var request = new GetUserDataRequest
         {
             PlayFabId = playFabId,
-            Keys = new List<string> { "EquippedAvatarIdPublic" } // 👈 clave pública
+            Keys = new List<string> { "EquippedAvatarIdPublic" }
         };
 
         PlayFabClientAPI.GetUserData(
@@ -365,27 +363,19 @@ public class LeaderboardUI : MonoBehaviour
                 if (result.Data != null && result.Data.ContainsKey("EquippedAvatarIdPublic"))
                     avatarId = result.Data["EquippedAvatarIdPublic"].Value;
 
-                Debug.Log($"[LeaderboardUI] User {playFabId} EquippedAvatarIdPublic = {avatarId}");
-
                 // Si no tiene avatar guardado → NO tocamos la imagen
                 if (string.IsNullOrEmpty(avatarId))
                     return;
 
-                var data = GetAvatarDataById(avatarId);
+                var data = GetAvatarDataById(avatarId);  // Aquí se usa el nuevo método
                 if (data != null && data.sprite != null)
                 {
-                    Debug.Log($"[LeaderboardUI] Aplicando avatar '{avatarId}' sprite '{data.sprite.name}' en {targetImage.name}");
                     targetImage.sprite = data.sprite;
-                }
-                else
-                {
-                    Debug.LogWarning($"[LeaderboardUI] No se encontró AvatarDataSO para id '{avatarId}'. No se modifica el sprite.");
                 }
             },
             error =>
             {
                 Debug.LogWarning("Error al obtener EquippedAvatarIdPublic de " + playFabId + ": " + error.GenerateErrorReport());
-                // En caso de error, no tocamos la imagen.
             }
         );
     }
@@ -500,4 +490,6 @@ public class LeaderboardUI : MonoBehaviour
                 break;
         }
     }
+
+
 }

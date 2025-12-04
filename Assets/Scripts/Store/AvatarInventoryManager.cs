@@ -15,8 +15,8 @@ public class AvatarInventoryManager : MonoBehaviour
     [SerializeField] private GameObject avatarItemPrefab;  // Prefab para cada item de avatar
     [SerializeField] private Transform contentPanel;       // Panel donde se instanciarán los avatares
 
-    [Header("Base de Datos de Avatares")]
-    [SerializeField] private AvatarDataSO[] avatarDatabase;   // Asegúrate de agregar esta referencia en el Inspector
+    [Header("Catalogo de Avatares")]
+    [SerializeField] private AvatarCatalogSO avatarCatalog;   // El catálogo de avatares
 
     [Header("Animación")]
     [SerializeField] private float popDuration = 0.25f;  // Duración de la animación de pop
@@ -31,9 +31,9 @@ public class AvatarInventoryManager : MonoBehaviour
     private void Start()
     {
         // Comprobamos que las referencias están asignadas correctamente
-        if (avatarDatabase == null || avatarDatabase.Length == 0)
+        if (avatarCatalog == null)
         {
-            Debug.LogError("AvatarDatabase no está asignado o está vacío.");
+            Debug.LogError("AvatarCatalog no está asignado.");
         }
 
         if (contentPanel == null)
@@ -67,6 +67,8 @@ public class AvatarInventoryManager : MonoBehaviour
 
         isPanelVisible = true;  // El panel ahora está visible
         StartCoroutine(PopPanel(Vector3.zero, Vector3.one * popScale));
+
+        LoadAvatarsInPanel();
     }
 
     public void ClosePanel()
@@ -98,10 +100,10 @@ public class AvatarInventoryManager : MonoBehaviour
 
     private void LoadAvatarsInPanel()
     {
-        // Verifica si el panel y avatarDatabase están configurados correctamente
-        if (contentPanel == null || avatarDatabase == null)
+        // Verifica si el panel y avatarCatalog están configurados correctamente
+        if (contentPanel == null || avatarCatalog == null)
         {
-            Debug.LogError("No se puede cargar avatares. contentPanel o avatarDatabase no están asignados.");
+            Debug.LogError("No se puede cargar avatares. contentPanel o avatarCatalog no están asignados.");
             return;
         }
 
@@ -111,47 +113,16 @@ public class AvatarInventoryManager : MonoBehaviour
             Destroy(child.gameObject);
         }
 
-        // Buscar todos los avatares comprados
-        var purchasedAvatars = GetPurchasedAvatars();
-
-        // Instanciamos los avatares comprados
-        foreach (var avatarId in purchasedAvatars)
+        // Instanciamos los avatares del catálogo
+        foreach (var avatarData in avatarCatalog.avatarDataSO)
         {
             GameObject avatarItemGO = Instantiate(avatarItemPrefab, contentPanel);
             InventoryAvatarItem avatarItem = avatarItemGO.GetComponent<InventoryAvatarItem>();
-            AvatarDataSO avatarData = GetAvatarById(avatarId);
             avatarItem.Setup(avatarData);
 
             // Añadimos el listener al botón de selección
             avatarItem.selectButton.onClick.AddListener(() => OnAvatarSelected(avatarItem));
         }
-    }
-
-    private List<string> GetPurchasedAvatars()
-    {
-        // Devuelve una lista con los avatares comprados desde PlayerPrefs
-        List<string> purchasedAvatars = new List<string>();
-
-        foreach (var avatarData in avatarDatabase)   // Aquí accedemos al array avatarDatabase
-        {
-            string key = "AvatarPurchased_" + avatarData.id;
-            if (PlayerPrefs.GetInt(key, 0) == 1)  // Verificamos si está marcado como comprado
-            {
-                purchasedAvatars.Add(avatarData.id);
-            }
-        }
-
-        return purchasedAvatars;
-    }
-
-    private AvatarDataSO GetAvatarById(string id)
-    {
-        foreach (var avatar in avatarDatabase)
-        {
-            if (avatar.id == id)
-                return avatar;
-        }
-        return null;
     }
 
     // Se llama cuando se selecciona un avatar
