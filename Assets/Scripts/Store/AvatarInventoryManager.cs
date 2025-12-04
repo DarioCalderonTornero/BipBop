@@ -100,28 +100,21 @@ public class AvatarInventoryManager : MonoBehaviour
 
     private void LoadAvatarsInPanel()
     {
-        // Verifica si el panel y avatarCatalog están configurados correctamente
         if (contentPanel == null || avatarCatalog == null)
         {
             Debug.LogError("No se puede cargar avatares. contentPanel o avatarCatalog no están asignados.");
             return;
         }
 
-        // Limpiamos cualquier avatar anterior en el contenedor
         foreach (Transform child in contentPanel)
-        {
             Destroy(child.gameObject);
-        }
 
-        // Instanciamos los avatares del catálogo
         foreach (var avatarData in avatarCatalog.avatarDataSO)
         {
             GameObject avatarItemGO = Instantiate(avatarItemPrefab, contentPanel);
             InventoryAvatarItem avatarItem = avatarItemGO.GetComponent<InventoryAvatarItem>();
             avatarItem.Setup(avatarData);
-
-            // Añadimos el listener al botón de selección
-            avatarItem.selectButton.onClick.AddListener(() => OnAvatarSelected(avatarItem));
+            // NO añadir listener aquí
         }
     }
 

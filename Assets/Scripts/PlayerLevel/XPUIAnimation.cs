@@ -106,20 +106,50 @@ public class XPUIAnimation : MonoBehaviour
 
     private void UpdateAvatarAndBackgroundCount()
     {
-        // Contamos los avatares y fondos disponibles
-        int avatarCount = avatarCatalog != null ? avatarCatalog.avatarDataSO.Count : 0;
-        int backgroundCount = backgroundCatalog != null ? backgroundCatalog.backgroundDataSO.Count : 0;
+        int ownedAvatars = 0;
+        int totalAvatars = avatarCatalog != null ? avatarCatalog.avatarDataSO.Count : 0;
 
-        // Actualizamos los textos
-        if (avatarCountText != null)
+        if (avatarCatalog != null)
         {
-            avatarCountText.text = $"{avatarCount} / {avatarCatalog.avatarDataSO.Count}";  // X / X
+            foreach (var avatar in avatarCatalog.avatarDataSO)
+            {
+                if (avatar == null) continue;
+
+                string key = "AvatarPurchased_" + avatar.id;
+
+                // Cuenta como comprado si PlayerPrefs dice 1
+                // (si quieres que uno sea “base” siempre comprado, puedes añadir: || avatar.id == "NormalAvatar")
+                bool isOwned = PlayerPrefs.GetInt(key, 0) == 1;
+
+                if (isOwned)
+                    ownedAvatars++;
+            }
         }
+
+        int ownedBackgrounds = 0;
+        int totalBackgrounds = backgroundCatalog != null ? backgroundCatalog.backgroundDataSO.Count : 0;
+
+        if (backgroundCatalog != null)
+        {
+            foreach (var bg in backgroundCatalog.backgroundDataSO)
+            {
+                if (bg == null) continue;
+
+                string id = bg.id;
+
+                // Mismo criterio que usas en FondoItem.ActualizarIcono
+                bool comprado = PlayerPrefs.GetInt("Purchased_" + id, 0) == 1 || id == "DefaultBackground";
+
+                if (comprado)
+                    ownedBackgrounds++;
+            }
+        }
+
+        if (avatarCountText != null)
+            avatarCountText.text = $"{ownedAvatars} / {totalAvatars}";
 
         if (backgroundCountText != null)
-        {
-            backgroundCountText.text = $"{backgroundCount} / {backgroundCatalog.backgroundDataSO.Count}";  // X / X
-        }
+            backgroundCountText.text = $"{ownedBackgrounds} / {totalBackgrounds}";
     }
 
     private void Update()

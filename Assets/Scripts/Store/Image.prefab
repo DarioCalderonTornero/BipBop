@@ -166,7 +166,7 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 6734791516055900476}
   m_Father: {fileID: 0}
@@ -230,6 +230,7 @@ MonoBehaviour:
   nameText: {fileID: 4782957989707930098}
   selectButton: {fileID: 2545569439944345604}
   avatarData: {fileID: 0}
+  lockedTint: {r: 0.01886791, g: 0.01886791, b: 0.01886791, a: 1}
 --- !u!114 &2545569439944345604
 MonoBehaviour:
   m_ObjectHideFlags: 0

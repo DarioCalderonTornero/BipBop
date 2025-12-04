@@ -14,20 +14,35 @@ public class InventoryAvatarItem : MonoBehaviour
 
     private bool isSelected = false;  // Estado de si está seleccionado o no
 
+    [Header("Estado de propiedad")]
+    [SerializeField] private Color lockedTint = Color.gray; // Color para avatares no comprados
+    private bool isOwned = false;
+    private Color originalColor;
+
     // Configuración inicial del item
     public void Setup(AvatarDataSO avatarData)
     {
         this.avatarData = avatarData;
 
         if (avatarImage != null)
+        {
             avatarImage.sprite = avatarData.sprite;
+            originalColor = avatarImage.color;
+        }
 
         if (nameText != null)
             nameText.text = avatarData.displayName;
 
-        // Asociamos el botón de selección con el método que se ejecutará cuando se haga clic
+        // Comprobar propiedad
+        string key = "AvatarPurchased_" + avatarData.id;
+        isOwned = PlayerPrefs.GetInt(key, 0) == 1;
+
+        ApplyOwnershipVisuals();
+
+        // Listener de selección
         if (selectButton != null)
         {
+            selectButton.onClick.RemoveAllListeners();
             selectButton.onClick.AddListener(OnSelectClicked);
         }
     }
@@ -56,9 +71,19 @@ public class InventoryAvatarItem : MonoBehaviour
     // Acción cuando se hace clic en el botón para seleccionar el avatar
     private void OnSelectClicked()
     {
-        AvatarInventoryManager inventoryManager = FindFirstObjectByType<AvatarInventoryManager>();
+        if (!isOwned)
+            return;
 
-        // Llamamos al método en el manager para seleccionar o deseleccionar este avatar
+        AvatarInventoryManager inventoryManager = FindFirstObjectByType<AvatarInventoryManager>();
         inventoryManager.OnAvatarSelected(this);
+    }
+
+    private void ApplyOwnershipVisuals()
+    {
+        if (avatarImage != null)
+            avatarImage.color = isOwned ? originalColor : lockedTint;
+
+        if (selectButton != null)
+            selectButton.interactable = isOwned;
     }
 }
