@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using PlayFab;
+using PlayFab.ClientModels;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -57,6 +59,9 @@ public class XPUIAnimation : MonoBehaviour
     [Header("Conteo de Avatares y Fondos")]
     [SerializeField] private TextMeshProUGUI avatarCountText;  
     [SerializeField] private TextMeshProUGUI backgroundCountText;
+
+    private bool isRemoteProfile = false;
+    private string remotePlayFabId = null;
 
     private void Awake()
     {
@@ -154,31 +159,213 @@ public class XPUIAnimation : MonoBehaviour
 
     private void Update()
     {
-        // Si el nivel/XP puede cambiar mientras juegas, lo refrescamos
-        UpdateLevelUI();
-        // Si los récords pueden cambiar mientras juegas (por ejemplo tras una partida),
-        // también los refrescamos aquí. Si no hace falta, puedes quitar esta línea.
-        UpdateRecordsUI();
+        if (!isRemoteProfile)
+        {
+            UpdateLevelUI();
+            UpdateRecordsUI();
+        }
     }
 
     // --------- ABRIR / CERRAR ---------
 
     public void OpenPanel()
     {
+        ShowLocalProfile();
+    }
+
+    public void ShowLocalProfile()
+    {
         if (isShown || isMoving) return;
 
         isShown = true;
+        isRemoteProfile = false;
+        remotePlayFabId = null;
+
         LoadCurrentAvatarSprite();
         UpdateLevelUI();
         LoadUsername();
         UpdateRecordsUI();
-
-        // Actualizar los textos de avatares y fondos
         UpdateAvatarAndBackgroundCount();
 
         if (currentRoutine != null) StopCoroutine(currentRoutine);
         currentRoutine = StartCoroutine(SlidePanel(panel.anchoredPosition, shownPosition));
     }
+
+    public void ShowRemoteProfile(string playFabId, string displayName)
+    {
+        if (isMoving) return;
+
+        isShown = true;
+        isRemoteProfile = true;
+        remotePlayFabId = playFabId;
+
+        // Nombre
+        if (usernameText != null)
+            usernameText.text = string.IsNullOrEmpty(displayName) ? "Player" : displayName;
+
+        // Para perfiles remotos NO tiene sentido mostrar tus colecciones
+        if (avatarCountText != null) avatarCountText.text = "-";
+        if (backgroundCountText != null) backgroundCountText.text = "-";
+
+        // Cargamos datos remotos desde PlayFab
+        LoadRemoteAvatarSprite(playFabId);
+        LoadRemoteLevelAndXP(playFabId);
+        LoadRemoteRecords(playFabId);
+
+        if (currentRoutine != null) StopCoroutine(currentRoutine);
+        currentRoutine = StartCoroutine(SlidePanel(panel.anchoredPosition, shownPosition));
+    }
+
+    private void LoadRemoteAvatarSprite(string playFabId)
+    {
+        if (avatarImage == null || avatarCatalog == null) return;
+
+        var request = new GetUserDataRequest
+        {
+            PlayFabId = playFabId,
+            Keys = new List<string> { "EquippedAvatarIdPublic" }
+        };
+
+        PlayFabClientAPI.GetUserData(
+            request,
+            result =>
+            {
+                // Por si el usuario cambia mientras llega la respuesta
+                if (!isRemoteProfile || playFabId != remotePlayFabId) return;
+
+                string avatarId = null;
+                if (result.Data != null && result.Data.ContainsKey("EquippedAvatarIdPublic"))
+                    avatarId = result.Data["EquippedAvatarIdPublic"].Value;
+
+                if (string.IsNullOrEmpty(avatarId))
+                {
+                    if (fallbackAvatar != null)
+                        avatarImage.sprite = fallbackAvatar;
+                    return;
+                }
+
+                var data = GetAvatarById(avatarId);
+                if (data != null && data.sprite != null)
+                    avatarImage.sprite = data.sprite;
+                else if (fallbackAvatar != null)
+                    avatarImage.sprite = fallbackAvatar;
+            },
+            error =>
+            {
+                Debug.LogWarning("Error al cargar avatar remoto: " + error.GenerateErrorReport());
+                if (fallbackAvatar != null)
+                    avatarImage.sprite = fallbackAvatar;
+            }
+        );
+    }
+
+    private void LoadRemoteLevelAndXP(string playFabId)
+    {
+        if (levelText == null && xpText == null && xpFillImage == null) return;
+
+        var request = new GetUserDataRequest
+        {
+            PlayFabId = playFabId,
+            Keys = new List<string> { "PlayerLevel", "CurrentXP", "XPToNextLevel" }
+        };
+
+        PlayFabClientAPI.GetUserData(
+            request,
+            result =>
+            {
+                if (!isRemoteProfile || playFabId != remotePlayFabId) return;
+
+                int level = 1;
+                int xp = 0;
+                int xpNext = 1;
+
+                if (result.Data != null)
+                {
+                    if (result.Data.ContainsKey("PlayerLevel"))
+                        int.TryParse(result.Data["PlayerLevel"].Value, out level);
+                    if (result.Data.ContainsKey("CurrentXP"))
+                        int.TryParse(result.Data["CurrentXP"].Value, out xp);
+                    if (result.Data.ContainsKey("XPToNextLevel"))
+                        int.TryParse(result.Data["XPToNextLevel"].Value, out xpNext);
+                }
+
+                xpNext = Mathf.Max(1, xpNext);
+
+                if (levelText != null)
+                    levelText.text = level.ToString();
+
+                if (xpText != null)
+                    xpText.text = $"{xp} / {xpNext}";
+
+                if (xpFillImage != null)
+                    xpFillImage.fillAmount = (float)xp / xpNext;
+            },
+            error =>
+            {
+                Debug.LogWarning("Error al cargar nivel remoto: " + error.GenerateErrorReport());
+            }
+        );
+    }
+
+    private void LoadRemoteRecords(string playFabId)
+    {
+        // Pedimos un leaderboard de 1 único jugador (el seleccionado)
+        var request = new GetLeaderboardAroundPlayerRequest
+        {
+            PlayFabId = playFabId,
+            StatisticName = "HighScore",
+            MaxResultsCount = 1
+        };
+
+        PlayFabClientAPI.GetLeaderboardAroundPlayer(
+            request,
+            result =>
+            {
+                int high = 0;
+
+                if (result.Leaderboard != null && result.Leaderboard.Count > 0)
+                    high = result.Leaderboard[0].StatValue;
+
+                classicRecordText.text = high.ToString();
+
+                // Y ahora hacemos lo mismo para los demás modos:
+                LoadRemoteRecordForStat(playFabId, "ColorScore", colorRecordText);
+                LoadRemoteRecordForStat(playFabId, "GeometricScore", geometricRecordText);
+                LoadRemoteRecordForStat(playFabId, "GridScore", gridRecordText);
+                LoadRemoteRecordForStat(playFabId, "DodgeScore", dodgeRecordText);
+            },
+            error => Debug.LogWarning(error.GenerateErrorReport())
+        );
+    }
+
+    private void LoadRemoteRecordForStat(string playFabId, string statName, TextMeshProUGUI targetText)
+    {
+        var request = new GetLeaderboardAroundPlayerRequest
+        {
+            PlayFabId = playFabId,
+            StatisticName = statName,
+            MaxResultsCount = 1
+        };
+
+        PlayFabClientAPI.GetLeaderboardAroundPlayer(
+            request,
+            result =>
+            {
+                int value = 0;
+
+                if (result.Leaderboard != null && result.Leaderboard.Count > 0)
+                    value = result.Leaderboard[0].StatValue;
+
+                targetText.text = value.ToString();
+            },
+            error =>
+            {
+                Debug.LogWarning($"Error al obtener {statName}: {error.GenerateErrorReport()}");
+                targetText.text = "0";
+            }
+        );
+    }
+
 
     public void ClosePanel()
     {

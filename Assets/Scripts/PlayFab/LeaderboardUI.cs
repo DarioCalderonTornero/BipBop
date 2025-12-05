@@ -63,6 +63,10 @@ public class LeaderboardUI : MonoBehaviour
 
     [Header("Avatares")]
     [SerializeField] private AvatarCatalogSO avatarCatalog;
+    
+    [Header("Perfil jugador")]
+    [SerializeField] private XPUIAnimation profilePanel;
+
 
     public enum MyPosState
     {
@@ -292,7 +296,7 @@ public class LeaderboardUI : MonoBehaviour
         foreach (Transform child in contentParent)
             Destroy(child.gameObject);
 
-        int startIndex = Mathf.Min(3, leaderboard.Count); // empezamos en el 4º puesto
+        int startIndex = Mathf.Min(3, leaderboard.Count);
         int count = Mathf.Min(leaderboard.Count, top);
 
         for (int i = startIndex; i < count; i++)
@@ -316,16 +320,33 @@ public class LeaderboardUI : MonoBehaviour
 
             if (!string.IsNullOrEmpty(entry.PlayFabId))
             {
-                GetPlayerLevel(entry.PlayFabId, level =>
+                GetPlayerLevel(entry.PlayFabId, lvl =>
                 {
                     if (levelText != null)
-                        levelText.text = level.ToString();
+                        levelText.text = lvl.ToString();
                 });
 
                 if (avatarImg != null)
-                {
                     SetAvatarForPlayFabId(entry.PlayFabId, avatarImg, null);
-                }
+            }
+
+            // 🔎 Buscar botón hijo
+            Transform btnTransform = row.transform.Find("OpenProfileButton");
+            Button openBtn = btnTransform != null ? btnTransform.GetComponent<Button>() : null;
+
+            if (openBtn != null)
+                openBtn.onClick.RemoveAllListeners();
+
+            // 🟦 CLICK para abrir panel de perfil remoto
+            if (openBtn != null && profilePanel != null && !string.IsNullOrEmpty(entry.PlayFabId))
+            {
+                string capturedId = entry.PlayFabId;
+                string capturedName = entry.DisplayName ?? "Player";
+
+                openBtn.onClick.AddListener(() =>
+                {
+                    profilePanel.ShowRemoteProfile(capturedId, capturedName);
+                });
             }
         }
     }
@@ -384,28 +405,30 @@ public class LeaderboardUI : MonoBehaviour
     {
         if (top3Slots == null) return;
 
-        // Evita nulls
         if (leaderboard == null)
             leaderboard = new List<PlayerLeaderboardEntry>();
 
-        for (int i = 0; i < top3Slots.Length; i++)   // siempre 0,1,2
+        for (int i = 0; i < top3Slots.Length; i++)
         {
             var slot = top3Slots[i];
             if (slot == null || slot.root == null)
                 continue;
 
-            // Queremos que los tres se vean SIEMPRE
             slot.root.SetActive(true);
 
-            // Resetear avatar SIEMPRE al default de ese slot
+            // Reset avatar al default
             if (slot.avatarImage != null && slot.defaultAvatarSprite != null)
-            {
                 slot.avatarImage.sprite = slot.defaultAvatarSprite;
-            }
+
+            // 🔎 Buscar botón hijo
+            Transform btnTransform = slot.root.transform.Find("OpenProfileButton");
+            Button openBtn = btnTransform != null ? btnTransform.GetComponent<Button>() : null;
+
+            if (openBtn != null)
+                openBtn.onClick.RemoveAllListeners();
 
             if (i < leaderboard.Count)
             {
-                // Hay datos reales para este puesto
                 var entry = leaderboard[i];
 
                 if (slot.nameText != null)
@@ -414,13 +437,11 @@ public class LeaderboardUI : MonoBehaviour
                 if (slot.scoreText != null)
                     slot.scoreText.text = entry.StatValue + " pts";
 
-                // Avatar (solo si el jugador tiene uno público)
+                // Avatar remoto
                 if (slot.avatarImage != null && !string.IsNullOrEmpty(entry.PlayFabId))
-                {
                     SetAvatarForPlayFabId(entry.PlayFabId, slot.avatarImage, null);
-                }
 
-                // Nivel
+                // Nivel remoto
                 if (slot.levelText != null)
                 {
                     GetPlayerLevel(entry.PlayFabId, level =>
@@ -428,10 +449,22 @@ public class LeaderboardUI : MonoBehaviour
                         slot.levelText.text = level.ToString();
                     });
                 }
+
+                // 🟦 CLICK para abrir perfil remoto
+                if (openBtn != null && profilePanel != null && !string.IsNullOrEmpty(entry.PlayFabId))
+                {
+                    string capturedId = entry.PlayFabId;
+                    string capturedName = entry.DisplayName ?? "Player";
+
+                    openBtn.onClick.AddListener(() =>
+                    {
+                        profilePanel.ShowRemoteProfile(capturedId, capturedName);
+                    });
+                }
             }
             else
             {
-                // No hay nadie aún en este puesto → placeholder
+                // Placeholder sin datos
                 if (slot.nameText != null)
                     slot.nameText.text = noRegisteredName;
 
