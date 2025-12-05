@@ -296,7 +296,7 @@ public class LeaderboardUI : MonoBehaviour
         foreach (Transform child in contentParent)
             Destroy(child.gameObject);
 
-        int startIndex = Mathf.Min(3, leaderboard.Count);
+        int startIndex = Mathf.Min(3, leaderboard.Count); // 4º puesto
         int count = Mathf.Min(leaderboard.Count, top);
 
         for (int i = startIndex; i < count; i++)
@@ -320,30 +320,26 @@ public class LeaderboardUI : MonoBehaviour
 
             if (!string.IsNullOrEmpty(entry.PlayFabId))
             {
-                GetPlayerLevel(entry.PlayFabId, lvl =>
+                GetPlayerLevel(entry.PlayFabId, level =>
                 {
                     if (levelText != null)
-                        levelText.text = lvl.ToString();
+                        levelText.text = level.ToString();
                 });
 
                 if (avatarImg != null)
+                {
                     SetAvatarForPlayFabId(entry.PlayFabId, avatarImg, null);
+                }
             }
 
-            // 🔎 Buscar botón hijo
-            Transform btnTransform = row.transform.Find("OpenProfileButton");
-            Button openBtn = btnTransform != null ? btnTransform.GetComponent<Button>() : null;
-
-            if (openBtn != null)
-                openBtn.onClick.RemoveAllListeners();
-
-            // 🟦 CLICK para abrir panel de perfil remoto
-            if (openBtn != null && profilePanel != null && !string.IsNullOrEmpty(entry.PlayFabId))
+            // 🔹 CLICK PARA ABRIR PERFIL REMOTO
+            var rowButton = row.GetComponent<Button>();
+            if (rowButton != null && profilePanel != null && !string.IsNullOrEmpty(entry.PlayFabId))
             {
                 string capturedId = entry.PlayFabId;
                 string capturedName = entry.DisplayName ?? "Player";
 
-                openBtn.onClick.AddListener(() =>
+                rowButton.onClick.AddListener(() =>
                 {
                     profilePanel.ShowRemoteProfile(capturedId, capturedName);
                 });
@@ -416,16 +412,16 @@ public class LeaderboardUI : MonoBehaviour
 
             slot.root.SetActive(true);
 
-            // Reset avatar al default
+            // Reset avatar
             if (slot.avatarImage != null && slot.defaultAvatarSprite != null)
+            {
                 slot.avatarImage.sprite = slot.defaultAvatarSprite;
+            }
 
-            // 🔎 Buscar botón hijo
-            Transform btnTransform = slot.root.transform.Find("OpenProfileButton");
-            Button openBtn = btnTransform != null ? btnTransform.GetComponent<Button>() : null;
-
-            if (openBtn != null)
-                openBtn.onClick.RemoveAllListeners();
+            // Limpia listeners antiguos del botón del slot
+            var slotButton = slot.root.GetComponent<Button>();
+            if (slotButton != null)
+                slotButton.onClick.RemoveAllListeners();
 
             if (i < leaderboard.Count)
             {
@@ -437,11 +433,13 @@ public class LeaderboardUI : MonoBehaviour
                 if (slot.scoreText != null)
                     slot.scoreText.text = entry.StatValue + " pts";
 
-                // Avatar remoto
+                // Avatar
                 if (slot.avatarImage != null && !string.IsNullOrEmpty(entry.PlayFabId))
+                {
                     SetAvatarForPlayFabId(entry.PlayFabId, slot.avatarImage, null);
+                }
 
-                // Nivel remoto
+                // Nivel
                 if (slot.levelText != null)
                 {
                     GetPlayerLevel(entry.PlayFabId, level =>
@@ -450,13 +448,13 @@ public class LeaderboardUI : MonoBehaviour
                     });
                 }
 
-                // 🟦 CLICK para abrir perfil remoto
-                if (openBtn != null && profilePanel != null && !string.IsNullOrEmpty(entry.PlayFabId))
+                // 🔹 CLICK PARA ABRIR PERFIL REMOTO
+                if (slotButton != null && profilePanel != null && !string.IsNullOrEmpty(entry.PlayFabId))
                 {
                     string capturedId = entry.PlayFabId;
                     string capturedName = entry.DisplayName ?? "Player";
 
-                    openBtn.onClick.AddListener(() =>
+                    slotButton.onClick.AddListener(() =>
                     {
                         profilePanel.ShowRemoteProfile(capturedId, capturedName);
                     });
@@ -464,7 +462,7 @@ public class LeaderboardUI : MonoBehaviour
             }
             else
             {
-                // Placeholder sin datos
+                // Placeholder
                 if (slot.nameText != null)
                     slot.nameText.text = noRegisteredName;
 

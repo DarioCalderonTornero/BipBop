@@ -203,17 +203,103 @@ public class XPUIAnimation : MonoBehaviour
         if (usernameText != null)
             usernameText.text = string.IsNullOrEmpty(displayName) ? "Player" : displayName;
 
-        // Para perfiles remotos NO tiene sentido mostrar tus colecciones
-        if (avatarCountText != null) avatarCountText.text = "-";
-        if (backgroundCountText != null) backgroundCountText.text = "-";
-
         // Cargamos datos remotos desde PlayFab
         LoadRemoteAvatarSprite(playFabId);
         LoadRemoteLevelAndXP(playFabId);
         LoadRemoteRecords(playFabId);
+        LoadRemoteAvatarAndBackgroundCount(playFabId);   // NUEVO
 
         if (currentRoutine != null) StopCoroutine(currentRoutine);
         currentRoutine = StartCoroutine(SlidePanel(panel.anchoredPosition, shownPosition));
+    }
+
+    private void LoadRemoteAvatarAndBackgroundCount(string playFabId)
+    {
+        // Si no hay textos, no hacemos nada
+        if (avatarCountText == null && backgroundCountText == null) return;
+
+        var request = new GetUserDataRequest
+        {
+            PlayFabId = playFabId
+            // Sin Keys  trae todo el UserData, así podemos comprobar cada id
+        };
+
+        PlayFabClientAPI.GetUserData(
+            request,
+            result =>
+            {
+                // Por si ha cambiado el perfil mientras llegaba la respuesta
+                if (!isRemoteProfile || playFabId != remotePlayFabId) return;
+
+                // --- Avatares ---
+                int totalAvatars = avatarCatalog != null ? avatarCatalog.avatarDataSO.Count : 0;
+                int ownedAvatars = 0;
+
+                if (avatarCatalog != null && result.Data != null)
+                {
+                    foreach (var avatar in avatarCatalog.avatarDataSO)
+                    {
+                        if (avatar == null) continue;
+
+                        string key = "AvatarPurchased_" + avatar.id;
+
+                        if (result.Data.ContainsKey(key) &&
+                            result.Data[key].Value == "1")
+                        {
+                            ownedAvatars++;
+                        }
+                    }
+                }
+
+                if (avatarCountText != null)
+                    avatarCountText.text = $"{ownedAvatars} / {totalAvatars}";
+
+                // --- Fondos ---
+                int totalBackgrounds = backgroundCatalog != null ? backgroundCatalog.backgroundDataSO.Count : 0;
+                int ownedBackgrounds = 0;
+
+                if (backgroundCatalog != null && result.Data != null)
+                {
+                    foreach (var bg in backgroundCatalog.backgroundDataSO)
+                    {
+                        if (bg == null) continue;
+
+                        string id = bg.id;
+                        string key = "Purchased_" + id;
+
+                        bool comprado = false;
+
+                        if (id == "DefaultBackground")
+                        {
+                            // Igual que en tu lógica local: el fondo por defecto siempre se considera comprado
+                            comprado = true;
+                        }
+                        else if (result.Data.ContainsKey(key) &&
+                                 result.Data[key].Value == "1")
+                        {
+                            comprado = true;
+                        }
+
+                        if (comprado)
+                            ownedBackgrounds++;
+                    }
+                }
+
+                if (backgroundCountText != null)
+                    backgroundCountText.text = $"{ownedBackgrounds} / {totalBackgrounds}";
+            },
+            error =>
+            {
+                Debug.LogWarning("Error al cargar conteo remoto de avatares/fondos: " + error.GenerateErrorReport());
+
+                // En caso de error, mostramos algo neutro
+                if (avatarCountText != null && avatarCatalog != null)
+                    avatarCountText.text = $"? / {avatarCatalog.avatarDataSO.Count}";
+
+                if (backgroundCountText != null && backgroundCatalog != null)
+                    backgroundCountText.text = $"? / {backgroundCatalog.backgroundDataSO.Count}";
+            }
+        );
     }
 
     private void LoadRemoteAvatarSprite(string playFabId)
@@ -266,7 +352,7 @@ public class XPUIAnimation : MonoBehaviour
         var request = new GetUserDataRequest
         {
             PlayFabId = playFabId,
-            Keys = new List<string> { "PlayerLevel", "CurrentXP", "XPToNextLevel" }
+            Keys = new List<string> { "PlayerLevel", "PlayerXP", "PlayerXPNext" }
         };
 
         PlayFabClientAPI.GetUserData(
@@ -283,10 +369,12 @@ public class XPUIAnimation : MonoBehaviour
                 {
                     if (result.Data.ContainsKey("PlayerLevel"))
                         int.TryParse(result.Data["PlayerLevel"].Value, out level);
-                    if (result.Data.ContainsKey("CurrentXP"))
-                        int.TryParse(result.Data["CurrentXP"].Value, out xp);
-                    if (result.Data.ContainsKey("XPToNextLevel"))
-                        int.TryParse(result.Data["XPToNextLevel"].Value, out xpNext);
+
+                    if (result.Data.ContainsKey("PlayerXP"))
+                        int.TryParse(result.Data["PlayerXP"].Value, out xp);
+
+                    if (result.Data.ContainsKey("PlayerXPNext"))
+                        int.TryParse(result.Data["PlayerXPNext"].Value, out xpNext);
                 }
 
                 xpNext = Mathf.Max(1, xpNext);
