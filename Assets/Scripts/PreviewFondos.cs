@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -110,24 +110,67 @@ public class PreviewFondos : MonoBehaviour
             if (coins >= currentPrice)
             {
                 CurrencyManager.Instance.SpendCoins(currentPrice);
+
                 PlayerPrefs.SetInt("Purchased_" + currentBackgroundID, 1);
                 PlayerPrefs.SetString("SelectedBackground", currentBackgroundID);
                 PlayerPrefs.Save();
+
+                // 🔹 SUBIR COMPRA A PLAYFAB
+                UploadBackgroundPurchaseToPlayFab(currentBackgroundID);
             }
             else
             {
-                // No llega, el bot�n ya estar� en "Monedas insuficientes"
-                return;
+                return; // El botón ya indica "insuficientes"
             }
         }
         else
         {
             PlayerPrefs.SetString("SelectedBackground", currentBackgroundID);
             PlayerPrefs.Save();
+
+            // 🔹 SUBIR EQUIPADO A PLAYFAB
+            UploadBackgroundEquipToPlayFab(currentBackgroundID);
         }
 
         fondoSelector.CambiarFondo(CurrentSelectedSprite);
         ClosePreviewPanel();
+    }
+
+    private void UploadBackgroundPurchaseToPlayFab(string backgroundId)
+    {
+        var request = new PlayFab.ClientModels.UpdateUserDataRequest
+        {
+            Data = new Dictionary<string, string>
+        {
+            { "Purchased_" + backgroundId, "1" },
+            { "SelectedBackground", backgroundId } // ya que al comprar también se equipa
+        },
+            Permission = PlayFab.ClientModels.UserDataPermission.Public
+        };
+
+        PlayFab.PlayFabClientAPI.UpdateUserData(
+            request,
+            result => Debug.Log("Fondo comprado subido a PlayFab: " + backgroundId),
+            error => Debug.LogWarning("Error al subir compra de fondo: " + error.GenerateErrorReport())
+        );
+    }
+
+    private void UploadBackgroundEquipToPlayFab(string backgroundId)
+    {
+        var request = new PlayFab.ClientModels.UpdateUserDataRequest
+        {
+            Data = new Dictionary<string, string>
+        {
+            { "SelectedBackground", backgroundId }
+        },
+            Permission = PlayFab.ClientModels.UserDataPermission.Public
+        };
+
+        PlayFab.PlayFabClientAPI.UpdateUserData(
+            request,
+            result => Debug.Log("Fondo equipado subido a PlayFab: " + backgroundId),
+            error => Debug.LogWarning("Error al subir fondo equipado: " + error.GenerateErrorReport())
+        );
     }
 
     public void CancelPreview()

@@ -106,7 +106,22 @@ public class LeaderboardUI : MonoBehaviour
         foreach (Transform child in contentParent)
             Destroy(child.gameObject);
 
-        // Esperar un frame para que PlayFabScoreManager se inicialice
+        // 🔹 Esperar a que PlayFab esté logueado antes de intentar cargar ranking
+        StartCoroutine(WaitForPlayFabAndInit());
+    }
+
+    private IEnumerator WaitForPlayFabAndInit()
+    {
+        // Esperamos a que exista el login manager y esté logueado
+        while (PlayFabLoginManager.Instance == null
+               || !PlayFabLoginManager.Instance.IsLoggedIn)
+        {
+            yield return null;
+        }
+
+        // (Opcional) Esperar un pelín más, por si el ScoreManager tarda un frame extra
+        yield return null;
+
         StartCoroutine(InitLastMode());
     }
 
@@ -184,7 +199,13 @@ public class LeaderboardUI : MonoBehaviour
 
         if (PlayFabScoreManager.Instance == null)
         {
-            StartCoroutine(DelayedShow(statisticName, top));
+            Debug.LogWarning("[LeaderboardUI] PlayFabScoreManager.Instance es NULL. No se puede cargar el ranking.");
+
+            isLoading = false;
+            myPosState = MyPosState.NoScores;
+            if (myPositionText != null)
+                myPositionText.text = noScoresText.GetLocalizedString();
+
             return;
         }
 
@@ -249,12 +270,6 @@ public class LeaderboardUI : MonoBehaviour
                 }
             });
         }
-    }
-
-    private IEnumerator DelayedShow(string statisticName, int top)
-    {
-        yield return new WaitForEndOfFrame();
-        ShowLeaderboard(statisticName, top);
     }
 
     private void GetPlayerLevel(string playFabId, Action<int> onLevelFound)

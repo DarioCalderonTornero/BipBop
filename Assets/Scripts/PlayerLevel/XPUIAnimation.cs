@@ -1,4 +1,4 @@
-using System.Collections;
+Ôªøusing System.Collections;
 using System.Collections.Generic;
 using PlayFab;
 using PlayFab.ClientModels;
@@ -10,21 +10,21 @@ public class XPUIAnimation : MonoBehaviour
 {
     [Header("Refs")]
     [SerializeField] private RectTransform panel;   // Panel del perfil
-    [SerializeField] private Button openButton;     // BotÛn de usuario (icono arriba en el HUD)
-    [SerializeField] private Button closeButton;    // BotÛn X dentro del panel
+    [SerializeField] private Button openButton;     // Bot√≥n de usuario (icono arriba en el HUD)
+    [SerializeField] private Button closeButton;    // Bot√≥n X dentro del panel
 
-    [Header("AnimaciÛn")]
+    [Header("Animaci√≥n")]
     [SerializeField] private float slideDuration = 0.25f;
     [SerializeField]
     private AnimationCurve slideCurve =
         AnimationCurve.EaseInOut(0, 0, 1, 1);
 
-    [Header("BotÛn Cerrar Pop")]
+    [Header("Bot√≥n Cerrar Pop")]
     [SerializeField] private float closePopScale = 0.85f;
     [SerializeField] private float closePopSpeed = 18f;
 
     // Posiciones
-    private Vector2 shownPosition;                                  // posiciÛn abierta
+    private Vector2 shownPosition;                                  // posici√≥n abierta
     [SerializeField] private Vector2 hiddenPosition = new(0, -1500); // fuera de pantalla abajo
 
     private bool isShown = false;
@@ -35,20 +35,20 @@ public class XPUIAnimation : MonoBehaviour
     [Header("Avatar del usuario")]
     [SerializeField] private Image avatarImage;          // Imagen circular grande
 
-    [SerializeField] private AvatarCatalogSO avatarCatalog; // Cat·logo de avatares (ScriptableObject)
+    [SerializeField] private AvatarCatalogSO avatarCatalog; // Cat√°logo de avatares (ScriptableObject)
     [SerializeField] private BackgroundCatalogSO backgroundCatalog;
     [SerializeField] private Sprite fallbackAvatar;      // por si falla algo
 
     // --------- NIVEL / XP ---------
     [Header("Nivel / XP")]
-    [SerializeField] private TextMeshProUGUI levelText;  // N˙mero de nivel
+    [SerializeField] private TextMeshProUGUI levelText;  // N√∫mero de nivel
     [SerializeField] private TextMeshProUGUI xpText;     // "XP / XPToNext"
     [SerializeField] private Image xpFillImage;          // Barra de relleno
 
     [Header("Nombre de usuario")]
     [SerializeField] private TextMeshProUGUI usernameText;
 
-    // --------- R…CORDS POR MODO ---------
+    // --------- R√âCORDS POR MODO ---------
     [Header("Records (solo el valor a la derecha)")]
     [SerializeField] private TextMeshProUGUI classicRecordText;   // HighScore
     [SerializeField] private TextMeshProUGUI colorRecordText;     // ColorScore
@@ -63,12 +63,18 @@ public class XPUIAnimation : MonoBehaviour
     private bool isRemoteProfile = false;
     private string remotePlayFabId = null;
 
+    [SerializeField] private Button pencilButton;
+
+    // Control de carga remota
+    private int pendingRemoteLoads = 0;
+    private bool remoteOpenStarted = false;
+
     private void Awake()
     {
         if (panel == null)
             panel = GetComponent<RectTransform>();
 
-        // Guardamos la posiciÛn ìbuenaî tal y como est· en el editor
+        // Guardamos la posici√≥n ‚Äúbuena‚Äù tal y como est√° en el editor
         shownPosition = panel.anchoredPosition;
 
         // Empezamos ocultos abajo
@@ -83,7 +89,7 @@ public class XPUIAnimation : MonoBehaviour
 
     private void OnEnable()
     {
-        // Si el login termina mientras este panel est· activo, refrescamos el nombre
+        // Si el login termina mientras este panel est√° activo, refrescamos el nombre
         if (PlayFabLoginManager.Instance != null)
             PlayFabLoginManager.Instance.OnLoginSuccess += OnLoginReady;
     }
@@ -97,6 +103,15 @@ public class XPUIAnimation : MonoBehaviour
     private void OnLoginReady()
     {
         LoadUsername();
+
+        // üîπ Ahora s√≠: estamos logueados en PlayFab, sincronizamos fondos
+        if (backgroundCatalog != null)
+        {
+            SyncAllPurchasedBackgroundsToPlayFab(backgroundCatalog);
+        }
+
+        if (avatarCatalog != null)
+            SyncAllPurchasedAvatarsToPlayFab(avatarCatalog);
     }
 
     private void Start()
@@ -104,7 +119,7 @@ public class XPUIAnimation : MonoBehaviour
         LoadCurrentAvatarSprite();
         UpdateLevelUI();
         LoadUsername();
-        UpdateRecordsUI();   // <- inicializamos tambiÈn los rÈcords
+        UpdateRecordsUI();   // <- inicializamos tambi√©n los r√©cords
 
         UpdateAvatarAndBackgroundCount(); // Llamada para actualizar los contadores
     }
@@ -123,7 +138,7 @@ public class XPUIAnimation : MonoBehaviour
                 string key = "AvatarPurchased_" + avatar.id;
 
                 // Cuenta como comprado si PlayerPrefs dice 1
-                // (si quieres que uno sea ìbaseî siempre comprado, puedes aÒadir: || avatar.id == "NormalAvatar")
+                // (si quieres que uno sea ‚Äúbase‚Äù siempre comprado, puedes a√±adir: || avatar.id == "NormalAvatar")
                 bool isOwned = PlayerPrefs.GetInt(key, 0) == 1;
 
                 if (isOwned)
@@ -171,6 +186,8 @@ public class XPUIAnimation : MonoBehaviour
     public void OpenPanel()
     {
         ShowLocalProfile();
+
+        pencilButton.gameObject.SetActive(true);
     }
 
     public void ShowLocalProfile()
@@ -195,41 +212,82 @@ public class XPUIAnimation : MonoBehaviour
     {
         if (isMoving) return;
 
-        isShown = true;
         isRemoteProfile = true;
         remotePlayFabId = playFabId;
+
+        // A√∫n NO consideramos el panel "mostrado"
+        isShown = false;
+        remoteOpenStarted = false;
+        pendingRemoteLoads = 0;
+
+        // Lo forzamos a la posici√≥n oculta por si estaba abierto
+        panel.anchoredPosition = hiddenPosition;
 
         // Nombre
         if (usernameText != null)
             usernameText.text = string.IsNullOrEmpty(displayName) ? "Player" : displayName;
 
-        // Cargamos datos remotos desde PlayFab
+        // Cuando miramos otro jugador, tus propios contadores no tienen sentido
+        if (avatarCountText != null) avatarCountText.text = "- / -";
+        if (backgroundCountText != null) backgroundCountText.text = "- / -";
+
+        // Lanzamos las cargas remotas (cada una har√° BeginRemoteLoad/OnRemoteLoadFinished)
         LoadRemoteAvatarSprite(playFabId);
         LoadRemoteLevelAndXP(playFabId);
-        LoadRemoteRecords(playFabId);
-        LoadRemoteAvatarAndBackgroundCount(playFabId);   // NUEVO
+        LoadRemoteAvatarAndBackgroundCount(playFabId);
+        LoadRemoteRecords(playFabId); // esto puede actualizar despu√©s; lo incluimos igual
 
-        if (currentRoutine != null) StopCoroutine(currentRoutine);
-        currentRoutine = StartCoroutine(SlidePanel(panel.anchoredPosition, shownPosition));
+        pencilButton.gameObject.SetActive(false);
+    }
+
+    private void BeginRemoteLoad()
+    {
+        pendingRemoteLoads++;
+        remoteOpenStarted = false;
+    }
+
+    private void OnRemoteLoadFinished(string playFabId)
+    {
+        // Si ya no estamos viendo ese perfil remoto, ignoramos
+        if (!isRemoteProfile || playFabId != remotePlayFabId)
+            return;
+
+        pendingRemoteLoads = Mathf.Max(0, pendingRemoteLoads - 1);
+
+        // Cuando todos los trozos remotos terminen, abrimos el panel
+        if (pendingRemoteLoads == 0 && !remoteOpenStarted)
+        {
+            remoteOpenStarted = true;
+
+            if (!isShown)
+            {
+                isShown = true;
+                if (currentRoutine != null) StopCoroutine(currentRoutine);
+                currentRoutine = StartCoroutine(SlidePanel(panel.anchoredPosition, shownPosition));
+            }
+        }
     }
 
     private void LoadRemoteAvatarAndBackgroundCount(string playFabId)
     {
-        // Si no hay textos, no hacemos nada
         if (avatarCountText == null && backgroundCountText == null) return;
+
+        BeginRemoteLoad();   // üëà NUEVO
 
         var request = new GetUserDataRequest
         {
             PlayFabId = playFabId
-            // Sin Keys  trae todo el UserData, asÌ podemos comprobar cada id
         };
 
         PlayFabClientAPI.GetUserData(
             request,
             result =>
             {
-                // Por si ha cambiado el perfil mientras llegaba la respuesta
-                if (!isRemoteProfile || playFabId != remotePlayFabId) return;
+                if (!isRemoteProfile || playFabId != remotePlayFabId)
+                {
+                    OnRemoteLoadFinished(playFabId);
+                    return;
+                }
 
                 // --- Avatares ---
                 int totalAvatars = avatarCatalog != null ? avatarCatalog.avatarDataSO.Count : 0;
@@ -271,7 +329,6 @@ public class XPUIAnimation : MonoBehaviour
 
                         if (id == "DefaultBackground")
                         {
-                            // Igual que en tu lÛgica local: el fondo por defecto siempre se considera comprado
                             comprado = true;
                         }
                         else if (result.Data.ContainsKey(key) &&
@@ -287,17 +344,20 @@ public class XPUIAnimation : MonoBehaviour
 
                 if (backgroundCountText != null)
                     backgroundCountText.text = $"{ownedBackgrounds} / {totalBackgrounds}";
+
+                OnRemoteLoadFinished(playFabId);   // üëà NUEVO
             },
             error =>
             {
                 Debug.LogWarning("Error al cargar conteo remoto de avatares/fondos: " + error.GenerateErrorReport());
 
-                // En caso de error, mostramos algo neutro
                 if (avatarCountText != null && avatarCatalog != null)
                     avatarCountText.text = $"? / {avatarCatalog.avatarDataSO.Count}";
 
                 if (backgroundCountText != null && backgroundCatalog != null)
                     backgroundCountText.text = $"? / {backgroundCatalog.backgroundDataSO.Count}";
+
+                OnRemoteLoadFinished(playFabId);   // üëà NUEVO
             }
         );
     }
@@ -305,6 +365,8 @@ public class XPUIAnimation : MonoBehaviour
     private void LoadRemoteAvatarSprite(string playFabId)
     {
         if (avatarImage == null || avatarCatalog == null) return;
+
+        BeginRemoteLoad();   // üëà NUEVO
 
         var request = new GetUserDataRequest
         {
@@ -316,8 +378,11 @@ public class XPUIAnimation : MonoBehaviour
             request,
             result =>
             {
-                // Por si el usuario cambia mientras llega la respuesta
-                if (!isRemoteProfile || playFabId != remotePlayFabId) return;
+                if (!isRemoteProfile || playFabId != remotePlayFabId)
+                {
+                    OnRemoteLoadFinished(playFabId);
+                    return;
+                }
 
                 string avatarId = null;
                 if (result.Data != null && result.Data.ContainsKey("EquippedAvatarIdPublic"))
@@ -327,6 +392,8 @@ public class XPUIAnimation : MonoBehaviour
                 {
                     if (fallbackAvatar != null)
                         avatarImage.sprite = fallbackAvatar;
+
+                    OnRemoteLoadFinished(playFabId);
                     return;
                 }
 
@@ -335,12 +402,16 @@ public class XPUIAnimation : MonoBehaviour
                     avatarImage.sprite = data.sprite;
                 else if (fallbackAvatar != null)
                     avatarImage.sprite = fallbackAvatar;
+
+                OnRemoteLoadFinished(playFabId);   // üëà NUEVO
             },
             error =>
             {
                 Debug.LogWarning("Error al cargar avatar remoto: " + error.GenerateErrorReport());
                 if (fallbackAvatar != null)
                     avatarImage.sprite = fallbackAvatar;
+
+                OnRemoteLoadFinished(playFabId);   // üëà NUEVO
             }
         );
     }
@@ -348,6 +419,8 @@ public class XPUIAnimation : MonoBehaviour
     private void LoadRemoteLevelAndXP(string playFabId)
     {
         if (levelText == null && xpText == null && xpFillImage == null) return;
+
+        BeginRemoteLoad();   // üëà NUEVO
 
         var request = new GetUserDataRequest
         {
@@ -359,7 +432,11 @@ public class XPUIAnimation : MonoBehaviour
             request,
             result =>
             {
-                if (!isRemoteProfile || playFabId != remotePlayFabId) return;
+                if (!isRemoteProfile || playFabId != remotePlayFabId)
+                {
+                    OnRemoteLoadFinished(playFabId);
+                    return;
+                }
 
                 int level = 1;
                 int xp = 0;
@@ -387,17 +464,21 @@ public class XPUIAnimation : MonoBehaviour
 
                 if (xpFillImage != null)
                     xpFillImage.fillAmount = (float)xp / xpNext;
+
+                OnRemoteLoadFinished(playFabId);   // üëà NUEVO
             },
             error =>
             {
                 Debug.LogWarning("Error al cargar nivel remoto: " + error.GenerateErrorReport());
+                OnRemoteLoadFinished(playFabId);   // üëà NUEVO
             }
         );
     }
 
     private void LoadRemoteRecords(string playFabId)
     {
-        // Pedimos un leaderboard de 1 ˙nico jugador (el seleccionado)
+        BeginRemoteLoad();   // üëà NUEVO
+
         var request = new GetLeaderboardAroundPlayerRequest
         {
             PlayFabId = playFabId,
@@ -416,13 +497,18 @@ public class XPUIAnimation : MonoBehaviour
 
                 classicRecordText.text = high.ToString();
 
-                // Y ahora hacemos lo mismo para los dem·s modos:
                 LoadRemoteRecordForStat(playFabId, "ColorScore", colorRecordText);
                 LoadRemoteRecordForStat(playFabId, "GeometricScore", geometricRecordText);
                 LoadRemoteRecordForStat(playFabId, "GridScore", gridRecordText);
                 LoadRemoteRecordForStat(playFabId, "DodgeScore", dodgeRecordText);
+
+                OnRemoteLoadFinished(playFabId);   // üëà NUEVO
             },
-            error => Debug.LogWarning(error.GenerateErrorReport())
+            error =>
+            {
+                Debug.LogWarning(error.GenerateErrorReport());
+                OnRemoteLoadFinished(playFabId);   // üëà NUEVO
+            }
         );
     }
 
@@ -461,12 +547,110 @@ public class XPUIAnimation : MonoBehaviour
 
         isShown = false;
 
-        // Lanzamos la animaciÛn POP DEL BOT”N antes de cerrar
+        // Lanzamos la animaci√≥n POP DEL BOT√ìN antes de cerrar
         if (closeButton != null)
             StartCoroutine(CloseButtonPopAnimation());
 
         if (currentRoutine != null) StopCoroutine(currentRoutine);
         currentRoutine = StartCoroutine(SlidePanel(panel.anchoredPosition, hiddenPosition));
+    }
+
+    public void SyncAllPurchasedBackgroundsToPlayFab(BackgroundCatalogSO catalog)
+    {
+        if (catalog == null)
+        {
+            Debug.LogWarning("[SyncBackgrounds] Cat√°logo nulo, no sincronizo.");
+            return;
+        }
+
+        // üîπ Comprobamos login en PlayFab
+        if (PlayFabLoginManager.Instance == null || !PlayFabLoginManager.Instance.IsLoggedIn)
+        {
+            Debug.LogWarning("[SyncBackgrounds] No logueado en PlayFab, no sincronizo todav√≠a.");
+            return;
+        }
+
+        Dictionary<string, string> data = new();
+
+        int countPurchased = 0;
+
+        foreach (var bg in catalog.backgroundDataSO)
+        {
+            if (bg == null) continue;
+
+            string id = bg.id;
+            bool purchased = PlayerPrefs.GetInt("Purchased_" + id, 0) == 1;
+
+            if (purchased)
+            {
+                data["Purchased_" + id] = "1";
+                countPurchased++;
+            }
+        }
+
+        // Tambi√©n subir el equipado actual
+        string equipped = PlayerPrefs.GetString("SelectedBackground", "DefaultBackground");
+        data["SelectedBackground"] = equipped;
+
+        Debug.Log($"[SyncBackgrounds] Enviando a PlayFab {countPurchased} fondos comprados. Equipped = {equipped}");
+
+        var request = new PlayFab.ClientModels.UpdateUserDataRequest
+        {
+            Data = data,
+            Permission = PlayFab.ClientModels.UserDataPermission.Public
+        };
+
+        PlayFab.PlayFabClientAPI.UpdateUserData(
+            request,
+            res => Debug.Log("[SyncBackgrounds] Sincronizaci√≥n completa de fondos con PlayFab."),
+            err => Debug.LogWarning("[SyncBackgrounds] Error sincronizando fondos: " + err.GenerateErrorReport())
+        );
+    }
+
+    public void SyncAllPurchasedAvatarsToPlayFab(AvatarCatalogSO catalog)
+    {
+        if (catalog == null)
+        {
+            Debug.LogWarning("[SyncAvatars] Cat√°logo nulo, no sincronizo.");
+            return;
+        }
+
+        if (PlayFabLoginManager.Instance == null || !PlayFabLoginManager.Instance.IsLoggedIn)
+        {
+            Debug.LogWarning("[SyncAvatars] No logueado en PlayFab, no sincronizo todav√≠a.");
+            return;
+        }
+
+        Dictionary<string, string> data = new();
+        int countPurchased = 0;
+
+        foreach (var av in catalog.avatarDataSO)
+        {
+            if (av == null) continue;
+
+            string key = "AvatarPurchased_" + av.id;
+            bool purchased = PlayerPrefs.GetInt(key, 0) == 1;
+
+            if (purchased)
+            {
+                data[key] = "1";
+                countPurchased++;
+            }
+        }
+
+        Debug.Log($"[SyncAvatars] Enviando a PlayFab {countPurchased} avatares comprados.");
+
+        var request = new UpdateUserDataRequest
+        {
+            Data = data,
+            Permission = UserDataPermission.Public
+        };
+
+        PlayFabClientAPI.UpdateUserData(
+            request,
+            res => Debug.Log("[SyncAvatars] Sincronizaci√≥n completa de avatares con PlayFab."),
+            err => Debug.LogWarning("[SyncAvatars] Error sincronizando avatares: " + err.GenerateErrorReport())
+        );
     }
 
     private IEnumerator CloseButtonPopAnimation()
@@ -484,7 +668,7 @@ public class XPUIAnimation : MonoBehaviour
             yield return null;
         }
 
-        // Volver al tamaÒo normal
+        // Volver al tama√±o normal
         t = 0;
         while (t < 1f)
         {
@@ -573,7 +757,7 @@ public class XPUIAnimation : MonoBehaviour
         var login = PlayFabLoginManager.Instance;
         if (login != null)
         {
-            // 1) Si el manager ya tiene DisplayName (despuÈs del login), lo usamos
+            // 1) Si el manager ya tiene DisplayName (despu√©s del login), lo usamos
             if (!string.IsNullOrEmpty(login.DisplayName))
             {
                 finalName = login.DisplayName;
@@ -590,11 +774,11 @@ public class XPUIAnimation : MonoBehaviour
         usernameText.text = finalName;
     }
 
-    // --------- R…CORDS POR MODO ---------
+    // --------- R√âCORDS POR MODO ---------
 
     private void UpdateRecordsUI()
     {
-        // Cambia las claves de PlayerPrefs aquÌ si en tu proyecto usas otras
+        // Cambia las claves de PlayerPrefs aqu√≠ si en tu proyecto usas otras
         if (classicRecordText != null)
             classicRecordText.text = PlayerPrefs.GetInt("MaxRecord", 0).ToString();
 

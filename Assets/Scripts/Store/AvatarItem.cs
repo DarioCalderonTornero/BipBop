@@ -169,6 +169,27 @@ public class AvatarItem : MonoBehaviour
                 UpdateBuyText();  // Actualizamos el texto del botón para reflejar que ya fue comprado
 
                 Debug.Log($"Avatar comprado: {avatarData.id}");
+
+                // 🔹 Sincronizar esta compra concreta con PlayFab
+                if (PlayFabLoginManager.Instance != null && PlayFabLoginManager.Instance.IsLoggedIn)
+                {
+                    var data = new Dictionary<string, string>
+    {
+                        { "AvatarPurchased_" + avatarData.id, "1" }
+    };
+
+                    var request = new UpdateUserDataRequest
+                    {
+                        Data = data,
+                        Permission = UserDataPermission.Public
+                    };
+
+                    PlayFabClientAPI.UpdateUserData(
+                        request,
+                        result => Debug.Log($"[AvatarItem] Enviado a PlayFab AvatarPurchased_{avatarData.id}=1"),
+                        error => Debug.LogWarning("[AvatarItem] Error al sincronizar avatar: " + error.GenerateErrorReport())
+                    );
+                }
             }
             else
             {

@@ -16036,6 +16036,7 @@ MonoBehaviour:
   dodgeRecordText: {fileID: 191019039}
   avatarCountText: {fileID: 1446618344}
   backgroundCountText: {fileID: 1377221511}
+  pencilButton: {fileID: 533315254}
 --- !u!1 &757659591
 GameObject:
   m_ObjectHideFlags: 0
