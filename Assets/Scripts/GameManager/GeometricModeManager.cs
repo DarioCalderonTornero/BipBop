@@ -37,6 +37,8 @@ public class GeometricModeManager : MonoBehaviour
     private bool gameOverInvoked = false;
     private bool hasGameStarted = false; //nuevo guard
 
+    [SerializeField] private Animator geometricAnimator;
+
     public event EventHandler OnGameOver;
 
     private void Awake()
@@ -144,7 +146,8 @@ public class GeometricModeManager : MonoBehaviour
 
         if (shape == currentTarget)
         {
-            shape.TemporarilyChangeColor(Color.green, 0.5f);
+            geometricAnimator.SetTrigger("isHitAnim");
+
             AddScore();
 
             startTime = Mathf.Max(1.5f, startTime - 0.1f);
@@ -161,6 +164,7 @@ public class GeometricModeManager : MonoBehaviour
             StartCoroutine(SlowMotionAndEnd(true, shape));
         }
     }
+
 
     private void AddScore()
     {
