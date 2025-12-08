@@ -76,4 +76,18 @@ public class BouncingShape : MonoBehaviour
         Vector2 newVelocity = Quaternion.Euler(0, 0, randomAngle) * rb.linearVelocity;
         rb.linearVelocity = newVelocity;
     }
+
+    public void RandomizeDirection()
+    {
+        if (rb == null) return;
+
+        // Mantener la velocidad actual si se está moviendo,
+        // si no, usar la velocidad inicial.
+        float speed = rb.linearVelocity.magnitude;
+        if (speed <= 0.01f)
+            speed = initialSpeed;
+
+        Vector2 randomDirection = Random.insideUnitCircle.normalized;
+        rb.linearVelocity = randomDirection * speed;
+    }
 }

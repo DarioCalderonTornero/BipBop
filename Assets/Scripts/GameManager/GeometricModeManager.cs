@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -13,8 +13,8 @@ public class GeometricModeManager : MonoBehaviour
     public static GeometricModeManager Instance { get; private set; }
 
     [Header("UI Elements")]
-    public TextMeshProUGUI instructionText;  // Indica qu� figura tocar
-    public TextMeshProUGUI scoreText;        // Puntuaci�n actual
+    public TextMeshProUGUI instructionText;  // Indica qué figura tocar
+    public TextMeshProUGUI scoreText;        // Puntuación actual
     public Image timeBarImage;               // Barra de tiempo
     public float startTime = 60f;            // Tiempo inicial (en segundos)
 
@@ -28,7 +28,7 @@ public class GeometricModeManager : MonoBehaviour
 
     [Header("Localization")]
     public LocalizedString scoreLabel;              // Smart String: "Puntos: {0}" / "Points: {0}"
-    public LocalizedString tapShapeInstruction;     // Smart String: "�Toca {0}!" / "Tap the {0}!"
+    public LocalizedString tapShapeInstruction;     // Smart String: "¡Toca {0}!" / "Tap the {0}!"
 
     private float currentTime;
     private int score = 0;
@@ -38,6 +38,8 @@ public class GeometricModeManager : MonoBehaviour
     private bool hasGameStarted = false; //nuevo guard
 
     public event EventHandler OnGameOver;
+
+    private bool isShuffling = false;
 
     private void Awake()
     {
@@ -63,7 +65,7 @@ public class GeometricModeManager : MonoBehaviour
         // Iniciamos siempre el juego (currentTime, barra, shapes...)
         StartGame();
 
-        // Mantenemos la l�gica de transici�n (para efectos visuales si los usas)
+        // Mantenemos la lógica de transición (para efectos visuales si los usas)
         if (TransitionScript.Instance != null)
         {
             TransitionScript.Instance.OnTransitionOutFinished += HandleTransitionFinished;
@@ -86,7 +88,7 @@ public class GeometricModeManager : MonoBehaviour
         // Un frame para que el panel desaparecido no cause picos visuales
         yield return null;
 
-        StartGame(); // si ya empez�, no har� nada
+        StartGame(); // si ya empezó, no hará nada
     }
 
     private void StartGame()
@@ -162,14 +164,91 @@ public class GeometricModeManager : MonoBehaviour
             UpdateShapesSpeed();
 
             CheckForAdditionalShapes();
-            ChooseNewTarget();
+
+            // 🔹 Nueva animación: mezclar posiciones + cambiar dirección
+            StartCoroutine(ShuffleShapesAndRetarget());
         }
         else
         {
             StartCoroutine(SlowMotionAndEnd(true, shape));
         }
     }
+    private IEnumerator ShuffleShapesAndRetarget()
+    {
+        if (isShuffling) yield break;
+        isShuffling = true;
 
+        // Solo figuras activas
+        List<BouncingShape> activeShapes = shapes.FindAll(s => s.gameObject.activeSelf);
+
+        if (activeShapes.Count <= 1)
+        {
+            isShuffling = false;
+            ChooseNewTarget();
+            yield break;
+        }
+
+        // Posiciones actuales
+        List<Vector3> originalPositions = new List<Vector3>();
+        foreach (var s in activeShapes)
+            originalPositions.Add(s.transform.position);
+
+        // Permutar posiciones
+        List<Vector3> shuffledPositions = new List<Vector3>(originalPositions);
+        int n = shuffledPositions.Count;
+        for (int i = 0; i < n; i++)
+        {
+            int j = UnityEngine.Random.Range(i, n);
+            (shuffledPositions[i], shuffledPositions[j]) = (shuffledPositions[j], shuffledPositions[i]);
+        }
+
+        float totalDuration = 0.40f;      // súper rápido
+        float halfDuration = totalDuration / 2f;
+        float t;
+
+        // 1) Encoger
+        t = 0f;
+        while (t < halfDuration)
+        {
+            t += Time.deltaTime;
+            float lerp = Mathf.Clamp01(t / halfDuration);
+            float scaleValue = Mathf.Lerp(1f, 0.25f, lerp);
+
+            foreach (var s in activeShapes)
+                s.transform.localScale = new Vector3(scaleValue, scaleValue, 1f);
+
+            yield return null;
+        }
+
+        // 2) Teleport + nueva dirección
+        for (int i = 0; i < activeShapes.Count; i++)
+        {
+            activeShapes[i].transform.position = shuffledPositions[i];
+            activeShapes[i].RandomizeDirection();
+        }
+
+        // 3) Volver a tamaño normal
+        t = 0f;
+        while (t < halfDuration)
+        {
+            t += Time.deltaTime;
+            float lerp = Mathf.Clamp01(t / halfDuration);
+            float scaleValue = Mathf.Lerp(0.25f, 1f, lerp);
+
+            foreach (var s in activeShapes)
+                s.transform.localScale = new Vector3(scaleValue, scaleValue, 1f);
+
+            yield return null;
+        }
+
+        foreach (var s in activeShapes)
+            s.transform.localScale = Vector3.one;
+
+        isShuffling = false;
+
+        // Nuevo objetivo después del shuffle
+        ChooseNewTarget();
+    }
 
     private void AddScore()
     {
@@ -368,7 +447,7 @@ public class GeometricModeManager : MonoBehaviour
             CurrencyManager.Instance.AddCoins(coinsEarned);
         }
 
-        Debug.Log($"Fin de partida � Recompensa: {coinsEarned} monedas");
+        Debug.Log($"Fin de partida — Recompensa: {coinsEarned} monedas");
     }
 
     private void OnLocaleChanged(Locale locale)
