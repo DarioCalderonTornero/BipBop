@@ -181,7 +181,6 @@ MonoBehaviour:
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
-  geometricAnimator: {fileID: 1995083206}
   scoreEffectGroup: {fileID: 117584066}
   references:
     version: 2
@@ -2976,7 +2975,7 @@ Transform:
   m_GameObject: {fileID: 1095570191}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 2.3426218, y: -0.07049264, z: 0.0488006}
+  m_LocalPosition: {x: 0.757, y: -1.142, z: 0.0488006}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4509,17 +4508,17 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0.1335444}
+  m_Offset: {x: 0.0067302585, y: 0.015764356}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.28866667}
-    oldSize: {x: 1, y: 1}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 1.4027778, y: 1.225}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 1.0476941}
+  m_Size: {x: 1.4441987, y: 1.2832541}
   m_EdgeRadius: 0
 --- !u!114 &1430412339
 MonoBehaviour:
@@ -4590,7 +4589,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 75f5f34dc1b5347e0b8351032682f224, type: 3}
+  m_Sprite: {fileID: -4536893933076840162, guid: 85831c9559a95ca4aa1c5ac164331de9, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -5801,7 +5800,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: -0.005990386, y: 0.02368635}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -5811,7 +5810,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 1.1342025, y: 1.1216716}
   m_EdgeRadius: 0
 --- !u!212 &1995083204
 SpriteRenderer:

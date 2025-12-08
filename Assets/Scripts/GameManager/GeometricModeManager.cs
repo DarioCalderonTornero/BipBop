@@ -37,8 +37,6 @@ public class GeometricModeManager : MonoBehaviour
     private bool gameOverInvoked = false;
     private bool hasGameStarted = false; //nuevo guard
 
-    [SerializeField] private Animator geometricAnimator;
-
     public event EventHandler OnGameOver;
 
     private void Awake()
@@ -146,7 +144,14 @@ public class GeometricModeManager : MonoBehaviour
 
         if (shape == currentTarget)
         {
-            geometricAnimator.SetTrigger("isHitAnim");
+            shape.TemporarilyChangeColor(Color.green, 0.5f);
+
+            // NUEVO: usamos el Animator de esa figura
+            Animator anim = shape.GetComponent<Animator>();
+            if (anim != null)
+            {
+                anim.SetTrigger("isHitAnim");
+            }
 
             AddScore();
 
