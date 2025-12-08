@@ -31,6 +31,9 @@ public class XPUIAnimation : MonoBehaviour
     private bool isMoving = false;
     private Coroutine currentRoutine;
 
+    // Escala original del panel (tal cual en el editor: X=0.88749, etc.)
+    private Vector3 originalScale;
+
     // --------- AVATAR ---------
     [Header("Avatar del usuario")]
     [SerializeField] private Image avatarImage;          // Imagen circular grande
@@ -57,7 +60,7 @@ public class XPUIAnimation : MonoBehaviour
     [SerializeField] private TextMeshProUGUI dodgeRecordText;     // DodgeScore
 
     [Header("Conteo de Avatares y Fondos")]
-    [SerializeField] private TextMeshProUGUI avatarCountText;  
+    [SerializeField] private TextMeshProUGUI avatarCountText;
     [SerializeField] private TextMeshProUGUI backgroundCountText;
 
     private bool isRemoteProfile = false;
@@ -74,11 +77,19 @@ public class XPUIAnimation : MonoBehaviour
         if (panel == null)
             panel = GetComponent<RectTransform>();
 
+        // Guardamos la escala original EXACTA del editor (X=0.88749, etc.)
+        originalScale = panel.localScale;
+
         // Guardamos la posición “buena” tal y como está en el editor
         shownPosition = panel.anchoredPosition;
 
-        // Empezamos ocultos abajo
+        // Empezamos ocultos abajo y más pequeños en Y (X se mantiene)
         panel.anchoredPosition = hiddenPosition;
+        panel.localScale = new Vector3(
+            originalScale.x,
+            originalScale.y * 0.7f,
+            originalScale.z
+        );
 
         if (openButton != null)
             openButton.onClick.AddListener(OpenPanel);
@@ -89,7 +100,6 @@ public class XPUIAnimation : MonoBehaviour
 
     private void OnEnable()
     {
-        // Si el login termina mientras este panel está activo, refrescamos el nombre
         if (PlayFabLoginManager.Instance != null)
             PlayFabLoginManager.Instance.OnLoginSuccess += OnLoginReady;
     }
@@ -104,11 +114,9 @@ public class XPUIAnimation : MonoBehaviour
     {
         LoadUsername();
 
-        // 🔹 Ahora sí: estamos logueados en PlayFab, sincronizamos fondos
+        // Sincronizar con PlayFab al loguear
         if (backgroundCatalog != null)
-        {
             SyncAllPurchasedBackgroundsToPlayFab(backgroundCatalog);
-        }
 
         if (avatarCatalog != null)
             SyncAllPurchasedAvatarsToPlayFab(avatarCatalog);
@@ -119,9 +127,8 @@ public class XPUIAnimation : MonoBehaviour
         LoadCurrentAvatarSprite();
         UpdateLevelUI();
         LoadUsername();
-        UpdateRecordsUI();   // <- inicializamos también los récords
-
-        UpdateAvatarAndBackgroundCount(); // Llamada para actualizar los contadores
+        UpdateRecordsUI();
+        UpdateAvatarAndBackgroundCount();
     }
 
     private void UpdateAvatarAndBackgroundCount()
@@ -136,9 +143,6 @@ public class XPUIAnimation : MonoBehaviour
                 if (avatar == null) continue;
 
                 string key = "AvatarPurchased_" + avatar.id;
-
-                // Cuenta como comprado si PlayerPrefs dice 1
-                // (si quieres que uno sea “base” siempre comprado, puedes añadir: || avatar.id == "NormalAvatar")
                 bool isOwned = PlayerPrefs.GetInt(key, 0) == 1;
 
                 if (isOwned)
@@ -156,8 +160,6 @@ public class XPUIAnimation : MonoBehaviour
                 if (bg == null) continue;
 
                 string id = bg.id;
-
-                // Mismo criterio que usas en FondoItem.ActualizarIcono
                 bool comprado = PlayerPrefs.GetInt("Purchased_" + id, 0) == 1 || id == "DefaultBackground";
 
                 if (comprado)
@@ -186,8 +188,8 @@ public class XPUIAnimation : MonoBehaviour
     public void OpenPanel()
     {
         ShowLocalProfile();
-
-        pencilButton.gameObject.SetActive(true);
+        if (pencilButton != null)
+            pencilButton.gameObject.SetActive(true);
     }
 
     public void ShowLocalProfile()
@@ -205,7 +207,7 @@ public class XPUIAnimation : MonoBehaviour
         UpdateAvatarAndBackgroundCount();
 
         if (currentRoutine != null) StopCoroutine(currentRoutine);
-        currentRoutine = StartCoroutine(SlidePanel(panel.anchoredPosition, shownPosition));
+        currentRoutine = StartCoroutine(SlidePanel(panel.anchoredPosition, shownPosition, true));
     }
 
     public void ShowRemoteProfile(string playFabId, string displayName)
@@ -222,22 +224,28 @@ public class XPUIAnimation : MonoBehaviour
 
         // Lo forzamos a la posición oculta por si estaba abierto
         panel.anchoredPosition = hiddenPosition;
+        panel.localScale = new Vector3(
+            originalScale.x,
+            originalScale.y * 0.7f,
+            originalScale.z
+        );
 
         // Nombre
         if (usernameText != null)
             usernameText.text = string.IsNullOrEmpty(displayName) ? "Player" : displayName;
 
-        // Cuando miramos otro jugador, tus propios contadores no tienen sentido
+        // Cuando miramos otro jugador, sus contadores se cargan remotos más tarde
         if (avatarCountText != null) avatarCountText.text = "- / -";
         if (backgroundCountText != null) backgroundCountText.text = "- / -";
 
-        // Lanzamos las cargas remotas (cada una hará BeginRemoteLoad/OnRemoteLoadFinished)
+        // Lanzamos las cargas remotas
         LoadRemoteAvatarSprite(playFabId);
         LoadRemoteLevelAndXP(playFabId);
         LoadRemoteAvatarAndBackgroundCount(playFabId);
-        LoadRemoteRecords(playFabId); // esto puede actualizar después; lo incluimos igual
+        LoadRemoteRecords(playFabId);
 
-        pencilButton.gameObject.SetActive(false);
+        if (pencilButton != null)
+            pencilButton.gameObject.SetActive(false);
     }
 
     private void BeginRemoteLoad()
@@ -248,13 +256,11 @@ public class XPUIAnimation : MonoBehaviour
 
     private void OnRemoteLoadFinished(string playFabId)
     {
-        // Si ya no estamos viendo ese perfil remoto, ignoramos
         if (!isRemoteProfile || playFabId != remotePlayFabId)
             return;
 
         pendingRemoteLoads = Mathf.Max(0, pendingRemoteLoads - 1);
 
-        // Cuando todos los trozos remotos terminen, abrimos el panel
         if (pendingRemoteLoads == 0 && !remoteOpenStarted)
         {
             remoteOpenStarted = true;
@@ -263,7 +269,7 @@ public class XPUIAnimation : MonoBehaviour
             {
                 isShown = true;
                 if (currentRoutine != null) StopCoroutine(currentRoutine);
-                currentRoutine = StartCoroutine(SlidePanel(panel.anchoredPosition, shownPosition));
+                currentRoutine = StartCoroutine(SlidePanel(panel.anchoredPosition, shownPosition, true));
             }
         }
     }
@@ -272,7 +278,7 @@ public class XPUIAnimation : MonoBehaviour
     {
         if (avatarCountText == null && backgroundCountText == null) return;
 
-        BeginRemoteLoad();   // 👈 NUEVO
+        BeginRemoteLoad();
 
         var request = new GetUserDataRequest
         {
@@ -345,7 +351,7 @@ public class XPUIAnimation : MonoBehaviour
                 if (backgroundCountText != null)
                     backgroundCountText.text = $"{ownedBackgrounds} / {totalBackgrounds}";
 
-                OnRemoteLoadFinished(playFabId);   // 👈 NUEVO
+                OnRemoteLoadFinished(playFabId);
             },
             error =>
             {
@@ -357,7 +363,7 @@ public class XPUIAnimation : MonoBehaviour
                 if (backgroundCountText != null && backgroundCatalog != null)
                     backgroundCountText.text = $"? / {backgroundCatalog.backgroundDataSO.Count}";
 
-                OnRemoteLoadFinished(playFabId);   // 👈 NUEVO
+                OnRemoteLoadFinished(playFabId);
             }
         );
     }
@@ -366,7 +372,7 @@ public class XPUIAnimation : MonoBehaviour
     {
         if (avatarImage == null || avatarCatalog == null) return;
 
-        BeginRemoteLoad();   // 👈 NUEVO
+        BeginRemoteLoad();
 
         var request = new GetUserDataRequest
         {
@@ -403,7 +409,7 @@ public class XPUIAnimation : MonoBehaviour
                 else if (fallbackAvatar != null)
                     avatarImage.sprite = fallbackAvatar;
 
-                OnRemoteLoadFinished(playFabId);   // 👈 NUEVO
+                OnRemoteLoadFinished(playFabId);
             },
             error =>
             {
@@ -411,7 +417,7 @@ public class XPUIAnimation : MonoBehaviour
                 if (fallbackAvatar != null)
                     avatarImage.sprite = fallbackAvatar;
 
-                OnRemoteLoadFinished(playFabId);   // 👈 NUEVO
+                OnRemoteLoadFinished(playFabId);
             }
         );
     }
@@ -420,7 +426,7 @@ public class XPUIAnimation : MonoBehaviour
     {
         if (levelText == null && xpText == null && xpFillImage == null) return;
 
-        BeginRemoteLoad();   // 👈 NUEVO
+        BeginRemoteLoad();
 
         var request = new GetUserDataRequest
         {
@@ -465,19 +471,19 @@ public class XPUIAnimation : MonoBehaviour
                 if (xpFillImage != null)
                     xpFillImage.fillAmount = (float)xp / xpNext;
 
-                OnRemoteLoadFinished(playFabId);   // 👈 NUEVO
+                OnRemoteLoadFinished(playFabId);
             },
             error =>
             {
                 Debug.LogWarning("Error al cargar nivel remoto: " + error.GenerateErrorReport());
-                OnRemoteLoadFinished(playFabId);   // 👈 NUEVO
+                OnRemoteLoadFinished(playFabId);
             }
         );
     }
 
     private void LoadRemoteRecords(string playFabId)
     {
-        BeginRemoteLoad();   // 👈 NUEVO
+        BeginRemoteLoad();
 
         var request = new GetLeaderboardAroundPlayerRequest
         {
@@ -502,12 +508,12 @@ public class XPUIAnimation : MonoBehaviour
                 LoadRemoteRecordForStat(playFabId, "GridScore", gridRecordText);
                 LoadRemoteRecordForStat(playFabId, "DodgeScore", dodgeRecordText);
 
-                OnRemoteLoadFinished(playFabId);   // 👈 NUEVO
+                OnRemoteLoadFinished(playFabId);
             },
             error =>
             {
                 Debug.LogWarning(error.GenerateErrorReport());
-                OnRemoteLoadFinished(playFabId);   // 👈 NUEVO
+                OnRemoteLoadFinished(playFabId);
             }
         );
     }
@@ -540,19 +546,18 @@ public class XPUIAnimation : MonoBehaviour
         );
     }
 
-
     public void ClosePanel()
     {
         if (!isShown || isMoving) return;
 
         isShown = false;
 
-        // Lanzamos la animación POP DEL BOTÓN antes de cerrar
+        // Pop del botón de cerrar
         if (closeButton != null)
             StartCoroutine(CloseButtonPopAnimation());
 
         if (currentRoutine != null) StopCoroutine(currentRoutine);
-        currentRoutine = StartCoroutine(SlidePanel(panel.anchoredPosition, hiddenPosition));
+        currentRoutine = StartCoroutine(SlidePanel(panel.anchoredPosition, hiddenPosition, false));
     }
 
     public void SyncAllPurchasedBackgroundsToPlayFab(BackgroundCatalogSO catalog)
@@ -563,7 +568,6 @@ public class XPUIAnimation : MonoBehaviour
             return;
         }
 
-        // 🔹 Comprobamos login en PlayFab
         if (PlayFabLoginManager.Instance == null || !PlayFabLoginManager.Instance.IsLoggedIn)
         {
             Debug.LogWarning("[SyncBackgrounds] No logueado en PlayFab, no sincronizo todavía.");
@@ -571,7 +575,6 @@ public class XPUIAnimation : MonoBehaviour
         }
 
         Dictionary<string, string> data = new();
-
         int countPurchased = 0;
 
         foreach (var bg in catalog.backgroundDataSO)
@@ -588,7 +591,6 @@ public class XPUIAnimation : MonoBehaviour
             }
         }
 
-        // También subir el equipado actual
         string equipped = PlayerPrefs.GetString("SelectedBackground", "DefaultBackground");
         data["SelectedBackground"] = equipped;
 
@@ -659,7 +661,6 @@ public class XPUIAnimation : MonoBehaviour
         Vector3 original = btn.localScale;
         Vector3 target = original * closePopScale;
 
-        // Reducir
         float t = 0;
         while (t < 1f)
         {
@@ -668,7 +669,6 @@ public class XPUIAnimation : MonoBehaviour
             yield return null;
         }
 
-        // Volver al tamaño normal
         t = 0;
         while (t < 1f)
         {
@@ -680,22 +680,123 @@ public class XPUIAnimation : MonoBehaviour
         btn.localScale = original;
     }
 
-    private IEnumerator SlidePanel(Vector2 from, Vector2 to)
+    /// <summary>
+    /// Animación: el panel sube desde abajo y cambia de escala SOLO en Y,
+    /// manteniendo la X original del editor.
+    /// opening = true → entra desde abajo, Y pequeña → Y grande + pop.
+    /// opening = false → sale hacia abajo, Y grande → Y pequeña.
+    /// </summary>
+    private IEnumerator SlidePanel(Vector2 from, Vector2 to, bool opening)
     {
         isMoving = true;
-        float t = 0f;
 
-        while (t < slideDuration)
+        if (opening)
         {
-            t += Time.deltaTime;
-            float lerp = Mathf.Clamp01(t / slideDuration);
-            float eased = slideCurve.Evaluate(lerp);
+            // ---------- APERTURA ----------
+            float t = 0f;
 
-            panel.anchoredPosition = Vector2.Lerp(from, to, eased);
-            yield return null;
+            float startFactor = 0.8f;   // 80% de la escala original
+            float endFactor = 0.9f;   // 90% durante la subida
+
+            Vector3 startScale = originalScale * startFactor;
+            Vector3 endScale = originalScale * endFactor;
+
+            panel.anchoredPosition = from;
+            panel.localScale = startScale;
+
+            // Subida desde abajo + escala de 0.8 → 0.9
+            while (t < slideDuration)
+            {
+                t += Time.deltaTime;
+                float lerp = Mathf.Clamp01(t / slideDuration);
+                float eased = slideCurve.Evaluate(lerp);
+
+                panel.anchoredPosition = Vector2.Lerp(from, to, eased);
+                panel.localScale = Vector3.Lerp(startScale, endScale, lerp);
+
+                yield return null;
+            }
+
+            panel.anchoredPosition = to;
+            panel.localScale = endScale;
+
+            // POP final hasta la escala EXACTA del editor (originalScale)
+            float popDuration = 0.10f;
+            float popT = 0f;
+            float popFactor = 1.05f;
+
+            Vector3 overshoot = originalScale * popFactor;
+            Vector3 final = originalScale;
+
+            panel.localScale = overshoot;
+
+            while (popT < popDuration)
+            {
+                popT += Time.deltaTime;
+                float lerp = Mathf.Clamp01(popT / popDuration);
+                panel.localScale = Vector3.Lerp(overshoot, final, lerp);
+                yield return null;
+            }
+
+            panel.localScale = final;
+        }
+        else
+        {
+            // ---------- CIERRE ----------
+            // 1) POP en su sitio (no se mueve, solo escala)
+            float popDuration = 0.10f;
+            float popT = 0f;
+            float popFactor = 1.05f;
+
+            Vector3 baseScale = originalScale;
+            Vector3 overshoot = originalScale * popFactor;
+
+            panel.anchoredPosition = from;
+            panel.localScale = baseScale;
+
+            while (popT < popDuration)
+            {
+                popT += Time.deltaTime;
+                float lerp = Mathf.Clamp01(popT / popDuration);
+
+                if (lerp < 0.5f)
+                {
+                    // 0 → 0.5: 1.0 → 1.05
+                    float inner = lerp / 0.5f;
+                    panel.localScale = Vector3.Lerp(baseScale, overshoot, inner);
+                }
+                else
+                {
+                    // 0.5 → 1: 1.05 → 1.0
+                    float inner = (lerp - 0.5f) / 0.5f;
+                    panel.localScale = Vector3.Lerp(overshoot, baseScale, inner);
+                }
+
+                yield return null;
+            }
+
+            panel.localScale = baseScale;
+
+            // 2) Desplazamiento hacia abajo + encoger (1.0 → 0.8)
+            float t = 0f;
+            Vector3 endScale = originalScale * 0.8f;
+
+            while (t < slideDuration)
+            {
+                t += Time.deltaTime;
+                float lerp = Mathf.Clamp01(t / slideDuration);
+                float eased = slideCurve.Evaluate(lerp);
+
+                panel.anchoredPosition = Vector2.Lerp(from, to, eased);
+                panel.localScale = Vector3.Lerp(baseScale, endScale, lerp);
+
+                yield return null;
+            }
+
+            panel.anchoredPosition = to;
+            panel.localScale = endScale;
         }
 
-        panel.anchoredPosition = to;
         isMoving = false;
     }
 
@@ -757,14 +858,12 @@ public class XPUIAnimation : MonoBehaviour
         var login = PlayFabLoginManager.Instance;
         if (login != null)
         {
-            // 1) Si el manager ya tiene DisplayName (después del login), lo usamos
             if (!string.IsNullOrEmpty(login.DisplayName))
             {
                 finalName = login.DisplayName;
             }
             else
             {
-                // 2) Si no, usamos el nombre local que guarda el propio manager
                 string localName = login.GetLocalDisplayName();
                 if (!string.IsNullOrEmpty(localName))
                     finalName = localName;
@@ -778,7 +877,6 @@ public class XPUIAnimation : MonoBehaviour
 
     private void UpdateRecordsUI()
     {
-        // Cambia las claves de PlayerPrefs aquí si en tu proyecto usas otras
         if (classicRecordText != null)
             classicRecordText.text = PlayerPrefs.GetInt("MaxRecord", 0).ToString();
 
