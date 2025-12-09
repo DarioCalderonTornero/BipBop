@@ -6,7 +6,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-
 public class AvatarItem : MonoBehaviour
 {
     [Header("Datos")]
@@ -31,6 +30,9 @@ public class AvatarItem : MonoBehaviour
     private bool _isPurchased = false;
 
     private static AvatarItem currentlySelectedItem = null;  // Para controlar qué avatar está "hecho grande"
+
+    // 👉 ID del avatar que NO debe aparecer en la tienda
+    private const string DEFAULT_AVATAR_ID = "NormalAvatar";
 
     private void Awake()
     {
@@ -59,6 +61,13 @@ public class AvatarItem : MonoBehaviour
         if (avatarData == null)
         {
             Debug.LogError($"AvatarItem en {name} no tiene AvatarData asignado.");
+            return;
+        }
+
+        // 🔹 Si es el avatar por defecto, NO debe estar en la tienda → desactivar GO y salir
+        if (avatarData.id == DEFAULT_AVATAR_ID)
+        {
+            gameObject.SetActive(false);
             return;
         }
 
@@ -153,7 +162,6 @@ public class AvatarItem : MonoBehaviour
     {
         if (!_isPurchased)
         {
-            // --- SISTEMA REAL DE COMPRA ---
             int currentCoins = CurrencyManager.Instance.GetCoins();
 
             if (currentCoins >= avatarData.price)
@@ -166,7 +174,7 @@ public class AvatarItem : MonoBehaviour
                 PlayerPrefs.SetInt("AvatarPurchased_" + avatarData.id, 1);
                 PlayerPrefs.Save();
 
-                UpdateBuyText();  // Actualizamos el texto del botón para reflejar que ya fue comprado
+                UpdateBuyText();
 
                 Debug.Log($"Avatar comprado: {avatarData.id}");
 
@@ -174,9 +182,9 @@ public class AvatarItem : MonoBehaviour
                 if (PlayFabLoginManager.Instance != null && PlayFabLoginManager.Instance.IsLoggedIn)
                 {
                     var data = new Dictionary<string, string>
-    {
+                    {
                         { "AvatarPurchased_" + avatarData.id, "1" }
-    };
+                    };
 
                     var request = new UpdateUserDataRequest
                     {
@@ -199,7 +207,6 @@ public class AvatarItem : MonoBehaviour
         }
         else
         {
-            // Si ya está comprado, no hacemos nada
             Debug.Log("Este avatar ya está comprado.");
         }
     }
@@ -229,7 +236,6 @@ public class AvatarItem : MonoBehaviour
         currentlySelectedItem = null;
         StartCoroutine(ScaleRoutine(transform.localScale, _originalScale));
 
-        // Ocultamos los botones de "Comprar"
         if (buyButton != null) buyButton.gameObject.SetActive(false);
         if (cancelButton != null) cancelButton.gameObject.SetActive(false);
     }

@@ -8,4 +8,13 @@ public class AvatarDataSO : ScriptableObject
     public string displayName;   // Nombre visible ("Avatar básico", "Perro feliz")
     public Sprite sprite;        // Imagen del avatar
     public int price;            // Precio en monedas
+
+    [Header("Desbloqueo por puntuación (opcional)")]
+    public bool unlockByScore = false;
+
+    [Tooltip("Clave del récord en PlayerPrefs (ej: MaxRecordColor, MaxRecord, MaxRecordGeometric...)")]
+    public string requiredScoreKey;
+
+    [Tooltip("Puntos necesarios para desbloquear este avatar")]
+    public int requiredScoreValue = 0;
 }

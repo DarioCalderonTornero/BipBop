@@ -1,25 +1,31 @@
-using TMPro;
+ï»¿using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class InventoryAvatarItem : MonoBehaviour
 {
     [Header("UI")]
     [SerializeField] private Image avatarImage;
     [SerializeField] private TextMeshProUGUI nameText;
-    public Button selectButton;  // Agregamos el botón de selección
+    public Button selectButton;
 
     [Header("Datos")]
-    [SerializeField] private AvatarDataSO avatarData;   // Datos del avatar
+    [SerializeField] private AvatarDataSO avatarData;
 
-    private bool isSelected = false;  // Estado de si está seleccionado o no
+    private bool isSelected = false;
 
     [Header("Estado de propiedad")]
-    [SerializeField] private Color lockedTint = Color.gray; // Color para avatares no comprados
+    [SerializeField] private Color lockedTint = Color.gray;
     private bool isOwned = false;
     private Color originalColor;
 
-    // Configuración inicial del item
+    // Para recuperar el estilo original de la fuente
+    private FontStyles originalFontStyle;
+
+    // ðŸ‘‡ ID del avatar que SIEMPRE estÃ¡ comprado
+    private const string DEFAULT_AVATAR_ID = "NormalAvatar";
+
     public void Setup(AvatarDataSO avatarData)
     {
         this.avatarData = avatarData;
@@ -31,15 +37,33 @@ public class InventoryAvatarItem : MonoBehaviour
         }
 
         if (nameText != null)
+        {
             nameText.text = avatarData.displayName;
+            originalFontStyle = nameText.fontStyle;
+        }
 
-        // Comprobar propiedad
+        // ðŸ”¹ Propiedad base: el avatar por defecto SIEMPRE estÃ¡ owned
         string key = "AvatarPurchased_" + avatarData.id;
-        isOwned = PlayerPrefs.GetInt(key, 0) == 1;
+        bool defaultOwned = avatarData.id == DEFAULT_AVATAR_ID;
+
+        isOwned = defaultOwned || PlayerPrefs.GetInt(key, 0) == 1;
+
+        // ðŸ”¹ Si NO estÃ¡ comprado pero es de tipo "por puntuaciÃ³n", miramos rÃ©cords
+        if (!isOwned && avatarData.unlockByScore && !string.IsNullOrEmpty(avatarData.requiredScoreKey))
+        {
+            int bestScore = PlayerPrefs.GetInt(avatarData.requiredScoreKey, 0);
+
+            if (bestScore >= avatarData.requiredScoreValue)
+            {
+                // Lo desbloqueamos de verdad y lo persistimos
+                isOwned = true;
+                PlayerPrefs.SetInt(key, 1);
+                PlayerPrefs.Save();
+            }
+        }
 
         ApplyOwnershipVisuals();
 
-        // Listener de selección
         if (selectButton != null)
         {
             selectButton.onClick.RemoveAllListeners();
@@ -47,28 +71,23 @@ public class InventoryAvatarItem : MonoBehaviour
         }
     }
 
-    // Seleccionar el avatar (escala el item y cambia el estado a seleccionado)
-    // Seleccionar el avatar (escala el item y cambia el estado a seleccionado)
     public void Select()
     {
         isSelected = true;
-        transform.localScale = Vector3.one * 1.1f;  // Aumentar tamaño para indicar selección
+        transform.localScale = Vector3.one * 1.1f;
     }
 
-    // Deseleccionar el avatar (restaurar el tamaño original)
     public void Deselect()
     {
         isSelected = false;
-        transform.localScale = Vector3.one;  // Restaurar tamaño original
+        transform.localScale = Vector3.one;
     }
 
-    // Obtener los datos del avatar
     public AvatarDataSO GetAvatarData()
     {
         return avatarData;
     }
 
-    // Acción cuando se hace clic en el botón para seleccionar el avatar
     private void OnSelectClicked()
     {
         if (!isOwned)
@@ -80,9 +99,15 @@ public class InventoryAvatarItem : MonoBehaviour
 
     private void ApplyOwnershipVisuals()
     {
+        // Imagen gris si no es tuyo
         if (avatarImage != null)
             avatarImage.color = isOwned ? originalColor : lockedTint;
 
+        // Nombre en negrita si NO lo tienes, estilo original si sÃ­
+        if (nameText != null)
+            nameText.fontStyle = isOwned ? originalFontStyle : FontStyles.Bold;
+
+        // Solo puedes pulsar si es tuyo
         if (selectButton != null)
             selectButton.interactable = isOwned;
     }

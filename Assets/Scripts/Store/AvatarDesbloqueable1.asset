@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8116731ce51618b47a0b58e595cab8e3, type: 3}
-  m_Name: Avatar1
+  m_Name: AvatarDesbloqueable1
   m_EditorClassIdentifier: 
-  id: NormalAvatar
-  displayName: Normal
-  sprite: {fileID: 4096687751673324164, guid: da0abe826c217814380e0ad7239943e2, type: 3}
-  price: 10
-  unlockByScore: 0
-  requiredScoreKey: 
-  requiredScoreValue: 0
+  id: Desbloqueable
+  displayName: Desbloqueable
+  sprite: {fileID: -1825931381, guid: 1201c14bb4ee74d8e99e56dc4f3f4fd1, type: 3}
+  price: 0
+  unlockByScore: 1
+  requiredScoreKey: MaxRecordDodge
+  requiredScoreValue: 22

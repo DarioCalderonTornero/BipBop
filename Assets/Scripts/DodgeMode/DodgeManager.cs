@@ -44,8 +44,8 @@ public class DodgeManager : MonoBehaviour
 #endif
 
         // Incrementar dificultad
-        if (score >= 50) CurrentEnemySpeed = 3.5f;
-        else if (score >= 30) CurrentEnemySpeed = 2.5f;
+        // if (score >= 50) CurrentEnemySpeed = 3.5f;
+        // else if (score >= 30) CurrentEnemySpeed = 2.5f;
     }
 
     public void GameOver()
@@ -56,10 +56,15 @@ public class DodgeManager : MonoBehaviour
         isGameOver = true;
         Debug.Log("GAME OVER!");
 
+        if (score > 20)
+        {
+            AvatarUnlockHelper.UnlockAvatar("Desbloqueable");
+        }
+
         DodgeState.Instance.dodgeGameState = DodgeState.DodgeGameStateEnum.GameOver;
         OnGameOver?.Invoke(this, EventArgs.Empty);
 
-        Time.timeScale = .3f;
+        // Time.timeScale = .3f;
 
         // Guardar récord máximo
         SaveRecordIfNeeded();
