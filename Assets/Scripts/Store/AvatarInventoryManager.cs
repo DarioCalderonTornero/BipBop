@@ -1,30 +1,40 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class AvatarInventoryManager : MonoBehaviour
 {
     [Header("UI References")]
-    [SerializeField] private RectTransform panel;   // Panel a mostrar/ocultar
-    [SerializeField] private Button openButton;     // Botón para abrir el panel
-    [SerializeField] private Button closeButton;    // Botón para cerrar el panel
-    [SerializeField] private Button saveButton;     // Botón para guardar la selección
+    [SerializeField] private RectTransform panel;
+    [SerializeField] private Button openButton;
+    [SerializeField] private Button closeButton;
+    [SerializeField] private Button saveButton;
 
-    [Header("Grid Layout")]
-    [SerializeField] private GameObject avatarItemPrefab;  // Prefab para cada item de avatar
-    [SerializeField] private Transform contentPanel;       // Panel donde se instanciarán los avatares
+    [Header("Grid Layout / Páginas")]
+    [SerializeField] private GameObject avatarItemPrefab;
+    [SerializeField] private Transform[] pageContainers;    // Page0, Page1, Page2...
 
-    [Header("Catalogo de Avatares")]
-    [SerializeField] private AvatarCatalogSO avatarCatalog;   // El catálogo de avatares
+    [Header("Catálogo de Avatares")]
+    [SerializeField] private AvatarCatalogSO avatarCatalog;
 
     [Header("Avatar por defecto")]
-    [SerializeField] private string defaultAvatarId = "NormalAvatar"; // 👈 ID del avatar que SIEMPRE estará comprado
+    [SerializeField] private string defaultAvatarId = "NormalAvatar";
 
     [Header("Animación")]
     [SerializeField] private float popDuration = 0.25f;
     [SerializeField] private float popScale = 1.1f;
     [SerializeField] private AnimationCurve popCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
+
+    [Header("Detalle selección")]
+    [SerializeField] private TextMeshProUGUI selectedAvatarNameText;
+    [SerializeField] private TextMeshProUGUI selectedAvatarDescriptionText;
+
+    [Header("Textos descriptivos")]
+    [SerializeField] private string defaultOwnedText = "¡Conseguido!";
+    [SerializeField] private string defaultStoreText = "Comprable en la tienda.";
+    [SerializeField] private string defaultScoreTemplate = "Alcanza {0} puntos para desbloquearlo.";
 
     private bool isPanelVisible = false;
     private bool isAnimating = false;
@@ -33,46 +43,35 @@ public class AvatarInventoryManager : MonoBehaviour
 
     private void Start()
     {
-        // Comprobamos referencias
         if (avatarCatalog == null)
-        {
             Debug.LogError("AvatarCatalog no está asignado.");
-        }
-
-        if (contentPanel == null)
-        {
-            Debug.LogError("contentPanel no está asignado.");
-        }
 
         if (avatarItemPrefab == null)
-        {
             Debug.LogError("avatarItemPrefab no está asignado.");
-        }
 
-        // 🔹 MUY IMPORTANTE: asegurar que el avatar por defecto está comprado y equipado
+        if (pageContainers == null || pageContainers.Length == 0)
+            Debug.LogError("pageContainers no está asignado.");
+
         EnsureDefaultAvatarOwnedAndEquipped();
 
-        // Listeners
-        openButton.onClick.AddListener(OpenPanel);
-        closeButton.onClick.AddListener(ClosePanel);
-        saveButton.onClick.AddListener(SaveSelectedAvatar);
+        if (openButton != null) openButton.onClick.AddListener(OpenPanel);
+        if (closeButton != null) closeButton.onClick.AddListener(ClosePanel);
+        if (saveButton != null) saveButton.onClick.AddListener(SaveSelectedAvatar);
 
-        // Cargamos los avatares en el panel
-        LoadAvatarsInPanel();
+        LoadAvatarsInPages();
 
-        // Panel cerrado
         panel.localScale = Vector3.zero;
+        if (saveButton != null)
+        {
+            saveButton.gameObject.SetActive(true);
+            saveButton.interactable = false;
+        }
 
-        saveButton.gameObject.SetActive(true);
-        saveButton.interactable = false;
+        // Limpiar textos iniciales
+        if (selectedAvatarNameText != null) selectedAvatarNameText.text = "";
+        if (selectedAvatarDescriptionText != null) selectedAvatarDescriptionText.text = "";
     }
 
-    /// <summary>
-    /// Se asegura de que el avatar por defecto:
-    /// - existe en el catálogo
-    /// - está marcado como comprado en PlayerPrefs
-    /// - esté equipado la PRIMERA vez que entras (si no hay EquippedAvatarId aún)
-    /// </summary>
     private void EnsureDefaultAvatarOwnedAndEquipped()
     {
         if (string.IsNullOrEmpty(defaultAvatarId) || avatarCatalog == null)
@@ -85,14 +84,12 @@ public class AvatarInventoryManager : MonoBehaviour
             return;
         }
 
-        // Marcar como comprado
         string purchaseKey = "AvatarPurchased_" + defaultAvatarId;
         if (PlayerPrefs.GetInt(purchaseKey, 0) == 0)
         {
             PlayerPrefs.SetInt(purchaseKey, 1);
         }
 
-        // Si el jugador aún no tiene ningún avatar equipado, ponemos este por defecto
         if (!PlayerPrefs.HasKey("EquippedAvatarId"))
         {
             PlayerPrefs.SetString("EquippedAvatarId", defaultAvatarId);
@@ -101,6 +98,10 @@ public class AvatarInventoryManager : MonoBehaviour
         PlayerPrefs.Save();
     }
 
+    // ========================
+    //  ABRIR / CERRAR PANEL
+    // ========================
+
     public void OpenPanel()
     {
         if (isAnimating || isPanelVisible) return;
@@ -108,7 +109,7 @@ public class AvatarInventoryManager : MonoBehaviour
         isPanelVisible = true;
         StartCoroutine(PopPanel(Vector3.zero, Vector3.one * popScale));
 
-        LoadAvatarsInPanel();
+        LoadAvatarsInPages();
     }
 
     public void ClosePanel()
@@ -138,51 +139,115 @@ public class AvatarInventoryManager : MonoBehaviour
         isAnimating = false;
     }
 
-    private void LoadAvatarsInPanel()
+    // ========================
+    //  CARGA EN PÁGINAS
+    // ========================
+
+    private void LoadAvatarsInPages()
     {
-        if (contentPanel == null || avatarCatalog == null)
+        if (avatarCatalog == null || pageContainers == null || pageContainers.Length == 0)
         {
-            Debug.LogError("No se puede cargar avatares. contentPanel o avatarCatalog no están asignados.");
+            Debug.LogError("No se puede cargar avatares. Falta avatarCatalog o pageContainers.");
             return;
         }
 
-        foreach (Transform child in contentPanel)
-            Destroy(child.gameObject);
-
-        foreach (var avatarData in avatarCatalog.avatarDataSO)
+        foreach (var page in pageContainers)
         {
+            if (page == null) continue;
+            foreach (Transform child in page)
+                Destroy(child.gameObject);
+        }
+
+        var list = avatarCatalog.avatarDataSO;
+        if (list == null || list.Count == 0)
+            return;
+
+        const int AVATARS_PER_PAGE = 15; // 5x3
+
+        for (int i = 0; i < list.Count; i++)
+        {
+            var avatarData = list[i];
             if (avatarData == null) continue;
 
-            GameObject avatarItemGO = Instantiate(avatarItemPrefab, contentPanel);
+            int pageIndex = i / AVATARS_PER_PAGE;
+            if (pageIndex >= pageContainers.Length)
+            {
+                Debug.LogWarning("[AvatarInventoryManager] Hay más avatares que páginas configuradas.");
+                break;
+            }
+
+            Transform parentPage = pageContainers[pageIndex];
+            if (parentPage == null) continue;
+
+            GameObject avatarItemGO = Instantiate(avatarItemPrefab, parentPage);
             InventoryAvatarItem avatarItem = avatarItemGO.GetComponent<InventoryAvatarItem>();
             avatarItem.Setup(avatarData);
         }
     }
 
-    // Se llama cuando se selecciona un avatar
+    // ========================
+    //  SELECCIÓN / GUARDAR
+    // ========================
+
     public void OnAvatarSelected(InventoryAvatarItem avatarItem)
     {
-        Debug.Log($"Avatar seleccionado: {avatarItem.GetAvatarData().displayName}");
+        var data = avatarItem.GetAvatarData();
+        Debug.Log($"Avatar seleccionado: {data.displayName}");
 
-        if (selectedAvatarItem == avatarItem)
-            return;
-
-        if (selectedAvatarItem != null)
+        if (selectedAvatarItem != null && selectedAvatarItem != avatarItem)
             selectedAvatarItem.Deselect();
 
         selectedAvatarItem = avatarItem;
         selectedAvatarItem.Select();
-        saveButton.interactable = true;
+
+        // 🔹 Actualizar nombre arriba
+        if (selectedAvatarNameText != null)
+            selectedAvatarNameText.text = data.displayName;
+
+        // 🔹 Actualizar descripción
+        if (selectedAvatarDescriptionText != null)
+        {
+            if (avatarItem.IsOwned)
+            {
+                // Ya lo tienes → "¡Conseguido!"
+                selectedAvatarDescriptionText.text = defaultOwnedText;
+            }
+            else
+            {
+                // No lo tienes → descripción de cómo se desbloquea
+                if (!string.IsNullOrEmpty(data.unlockDescription))
+                {
+                    selectedAvatarDescriptionText.text = data.unlockDescription;
+                }
+                else if (data.unlockByScore && data.requiredScoreValue > 0)
+                {
+                    // Fallback por puntuación si no rellenaste el texto
+                    selectedAvatarDescriptionText.text =
+                        string.Format(defaultScoreTemplate, data.requiredScoreValue);
+                }
+                else if (data.price > 0)
+                {
+                    selectedAvatarDescriptionText.text = defaultStoreText;
+                }
+                else
+                {
+                    selectedAvatarDescriptionText.text = "";
+                }
+            }
+        }
+
+        // 🔹 Solo puedes guardar si está conseguido
+        if (saveButton != null)
+            saveButton.interactable = avatarItem.IsOwned;
     }
 
     private void SaveSelectedAvatar()
     {
-        if (selectedAvatarItem != null)
+        if (selectedAvatarItem != null && selectedAvatarItem.IsOwned)
         {
             AvatarDataSO selectedAvatarData = selectedAvatarItem.GetAvatarData();
             EquipAvatar(selectedAvatarData);
             ClosePanel();
-
             StartCoroutine(WaitAndUpdateAvatar());
         }
     }
@@ -214,16 +279,18 @@ public class AvatarInventoryManager : MonoBehaviour
             Permission = PlayFab.ClientModels.UserDataPermission.Public
         };
 
-        PlayFab.PlayFabClientAPI.UpdateUserData(request, result =>
-        {
-            Debug.Log("Avatar equipados en PlayFab");
-
-            XPUIAnimation menuAvatar = FindFirstObjectByType<XPUIAnimation>();
-            if (menuAvatar != null)
-                menuAvatar.LoadCurrentAvatarSprite();
-        }, error =>
-        {
-            Debug.LogWarning("Error al actualizar avatar en PlayFab: " + error.GenerateErrorReport());
-        });
+        PlayFab.PlayFabClientAPI.UpdateUserData(
+            request,
+            result =>
+            {
+                Debug.Log("Avatar equipados en PlayFab");
+                XPUIAnimation menuAvatar = FindFirstObjectByType<XPUIAnimation>();
+                if (menuAvatar != null)
+                    menuAvatar.LoadCurrentAvatarSprite();
+            },
+            error =>
+            {
+                Debug.LogWarning("Error al actualizar avatar en PlayFab: " + error.GenerateErrorReport());
+            });
     }
 }

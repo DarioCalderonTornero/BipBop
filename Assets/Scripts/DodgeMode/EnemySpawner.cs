@@ -8,21 +8,59 @@ public class EnemySpawner : MonoBehaviour
     public float spawnInterval = 2f;
     public Transform player;
 
+    private bool canSpawn = false;
+
     private void Start()
     {
-        InvokeRepeating(nameof(SpawnEnemy), 1f, spawnInterval);
+        // Escuchar cuando el juego realmente empieza
+        DodgeState.Instance.OnPlayingDodgeGame += StartSpawning;
+        DodgeState.Instance.OnGameOverDodgeGame += StopSpawning;
     }
 
-    void SpawnEnemy()
+    private void OnDestroy()
+    {
+        if (DodgeState.Instance != null)
+        {
+            DodgeState.Instance.OnPlayingDodgeGame -= StartSpawning;
+            DodgeState.Instance.OnGameOverDodgeGame -= StopSpawning;
+        }
+    }
+
+    private void StartSpawning(object sender, System.EventArgs e)
+    {
+        if (canSpawn) return;
+
+        canSpawn = true;
+        StartCoroutine(SpawnLoop());
+    }
+
+    private void StopSpawning(object sender, System.EventArgs e)
+    {
+        canSpawn = false;
+    }
+
+    private IEnumerator SpawnLoop()
+    {
+        yield return new WaitForSeconds(0.4f); // retraso opcional tras el "GO!"
+
+        while (canSpawn)
+        {
+            SpawnEnemy();
+            yield return new WaitForSeconds(spawnInterval);
+        }
+    }
+
+    private void SpawnEnemy()
     {
         Vector2 spawnPos = GetRandomSpawnPosition();
         GameObject enemyObj = Instantiate(enemyPrefab, spawnPos, Quaternion.identity);
         Enemy enemy = enemyObj.GetComponent<Enemy>();
+
         float enemySpeed = DodgeManager.Instance.CurrentEnemySpeed;
         enemy.Init(player, enemySpeed);
     }
 
-    Vector2 GetRandomSpawnPosition()
+    private Vector2 GetRandomSpawnPosition()
     {
         Camera cam = Camera.main;
         float camHeight = 2f * cam.orthographicSize;

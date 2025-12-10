@@ -26,6 +26,9 @@ public class InventoryAvatarItem : MonoBehaviour
     // 👇 ID del avatar que SIEMPRE está comprado
     private const string DEFAULT_AVATAR_ID = "NormalAvatar";
 
+    // 👉 Propiedad pública para que el manager sepa si está conseguido
+    public bool IsOwned => isOwned;
+
     public void Setup(AvatarDataSO avatarData)
     {
         this.avatarData = avatarData;
@@ -90,11 +93,12 @@ public class InventoryAvatarItem : MonoBehaviour
 
     private void OnSelectClicked()
     {
-        if (!isOwned)
-            return;
+        // ❌ YA NO hacemos early-return si no es owned.
+        // Queremos poder seleccionarlo para mostrar descripción.
 
         AvatarInventoryManager inventoryManager = FindFirstObjectByType<AvatarInventoryManager>();
-        inventoryManager.OnAvatarSelected(this);
+        if (inventoryManager != null)
+            inventoryManager.OnAvatarSelected(this);
     }
 
     private void ApplyOwnershipVisuals()
@@ -107,8 +111,8 @@ public class InventoryAvatarItem : MonoBehaviour
         if (nameText != null)
             nameText.fontStyle = isOwned ? originalFontStyle : FontStyles.Bold;
 
-        // Solo puedes pulsar si es tuyo
+        // ⛔ Ahora dejamos que siempre se pueda pulsar, aunque esté bloqueado
         if (selectButton != null)
-            selectButton.interactable = isOwned;
+            selectButton.interactable = true;
     }
 }

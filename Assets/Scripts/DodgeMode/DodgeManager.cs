@@ -21,6 +21,9 @@ public class DodgeManager : MonoBehaviour
     {
         Instance = this;
         scoreText.text = $"Score: {score}";
+
+        // Por si acaso, al entrar en escena nos aseguramos de que no haya freeze antiguo
+        Enemy.GlobalFreeze = false;
     }
 
     private void Start()
@@ -40,20 +43,71 @@ public class DodgeManager : MonoBehaviour
         scoreText.text = $"Score: {score}";
 
 #if UNITY_ANDROID || UNITY_IOS
-        Haptics.TryVibrate(); // Vibración opcional
+        Haptics.TryVibrate();
 #endif
-
-        // Incrementar dificultad
-        // if (score >= 50) CurrentEnemySpeed = 3.5f;
-        // else if (score >= 30) CurrentEnemySpeed = 2.5f;
     }
 
+    // =========================
+    //  NUEVO: jugador golpeado
+    // =========================
+    public void PlayerHit(Enemy killer)
+    {
+        if (isGameOver)
+            return;
+
+        StartCoroutine(SlowMotionAndGameOver(killer));
+    }
+
+    private IEnumerator SlowMotionAndGameOver(Enemy killer)
+    {
+        isGameOver = true;
+        Debug.Log("GAME OVER (slow motion)!");
+
+        // Guardar tiempos originales
+        float prevTimeScale = Time.timeScale;
+        float prevFixedDelta = Time.fixedDeltaTime;
+
+        // Cámara lenta
+        Time.timeScale = 0.2f;
+        Time.fixedDeltaTime = 0.02f * Time.timeScale;
+
+        // Congelar a todos los enemigos (veremos esto en Enemy)
+        Enemy.GlobalFreeze = true;
+
+        // Parpadeo del enemigo que ha dado al jugador
+        if (killer != null)
+        {
+            yield return killer.FlashRedCoroutine(3, 0.15f);
+        }
+        else
+        {
+            // Fallback por si no tenemos referencia
+            yield return new WaitForSecondsRealtime(0.9f);
+        }
+
+        // Restaurar tiempo normal
+        Time.timeScale = prevTimeScale;
+        Time.fixedDeltaTime = prevFixedDelta;
+
+        // Ejecutar la lógica normal de GameOver (menú, monedas, PlayFab…)
+        DoGameOverLogic();
+    }
+
+    // =========================
+    //  GameOver normal (sin cámara lenta)
+    // =========================
     public void GameOver()
     {
         if (isGameOver)
             return;
 
         isGameOver = true;
+        DoGameOverLogic();
+    }
+
+    // Extraemos aquí la lógica que ya tenías en GameOver
+    private void DoGameOverLogic()
+    {
         Debug.Log("GAME OVER!");
 
         if (score > 20)
@@ -63,8 +117,6 @@ public class DodgeManager : MonoBehaviour
 
         DodgeState.Instance.dodgeGameState = DodgeState.DodgeGameStateEnum.GameOver;
         OnGameOver?.Invoke(this, EventArgs.Empty);
-
-        // Time.timeScale = .3f;
 
         // Guardar récord máximo
         SaveRecordIfNeeded();
@@ -90,8 +142,6 @@ public class DodgeManager : MonoBehaviour
         {
             CurrencyManager.Instance.AddCoins(coinsEarned);
         }
-
-        // Notificar fin de partida
     }
 
     private void SaveRecordIfNeeded()

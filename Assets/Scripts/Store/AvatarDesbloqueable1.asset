@@ -19,3 +19,5 @@ MonoBehaviour:
   unlockByScore: 1
   requiredScoreKey: MaxRecordDodge
   requiredScoreValue: 22
+  unlockDescription: "Alcanza una puntuaci\xF3n de 22 como m\xEDnimo en el modo \"Dodge\"
+    para desbloquaer"
