@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using PlayFab;
 using PlayFab.ClientModels;
 using TMPro;
@@ -13,12 +14,34 @@ public class PlayFabLoginManager : MonoBehaviour
     private const string PREF_CUSTOM_ID = "pf_custom_id";
     private const string PREF_DISPLAY_NAME = "pf_display_name";
 
+    // Límite de caracteres del nombre
+    private const int MAX_NAME_LENGTH = 12;
+
     [Header("UI (assign in inspector)")]
-    public GameObject namePanel;             // panel que pide el nombre (SetActive true/false)
+    public GameObject namePanel;             // panel que pide el nombre
     public TMP_InputField nameInput;         // input para escribir el nombre
     public Button submitButton;              // botón para enviar el nombre
-    public Button skipButton;                // (opcional) botón para omitir
+    public Button skipButton;                // botón para omitir (opcional)
     public GameObject loadingIndicator;      // spinner u objeto que muestra carga
+
+    [Header("Feedback")]
+    public TextMeshProUGUI feedbackText;     // texto de errores bajo el input
+
+    [Header("DEBUG")]
+    [Tooltip("Si lo marcas en el inspector, forzará que se abra el panel de nombre aunque ya tengas uno guardado.")]
+    [SerializeField] private bool debugForceNamePanel = false;
+
+    [Header("Debug nombre")]
+    [SerializeField] private bool debugNameTestMode = false;
+
+    // Lista de nombres que se considerarán "ocupados" en modo debug
+    [SerializeField] private string[] debugTakenNames;
+
+    [Header("Name counter")]
+    [SerializeField] private TextMeshProUGUI nameCounterText;
+    [SerializeField] private Color counterLowColor = Color.green;    // 0 - 1/3
+    [SerializeField] private Color counterMidColor = Color.yellow;   // 1/3 - 2/3
+    [SerializeField] private Color counterHighColor = Color.red;     // 2/3 - full
 
     // Estado
     public bool IsLoggedIn { get; private set; } = false;
@@ -32,7 +55,7 @@ public class PlayFabLoginManager : MonoBehaviour
     {
         if (string.IsNullOrEmpty(PlayFabSettings.TitleId))
         {
-            PlayFabSettings.TitleId = "145AD3"; // pega tu TitleId
+            PlayFabSettings.TitleId = "145AD3"; // tu TitleId
         }
 
         if (Instance == null) { Instance = this; DontDestroyOnLoad(gameObject); }
@@ -43,19 +66,80 @@ public class PlayFabLoginManager : MonoBehaviour
         if (loadingIndicator != null) loadingIndicator.SetActive(false);
 
         if (nameInput != null)
+        {
             nameInput.onValueChanged.AddListener(OnNameInputChanged);
+            // Aseguramos el límite también a nivel de input
+            nameInput.characterLimit = MAX_NAME_LENGTH;
+        }
     }
 
     private void Start()
     {
         StartLoginFlow();
+
+        if (nameInput != null)
+            UpdateNameCounter(nameInput.text);
     }
 
     private void OnNameInputChanged(string value)
     {
         if (feedbackText != null)
             feedbackText.text = ""; // limpia mensajes anteriores mientras escribe
+
+        UpdateNameCounter(value);
     }
+
+    private void UpdateNameCounter(string currentText)
+    {
+        if (nameCounterText == null) return;
+
+        int length = string.IsNullOrEmpty(currentText) ? 0 : currentText.Length;
+
+        // Texto tipo "X / MAX"
+        nameCounterText.text = $"{length} / {MAX_NAME_LENGTH}";
+
+        // Proporción usada
+        float ratio = (float)length / MAX_NAME_LENGTH;
+
+        // Elegimos color según tercio
+        if (ratio <= 1f / 3f)
+        {
+            nameCounterText.color = counterLowColor;    // verde
+        }
+        else if (ratio <= 2f / 3f)
+        {
+            nameCounterText.color = counterMidColor;    // naranja/amarillo
+        }
+        else
+        {
+            nameCounterText.color = counterHighColor;   // rojo
+        }
+    }
+    private IEnumerator ShakeInputField()
+    {
+        if (nameInput == null) yield break;
+
+        RectTransform rt = nameInput.GetComponent<RectTransform>();
+        if (rt == null) yield break;
+
+        Vector2 originalPos = rt.anchoredPosition;
+
+        float duration = 0.18f;
+        float elapsed = 0f;
+        float amplitude = 10f;   // cuánto se mueve a los lados
+        float frequency = 40f;   // velocidad de la vibración
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime; // por si el tiempo está pausado en alguna escena
+            float offset = Mathf.Sin(elapsed * frequency) * amplitude;
+            rt.anchoredPosition = originalPos + new Vector2(offset, 0f);
+            yield return null;
+        }
+
+        rt.anchoredPosition = originalPos;
+    }
+
 
     #region Login Flow
     public void StartLoginFlow()
@@ -78,6 +162,22 @@ public class PlayFabLoginManager : MonoBehaviour
         PlayFabClientAPI.LoginWithCustomID(request, OnLoginSuccessInternal, OnPlayFabError);
     }
 
+    // Helper para modo debug: simula nombres ocupados
+    private bool IsDebugNameTaken(string name)
+    {
+        if (debugTakenNames == null || debugTakenNames.Length == 0)
+            return false;
+
+        foreach (var taken in debugTakenNames)
+        {
+            if (string.IsNullOrEmpty(taken)) continue;
+            if (string.Equals(taken.Trim(), name, StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+
+        return false;
+    }
+
     private void OnLoginSuccessInternal(LoginResult result)
     {
         ShowLoading(false);
@@ -85,8 +185,34 @@ public class PlayFabLoginManager : MonoBehaviour
         PlayFabId = result.PlayFabId;
         Debug.Log($"PlayFab login OK - PlayFabId: {PlayFabId}");
 
-        // Si localmente ya teníamos un display name, sincronizarlo
         string localName = PlayerPrefs.GetString(PREF_DISPLAY_NAME, "");
+
+        // DEBUG: fuerza mostrar el panel aunque ya hubiera nombre
+        if (debugForceNamePanel)
+        {
+            debugForceNamePanel = false; // se auto-resetea
+            if (namePanel != null)
+            {
+                namePanel.SetActive(true);
+
+                if (submitButton != null)
+                {
+                    submitButton.onClick.RemoveAllListeners();
+                    submitButton.onClick.AddListener(SubmitNameFromUI);
+                }
+
+                if (skipButton != null)
+                {
+                    skipButton.onClick.RemoveAllListeners();
+                    skipButton.onClick.AddListener(OnSkipName);
+                }
+            }
+            return;
+        }
+
+
+
+        // Flujo normal
         if (!string.IsNullOrEmpty(localName))
         {
             // aseguramos que PlayFab tenga el nombre (opcional)
@@ -98,9 +224,12 @@ public class PlayFabLoginManager : MonoBehaviour
             if (namePanel != null)
             {
                 namePanel.SetActive(true);
-                // Configurar listeners si no están ya
-                submitButton.onClick.RemoveAllListeners();
-                submitButton.onClick.AddListener(SubmitNameFromUI);
+
+                if (submitButton != null)
+                {
+                    submitButton.onClick.RemoveAllListeners();
+                    submitButton.onClick.AddListener(SubmitNameFromUI);
+                }
 
                 if (skipButton != null)
                 {
@@ -130,7 +259,7 @@ public class PlayFabLoginManager : MonoBehaviour
     {
         string typed = nameInput != null ? nameInput.text?.Trim() : "";
 
-        // Validar nombre vacío
+        // 1) Vacío
         if (string.IsNullOrEmpty(typed))
         {
             if (feedbackText != null)
@@ -138,15 +267,35 @@ public class PlayFabLoginManager : MonoBehaviour
             return;
         }
 
-        // Validar longitud máxima
-        if (typed.Length > 14)
+        // 2) Longitud
+        if (typed.Length > MAX_NAME_LENGTH)
         {
             if (feedbackText != null)
-                feedbackText.text = "Nombre demasiado largo, máximo de caracteres: 14.";
+                feedbackText.text = $"Nombre demasiado largo, máximo {MAX_NAME_LENGTH} caracteres.";
             return;
         }
 
-        // Si está OK, enviar
+        // 3) MODO DEBUG: solo probar, NO guardar ni llamar a PlayFab
+        if (debugNameTestMode)
+        {
+            if (IsDebugNameTaken(typed))
+            {
+                if (feedbackText != null)
+                    feedbackText.text = "Ese nombre ya existe, elige otro.";
+
+                // Agitar input en debug cuando el nombre "ya existe"
+                StartCoroutine(ShakeInputField());
+            }
+            else
+            {
+                if (feedbackText != null)
+                    feedbackText.text = "Nombre válido (modo prueba). No se ha guardado.";
+            }
+
+            return;
+        }
+
+        // 4) Modo real
         SetDisplayName(typed);
     }
 
@@ -159,8 +308,6 @@ public class PlayFabLoginManager : MonoBehaviour
     }
 
     // Settea displayName en PlayFab y guarda local
-    public TextMeshProUGUI feedbackText; // <- Asigna un TextMeshPro debajo del input
-
     public void SetDisplayName(string newName)
     {
         ShowLoading(true);
@@ -176,7 +323,7 @@ public class PlayFabLoginManager : MonoBehaviour
             PlayerPrefs.Save();
 
             Debug.Log("DisplayName guardado: " + DisplayName);
-            if (feedbackText != null) feedbackText.text = ""; // limpiar mensaje si había error anterior
+            if (feedbackText != null) feedbackText.text = "";
             if (namePanel != null) namePanel.SetActive(false);
 
             FinalizeLogin();
@@ -195,8 +342,10 @@ public class PlayFabLoginManager : MonoBehaviour
                 {
                     nameInput.text = "";
                     nameInput.Select();
-                    nameInput.ActivateInputField(); // enfocar para volver a escribir
+                    nameInput.ActivateInputField();
                 }
+
+                StartCoroutine(ShakeInputField());
             }
             else
             {
@@ -228,7 +377,6 @@ public class PlayFabLoginManager : MonoBehaviour
 
     private void FinalizeLogin()
     {
-        // Ya tenemos PlayFabId y posiblemente DisplayName
         OnLoginSuccess?.Invoke();
     }
     #endregion
@@ -240,7 +388,6 @@ public class PlayFabLoginManager : MonoBehaviour
             loadingIndicator.SetActive(show);
     }
 
-    // Método público para que otras clases obtengan el displayName guardado en local
     public string GetLocalDisplayName()
     {
         return PlayerPrefs.GetString(PREF_DISPLAY_NAME, "");
