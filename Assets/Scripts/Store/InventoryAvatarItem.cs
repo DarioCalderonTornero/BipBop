@@ -1,7 +1,6 @@
 ﻿using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 public class InventoryAvatarItem : MonoBehaviour
 {
@@ -9,6 +8,14 @@ public class InventoryAvatarItem : MonoBehaviour
     [SerializeField] private Image avatarImage;
     [SerializeField] private TextMeshProUGUI nameText;
     public Button selectButton;
+
+    [Header("Icono de candado")]
+    [SerializeField] private Image lockedIcon;
+    // Icono de candado para avatares bloqueados
+
+    [Header("Fondo de selección")]
+    [SerializeField] private Image selectionBackground;
+    // 👉 Imagen de fondo que se ve SOLO cuando el item está seleccionado
 
     [Header("Datos")]
     [SerializeField] private AvatarDataSO avatarData;
@@ -20,14 +27,13 @@ public class InventoryAvatarItem : MonoBehaviour
     private bool isOwned = false;
     private Color originalColor;
 
-    // Para recuperar el estilo original de la fuente
     private FontStyles originalFontStyle;
-
-    // 👇 ID del avatar que SIEMPRE está comprado
     private const string DEFAULT_AVATAR_ID = "NormalAvatar";
-
-    // 👉 Propiedad pública para que el manager sepa si está conseguido
     public bool IsOwned => isOwned;
+
+    [Header("Animación de pop")]
+    [SerializeField] private float popDuration = 0.12f;
+    [SerializeField] private float popScale = 1.1f;
 
     public void Setup(AvatarDataSO avatarData)
     {
@@ -45,20 +51,24 @@ public class InventoryAvatarItem : MonoBehaviour
             originalFontStyle = nameText.fontStyle;
         }
 
-        // 🔹 Propiedad base: el avatar por defecto SIEMPRE está owned
+        // Si no se asignó por Inspector, intentamos buscarla por nombre
+        if (selectionBackground == null)
+        {
+            Transform bg = transform.Find("ImagenFondoSeleccion");
+            if (bg != null)
+                selectionBackground = bg.GetComponent<Image>();
+        }
+
         string key = "AvatarPurchased_" + avatarData.id;
         bool defaultOwned = avatarData.id == DEFAULT_AVATAR_ID;
-
         isOwned = defaultOwned || PlayerPrefs.GetInt(key, 0) == 1;
 
-        // 🔹 Si NO está comprado pero es de tipo "por puntuación", miramos récords
         if (!isOwned && avatarData.unlockByScore && !string.IsNullOrEmpty(avatarData.requiredScoreKey))
         {
             int bestScore = PlayerPrefs.GetInt(avatarData.requiredScoreKey, 0);
 
             if (bestScore >= avatarData.requiredScoreValue)
             {
-                // Lo desbloqueamos de verdad y lo persistimos
                 isOwned = true;
                 PlayerPrefs.SetInt(key, 1);
                 PlayerPrefs.Save();
@@ -66,6 +76,7 @@ public class InventoryAvatarItem : MonoBehaviour
         }
 
         ApplyOwnershipVisuals();
+        ApplySelectionBackground(false); // al inicio, sin selección
 
         if (selectButton != null)
         {
@@ -77,25 +88,27 @@ public class InventoryAvatarItem : MonoBehaviour
     public void Select()
     {
         isSelected = true;
-        transform.localScale = Vector3.one * 1.1f;
+
+        StopAllCoroutines();
+        StartCoroutine(PopRoutine());
+
+        ApplySelectionBackground(true);
     }
 
     public void Deselect()
     {
         isSelected = false;
+
+        StopAllCoroutines();
         transform.localScale = Vector3.one;
+
+        ApplySelectionBackground(false);
     }
 
-    public AvatarDataSO GetAvatarData()
-    {
-        return avatarData;
-    }
+    public AvatarDataSO GetAvatarData() => avatarData;
 
     private void OnSelectClicked()
     {
-        // ❌ YA NO hacemos early-return si no es owned.
-        // Queremos poder seleccionarlo para mostrar descripción.
-
         AvatarInventoryManager inventoryManager = FindFirstObjectByType<AvatarInventoryManager>();
         if (inventoryManager != null)
             inventoryManager.OnAvatarSelected(this);
@@ -107,12 +120,54 @@ public class InventoryAvatarItem : MonoBehaviour
         if (avatarImage != null)
             avatarImage.color = isOwned ? originalColor : lockedTint;
 
-        // Nombre en negrita si NO lo tienes, estilo original si sí
+        // Nombre en negrita si está bloqueado
         if (nameText != null)
             nameText.fontStyle = isOwned ? originalFontStyle : FontStyles.Bold;
 
-        // ⛔ Ahora dejamos que siempre se pueda pulsar, aunque esté bloqueado
+        // Icono de candado visible SOLO si está bloqueado
+        if (lockedIcon != null)
+            lockedIcon.gameObject.SetActive(!isOwned);
+
+        // Se puede pulsar siempre (para ver descripción aunque no sea tuyo)
         if (selectButton != null)
             selectButton.interactable = true;
+    }
+
+    private void ApplySelectionBackground(bool selected)
+    {
+        if (selectionBackground == null)
+            return;
+
+        selectionBackground.gameObject.SetActive(selected);
+    }
+
+    private System.Collections.IEnumerator PopRoutine()
+    {
+        Vector3 originalScale = Vector3.one;
+        Vector3 targetScale = Vector3.one * popScale;
+
+        float half = popDuration * 0.5f;
+        float t = 0f;
+
+        // Subida
+        while (t < half)
+        {
+            t += Time.deltaTime;
+            float lerp = Mathf.Clamp01(t / half);
+            transform.localScale = Vector3.Lerp(originalScale, targetScale, lerp);
+            yield return null;
+        }
+
+        // Bajada
+        t = 0f;
+        while (t < half)
+        {
+            t += Time.deltaTime;
+            float lerp = Mathf.Clamp01(t / half);
+            transform.localScale = Vector3.Lerp(targetScale, originalScale, lerp);
+            yield return null;
+        }
+
+        transform.localScale = originalScale;
     }
 }

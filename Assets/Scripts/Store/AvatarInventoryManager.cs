@@ -22,6 +22,9 @@ public class AvatarInventoryManager : MonoBehaviour
     [Header("Avatar por defecto")]
     [SerializeField] private string defaultAvatarId = "NormalAvatar";
 
+    [Header("Pager")]
+    [SerializeField] private AvatarInventoryPager inventoryPager;
+
     [Header("Animación")]
     [SerializeField] private float popDuration = 0.25f;
     [SerializeField] private float popScale = 1.1f;
@@ -35,11 +38,23 @@ public class AvatarInventoryManager : MonoBehaviour
     [SerializeField] private string defaultOwnedText = "¡Conseguido!";
     [SerializeField] private string defaultStoreText = "Comprable en la tienda.";
     [SerializeField] private string defaultScoreTemplate = "Alcanza {0} puntos para desbloquearlo.";
+    [SerializeField] private string noSelectionText = "¡Elige un avatar!";
 
     private bool isPanelVisible = false;
     private bool isAnimating = false;
 
     private InventoryAvatarItem selectedAvatarItem = null;
+
+    // Posición original del panel tal y como está en el editor
+    private Vector2 originalPanelAnchoredPosition;
+
+    private void Awake()
+    {
+        if (panel == null)
+            panel = GetComponent<RectTransform>();
+
+        originalPanelAnchoredPosition = panel.anchoredPosition;
+    }
 
     private void Start()
     {
@@ -60,16 +75,18 @@ public class AvatarInventoryManager : MonoBehaviour
 
         LoadAvatarsInPages();
 
+        // Panel cerrado por escala, pero posición original intacta
         panel.localScale = Vector3.zero;
+
         if (saveButton != null)
         {
             saveButton.gameObject.SetActive(true);
             saveButton.interactable = false;
         }
 
-        // Limpiar textos iniciales
+        // Textos iniciales: nada seleccionado aún
         if (selectedAvatarNameText != null) selectedAvatarNameText.text = "";
-        if (selectedAvatarDescriptionText != null) selectedAvatarDescriptionText.text = "";
+        if (selectedAvatarDescriptionText != null) selectedAvatarDescriptionText.text = noSelectionText;
     }
 
     private void EnsureDefaultAvatarOwnedAndEquipped()
@@ -107,17 +124,88 @@ public class AvatarInventoryManager : MonoBehaviour
         if (isAnimating || isPanelVisible) return;
 
         isPanelVisible = true;
-        StartCoroutine(PopPanel(Vector3.zero, Vector3.one * popScale));
 
+        // Reset posición y escala
+        panel.anchoredPosition = originalPanelAnchoredPosition;
+        panel.localScale = Vector3.zero;
+
+        // Reset selección
+        selectedAvatarItem = null;
+
+        if (selectedAvatarNameText != null) selectedAvatarNameText.text = "";
+        if (selectedAvatarDescriptionText != null) selectedAvatarDescriptionText.text = noSelectionText;
+        if (saveButton != null) saveButton.interactable = false;
+
+        // Cargamos los avatares
         LoadAvatarsInPages();
+
+        // El resto en una corrutina para esperar al layout
+        StartCoroutine(OpenPanelRoutine());
+    }
+
+    private IEnumerator OpenPanelRoutine()
+    {
+        // Esperar al final de frame para que el ScrollRect y GridLayoutGroup
+        // calculen bien tamaños y posiciones (sobre todo en móvil)
+        yield return null;
+        Canvas.ForceUpdateCanvases();
+
+        // Forzamos la primera página desde el pager
+        if (inventoryPager != null)
+        {
+            inventoryPager.HardResetToFirstPage();
+        }
+
+        // Animación de pop del panel
+        StartCoroutine(PopPanel(Vector3.zero, Vector3.one * popScale));
     }
 
     public void ClosePanel()
     {
         if (isAnimating || !isPanelVisible) return;
 
+        // POP en la X
+        if (closeButton != null)
+            StartCoroutine(PopButton(closeButton.transform as RectTransform));
+
         isPanelVisible = false;
         StartCoroutine(PopPanel(Vector3.one * popScale, Vector3.zero));
+    }
+
+    // ========================
+    //  POP DE BOTONES / PANEL
+    // ========================
+    private IEnumerator PopButton(RectTransform button)
+    {
+        if (button == null) yield break;
+
+        Vector3 original = button.localScale;
+        Vector3 bigger = original * 1.12f;
+
+        float duration = 0.12f;
+        float half = duration * 0.5f;
+        float t = 0f;
+
+        // Subida
+        while (t < half)
+        {
+            t += Time.deltaTime;
+            float p = Mathf.Clamp01(t / half);
+            button.localScale = Vector3.Lerp(original, bigger, p);
+            yield return null;
+        }
+
+        // Bajada
+        t = 0f;
+        while (t < half)
+        {
+            t += Time.deltaTime;
+            float p = Mathf.Clamp01(t / half);
+            button.localScale = Vector3.Lerp(bigger, original, p);
+            yield return null;
+        }
+
+        button.localScale = original;
     }
 
     private IEnumerator PopPanel(Vector3 from, Vector3 to)
@@ -151,6 +239,7 @@ public class AvatarInventoryManager : MonoBehaviour
             return;
         }
 
+        // Limpiar páginas
         foreach (var page in pageContainers)
         {
             if (page == null) continue;
@@ -183,6 +272,15 @@ public class AvatarInventoryManager : MonoBehaviour
             InventoryAvatarItem avatarItem = avatarItemGO.GetComponent<InventoryAvatarItem>();
             avatarItem.Setup(avatarData);
         }
+
+        // Rebuild layout para evitar glitches en móvil
+        foreach (var page in pageContainers)
+        {
+            if (page == null) continue;
+            var rt = page as RectTransform;
+            if (rt != null)
+                LayoutRebuilder.ForceRebuildLayoutImmediate(rt);
+        }
     }
 
     // ========================
@@ -200,28 +298,23 @@ public class AvatarInventoryManager : MonoBehaviour
         selectedAvatarItem = avatarItem;
         selectedAvatarItem.Select();
 
-        // 🔹 Actualizar nombre arriba
         if (selectedAvatarNameText != null)
             selectedAvatarNameText.text = data.displayName;
 
-        // 🔹 Actualizar descripción
         if (selectedAvatarDescriptionText != null)
         {
             if (avatarItem.IsOwned)
             {
-                // Ya lo tienes → "¡Conseguido!"
                 selectedAvatarDescriptionText.text = defaultOwnedText;
             }
             else
             {
-                // No lo tienes → descripción de cómo se desbloquea
                 if (!string.IsNullOrEmpty(data.unlockDescription))
                 {
                     selectedAvatarDescriptionText.text = data.unlockDescription;
                 }
                 else if (data.unlockByScore && data.requiredScoreValue > 0)
                 {
-                    // Fallback por puntuación si no rellenaste el texto
                     selectedAvatarDescriptionText.text =
                         string.Format(defaultScoreTemplate, data.requiredScoreValue);
                 }
@@ -236,7 +329,6 @@ public class AvatarInventoryManager : MonoBehaviour
             }
         }
 
-        // 🔹 Solo puedes guardar si está conseguido
         if (saveButton != null)
             saveButton.interactable = avatarItem.IsOwned;
     }
@@ -245,6 +337,9 @@ public class AvatarInventoryManager : MonoBehaviour
     {
         if (selectedAvatarItem != null && selectedAvatarItem.IsOwned)
         {
+            if (saveButton != null)
+                StartCoroutine(PopButton(saveButton.transform as RectTransform));
+
             AvatarDataSO selectedAvatarData = selectedAvatarItem.GetAvatarData();
             EquipAvatar(selectedAvatarData);
             ClosePanel();
