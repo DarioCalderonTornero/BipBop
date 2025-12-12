@@ -6,6 +6,7 @@ using UnityEngine;
 public class BackgroundDataSO : ScriptableObject
 {
     public string id;
+    public string displayName;
     public Sprite sprite;
     public int price;
 }
