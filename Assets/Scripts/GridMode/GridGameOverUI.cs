@@ -36,7 +36,7 @@ public class GridGameOverUI : MonoBehaviour
     private void GridGameManager_OnGameOver(object sender, System.EventArgs e)
     {
         Debug.Log("OnGeometricGameOver");
-        coinText.text = "Coins: " + GridGameManager.Instance.GetScore();
+        coinText.text = "Points: " + GridGameManager.Instance.GetScore();
         myanimator.SetBool("IsGameOver", true);
     }
 

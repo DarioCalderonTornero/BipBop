@@ -1,61 +1,102 @@
+using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class FlyingCoin : MonoBehaviour
 {
     private RectTransform rectTransform;
-    private Vector3 startPos;
-    private Vector3 scatterTarget;
-    private Vector3 finalTarget;
-    private float scatterDuration = 0.8f;
-    private float flyDuration = 0.8f;
-    private System.Action onArrive;
+    private Action onArrive;
 
     private void Awake()
     {
         rectTransform = GetComponent<RectTransform>();
     }
 
-    public void Initialize(Vector3 center, Vector3 target, float scatterRadius, System.Action onArriveCallback)
+    /// <summary>
+    /// startPos/targetPos: posiciones en pantalla (RectTransform.position).
+    /// burstDir: dirección del "disparo".
+    /// burstForce: fuerza inicial (px/seg aprox, al ser UI).
+    /// burstDuration: cuánto dura el disparo antes de agruparse.
+    /// homingDuration: cuánto tarda en llegar al icono.
+    /// </summary>
+    public void Initialize(
+        Vector3 startPos,
+        Vector3 targetPos,
+        Vector2 burstDir,
+        float burstForce,
+        float burstDuration,
+        float homingDuration,
+        Action onArriveCallback)
     {
-        startPos = center;
-        finalTarget = target;
         onArrive = onArriveCallback;
 
+        StopAllCoroutines();
         rectTransform.position = startPos;
 
-        // posición aleatoria a la que "explota"
-        Vector2 randomDir = Random.insideUnitCircle.normalized * Random.Range(scatterRadius * 0.5f, scatterRadius);
-        scatterTarget = startPos + (Vector3)randomDir;
-
-        StartCoroutine(ScatterThenFly());
+        StartCoroutine(BurstThenHome(startPos, targetPos, burstDir, burstForce, burstDuration, homingDuration));
     }
 
-    private IEnumerator ScatterThenFly()
+    private IEnumerator BurstThenHome(
+        Vector3 startPos,
+        Vector3 targetPos,
+        Vector2 burstDir,
+        float burstForce,
+        float burstDuration,
+        float homingDuration)
     {
-        // Fase 1: dispersión
+        // -----------------------
+        // 1) BURST (impulso)
+        // -----------------------
+        Vector3 pos = startPos;
+        Vector3 vel = (Vector3)(burstDir.normalized * burstForce);
+
         float t = 0f;
-        while (t < 1f)
+        while (t < burstDuration)
         {
-            t += Time.deltaTime / scatterDuration;
-            rectTransform.position = Vector3.Lerp(startPos, scatterTarget, Mathf.SmoothStep(0, 1, t));
+            t += Time.unscaledDeltaTime;
+
+            // fricción ligera (si quieres aún más “disparo”, baja el 0.90 a 0.93-0.96)
+            vel *= Mathf.Pow(0.90f, Time.unscaledDeltaTime * 60f);
+
+            pos += vel * Time.unscaledDeltaTime;
+            rectTransform.position = pos;
+
             yield return null;
         }
 
-        yield return new WaitForSeconds(0.4f); // pausa breve
+        Vector3 burstEnd = rectTransform.position;
 
-        // Fase 2: vuelo al objetivo
-        Vector3 scatterStart = rectTransform.position;
+        // -----------------------
+        // 2) HOMING (curva al icono)
+        // -----------------------
+        Vector3 toTarget = targetPos - burstEnd;
+
+        // Control point para que curve bonito
+        Vector3 control = burstEnd + toTarget * 0.35f;
+        control += new Vector3(UnityEngine.Random.Range(-35f, 35f), UnityEngine.Random.Range(70f, 120f), 0f);
+
         t = 0f;
-        while (t < 1f)
+        while (t < homingDuration)
         {
-            t += Time.deltaTime / flyDuration;
-            rectTransform.position = Vector3.Lerp(scatterStart, finalTarget, Mathf.SmoothStep(0, 1, t));
+            t += Time.unscaledDeltaTime;
+            float p = Mathf.Clamp01(t / homingDuration);
+
+            // easing suave
+            float eased = Mathf.SmoothStep(0f, 1f, p);
+
+            rectTransform.position = QuadraticBezier(burstEnd, control, targetPos, eased);
             yield return null;
         }
+
+        rectTransform.position = targetPos;
 
         onArrive?.Invoke();
         Destroy(gameObject);
+    }
+
+    private static Vector3 QuadraticBezier(Vector3 a, Vector3 b, Vector3 c, float t)
+    {
+        float u = 1f - t;
+        return (u * u) * a + (2f * u * t) * b + (t * t) * c;
     }
 }

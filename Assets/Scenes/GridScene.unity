@@ -2045,8 +2045,16 @@ MonoBehaviour:
   panelCanvasGroup: {fileID: 271458901}
   totalCoinsText: {fileID: 876977827}
   scatterRadius: 164
-  spawnDelay: 0.05
   fadeDuration: 0.5
+  shortDelay: 0.15
+  maxVisualCoins: 30
+  burstForceMin: 2000
+  burstForceMax: 2400
+  burstDurationMin: 0.3
+  burstDurationMax: 0.4
+  homingDurationMin: 0.6
+  homingDurationMax: 0.7
+  lateralBias: 0.65
 --- !u!1 &784293511
 GameObject:
   m_ObjectHideFlags: 0
