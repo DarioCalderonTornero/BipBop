@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9fcc239514915840a27f06b9bd637cf, type: 3}
+  m_Name: DailyLuckPool
+  m_EditorClassIdentifier: 
+  possibleBackgrounds:
+  - {fileID: 11400000, guid: 1bc7c38e33816b840971818a776362b5, type: 2}
+  - {fileID: 11400000, guid: cb2ef859cc58daa4a9f0c08b63698896, type: 2}
+  - {fileID: 11400000, guid: 73eefed49a7f23a43a49f359ac7f5b80, type: 2}
+  - {fileID: 11400000, guid: c18e61f178c078146b8e921d27b9b0aa, type: 2}
+  allowDuplicatesInSpin: 1

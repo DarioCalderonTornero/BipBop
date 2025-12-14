@@ -26,11 +26,6 @@ public class CurrencyManager : MonoBehaviour
         }
     }
 
-    private void Update()
-    {
-        Debug.Log(GetCoins());
-    }
-
     public void AddCoins(int amount)
     {
         if (amount <= 0) return;
@@ -46,6 +41,19 @@ public class CurrencyManager : MonoBehaviour
         coins = Mathf.Max(0, coins - amount);
         SaveCoins();
         OnCoinsChanged?.Invoke(coins);
+    }
+
+    public bool TrySpendCoins(int amount)
+    {
+        if (amount <= 0) return true;
+
+        if (coins < amount)
+            return false;
+
+        coins -= amount;
+        SaveCoins();
+        OnCoinsChanged?.Invoke(coins);
+        return true;
     }
 
     public int GetCoins() => coins;

@@ -470,7 +470,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -3743,8 +3743,16 @@ MonoBehaviour:
   panelCanvasGroup: {fileID: 1148690655}
   totalCoinsText: {fileID: 965421276}
   scatterRadius: 164.6
-  spawnDelay: 0.05
   fadeDuration: 0.5
+  shortDelay: 0.15
+  maxVisualCoins: 30
+  burstForceMin: 850
+  burstForceMax: 1450
+  burstDurationMin: 0.1
+  burstDurationMax: 0.18
+  homingDurationMin: 0.25
+  homingDurationMax: 0.38
+  lateralBias: 0.65
 --- !u!1 &1799576499
 GameObject:
   m_ObjectHideFlags: 0

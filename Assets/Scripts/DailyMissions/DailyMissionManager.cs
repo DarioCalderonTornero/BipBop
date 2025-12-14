@@ -216,7 +216,7 @@ public class DailyMissionManager : MonoBehaviour
             string remaining = DailyMissionsTimer.Instance.GetRemainingTimeString();
             string localized = dailyMissionsTimerLabel.GetLocalizedString(remaining);
 
-            Debug.Log($"[DailyMissionManager] Timer -> '{localized}'");
+            // Debug.Log($"[DailyMissionManager] Timer -> '{localized}'");
 
             timerText.text = localized;
         }
