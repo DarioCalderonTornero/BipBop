@@ -195,7 +195,7 @@ public class DailyStoreManager : MonoBehaviour
         TimeSpan remaining = nextMidnight - now;
         if (remaining.TotalSeconds < 0) remaining = TimeSpan.Zero;
 
-        countdownText.text = $"{remaining.Hours:00}:{remaining.Minutes:00}:{remaining.Seconds:00}";
+        countdownText.text = $"Nuevas ofertas en:{remaining.Hours:00}:{remaining.Minutes:00}:{remaining.Seconds:00}";
     }
 
     // -----------------------
