@@ -44,6 +44,11 @@ public class GamePause : MonoBehaviour
 
     bool cancelImage = true;
 
+    [Header("Resume Countdown")]
+    [SerializeField] private ResumeCountDownUI resumeCountdownUI;
+    private bool isResuming;
+
+
     private void OnEnable()
     {
         LocalizationSettings.SelectedLocaleChanged += OnLocaleChanged;
@@ -65,9 +70,10 @@ public class GamePause : MonoBehaviour
 
         resumeGameButton.onClick.AddListener(() =>
         {
-            gamePauseAnimator.SetBool("IsGamePaused", false);
-            pauseGameButton.gameObject.SetActive(true);
+            if (isResuming) return;
+            StartCoroutine(ResumeWithCountdown());
         });
+
 
         settingsButton.onClick.AddListener(() =>
         {
@@ -173,6 +179,44 @@ public class GamePause : MonoBehaviour
         gamePauseAnimator.SetBool("IsSettingsClose", false);
         gamePauseAnimator.SetBool("IsSettingsOpen", false);
     }
+
+    private IEnumerator ResumeWithCountdown()
+    {
+        isResuming = true;
+
+        resumeGameButton.interactable = false;
+        pauseGameButton.interactable = false;
+        settingsButton.interactable = false;
+        mainMenuButton.interactable = false;
+
+        gamePauseAnimator.SetBool("IsGamePaused", false);
+        closeGamePauseImage.gameObject.SetActive(false);
+
+        Time.timeScale = 0f;
+
+        bool done = false;
+        resumeCountdownUI.Finished += OnFinished;
+        resumeCountdownUI.Play();
+
+        while (!done)
+            yield return null;
+
+        resumeCountdownUI.Finished -= OnFinished;
+
+        Time.timeScale = 1f;
+
+        pauseGameButton.gameObject.SetActive(true);
+
+        resumeGameButton.interactable = true;
+        pauseGameButton.interactable = true;
+        settingsButton.interactable = true;
+        mainMenuButton.interactable = true;
+
+        isResuming = false;
+
+        void OnFinished() => done = true;
+    }
+
 
     public void StopTime()
     {
