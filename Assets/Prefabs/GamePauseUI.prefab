@@ -1670,6 +1670,7 @@ MonoBehaviour:
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
+  resumeCountdownUI: {fileID: 7540356141354292361, guid: 67242f0330cee7d4892d47f78753efc1, type: 3}
   references:
     version: 2
     RefIds: []
