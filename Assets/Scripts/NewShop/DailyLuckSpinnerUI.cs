@@ -96,6 +96,7 @@ public class DailyLuckSpinnerUI : MonoBehaviour
     /// </summary>
     public void PlaySpin(List<Sprite> spinSprites, Sprite finalSprite, string feedbackMsg, Action onFinished, Action onClosed = null)
     {
+
         if (rewardImage == null)
         {
             onFinished?.Invoke();
