@@ -126,7 +126,7 @@ public class DodgeManager : MonoBehaviour
             PlayFabScoreManager.Instance.SubmitScore("DodgeScore", score);
 
         // Guardar monedas ganadas (1 cada 15 puntos)
-        int coinsEarned = score / 15;
+        int coinsEarned = score;
         int totalCoins = PlayerPrefs.GetInt("CoinCount", 0);
         totalCoins += coinsEarned;
         PlayerPrefs.SetInt("CoinCount", totalCoins);

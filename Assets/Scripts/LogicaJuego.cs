@@ -181,7 +181,7 @@ public class LogicaJuego : MonoBehaviour
         hasEnded = true;
         instructionText.text = gameOverText.GetLocalizedString();
 
-        int coinsEarned = MainGamePoints.Instance.GetScore() / 15;
+        int coinsEarned = MainGamePoints.Instance.GetScore();
 
         SaveRecordIfNeeded();
 
