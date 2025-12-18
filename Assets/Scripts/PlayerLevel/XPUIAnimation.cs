@@ -68,6 +68,9 @@ public class XPUIAnimation : MonoBehaviour
 
     [SerializeField] private Button pencilButton;
 
+    [SerializeField] private Button backgroundButton;
+    [SerializeField] private Image backgroundImage;
+
     // Control de carga remota
     private int pendingRemoteLoads = 0;
     private bool remoteOpenStarted = false;
@@ -190,6 +193,11 @@ public class XPUIAnimation : MonoBehaviour
         ShowLocalProfile();
         if (pencilButton != null)
             pencilButton.gameObject.SetActive(true);
+        if (backgroundButton != null)
+            backgroundButton.gameObject.SetActive(true);
+        if (backgroundImage != null)
+            backgroundImage.gameObject.SetActive(true);
+
     }
 
     public void ShowLocalProfile()
@@ -246,6 +254,10 @@ public class XPUIAnimation : MonoBehaviour
 
         if (pencilButton != null)
             pencilButton.gameObject.SetActive(false);
+        if (backgroundButton != null)
+            backgroundButton.gameObject.SetActive(false);
+        if (backgroundImage != null)
+            backgroundImage.gameObject.SetActive(false);
     }
 
     private void BeginRemoteLoad()
