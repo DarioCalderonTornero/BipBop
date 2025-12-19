@@ -1,27 +1,31 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+[RequireComponent(typeof(RawImage))]
 public class UIScrollTexture : MonoBehaviour
 {
     [SerializeField] private Vector2 speed = new Vector2(0.01f, 0.01f);
-    [SerializeField] private string textureProperty = "_MainTex";
 
+    private RawImage raw;
     private Material runtimeMat;
-    private int propId;
     private Vector2 offset;
 
     void Awake()
     {
-        var img = GetComponent<Image>();
-        runtimeMat = Instantiate(img.material);   // IMPORTANTE: instancia para no afectar a otras UI
-        img.material = runtimeMat;
+        raw = GetComponent<RawImage>();
 
-        propId = Shader.PropertyToID(textureProperty);
+        runtimeMat = Instantiate(raw.material);
+        raw.material = runtimeMat;
     }
 
     void Update()
     {
-        offset += speed * Time.unscaledDeltaTime; // UI suele ir mejor sin Time.timeScale
-        runtimeMat.SetTextureOffset(propId, offset);
+        offset += speed * Time.unscaledDeltaTime;
+
+        // LOOP perfecto (evita offsets gigantes y glitches)
+        offset.x = Mathf.Repeat(offset.x, 1f);
+        offset.y = Mathf.Repeat(offset.y, 1f);
+
+        runtimeMat.mainTextureOffset = offset;
     }
 }
