@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e1ce8d8cad3e92f42a110d070b200cd1, type: 3}
+  m_Name: DailyStoreAvatarPool
+  m_EditorClassIdentifier: 
+  possibleAvatars:
+  - {fileID: 11400000, guid: f0fe0aade60c0cf4e9e7a090f231ab0c, type: 2}
+  - {fileID: 11400000, guid: e33d28f5306a8e64391f1e27c3be6488, type: 2}
+  - {fileID: 11400000, guid: 3e470bf52f125824abc3f31925be0d83, type: 2}
+  - {fileID: 11400000, guid: 2cfa87c935700414cbbe8e330bcdb9dc, type: 2}

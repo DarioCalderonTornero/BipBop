@@ -10,9 +10,11 @@ public class DailyStoreManager : MonoBehaviour
     [SerializeField] private StoreOfferSlotUI[] avatarSlots;     // 3
     [SerializeField] private TextMeshProUGUI countdownText;
 
-    [Header("Catalogs")]
+    [Header("Catalogs / Pools")]
     [SerializeField] private BackgroundCatalogSO backgroundCatalog;
-    [SerializeField] private AvatarCatalogSO avatarCatalog;
+
+    [Tooltip("Pool SOLO de avatares que se pueden comprar en tienda.")]
+    [SerializeField] private DailyStoreAvatarPoolSO avatarStorePool;
 
     private const string PREF_DAY_KEY = "DailyStore_DayKey";
     private const string PREF_BG_OFFER_PREFIX = "DailyStore_BG_"; // + i
@@ -35,7 +37,6 @@ public class DailyStoreManager : MonoBehaviour
 
     private void RefreshIfNeeded(bool force)
     {
-        // A las 00:00 cambia (hora del dispositivo)
         string todayKey = DateTime.Now.ToString("yyyyMMdd");
         bool needsRefresh = force || PlayerPrefs.GetString(PREF_DAY_KEY, "") != todayKey;
 
@@ -60,12 +61,7 @@ public class DailyStoreManager : MonoBehaviour
             var pickedBG = PickUniqueBackgrounds(backgroundCatalog.backgroundDataSO, 3, rng);
 
             for (int i = 0; i < 3; i++)
-            {
-                if (i < pickedBG.Count && pickedBG[i] != null)
-                    PlayerPrefs.SetString(PREF_BG_OFFER_PREFIX + i, pickedBG[i].id);
-                else
-                    PlayerPrefs.SetString(PREF_BG_OFFER_PREFIX + i, "");
-            }
+                PlayerPrefs.SetString(PREF_BG_OFFER_PREFIX + i, (i < pickedBG.Count && pickedBG[i] != null) ? pickedBG[i].id : "");
         }
         else
         {
@@ -73,16 +69,17 @@ public class DailyStoreManager : MonoBehaviour
             for (int i = 0; i < 3; i++) PlayerPrefs.SetString(PREF_BG_OFFER_PREFIX + i, "");
         }
 
-        // -------- Avatares (solo unlockByScore = false) --------
-        if (avatarCatalog != null && avatarCatalog.avatarDataSO != null && avatarCatalog.avatarDataSO.Count > 0)
+        // -------- Avatares (POOL tienda) --------
+        if (avatarStorePool != null && avatarStorePool.possibleAvatars != null && avatarStorePool.possibleAvatars.Count > 0)
         {
-            List<AvatarDataSO> storeAvatars = avatarCatalog.avatarDataSO.FindAll(a =>
+            // Si quieres una última seguridad:
+            List<AvatarDataSO> storeAvatars = avatarStorePool.possibleAvatars.FindAll(a =>
                 a != null && a.unlockByScore == false
             );
 
             if (storeAvatars.Count == 0)
             {
-                Debug.LogWarning("[DailyStore] No hay avatares de tienda (unlockByScore=false).");
+                Debug.LogWarning("[DailyStore] Pool de avatares de tienda vacía (o filtrada).");
                 for (int i = 0; i < 3; i++) PlayerPrefs.SetString(PREF_AV_OFFER_PREFIX + i, "");
             }
             else
@@ -90,17 +87,12 @@ public class DailyStoreManager : MonoBehaviour
                 var pickedAV = PickUniqueAvatars(storeAvatars, 3, rng);
 
                 for (int i = 0; i < 3; i++)
-                {
-                    if (i < pickedAV.Count && pickedAV[i] != null)
-                        PlayerPrefs.SetString(PREF_AV_OFFER_PREFIX + i, pickedAV[i].id);
-                    else
-                        PlayerPrefs.SetString(PREF_AV_OFFER_PREFIX + i, "");
-                }
+                    PlayerPrefs.SetString(PREF_AV_OFFER_PREFIX + i, (i < pickedAV.Count && pickedAV[i] != null) ? pickedAV[i].id : "");
             }
         }
         else
         {
-            Debug.LogWarning("[DailyStore] avatarCatalog vacío o no asignado.");
+            Debug.LogWarning("[DailyStore] avatarStorePool vacío o no asignado.");
             for (int i = 0; i < 3; i++) PlayerPrefs.SetString(PREF_AV_OFFER_PREFIX + i, "");
         }
     }
@@ -138,7 +130,6 @@ public class DailyStoreManager : MonoBehaviour
                     data.price,
                     () =>
                     {
-                        // Tu flujo actual (preview/compra)
                         if (PreviewFondos.Instance != null)
                             PreviewFondos.Instance.ShowPreview(data);
                         else
@@ -178,8 +169,7 @@ public class DailyStoreManager : MonoBehaviour
                     () =>
                     {
                         Debug.Log("[DailyStore] Click avatar: " + data.id);
-                        // Aquí conectas tu preview/compra de avatares
-                        // Ej: PreviewAvatars.Instance.ShowPreview(data);
+                        // PreviewAvatars.Instance.ShowPreview(data);
                     }
                 );
             }
@@ -198,9 +188,6 @@ public class DailyStoreManager : MonoBehaviour
         countdownText.text = $"Nuevas ofertas en:{remaining.Hours:00}:{remaining.Minutes:00}:{remaining.Seconds:00}";
     }
 
-    // -----------------------
-    // Ownership (tus keys)
-    // -----------------------
     private bool IsBackgroundOwned(string id)
     {
         if (id == DEFAULT_BACKGROUND_ID) return true;
@@ -213,9 +200,6 @@ public class DailyStoreManager : MonoBehaviour
         return PlayerPrefs.GetInt("AvatarPurchased_" + id, 0) == 1;
     }
 
-    // -----------------------
-    // Picks
-    // -----------------------
     private List<BackgroundDataSO> PickUniqueBackgrounds(List<BackgroundDataSO> source, int count, System.Random rng)
     {
         List<BackgroundDataSO> copy = new List<BackgroundDataSO>();
@@ -245,9 +229,6 @@ public class DailyStoreManager : MonoBehaviour
         }
     }
 
-    // -----------------------
-    // Finders
-    // -----------------------
     private BackgroundDataSO FindBackground(string id)
     {
         if (backgroundCatalog == null || backgroundCatalog.backgroundDataSO == null || string.IsNullOrEmpty(id))
@@ -258,9 +239,9 @@ public class DailyStoreManager : MonoBehaviour
 
     private AvatarDataSO FindAvatar(string id)
     {
-        if (avatarCatalog == null || avatarCatalog.avatarDataSO == null || string.IsNullOrEmpty(id))
+        if (avatarStorePool == null || avatarStorePool.possibleAvatars == null || string.IsNullOrEmpty(id))
             return null;
 
-        return avatarCatalog.avatarDataSO.Find(a => a != null && a.id == id);
+        return avatarStorePool.possibleAvatars.Find(a => a != null && a.id == id);
     }
 }
