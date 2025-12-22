@@ -383,6 +383,22 @@ MonoBehaviour:
     m_Key: stateNewText
     m_Metadata:
       m_Items: []
+  - m_Id: 14100596983300096
+    m_Key: Game_over
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14100713085829120
+    m_Key: GameOver_Retry
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14100746069835776
+    m_Key: GameOver_MainMenu
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14100908225822720
+    m_Key: GameOver_Points
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

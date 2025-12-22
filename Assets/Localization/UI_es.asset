@@ -393,6 +393,22 @@ MonoBehaviour:
     m_Localized: "\xA1Nuevo!"
     m_Metadata:
       m_Items: []
+  - m_Id: 14100596983300096
+    m_Localized: FIN DEL JUEGO
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14100713085829120
+    m_Localized: Reintentar
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14100746069835776
+    m_Localized: "Men\xFA inicial"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14100908225822720
+    m_Localized: "Puntuaci\xF3n: {0}"
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:
