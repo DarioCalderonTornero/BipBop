@@ -47,6 +47,8 @@ public class BackgroundInventoryManager : MonoBehaviour
 
     [SerializeField] private Image equippedBackgroundPreview;
 
+    [SerializeField] private TextMeshProUGUI titleText;
+
     private void Awake()
     {
         if (panel == null)
@@ -146,6 +148,8 @@ public class BackgroundInventoryManager : MonoBehaviour
         if (selectedNameText != null) selectedNameText.text = "";
         if (selectedDescriptionText != null) selectedDescriptionText.text = noSelectionText;
         if (saveButton != null) saveButton.interactable = false;
+
+        titleText.text = "Inventario de fondos";
 
         LoadBackgroundsInPages();
 

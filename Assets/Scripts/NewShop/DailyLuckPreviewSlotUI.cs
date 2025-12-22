@@ -12,7 +12,7 @@ public class DailyLuckPreviewSlotUI : MonoBehaviour
     [Header("Fade")]
     [SerializeField] private float fadeDuration = 0.2f;
 
-    Coroutine fadeRoutine;
+    private Coroutine fadeRoutine;
 
     public void SetInstant(Sprite sprite, string stateLabel)
     {
@@ -34,7 +34,7 @@ public class DailyLuckPreviewSlotUI : MonoBehaviour
         fadeRoutine = StartCoroutine(FadeSwap(sprite, stateLabel));
     }
 
-    IEnumerator FadeSwap(Sprite newSprite, string newLabel)
+    private IEnumerator FadeSwap(Sprite newSprite, string newLabel)
     {
         if (previewImage == null)
         {

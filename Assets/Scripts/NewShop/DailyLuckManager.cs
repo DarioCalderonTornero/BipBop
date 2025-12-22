@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
+using System.Threading.Tasks;
 using TMPro;
+using UnityEngine;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
+using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityEngine.UI;
 
 public class DailyLuckManager : MonoBehaviour
 {
@@ -25,6 +29,20 @@ public class DailyLuckManager : MonoBehaviour
     [Header("Attempts Text")]
     [SerializeField] private TextMeshProUGUI bgAttemptsText;     // "Intentos restantes: X/X"
     [SerializeField] private TextMeshProUGUI avatarAttemptsText; // "Intentos restantes: X/X"
+
+    [Header("Localization (solo lo que has pedido)")]
+    [Tooltip("Smart String con {0} y {1}. Ej: 'Intentos restantes: {0}/{1}'")]
+    [SerializeField] private LocalizedString attemptsTextTemplate;      // UI/daily_luck_attempts_template
+
+    [Tooltip("Smart String con {0}. Ej: '+{0} monedas (ya lo tenías)'")]
+    [SerializeField] private LocalizedString bgDuplicateRefundMsg;      // UI/daily_luck_bg_duplicate_refund
+
+    [SerializeField] private LocalizedString bgNewMsg;                  // UI/daily_luck_bg_new
+
+    [Tooltip("Smart String con {0}. Ej: '+{0} monedas (ya lo tenías)'")]
+    [SerializeField] private LocalizedString avDuplicateRefundMsg;      // UI/daily_luck_av_duplicate_refund
+
+    [SerializeField] private LocalizedString avNewMsg;                  // UI/daily_luck_av_new
 
     [Header("Spin visuals")]
     [SerializeField] private int spinListSize = 18;
@@ -57,10 +75,23 @@ public class DailyLuckManager : MonoBehaviour
 
     private void OnEnable()
     {
-        buttonsLockedBySpin = false;   
+        buttonsLockedBySpin = false;
         EnsureDailyCounters();
+        LocalizationSettings.SelectedLocaleChanged += OnLocaleChanged;
         RefreshAttemptsUI();
         RefreshButtonsInteractable();
+    }
+
+    private void OnDisable()
+    {
+        LocalizationSettings.SelectedLocaleChanged -= OnLocaleChanged;
+    }
+
+    private void OnLocaleChanged(Locale _)
+    {
+        RefreshAttemptsUI();
+        // Si quieres que también cambien textos de recompensa si están visibles:
+        // (no hace falta normalmente)
     }
 
     private void Update()
@@ -76,7 +107,7 @@ public class DailyLuckManager : MonoBehaviour
     // =========================================================
     // Rolls
     // =========================================================
-    private void RollBackground()
+    private async void RollBackground()
     {
         if (spinnerUI != null && spinnerUI.IsSpinning) return;
 
@@ -88,14 +119,11 @@ public class DailyLuckManager : MonoBehaviour
 
         if (!spinnerUI.isActiveAndEnabled)
         {
-            // Intentamos reactivar el objeto del spinner
             spinnerUI.gameObject.SetActive(true);
             spinnerUI.enabled = true;
         }
 
         EnsureDailyCounters();
-
-        Debug.Log("Debería hacer algo");
 
         int remaining = GetRemainingBG();
         if (remaining <= 0)
@@ -119,7 +147,6 @@ public class DailyLuckManager : MonoBehaviour
             return;
         }
 
-        // Cobro ÚNICO (TrySpendCoins ya debe restar)
         if (!CurrencyManager.Instance.TrySpendCoins(rollCost))
         {
             SetFeedback("No tienes suficientes monedas.");
@@ -131,9 +158,10 @@ public class DailyLuckManager : MonoBehaviour
         RefreshAttemptsUI();
 
         bool alreadyOwned = IsBackgroundOwned(reward);
+
         string resultMsg = alreadyOwned
-            ? $"+{duplicateRefund} monedas (ya lo tenías)"
-            : "¡Nuevo fondo conseguido!";
+            ? await GetLocalized(bgDuplicateRefundMsg, duplicateRefund)
+            : await GetLocalized(bgNewMsg);
 
         List<Sprite> spinSprites = BuildSpinSpriteList(
             backgroundPool.possibleBackgrounds, spinListSize, backgroundPool.allowDuplicatesInSpin
@@ -155,7 +183,7 @@ public class DailyLuckManager : MonoBehaviour
         );
     }
 
-    private void RollAvatar()
+    private async void RollAvatar()
     {
         if (spinnerUI != null && spinnerUI.IsSpinning) return;
 
@@ -167,14 +195,11 @@ public class DailyLuckManager : MonoBehaviour
 
         if (!spinnerUI.isActiveAndEnabled)
         {
-            // Intentamos reactivar el objeto del spinner
             spinnerUI.gameObject.SetActive(true);
             spinnerUI.enabled = true;
         }
 
         EnsureDailyCounters();
-
-        Debug.Log("Debería hacer algo de avatares");
 
         int remaining = GetRemainingAV();
         if (remaining <= 0)
@@ -214,9 +239,10 @@ public class DailyLuckManager : MonoBehaviour
         RefreshAttemptsUI();
 
         bool alreadyOwned = IsAvatarOwned(reward);
+
         string resultMsg = alreadyOwned
-            ? $"+{duplicateRefund} monedas (ya lo tenías)"
-            : "¡Nuevo avatar conseguido!";
+            ? await GetLocalized(avDuplicateRefundMsg, duplicateRefund)
+            : await GetLocalized(avNewMsg);
 
         List<Sprite> spinSprites = BuildSpinSpriteListAvatars(
             avatarPool.possibleAvatars, spinListSize, avatarPool.allowDuplicatesInSpin
@@ -281,13 +307,23 @@ public class DailyLuckManager : MonoBehaviour
         PlayerPrefs.Save();
     }
 
-    private void RefreshAttemptsUI()
+    private async void RefreshAttemptsUI()
     {
-        if (bgAttemptsText != null)
-            bgAttemptsText.text = $"Intentos restantes: {GetRemainingBG()}/{maxAttemptsPerDay}";
+        // Si no asignas LocalizedString, fallback al texto hardcodeado
+        if (attemptsTextTemplate.IsEmpty)
+        {
+            if (bgAttemptsText != null)
+                bgAttemptsText.text = $"Intentos restantes: {GetRemainingBG()}/{maxAttemptsPerDay}";
+            if (avatarAttemptsText != null)
+                avatarAttemptsText.text = $"Intentos restantes: {GetRemainingAV()}/{maxAttemptsPerDay}";
+            return;
+        }
 
-        if (avatarAttemptsText != null)
-            avatarAttemptsText.text = $"Intentos restantes: {GetRemainingAV()}/{maxAttemptsPerDay}";
+        string bgLine = await GetLocalized(attemptsTextTemplate, GetRemainingBG(), maxAttemptsPerDay);
+        string avLine = await GetLocalized(attemptsTextTemplate, GetRemainingAV(), maxAttemptsPerDay);
+
+        if (bgAttemptsText != null) bgAttemptsText.text = bgLine;
+        if (avatarAttemptsText != null) avatarAttemptsText.text = avLine;
     }
 
     private void RefreshButtonsInteractable()
@@ -429,5 +465,23 @@ public class DailyLuckManager : MonoBehaviour
     {
         if (feedbackText != null)
             feedbackText.text = msg;
+    }
+
+    // =========================================================
+    // Localization helpers
+    // =========================================================
+    private async Task<string> GetLocalized(LocalizedString ls, params object[] args)
+    {
+        if (ls.IsEmpty) return "";
+
+        ls.Arguments = args;
+
+        AsyncOperationHandle<string> handle = ls.GetLocalizedStringAsync();
+        await handle.Task;
+
+        if (handle.Status == AsyncOperationStatus.Succeeded)
+            return handle.Result ?? "";
+
+        return "";
     }
 }

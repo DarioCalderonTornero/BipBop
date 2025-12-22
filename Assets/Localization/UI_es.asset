@@ -16,7 +16,8 @@ MonoBehaviour:
     m_Code: es
   m_SharedData: {fileID: 11400000, guid: a56000387c1aa2149885fc7996968516, type: 2}
   m_Metadata:
-    m_Items: []
+    m_Items:
+    - rid: 39710471166099559
   m_TableData:
   - m_Id: 49149870080
     m_Localized: Inicio
@@ -319,6 +320,85 @@ MonoBehaviour:
     m_Localized: "Men\xFA principal"
     m_Metadata:
       m_Items: []
+  - m_Id: 14060377554780160
+    m_Localized: Tienda
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14060444516843520
+    m_Localized: Fondos destacados
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14060624121135104
+    m_Localized: Avatares destacados
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14060923510554624
+    m_Localized: Suerte diaria
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14061002422190080
+    m_Localized: Fondo o avatar aleatorio
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14061195091738624
+    m_Localized: Probar ahora
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14064583233732608
+    m_Localized: 'Nuevas ofertas en:'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14065849544441856
+    m_Localized: "Prueba tu suerte para conseguir fondos y avatares \xFAnicos"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14066312805318656
+    m_Localized: 'Posibles recompensas: '
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14066600828174336
+    m_Localized: 'Intentos restantes: {0}/{1}'
+    m_Metadata:
+      m_Items:
+      - rid: 39710471166099559
+  - m_Id: 14066752263520256
+    m_Localized: Probar suerte con fondos
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14066899584253952
+    m_Localized: Probar suerte con avatares
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14067018912202752
+    m_Localized: En propiedad
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14071199354028032
+    m_Localized: "+{0} monedas (ya lo ten\xEDas)"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14071292102672384
+    m_Localized: "\xA1Nuevo fondo conseguido!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14072761996509184
+    m_Localized: "+{0} monedas (ya lo ten\xEDas)"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14072809920626688
+    m_Localized: "\xA1Nuevo avatar conseguido!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14075909226070016
+    m_Localized: "\xA1Nuevo!"
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 39710471166099559
+      type: {class: SmartFormatTag, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_Entries: 
+        m_SharedEntries:
+        - id: 14066600828174336

@@ -311,6 +311,78 @@ MonoBehaviour:
     m_Key: GameOver_menu
     m_Metadata:
       m_Items: []
+  - m_Id: 14060377554780160
+    m_Key: Tienda_screen
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14060444516843520
+    m_Key: Fondos_destacados
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14060624121135104
+    m_Key: Avatares_destacados
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14060923510554624
+    m_Key: Suerte_diaria
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14061002422190080
+    m_Key: "SuerteDiaria_descripci\xF3n"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14061195091738624
+    m_Key: Probar_ahora
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14064583233732608
+    m_Key: Nuevas_ofertas
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14065849544441856
+    m_Key: "SuerteDiariaDescripci\xF3n"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14066312805318656
+    m_Key: Posibles_recompensas
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14066600828174336
+    m_Key: Intentos_restantes
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14066752263520256
+    m_Key: Probar_suerte_con_fondos
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14066899584253952
+    m_Key: Probar_suerte_con_avatares
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14067018912202752
+    m_Key: En_propiedad
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14071199354028032
+    m_Key: daily_luck_bg_duplicate_refund
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14071292102672384
+    m_Key: daily_luck_bg_new
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14072761996509184
+    m_Key: daily_luck_av_duplicate_refund
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14072809920626688
+    m_Key: daily_luck_av_new
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14075909226070016
+    m_Key: stateNewText
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

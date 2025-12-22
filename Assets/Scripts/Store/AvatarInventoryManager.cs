@@ -48,6 +48,8 @@ public class AvatarInventoryManager : MonoBehaviour
     // Posición original del panel tal y como está en el editor
     private Vector2 originalPanelAnchoredPosition;
 
+    [SerializeField] private TextMeshProUGUI titleText;
+
     private void Awake()
     {
         if (panel == null)
@@ -135,6 +137,8 @@ public class AvatarInventoryManager : MonoBehaviour
         if (selectedAvatarNameText != null) selectedAvatarNameText.text = "";
         if (selectedAvatarDescriptionText != null) selectedAvatarDescriptionText.text = noSelectionText;
         if (saveButton != null) saveButton.interactable = false;
+
+        titleText.text = "Inventario de avatares";
 
         // Cargamos los avatares
         LoadAvatarsInPages();
@@ -251,7 +255,7 @@ public class AvatarInventoryManager : MonoBehaviour
         if (list == null || list.Count == 0)
             return;
 
-        const int AVATARS_PER_PAGE = 15; // 5x3
+        const int AVATARS_PER_PAGE = 12; // 5x3
 
         for (int i = 0; i < list.Count; i++)
         {

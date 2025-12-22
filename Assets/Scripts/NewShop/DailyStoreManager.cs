@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 
 public class DailyStoreManager : MonoBehaviour
 {
@@ -9,6 +11,10 @@ public class DailyStoreManager : MonoBehaviour
     [SerializeField] private StoreOfferSlotUI[] backgroundSlots; // 3
     [SerializeField] private StoreOfferSlotUI[] avatarSlots;     // 3
     [SerializeField] private TextMeshProUGUI countdownText;
+
+    [Header("Localization")]
+    [SerializeField] private LocalizedString countdownPrefix;
+    private string cachedPrefix = "Nuevas ofertas en:";
 
     [Header("Catalogs / Pools")]
     [SerializeField] private BackgroundCatalogSO backgroundCatalog;
@@ -22,6 +28,38 @@ public class DailyStoreManager : MonoBehaviour
 
     private const string DEFAULT_BACKGROUND_ID = "DefaultBackground";
     private const string DEFAULT_AVATAR_ID = "NormalAvatar";
+
+
+    private void OnEnable()
+    {
+        // Cargar prefix al habilitar
+        RefreshCountdownPrefix();
+
+        // Si cambia el idioma, refrescar prefix
+        LocalizationSettings.SelectedLocaleChanged += OnLocaleChanged;
+    }
+
+    private void OnDisable()
+    {
+        LocalizationSettings.SelectedLocaleChanged -= OnLocaleChanged;
+    }
+
+    private void OnLocaleChanged(UnityEngine.Localization.Locale _)
+    {
+        RefreshCountdownPrefix();
+    }
+
+    private async void RefreshCountdownPrefix()
+    {
+        if (countdownPrefix.IsEmpty)
+            return;
+
+        var handle = countdownPrefix.GetLocalizedStringAsync();
+        await handle.Task;
+
+        if (handle.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
+            cachedPrefix = handle.Result;
+    }
 
     private void Start()
     {
@@ -185,7 +223,7 @@ public class DailyStoreManager : MonoBehaviour
         TimeSpan remaining = nextMidnight - now;
         if (remaining.TotalSeconds < 0) remaining = TimeSpan.Zero;
 
-        countdownText.text = $"Nuevas ofertas en:{remaining.Hours:00}:{remaining.Minutes:00}:{remaining.Seconds:00}";
+        countdownText.text = $"{cachedPrefix} {remaining.Hours:00}:{remaining.Minutes:00}:{remaining.Seconds:00}";
     }
 
     private bool IsBackgroundOwned(string id)

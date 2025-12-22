@@ -16,7 +16,8 @@ MonoBehaviour:
     m_Code: en
   m_SharedData: {fileID: 11400000, guid: a56000387c1aa2149885fc7996968516, type: 2}
   m_Metadata:
-    m_Items: []
+    m_Items:
+    - rid: 39710471166099560
   m_TableData:
   - m_Id: 49149870080
     m_Localized: Start
@@ -319,6 +320,85 @@ MonoBehaviour:
     m_Localized: Main menu
     m_Metadata:
       m_Items: []
+  - m_Id: 14060377554780160
+    m_Localized: Store
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14060444516843520
+    m_Localized: Featured backgrounds
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14060624121135104
+    m_Localized: Featured avatars
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14060923510554624
+    m_Localized: Daily luck
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14061002422190080
+    m_Localized: Random background or avatar
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14061195091738624
+    m_Localized: Prove now
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14064583233732608
+    m_Localized: 'New offers in:'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14065849544441856
+    m_Localized: Try your luck to win backgrounds and unique avatars.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14066312805318656
+    m_Localized: 'Possible rewards: '
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14066600828174336
+    m_Localized: 'Attempts left: {0}/{1}'
+    m_Metadata:
+      m_Items:
+      - rid: 39710471166099560
+  - m_Id: 14066752263520256
+    m_Localized: Try your luck with backgrounds
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14066899584253952
+    m_Localized: Try your luck with avatars
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14067018912202752
+    m_Localized: Owned
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14071199354028032
+    m_Localized: +{0} coins (already owned)
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14071292102672384
+    m_Localized: New background unlocked!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14072761996509184
+    m_Localized: +{0} coins (already owned)
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14072809920626688
+    m_Localized: New avatar unlocked!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14075909226070016
+    m_Localized: New!
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 39710471166099560
+      type: {class: SmartFormatTag, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_Entries: 
+        m_SharedEntries:
+        - id: 14066600828174336

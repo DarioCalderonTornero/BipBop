@@ -1,6 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Localization;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
 public class DailyLuckAvatarPoolPreviewUI : MonoBehaviour
 {
@@ -16,7 +19,11 @@ public class DailyLuckAvatarPoolPreviewUI : MonoBehaviour
     [Header("Owned Rules")]
     [SerializeField] private string defaultAvatarId = "NormalAvatar";
 
-    private List<AvatarDataSO> list = new List<AvatarDataSO>();
+    [Header("Localization (stateText)")]
+    [SerializeField] private LocalizedString stateOwnedText; // ej: UI/owned
+    [SerializeField] private LocalizedString stateNewText;   // ej: UI/new
+
+    private readonly List<AvatarDataSO> list = new List<AvatarDataSO>();
     private int startIndex = 0;
     private Coroutine routine;
 
@@ -67,9 +74,13 @@ public class DailyLuckAvatarPoolPreviewUI : MonoBehaviour
         }
     }
 
-    private void Apply3(bool instant)
+    private async void Apply3(bool instant)
     {
         if (slots == null || slots.Length == 0) return;
+
+        // precargamos textos (para no pedirlos 3 veces)
+        string ownedLabel = await GetLocalized(stateOwnedText);
+        string newLabel = await GetLocalized(stateNewText);
 
         for (int i = 0; i < slots.Length; i++)
         {
@@ -84,7 +95,7 @@ public class DailyLuckAvatarPoolPreviewUI : MonoBehaviour
             var data = list[(startIndex + i) % list.Count];
 
             bool owned = IsOwned(data.id);
-            string label = owned ? "En propiedad" : "¡Nuevo!";
+            string label = owned ? ownedLabel : newLabel;
 
             if (instant) slots[i].SetInstant(data.sprite, label);
             else slots[i].SetWithFade(data.sprite, label);
@@ -95,5 +106,18 @@ public class DailyLuckAvatarPoolPreviewUI : MonoBehaviour
     {
         if (id == defaultAvatarId) return true;
         return PlayerPrefs.GetInt("AvatarPurchased_" + id, 0) == 1;
+    }
+
+    private async Task<string> GetLocalized(LocalizedString ls)
+    {
+        if (ls.IsEmpty) return "";
+
+        AsyncOperationHandle<string> handle = ls.GetLocalizedStringAsync();
+        await handle.Task;
+
+        if (handle.Status == AsyncOperationStatus.Succeeded)
+            return handle.Result ?? "";
+
+        return "";
     }
 }

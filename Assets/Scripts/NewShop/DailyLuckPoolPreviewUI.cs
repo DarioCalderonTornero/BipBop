@@ -1,6 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Localization;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
 public class DailyLuckPoolPreviewUI : MonoBehaviour
 {
@@ -16,8 +19,12 @@ public class DailyLuckPoolPreviewUI : MonoBehaviour
     [Header("Owned Rules")]
     [SerializeField] private string defaultBackgroundId = "DefaultBackground";
 
+    [Header("Localization (stateText)")]
+    [SerializeField] private LocalizedString stateOwnedText; // ej: UI/owned
+    [SerializeField] private LocalizedString stateNewText;   // ej: UI/new
+
     // Lista filtrada (solo válidos)
-    private List<BackgroundDataSO> list = new List<BackgroundDataSO>();
+    private readonly List<BackgroundDataSO> list = new List<BackgroundDataSO>();
     private int startIndex = 0;
     private Coroutine routine;
 
@@ -49,12 +56,10 @@ public class DailyLuckPoolPreviewUI : MonoBehaviour
                 list.Add(b);
         }
 
-        // Para que no sea siempre el mismo orden (opcional)
-        // Shuffle(list);
         startIndex = 0;
     }
 
-    IEnumerator RotateRoutine()
+    private IEnumerator RotateRoutine()
     {
         var wait = new WaitForSecondsRealtime(changeEverySeconds);
 
@@ -70,9 +75,13 @@ public class DailyLuckPoolPreviewUI : MonoBehaviour
         }
     }
 
-    private void Apply3(bool instant)
+    private async void Apply3(bool instant)
     {
         if (slots == null || slots.Length == 0) return;
+
+        // precargamos textos (para no pedirlos 3 veces)
+        string ownedLabel = await GetLocalized(stateOwnedText);
+        string newLabel = await GetLocalized(stateNewText);
 
         for (int i = 0; i < slots.Length; i++)
         {
@@ -87,7 +96,7 @@ public class DailyLuckPoolPreviewUI : MonoBehaviour
             var data = list[(startIndex + i) % list.Count];
 
             bool owned = IsOwned(data.id);
-            string label = owned ? "En propiedad" : "¡Nuevo!";
+            string label = owned ? ownedLabel : newLabel;
 
             if (instant) slots[i].SetInstant(data.sprite, label);
             else slots[i].SetWithFade(data.sprite, label);
@@ -100,13 +109,16 @@ public class DailyLuckPoolPreviewUI : MonoBehaviour
         return PlayerPrefs.GetInt("Purchased_" + id, 0) == 1;
     }
 
-    // Si quieres barajar (opcional)
-    private void Shuffle<T>(List<T> arr)
+    private async Task<string> GetLocalized(LocalizedString ls)
     {
-        for (int i = 0; i < arr.Count; i++)
-        {
-            int j = Random.Range(i, arr.Count);
-            (arr[i], arr[j]) = (arr[j], arr[i]);
-        }
+        if (ls.IsEmpty) return "";
+
+        AsyncOperationHandle<string> handle = ls.GetLocalizedStringAsync();
+        await handle.Task;
+
+        if (handle.Status == AsyncOperationStatus.Succeeded)
+            return handle.Result ?? "";
+
+        return "";
     }
 }
