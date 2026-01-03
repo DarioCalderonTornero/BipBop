@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -20,7 +21,6 @@ public class SwipeMenu : MonoBehaviour, IEndDragHandler
     [SerializeField] private LeanTweenType tweenType;
 
     [SerializeField] private Image[] barImage;
-
     [SerializeField] private Sprite barClosed, barOpen;
 
     [SerializeField] private Button previousButton;
@@ -30,31 +30,29 @@ public class SwipeMenu : MonoBehaviour, IEndDragHandler
     [SerializeField] private Button page2Button;
     [SerializeField] private Button page3Button;
 
+    [Header("Page Buttons Scale Animation")]
+    [SerializeField] private float selectedScale = 1.12f;      // “sensiblemente más grande”
+    [SerializeField] private float scaleTweenTime = 0.15f;      // transición rápida y suave
+    [SerializeField] private LeanTweenType scaleTweenType = LeanTweenType.easeOutBack;
+
+    private Vector3 pageBtnDefaultScale = Vector3.one;
+    private int lastVisualPage = -1;
+
     private void Awake()
     {
         currentPage = 1;
         targetPos = swipeContainerRect.localPosition;
         dragThresold = Screen.width / 15;
-        //UpdateBar();
+
+        // Guardamos la escala “normal” real (por si no es (1,1,1))
+        pageBtnDefaultScale = page1Button.transform.localScale;
+
         UpdateButtons();
+        UpdatePageButtonsScale(force: true);
 
-        page1Button.onClick.AddListener(() =>
-        {
-            Page1();
-        });
-
-        page2Button.onClick.AddListener(() =>
-        {
-            Page2();
-        });
-
-        
-        page3Button.onClick.AddListener(() =>
-        {
-            Page3();
-        });
-        
-        
+        page1Button.onClick.AddListener(Page1);
+        page2Button.onClick.AddListener(Page2);
+        page3Button.onClick.AddListener(Page3);
     }
 
     private void Page1()
@@ -102,13 +100,12 @@ public class SwipeMenu : MonoBehaviour, IEndDragHandler
                 MovePage();
             }
 
-           if (currentPage == 2)
+            if (currentPage == 2)
             {
                 Next();
             }
         }
     }
- 
 
     public void Next()
     {
@@ -133,8 +130,8 @@ public class SwipeMenu : MonoBehaviour, IEndDragHandler
     private void MovePage()
     {
         swipeContainerRect.LeanMoveLocal(targetPos, tweenTime).setEase(tweenType);
-        //UpdateBar();
         UpdateButtons();
+        UpdatePageButtonsScale();
     }
 
     public void OnEndDrag(PointerEventData eventData)
@@ -143,9 +140,7 @@ public class SwipeMenu : MonoBehaviour, IEndDragHandler
         {
             if (eventData.position.x > eventData.pressPosition.x) Previous();
             else Next();
-
         }
-
         else
         {
             MovePage();
@@ -154,7 +149,7 @@ public class SwipeMenu : MonoBehaviour, IEndDragHandler
 
     private void UpdateBar()
     {
-        foreach(var item in barImage)
+        foreach (var item in barImage)
         {
             item.sprite = barClosed;
         }
@@ -168,5 +163,31 @@ public class SwipeMenu : MonoBehaviour, IEndDragHandler
         page1Button.interactable = currentPage != 1;
         page2Button.interactable = currentPage != 2;
         page3Button.interactable = currentPage != 3;
+    }
+
+
+    private void UpdatePageButtonsScale(bool force = false)
+    {
+        if (!force && lastVisualPage == currentPage)
+            return; 
+
+        lastVisualPage = currentPage;
+
+        AnimateButtonScale(page1Button, currentPage == 1);
+        AnimateButtonScale(page2Button, currentPage == 2);
+        AnimateButtonScale(page3Button, currentPage == 3);
+    }
+
+    private void AnimateButtonScale(Button btn, bool selected)
+    {
+        Transform t = btn.transform;
+
+        LeanTween.cancel(t.gameObject);
+
+        Vector3 targetScale = selected ? pageBtnDefaultScale * selectedScale : pageBtnDefaultScale;
+
+        LeanTween.scale(t.gameObject, targetScale, scaleTweenTime)
+                 .setEase(scaleTweenType)
+                 .setIgnoreTimeScale(true);
     }
 }

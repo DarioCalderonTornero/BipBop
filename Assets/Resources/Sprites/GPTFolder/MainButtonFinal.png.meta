@@ -1,10 +1,25 @@
 fileFormatVersion: 2
-guid: a95bf4915343e6e45a539866b138f602
+guid: e8ea1b059ac5f6c478ecd3585dd8f12d
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -3200491079212237174
-    second: AvatarOsoPanda_0
+      213: 385909540905411310
+    second: MainButtonFinal_0
+  - first:
+      213: 6700924032810136211
+    second: MainButtonFinal_1
+  - first:
+      213: -2564741659920075934
+    second: MainButtonFinal_2
+  - first:
+      213: 5009234667762477818
+    second: MainButtonFinal_3
+  - first:
+      213: -7771536419790258567
+    second: MainButtonFinal_4
+  - first:
+      213: -1494400743130528692
+    second: MainButtonFinal_5
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -126,12 +141,12 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: AvatarOsoPanda_0
+      name: MainButtonFinal_0
       rect:
         serializedVersion: 2
-        x: 0
+        x: 11
         y: 0
-        width: 1024
+        width: 1516
         height: 1024
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -141,8 +156,118 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a8e7fb402529593d0800000000000000
-      internalID: -3200491079212237174
+      spriteID: ee2e91dcea60b5500800000000000000
+      internalID: 385909540905411310
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MainButtonFinal_1
+      rect:
+        serializedVersion: 2
+        x: 83
+        y: 735
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 392b682a7e67efc50800000000000000
+      internalID: 6700924032810136211
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MainButtonFinal_2
+      rect:
+        serializedVersion: 2
+        x: 82
+        y: 622
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 26371d38c05386cd0800000000000000
+      internalID: -2564741659920075934
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MainButtonFinal_3
+      rect:
+        serializedVersion: 2
+        x: 83
+        y: 487
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: afaed88e360648540800000000000000
+      internalID: 5009234667762477818
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MainButtonFinal_4
+      rect:
+        serializedVersion: 2
+        x: 995
+        y: 354
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 97ef3633dc4f52490800000000000000
+      internalID: -7771536419790258567
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MainButtonFinal_5
+      rect:
+        serializedVersion: 2
+        x: 994
+        y: 200
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c4400a91172d24be0800000000000000
+      internalID: -1494400743130528692
       vertices: []
       indices: 
       edges: []
@@ -160,8 +285,7 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable:
-      AvatarOsoPanda_0: -3200491079212237174
+    nameFileIdTable: {}
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
