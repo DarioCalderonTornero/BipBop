@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -9,8 +7,8 @@ public class SwipeMenu : MonoBehaviour, IEndDragHandler
 {
     [SerializeField] private int maxPage;
 
-    int currentPage;
-    Vector3 targetPos;
+    private int currentPage;
+    private Vector3 targetPos;
 
     [SerializeField] private Vector3 pageStep;
     [SerializeField] private RectTransform swipeContainerRect;
@@ -26,112 +24,143 @@ public class SwipeMenu : MonoBehaviour, IEndDragHandler
     [SerializeField] private Button previousButton;
     [SerializeField] private Button nextButton;
 
-    [SerializeField] private Button page1Button;
-    [SerializeField] private Button page2Button;
-    [SerializeField] private Button page3Button;
+    [Header("Buttons (Variants)")]
+    [SerializeField] private Button page1ButtonNormal;
+    [SerializeField] private Button page1ButtonExpanded;
+    [SerializeField] private Button page1ButtonRecortado;
 
-    [Header("Page Buttons Scale Animation")]
-    [SerializeField] private float selectedScale = 1.12f;      // “sensiblemente más grande”
-    [SerializeField] private float scaleTweenTime = 0.15f;      // transición rápida y suave
-    [SerializeField] private LeanTweenType scaleTweenType = LeanTweenType.easeOutBack;
+    [SerializeField] private Button page2ButtonExpanded;
+    [SerializeField] private Button page2ButtonRecortedLeft;
+    [SerializeField] private Button page2ButtonRecortedRight;
 
-    private Vector3 pageBtnDefaultScale = Vector3.one;
-    private int lastVisualPage = -1;
+    [SerializeField] private Button page3ButtonNormal;
+    [SerializeField] private Button page3ButtonExpanded;
+    [SerializeField] private Button page3ButtonRecorted;
 
     private void Awake()
     {
         currentPage = 1;
         targetPos = swipeContainerRect.localPosition;
-        dragThresold = Screen.width / 15;
+        dragThresold = Screen.width / 15f;
 
-        // Guardamos la escala “normal” real (por si no es (1,1,1))
-        pageBtnDefaultScale = page1Button.transform.localScale;
+        HideAllPageButtons();
+        BindAllButtonListeners();
+
+        // Estado inicial: página 1 seleccionada
+        ShowStateForSelectedPage(1);
 
         UpdateButtons();
-        UpdatePageButtonsScale(force: true);
-
-        page1Button.onClick.AddListener(Page1);
-        page2Button.onClick.AddListener(Page2);
-        page3Button.onClick.AddListener(Page3);
+        UpdateBar();
     }
 
-    private void Page1()
+    // =========================
+    // LISTENERS
+    // =========================
+    private void BindAllButtonListeners()
     {
-        if (currentPage != 1)
-        {
-            if (currentPage == 2)
-            {
-                Previous();
-            }
+        // Página 1 (todas las variantes llevan a seleccionar 1)
+        page1ButtonNormal.onClick.AddListener(() => SelectPage(1));
+        page1ButtonExpanded.onClick.AddListener(() => SelectPage(1));
+        page1ButtonRecortado.onClick.AddListener(() => SelectPage(1));
 
-            if (currentPage == maxPage)
-            {
-                currentPage -= 2;
-                targetPos -= pageStep * 2;
-                MovePage();
-            }
+        // Página 2
+        page2ButtonExpanded.onClick.AddListener(() => SelectPage(2));
+        page2ButtonRecortedLeft.onClick.AddListener(() => SelectPage(2));
+        page2ButtonRecortedRight.onClick.AddListener(() => SelectPage(2));
+
+        // Página 3
+        page3ButtonNormal.onClick.AddListener(() => SelectPage(3));
+        page3ButtonExpanded.onClick.AddListener(() => SelectPage(3));
+        page3ButtonRecorted.onClick.AddListener(() => SelectPage(3));
+    }
+
+    // =========================
+    // STATE (activar solo 3 botones)
+    // =========================
+    private void HideAllPageButtons()
+    {
+        page1ButtonNormal.gameObject.SetActive(false);
+        page1ButtonExpanded.gameObject.SetActive(false);
+        page1ButtonRecortado.gameObject.SetActive(false);
+
+        page2ButtonExpanded.gameObject.SetActive(false);
+        page2ButtonRecortedLeft.gameObject.SetActive(false);
+        page2ButtonRecortedRight.gameObject.SetActive(false);
+
+        page3ButtonNormal.gameObject.SetActive(false);
+        page3ButtonExpanded.gameObject.SetActive(false);
+        page3ButtonRecorted.gameObject.SetActive(false);
+    }
+
+    /// <summary>
+    /// Activa exactamente 3 botones (uno por página), según cuál esté seleccionada.
+    /// Esto evita solapes/taps raros y asegura que siempre hay listener.
+    /// </summary>
+    private void ShowStateForSelectedPage(int selectedPage)
+    {
+        HideAllPageButtons();
+
+        switch (selectedPage)
+        {
+            case 1:
+                // 1 seleccionado: 1 expanded, 2 recorte left, 3 normal
+                page1ButtonExpanded.gameObject.SetActive(true);
+                page2ButtonRecortedLeft.gameObject.SetActive(true);
+                page3ButtonNormal.gameObject.SetActive(true);
+                break;
+
+            case 2:
+                // 2 seleccionado: 1 recortado, 2 expanded, 3 recortado
+                page1ButtonRecortado.gameObject.SetActive(true);
+                page2ButtonExpanded.gameObject.SetActive(true);
+                page3ButtonRecorted.gameObject.SetActive(true);
+                break;
+
+            case 3:
+                // 3 seleccionado: 1 normal, 2 recorte right, 3 expanded
+                page1ButtonNormal.gameObject.SetActive(true);
+                page2ButtonRecortedRight.gameObject.SetActive(true);
+                page3ButtonExpanded.gameObject.SetActive(true);
+                break;
         }
     }
 
-    private void Page2()
+    // =========================
+    // PAGE SELECT / MOVE
+    // =========================
+    private void SelectPage(int page)
     {
-        if (currentPage != 2)
-        {
-            if (currentPage == 1)
-            {
-                Next();
-            }
+        page = Mathf.Clamp(page, 1, maxPage);
 
-            if (currentPage == maxPage)
-            {
-                Previous();
-            }
-        }
-    }
+        if (currentPage == page)
+            return;
 
-    private void Page3()
-    {
-        if (currentPage != maxPage)
-        {
-            if (currentPage == 1)
-            {
-                currentPage += 2;
-                targetPos += pageStep * 2;
-                MovePage();
-            }
+        int delta = page - currentPage;
 
-            if (currentPage == 2)
-            {
-                Next();
-            }
-        }
+        currentPage = page;
+        targetPos += pageStep * delta;
+
+        MovePage();
+        ShowStateForSelectedPage(currentPage);
+        UpdateButtons();
+        UpdateBar();
     }
 
     public void Next()
     {
         if (currentPage < maxPage)
-        {
-            currentPage++;
-            targetPos += pageStep;
-            MovePage();
-        }
+            SelectPage(currentPage + 1);
     }
 
     public void Previous()
     {
         if (currentPage > 1)
-        {
-            currentPage--;
-            targetPos -= pageStep;
-            MovePage();
-        }
+            SelectPage(currentPage - 1);
     }
 
     private void MovePage()
     {
         swipeContainerRect.LeanMoveLocal(targetPos, tweenTime).setEase(tweenType);
-        UpdateButtons();
-        UpdatePageButtonsScale();
     }
 
     public void OnEndDrag(PointerEventData eventData)
@@ -147,47 +176,31 @@ public class SwipeMenu : MonoBehaviour, IEndDragHandler
         }
     }
 
+    // =========================
+    // UI
+    // =========================
     private void UpdateBar()
     {
-        foreach (var item in barImage)
+        if (barImage == null || barImage.Length == 0) return;
+        if (barClosed == null || barOpen == null) return;
+
+        for (int i = 0; i < barImage.Length; i++)
         {
-            item.sprite = barClosed;
+            if (barImage[i] != null)
+                barImage[i].sprite = barClosed;
         }
-        barImage[currentPage - 1].sprite = barOpen;
+
+        int idx = currentPage - 1;
+        if (idx >= 0 && idx < barImage.Length && barImage[idx] != null)
+            barImage[idx].sprite = barOpen;
     }
 
     private void UpdateButtons()
     {
-        previousButton.interactable = currentPage != 1;
-        nextButton.interactable = currentPage != maxPage;
-        page1Button.interactable = currentPage != 1;
-        page2Button.interactable = currentPage != 2;
-        page3Button.interactable = currentPage != 3;
-    }
+        if (previousButton != null)
+            previousButton.interactable = currentPage != 1;
 
-
-    private void UpdatePageButtonsScale(bool force = false)
-    {
-        if (!force && lastVisualPage == currentPage)
-            return; 
-
-        lastVisualPage = currentPage;
-
-        AnimateButtonScale(page1Button, currentPage == 1);
-        AnimateButtonScale(page2Button, currentPage == 2);
-        AnimateButtonScale(page3Button, currentPage == 3);
-    }
-
-    private void AnimateButtonScale(Button btn, bool selected)
-    {
-        Transform t = btn.transform;
-
-        LeanTween.cancel(t.gameObject);
-
-        Vector3 targetScale = selected ? pageBtnDefaultScale * selectedScale : pageBtnDefaultScale;
-
-        LeanTween.scale(t.gameObject, targetScale, scaleTweenTime)
-                 .setEase(scaleTweenType)
-                 .setIgnoreTimeScale(true);
+        if (nextButton != null)
+            nextButton.interactable = currentPage != maxPage;
     }
 }
