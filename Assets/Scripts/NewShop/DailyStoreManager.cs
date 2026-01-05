@@ -18,6 +18,7 @@ public class DailyStoreManager : MonoBehaviour
 
     [Header("Catalogs / Pools")]
     [SerializeField] private BackgroundCatalogSO backgroundCatalog;
+    [SerializeField] private AvatarCatalogSO avatarCatalog;
 
     [Tooltip("Pool SOLO de avatares que se pueden comprar en tienda.")]
     [SerializeField] private DailyStoreAvatarPoolSO avatarStorePool;
@@ -161,17 +162,17 @@ public class DailyStoreManager : MonoBehaviour
             else
             {
                 string title = string.IsNullOrEmpty(data.name) ? "Fondo" : data.name;
+                int price = data.price;
+
+                int slotIndex = i; // capturar índice en variable local
 
                 backgroundSlots[i].SetContent(
                     data.sprite,
                     title,
-                    data.price,
+                    price,
                     () =>
                     {
-                        if (PreviewFondos.Instance != null)
-                            PreviewFondos.Instance.ShowPreview(data);
-                        else
-                            Debug.Log("[DailyStore] Click fondo: " + data.id);
+                        TryBuyBackground(slotIndex, data);
                     }
                 );
             }
@@ -200,14 +201,16 @@ public class DailyStoreManager : MonoBehaviour
             }
             else
             {
+                int price = data.price;
+                int slotIndex = i;
+
                 avatarSlots[i].SetContent(
                     data.sprite,
                     data.displayName,
-                    data.price,
+                    price,
                     () =>
                     {
-                        Debug.Log("[DailyStore] Click avatar: " + data.id);
-                        // PreviewAvatars.Instance.ShowPreview(data);
+                        TryBuyAvatar(slotIndex, data);
                     }
                 );
             }
@@ -281,5 +284,82 @@ public class DailyStoreManager : MonoBehaviour
             return null;
 
         return avatarStorePool.possibleAvatars.Find(a => a != null && a.id == id);
+    }
+
+    private void TryBuyBackground(int slotIndex, BackgroundDataSO data)
+    {
+        if (data == null) return;
+
+        // Ya poseído, por seguridad
+        if (IsBackgroundOwned(data.id))
+        {
+            Debug.Log("[DailyStore] Ya tienes este fondo: " + data.id);
+            return;
+        }
+
+        int price = data.price;
+
+        // Comprobar monedas
+        if (!CurrencyManager.Instance.TrySpendCoins(price))
+        {
+            Debug.Log("[DailyStore] No hay monedas suficientes para fondo: " + data.id);
+            // Aquí podrías mostrar un popup de "no tienes monedas"
+            return;
+        }
+
+        // Marcar como comprado (mismo patrón que DailyLuckManager)
+        PlayerPrefs.SetInt("Purchased_" + data.id, 1);
+        PlayerPrefs.Save();
+
+        XPUIAnimation ui = FindFirstObjectByType<XPUIAnimation>();
+        if (ui != null)
+        {
+            ui.SyncAllPurchasedAvatarsToPlayFab(avatarCatalog);
+            ui.SyncAllPurchasedBackgroundsToPlayFab(backgroundCatalog);
+        }
+
+        Debug.Log("[DailyStore] Fondo comprado: " + data.id);
+
+        // Actualizar solo este slot a estado "owned"
+        if (slotIndex >= 0 && slotIndex < backgroundSlots.Length && backgroundSlots[slotIndex] != null)
+        {
+            backgroundSlots[slotIndex].SetOwned(data.sprite);
+        }
+    }
+
+    private void TryBuyAvatar(int slotIndex, AvatarDataSO data)
+    {
+        if (data == null) return;
+
+        if (IsAvatarOwned(data.id))
+        {
+            Debug.Log("[DailyStore] Ya tienes este avatar: " + data.id);
+            return;
+        }
+
+        int price = data.price;
+
+        if (!CurrencyManager.Instance.TrySpendCoins(price))
+        {
+            Debug.Log("[DailyStore] No hay monedas suficientes para avatar: " + data.id);
+            return;
+        }
+
+        PlayerPrefs.SetInt("AvatarPurchased_" + data.id, 1);
+        PlayerPrefs.Save();
+
+        XPUIAnimation ui = FindFirstObjectByType<XPUIAnimation>();
+        if (ui != null)
+        {
+            ui.SyncAllPurchasedAvatarsToPlayFab(avatarCatalog);
+            ui.SyncAllPurchasedBackgroundsToPlayFab(backgroundCatalog);
+        }
+
+        Debug.Log("[DailyStore] Avatar comprado: " + data.id);
+
+        if (slotIndex >= 0 && slotIndex < avatarSlots.Length && avatarSlots[slotIndex] != null)
+        {
+            avatarSlots[slotIndex].SetOwned(data.sprite);
+        }
     }
 }

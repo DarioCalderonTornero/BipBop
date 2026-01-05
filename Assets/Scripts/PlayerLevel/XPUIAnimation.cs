@@ -251,13 +251,12 @@ public class XPUIAnimation : MonoBehaviour
         LoadRemoteLevelAndXP(playFabId);
         LoadRemoteAvatarAndBackgroundCount(playFabId);
         LoadRemoteRecords(playFabId);
+        LoadRemoteBackground(playFabId);
 
         if (pencilButton != null)
             pencilButton.gameObject.SetActive(false);
         if (backgroundButton != null)
             backgroundButton.gameObject.SetActive(false);
-        if (backgroundImage != null)
-            backgroundImage.gameObject.SetActive(false);
     }
 
     private void BeginRemoteLoad()
@@ -558,6 +557,66 @@ public class XPUIAnimation : MonoBehaviour
         );
     }
 
+    private void LoadRemoteBackground(string playFabId)
+    {
+        if (backgroundImage == null || backgroundCatalog == null) return;
+
+        BeginRemoteLoad();
+
+        var request = new GetUserDataRequest
+        {
+            PlayFabId = playFabId,
+            Keys = new List<string> { "SelectedBackground" }
+        };
+
+        PlayFabClientAPI.GetUserData(
+            request,
+            result =>
+            {
+                if (!isRemoteProfile || playFabId != remotePlayFabId)
+                {
+                    OnRemoteLoadFinished(playFabId);
+                    return;
+                }
+
+                string bgId = "DefaultBackground";
+                if (result.Data != null && result.Data.ContainsKey("SelectedBackground"))
+                    bgId = result.Data["SelectedBackground"].Value;
+
+                BackgroundDataSO bgData = null;
+                if (backgroundCatalog != null && backgroundCatalog.backgroundDataSO != null)
+                {
+                    foreach (var bg in backgroundCatalog.backgroundDataSO)
+                    {
+                        if (bg != null && bg.id == bgId)
+                        {
+                            bgData = bg;
+                            break;
+                        }
+                    }
+                }
+
+                if (bgData != null && bgData.sprite != null)
+                {
+                    backgroundImage.sprite = bgData.sprite;
+                    backgroundImage.gameObject.SetActive(true);
+                }
+                else
+                {
+                    backgroundImage.gameObject.SetActive(false);
+                }
+
+                OnRemoteLoadFinished(playFabId);
+            },
+            error =>
+            {
+                Debug.LogWarning("Error al cargar fondo remoto: " + error.GenerateErrorReport());
+                backgroundImage.gameObject.SetActive(false);
+                OnRemoteLoadFinished(playFabId);
+            }
+        );
+    }
+
     public void ClosePanel()
     {
         if (!isShown || isMoving) return;
@@ -822,9 +881,45 @@ public class XPUIAnimation : MonoBehaviour
         AvatarDataSO data = GetAvatarById(avatarId);
 
         if (data != null && data.sprite != null)
+        {
             avatarImage.sprite = data.sprite;
+
+            // Aplicar shader especial si lo tiene
+            ApplyAvatarMaterial(data);
+        }
         else if (fallbackAvatar != null)
+        {
             avatarImage.sprite = fallbackAvatar;
+            // Material por defecto sin efecto
+            avatarImage.material = null;
+        }
+    }
+
+    private void ApplyAvatarMaterial(AvatarDataSO data)
+    {
+        // Si no hay efecto, material por defecto
+        if (!data.hasShaderEffect || data.effectMaterial == null)
+        {
+            avatarImage.material = null; // o un material UI por defecto
+            return;
+        }
+
+        // Asignar el material base del shader
+        // IMPORTANTE: instanciar para no modificar el asset original
+        Material matInstance = Instantiate(data.effectMaterial);
+        avatarImage.material = matInstance;
+
+        // Opcional: setear parámetros por avatar
+        /* if (data.effectType == AvatarShaderEffectType.Wave)
+        {
+            // Los nombres deben coincidir con las propiedades del shader
+            matInstance.SetFloat("_WaveAmount", data.waveAmount);
+            matInstance.SetFloat("_WaveSpeed", data.waveSpeed);
+            matInstance.SetFloat("_WaveStrength", data.waveStrength);
+            // Si hace falta, X/Y Axis:
+            // matInstance.SetFloat("_WaveX", data.waveXAxis);
+            // matInstance.SetFloat("_WaveY", data.waveYAxis);
+        }*/
     }
 
     private AvatarDataSO GetAvatarById(string id)
