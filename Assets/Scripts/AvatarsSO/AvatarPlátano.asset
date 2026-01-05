@@ -20,6 +20,6 @@ MonoBehaviour:
   requiredScoreKey: 
   requiredScoreValue: 0
   unlockDescription: 
-  hasShaderEffect: 0
+  hasShaderEffect: 1
   effectType: 3
-  effectMaterial: {fileID: 0}
+  effectMaterial: {fileID: 2100000, guid: b9082e425b15e784a881ea2fb8f55f0c, type: 2}

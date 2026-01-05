@@ -395,14 +395,26 @@ public class LeaderboardUI : MonoBehaviour
                 if (result.Data != null && result.Data.ContainsKey("EquippedAvatarIdPublic"))
                     avatarId = result.Data["EquippedAvatarIdPublic"].Value;
 
-                // Si no tiene avatar guardado → NO tocamos la imagen
                 if (string.IsNullOrEmpty(avatarId))
-                    return;
-
-                var data = GetAvatarDataById(avatarId);  // Aquí se usa el nuevo método
-                if (data != null && data.sprite != null)
                 {
-                    targetImage.sprite = data.sprite;
+                    // Si no tiene avatar guardado, podrías poner uno por defecto
+                    if (defaultSprite != null)
+                    {
+                        targetImage.sprite = defaultSprite;
+                        targetImage.material = null;
+                    }
+                    return;
+                }
+
+                var data = GetAvatarDataById(avatarId);
+                if (data != null)
+                {
+                    ApplyAvatarVisualToImage(targetImage, data);
+                }
+                else if (defaultSprite != null)
+                {
+                    targetImage.sprite = defaultSprite;
+                    targetImage.material = null;
                 }
             },
             error =>
@@ -537,5 +549,37 @@ public class LeaderboardUI : MonoBehaviour
         }
     }
 
+    private void ApplyAvatarVisualToImage(Image targetImage, AvatarDataSO data)
+    {
+        if (targetImage == null) return;
+
+        if (data == null || data.sprite == null)
+        {
+            // Sin datos → avatar por defecto sin shader
+            targetImage.material = null;
+            return;
+        }
+
+        targetImage.sprite = data.sprite;
+
+        if (data.hasShaderEffect && data.effectMaterial != null)
+        {
+            // Instanciamos material para no modificar el asset global
+            var matInstance = Instantiate(data.effectMaterial);
+            targetImage.material = matInstance;
+
+            // Si quieres, setea aquí los parámetros del shader
+            // Ojo con los nombres reales de las props del AllIn1SpriteShader
+           //  matInstance.SetFloat("_WaveAmount", data.waveAmount);
+           // matInstance.SetFloat("_WaveSpeed", data.waveSpeed);
+            // matInstance.SetFloat("_WaveStrength", data.waveStrength);
+            // etc. según lo que uses
+        }
+        else
+        {
+            // Avatares sin efecto → material por defecto
+            targetImage.material = null;
+        }
+    }
 
 }
