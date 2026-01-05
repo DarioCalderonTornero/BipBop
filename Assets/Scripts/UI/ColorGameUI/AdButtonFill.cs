@@ -1,10 +1,15 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class AdButtonFill : MonoBehaviour
 {
+    public event EventHandler OnHideOffer;
+
     [SerializeField] private Image fillImage;
     [SerializeField] private float duration = 5f;
+
+    [SerializeField] VideoGameOver videoGameOver;
 
     private float timer;
 
@@ -22,7 +27,8 @@ public class AdButtonFill : MonoBehaviour
 
         if (timer <= 0f)
         {
-            gameObject.SetActive(false);
+            OnHideOffer?.Invoke(this, EventArgs.Empty);
+            videoGameOver.HideAdOffer();
         }
     }
 }

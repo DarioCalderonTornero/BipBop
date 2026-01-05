@@ -1932,6 +1932,8 @@ MonoBehaviour:
   coinText: {fileID: 1083246950}
   gameOverText: {fileID: 1037186255}
   myanimator: {fileID: 767569442}
+  videoGameOver: {fileID: 2061997629}
+  adButtonFill: {fileID: 1049372937}
 --- !u!95 &767569442
 Animator:
   serializedVersion: 7
@@ -2492,6 +2494,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   fillImage: {fileID: 566771497}
   duration: 5
+  videoGameOver: {fileID: 2061997629}
 --- !u!114 &1049372938
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6134,6 +6137,8 @@ GameObject:
   m_Component:
   - component: {fileID: 2061997628}
   - component: {fileID: 2061997629}
+  - component: {fileID: 2061997631}
+  - component: {fileID: 2061997630}
   m_Layer: 5
   m_Name: VideoGameOver
   m_TagString: Untagged
@@ -6160,7 +6165,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -414}
+  m_AnchoredPosition: {x: 0, y: 169}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2061997629
@@ -6175,9 +6180,45 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6c28569000b2a7d44803466df1a1f5fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isVideoShow: 0
   videoGameOverBackgroundImage: {fileID: 700780283}
   playVideoButton: {fileID: 1049372938}
   playVideoText: {fileID: 551259229}
+  playVideoAnimator: {fileID: 2061997630}
+--- !u!95 &2061997630
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2061997627}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 7bf3925074132a44b917077838b36601, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+--- !u!225 &2061997631
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2061997627}
+  m_Enabled: 1
+  m_Alpha: 0
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1001 &2080409242
 PrefabInstance:
   m_ObjectHideFlags: 0
