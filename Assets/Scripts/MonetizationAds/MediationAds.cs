@@ -7,12 +7,34 @@ using System;
 
 public class MediationAds : MonoBehaviour
 {
+    public static MediationAds Instance { get; private set; }
+
     public Button showAdButton;
     [SerializeField] private string adUnitIdAndroid = "Rewarded_Androidd"; // Ad Unit ID Android
     [SerializeField] private string adUnitIdIOS = "Rewarded_iOS"; // Ad Unit ID iOS
 
     private LevelPlayRewardedAd rewardedAd;
     private string adUnitId;
+
+    void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Debug.LogWarning("MediationAds duplicado, destruyendo este GameObject.");
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+
+        Debug.Log("MediationAds singleton instance created.");
+    }
+
+    private void OnDestroy()
+    {
+        Debug.Log("MediationAds destroyed: " + gameObject.name);
+    }
 
     void OnEnable()
     {
@@ -55,13 +77,17 @@ public class MediationAds : MonoBehaviour
     private void OnAdLoaded(LevelPlayAdInfo adInfo)
     {
         Debug.Log("Ad loaded and ready.");
-        showAdButton.interactable = true; // Solo habilita botón cuando el anuncio está listo
+
+        if (showAdButton != null)
+            showAdButton.interactable = true; // Solo habilita botón cuando el anuncio está listo
     }
 
     private void OnAdLoadFailed(LevelPlayAdError error)
     {
         Debug.LogWarning($"Failed to load ad: {error}");
-        showAdButton.interactable = false;
+
+        if (showAdButton != null)
+            showAdButton.interactable = false;
 
         // Reintento automático opcional
         Invoke(nameof(RetryLoadAd), 5f);
@@ -75,10 +101,12 @@ public class MediationAds : MonoBehaviour
 
     private void TryShowAd()
     {
-        if (rewardedAd.IsAdReady())
+        if (rewardedAd != null && rewardedAd.IsAdReady())
         {
             rewardedAd.ShowAd();
-            showAdButton.interactable = false;
+
+            if (showAdButton != null)
+                showAdButton.interactable = false;
         }
         else
         {
@@ -120,7 +148,9 @@ public class MediationAds : MonoBehaviour
             // Guarda el callback, lo llamas al recibir OnAdRewarded
             this.onRewardedCallback = onRewarded;
             rewardedAd.ShowAd();
-            showAdButton.interactable = false;
+
+            if (showAdButton != null)
+                showAdButton.interactable = false;
         }
     }
 

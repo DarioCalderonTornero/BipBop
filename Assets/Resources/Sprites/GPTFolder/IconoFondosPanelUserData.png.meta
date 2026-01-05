@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 8e2b4c5f968508049ab7f770de0fc815
+guid: f07910c3973056c43ac31405b5976638
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 1540573850082597206
-    second: KeyImage_0
+      213: 6241857780429770718
+    second: IconoFondosPanelUserData_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -109,30 +109,17 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: WindowsStoreApps
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: KeyImage_0
+      name: IconoFondosPanelUserData_0
       rect:
         serializedVersion: 2
-        x: 43
-        y: 8
-        width: 979
-        height: 1011
+        x: 5
+        y: 3
+        width: 653
+        height: 573
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 659dd6c11c7316510800000000000000
-      internalID: 1540573850082597206
+      spriteID: edf460d94988f9650800000000000000
+      internalID: 6241857780429770718
       vertices: []
       indices: 
       edges: []
@@ -160,8 +147,7 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable:
-      KeyImage_0: 1540573850082597206
+    nameFileIdTable: {}
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

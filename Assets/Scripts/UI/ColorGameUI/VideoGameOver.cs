@@ -14,10 +14,8 @@ public class VideoGameOver : MonoBehaviour
         playVideoButton.gameObject.SetActive(false);
         playVideoText.gameObject.SetActive(false);
 
-        playVideoButton.onClick.AddListener(() =>
-        {
-            SceneLoader.LoadScene(SceneLoader.Scene.ColorScene);
-        });
+        playVideoButton.onClick.RemoveAllListeners();
+        playVideoButton.onClick.AddListener(OnClickPlayVideo);
     }
 
     private void Start()
@@ -27,16 +25,41 @@ public class VideoGameOver : MonoBehaviour
 
     private void ColorManager_OnGameOver(object sender, System.EventArgs e)
     {
-        float videoProbability = Random.Range(0, 10);
+        // Aquí solo muestras el panel cuando tu otro script lo decida (50% lo controlas fuera)
+        videoGameOverBackgroundImage.gameObject.SetActive(true);
+        playVideoButton.gameObject.SetActive(true);
+        playVideoText.gameObject.SetActive(true);
+    }
 
-        Debug.Log(videoProbability);
-
-        if (videoProbability > 5)
+    private void OnClickPlayVideo()
+    {
+        if (MediationAds.Instance == null)
         {
-            videoGameOverBackgroundImage.gameObject.SetActive(true);
-            playVideoButton.gameObject.SetActive(true);
-            playVideoText.gameObject.SetActive(true);
+            Debug.LogWarning("No hay instancia de MediationAds en la escena (singleton).");
+            SceneLoader.LoadScene(SceneLoader.Scene.ColorScene);
+            return;
         }
+
+        if (MediationAds.Instance.IsAdReady())
+        {
+            // Ocultar panel mientras se ve el anuncio
+            videoGameOverBackgroundImage.gameObject.SetActive(false);
+            playVideoButton.gameObject.SetActive(false);
+            playVideoText.gameObject.SetActive(false);
+
+            MediationAds.Instance.ShowRewardedAd(OnAdRewardedRevive);
+        }
+        else
+        {
+            Debug.Log("Anuncio no listo, recargando escena directamente.");
+            SceneLoader.LoadScene(SceneLoader.Scene.ColorScene);
+        }
+    }
+
+    private void OnAdRewardedRevive()
+    {
+        // Acción al terminar el anuncio (revivir/recargar)
+        SceneLoader.LoadScene(SceneLoader.Scene.ColorScene);
     }
 
     private void OnDestroy()

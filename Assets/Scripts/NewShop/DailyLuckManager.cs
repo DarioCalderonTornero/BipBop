@@ -17,20 +17,20 @@ public class DailyLuckManager : MonoBehaviour
     [SerializeField] private int duplicateRefund = 75;
 
     [Header("Daily Attempts")]
-    [SerializeField] private int maxAttemptsPerDay = 3;
+    [SerializeField] private int maxAttemptsPerDay = 10; // ahora 10
 
     [Header("UI")]
     [SerializeField] private Button rollBackgroundButton;
     [SerializeField] private Button rollAvatarButton;
 
-    [SerializeField] private TextMeshProUGUI feedbackText; // Solo errores (sin monedas, sin pool, etc.)
+    [SerializeField] private TextMeshProUGUI feedbackText; // Solo errores
     [SerializeField] private DailyLuckSpinnerUI spinnerUI;
 
     [Header("Attempts Text")]
     [SerializeField] private TextMeshProUGUI bgAttemptsText;     // "Intentos restantes: X/X"
     [SerializeField] private TextMeshProUGUI avatarAttemptsText; // "Intentos restantes: X/X"
 
-    [Header("Localization (solo lo que has pedido)")]
+    [Header("Localization")]
     [Tooltip("Smart String con {0} y {1}. Ej: 'Intentos restantes: {0}/{1}'")]
     [SerializeField] private LocalizedString attemptsTextTemplate;      // UI/daily_luck_attempts_template
 
@@ -47,6 +47,9 @@ public class DailyLuckManager : MonoBehaviour
     [Header("Spin visuals")]
     [SerializeField] private int spinListSize = 18;
 
+    [Header("Ads")]
+    [SerializeField] private MediationAds mediationAds; // referencia a tu script de anuncios
+
     private const string DEFAULT_BG_ID = "DefaultBackground";
     private const string DEFAULT_AVATAR_ID = "NormalAvatar";
 
@@ -56,7 +59,15 @@ public class DailyLuckManager : MonoBehaviour
     private const string BG_REMAINING_KEY = "DailyLuck_BG_Remaining";
     private const string AV_REMAINING_KEY = "DailyLuck_AV_Remaining";
 
+    // Contadores de tiradas de HOY (para saber cuál es la 5 y la 10)
+    private const string BG_TODAY_ROLLS_KEY = "DailyLuck_BG_TodayRolls";
+    private const string AV_TODAY_ROLLS_KEY = "DailyLuck_AV_TodayRolls";
+
     private bool buttonsLockedBySpin;
+
+    [Header("Ad roll UI")]
+    [SerializeField] private GameObject bgAdInfoRoot;     // Imagen + texto para tirada BG con anuncio
+    [SerializeField] private GameObject avatarAdInfoRoot; // Imagen + texto para tirada Avatar con anuncio
 
     private void Awake()
     {
@@ -90,8 +101,6 @@ public class DailyLuckManager : MonoBehaviour
     private void OnLocaleChanged(Locale _)
     {
         RefreshAttemptsUI();
-        // Si quieres que también cambien textos de recompensa si están visibles:
-        // (no hace falta normalmente)
     }
 
     private void Update()
@@ -107,7 +116,7 @@ public class DailyLuckManager : MonoBehaviour
     // =========================================================
     // Rolls
     // =========================================================
-    private async void RollBackground()
+    private void RollBackground()
     {
         if (spinnerUI != null && spinnerUI.IsSpinning) return;
 
@@ -140,50 +149,37 @@ public class DailyLuckManager : MonoBehaviour
             return;
         }
 
-        BackgroundDataSO reward = PickBackground(backgroundPool.possibleBackgrounds);
-        if (reward == null || reward.sprite == null)
+        // Índice de tirada de hoy: 1..maxAttemptsPerDay
+        int todayRollIndex = maxAttemptsPerDay - remaining + 1;
+        bool isAdRoll = (todayRollIndex == 5 || todayRollIndex == 10);
+
+        if (isAdRoll)
         {
-            SetFeedback("Error: premio inválido.");
-            return;
-        }
-
-        if (!CurrencyManager.Instance.TrySpendCoins(rollCost))
-        {
-            SetFeedback("No tienes suficientes monedas.");
-            return;
-        }
-
-        // Consumimos intento SOLO si el roll arranca de verdad
-        SetRemainingBG(remaining - 1);
-        RefreshAttemptsUI();
-
-        bool alreadyOwned = IsBackgroundOwned(reward);
-
-        string resultMsg = alreadyOwned
-            ? await GetLocalized(bgDuplicateRefundMsg, duplicateRefund)
-            : await GetLocalized(bgNewMsg);
-
-        List<Sprite> spinSprites = BuildSpinSpriteList(
-            backgroundPool.possibleBackgrounds, spinListSize, backgroundPool.allowDuplicatesInSpin
-        );
-
-        LockButtons(true);
-        SetFeedback("");
-
-        spinnerUI.PlaySpin(
-            spinSprites,
-            reward.sprite,
-            resultMsg,
-            onFinished: () => ApplyBackgroundReward(reward, alreadyOwned),
-            onClosed: () =>
+            // Tirada que requiere anuncio (no gasta monedas)
+            if (mediationAds != null && mediationAds.IsAdReady())
             {
-                LockButtons(false);
-                RefreshButtonsInteractable();
+                LockButtons(true);
+                SetFeedback("");
+
+                mediationAds.ShowRewardedAd(() =>
+                {
+                    // Callback cuando se ha visto el anuncio -> tirada gratuita
+                    _ = DoBackgroundRollInternal(remaining, isFreeRoll: true);
+                });
             }
-        );
+            else
+            {
+                SetFeedback("Anuncio no disponible ahora mismo.");
+            }
+        }
+        else
+        {
+            // Tirada normal (pagando monedas)
+            _ = DoBackgroundRollInternal(remaining, isFreeRoll: false);
+        }
     }
 
-    private async void RollAvatar()
+    private void RollAvatar()
     {
         if (spinnerUI != null && spinnerUI.IsSpinning) return;
 
@@ -216,26 +212,139 @@ public class DailyLuckManager : MonoBehaviour
             return;
         }
 
+        AvatarDataSO rewardCheck = PickAvatar(avatarPool.possibleAvatars);
+        if (rewardCheck == null || rewardCheck.sprite == null)
+        {
+            SetFeedback("Error: premio inválido.");
+            return;
+        }
+
+        if (rewardCheck.unlockByScore)
+        {
+            SetFeedback("Error: ese avatar no puede salir en suerte diaria (unlockByScore).");
+            return;
+        }
+
+        // Índice de tirada de hoy: 1..maxAttemptsPerDay
+        int todayRollIndex = maxAttemptsPerDay - remaining + 1;
+        bool isAdRoll = (todayRollIndex == 5 || todayRollIndex == 10);
+
+        if (isAdRoll)
+        {
+            // Tirada que requiere anuncio (no gasta monedas)
+            if (mediationAds != null && mediationAds.IsAdReady())
+            {
+                LockButtons(true);
+                SetFeedback("");
+
+                mediationAds.ShowRewardedAd(() =>
+                {
+                    _ = DoAvatarRollInternal(remaining, isFreeRoll: true);
+                });
+            }
+            else
+            {
+                SetFeedback("Anuncio no disponible ahora mismo.");
+            }
+        }
+        else
+        {
+            // Tirada normal (pagando monedas)
+            _ = DoAvatarRollInternal(remaining, isFreeRoll: false);
+        }
+    }
+
+    // =========================================================
+    // Lógica interna de tirada BG
+    // =========================================================
+    private async Task DoBackgroundRollInternal(int remaining, bool isFreeRoll)
+    {
+        BackgroundDataSO reward = PickBackground(backgroundPool.possibleBackgrounds);
+        if (reward == null || reward.sprite == null)
+        {
+            SetFeedback("Error: premio inválido.");
+            LockButtons(false);
+            return;
+        }
+
+        // Si no es tirada gratuita (5 o 10), cobramos monedas
+        if (!isFreeRoll)
+        {
+            if (!CurrencyManager.Instance.TrySpendCoins(rollCost))
+            {
+                SetFeedback("No tienes suficientes monedas.");
+                LockButtons(false);
+                return;
+            }
+        }
+
+        // Consumimos intento SOLO si la tirada arranca
+        SetRemainingBG(remaining - 1);
+
+        // Incrementamos contador de tiradas de hoy (por si lo quisieras usar en otro sitio)
+        SetTodayBgRolls(GetTodayBgRolls() + 1);
+
+        RefreshAttemptsUI();
+
+        bool alreadyOwned = IsBackgroundOwned(reward);
+
+        string resultMsg = alreadyOwned
+            ? await GetLocalized(bgDuplicateRefundMsg, duplicateRefund)
+            : await GetLocalized(bgNewMsg);
+
+        List<Sprite> spinSprites = BuildSpinSpriteList(
+            backgroundPool.possibleBackgrounds, spinListSize, backgroundPool.allowDuplicatesInSpin
+        );
+
+        LockButtons(true);
+        SetFeedback("");
+
+        spinnerUI.PlaySpin(
+            spinSprites,
+            reward.sprite,
+            resultMsg,
+            onFinished: () => ApplyBackgroundReward(reward, alreadyOwned),
+            onClosed: () =>
+            {
+                LockButtons(false);
+                RefreshButtonsInteractable();
+            }
+        );
+    }
+
+    // =========================================================
+    // Lógica interna de tirada Avatar
+    // =========================================================
+    private async Task DoAvatarRollInternal(int remaining, bool isFreeRoll)
+    {
         AvatarDataSO reward = PickAvatar(avatarPool.possibleAvatars);
         if (reward == null || reward.sprite == null)
         {
             SetFeedback("Error: premio inválido.");
+            LockButtons(false);
             return;
         }
 
         if (reward.unlockByScore)
         {
             SetFeedback("Error: ese avatar no puede salir en suerte diaria (unlockByScore).");
+            LockButtons(false);
             return;
         }
 
-        if (!CurrencyManager.Instance.TrySpendCoins(rollCost))
+        if (!isFreeRoll)
         {
-            SetFeedback("No tienes suficientes monedas.");
-            return;
+            if (!CurrencyManager.Instance.TrySpendCoins(rollCost))
+            {
+                SetFeedback("No tienes suficientes monedas.");
+                LockButtons(false);
+                return;
+            }
         }
 
         SetRemainingAV(remaining - 1);
+        SetTodayAvRolls(GetTodayAvRolls() + 1);
+
         RefreshAttemptsUI();
 
         bool alreadyOwned = IsAvatarOwned(reward);
@@ -277,6 +386,7 @@ public class DailyLuckManager : MonoBehaviour
         {
             PlayerPrefs.SetString(BG_DAY_KEY, today);
             PlayerPrefs.SetInt(BG_REMAINING_KEY, maxAttemptsPerDay);
+            PlayerPrefs.SetInt(BG_TODAY_ROLLS_KEY, 0);
             changed = true;
         }
 
@@ -285,6 +395,7 @@ public class DailyLuckManager : MonoBehaviour
         {
             PlayerPrefs.SetString(AV_DAY_KEY, today);
             PlayerPrefs.SetInt(AV_REMAINING_KEY, maxAttemptsPerDay);
+            PlayerPrefs.SetInt(AV_TODAY_ROLLS_KEY, 0);
             changed = true;
         }
 
@@ -307,23 +418,90 @@ public class DailyLuckManager : MonoBehaviour
         PlayerPrefs.Save();
     }
 
+    private int GetTodayBgRolls() => PlayerPrefs.GetInt(BG_TODAY_ROLLS_KEY, 0);
+    private int GetTodayAvRolls() => PlayerPrefs.GetInt(AV_TODAY_ROLLS_KEY, 0);
+
+    private void SetTodayBgRolls(int value)
+    {
+        PlayerPrefs.SetInt(BG_TODAY_ROLLS_KEY, Mathf.Clamp(value, 0, maxAttemptsPerDay));
+        PlayerPrefs.Save();
+    }
+
+    private void SetTodayAvRolls(int value)
+    {
+        PlayerPrefs.SetInt(AV_TODAY_ROLLS_KEY, Mathf.Clamp(value, 0, maxAttemptsPerDay));
+        PlayerPrefs.Save();
+    }
+
     private async void RefreshAttemptsUI()
     {
+        int remainingBG = GetRemainingBG();
+        int remainingAV = GetRemainingAV();
+
+        // Índice de la SIGUIENTE tirada de hoy (1..maxAttemptsPerDay)
+        int nextBgRollIndex = maxAttemptsPerDay - remainingBG + 1;
+        int nextAvRollIndex = maxAttemptsPerDay - remainingAV + 1;
+
+        bool nextBgIsAdRoll = (nextBgRollIndex == 5 || nextBgRollIndex == 10);
+        bool nextAvIsAdRoll = (nextAvRollIndex == 5 || nextAvRollIndex == 10);
+
+        // -------- Fondo --------
+        if (nextBgIsAdRoll)
+        {
+            // Ocultamos texto de intentos y mostramos la imagen+texto especial
+            if (bgAttemptsText != null)
+                bgAttemptsText.gameObject.SetActive(false);
+
+            if (bgAdInfoRoot != null)
+                bgAdInfoRoot.SetActive(true);
+        }
+        else
+        {
+            if (bgAdInfoRoot != null)
+                bgAdInfoRoot.SetActive(false);
+
+            if (bgAttemptsText != null)
+                bgAttemptsText.gameObject.SetActive(true);
+        }
+
+        // -------- Avatar --------
+        if (nextAvIsAdRoll)
+        {
+            if (avatarAttemptsText != null)
+                avatarAttemptsText.gameObject.SetActive(false);
+
+            if (avatarAdInfoRoot != null)
+                avatarAdInfoRoot.SetActive(true);
+        }
+        else
+        {
+            if (avatarAdInfoRoot != null)
+                avatarAdInfoRoot.SetActive(false);
+
+            if (avatarAttemptsText != null)
+                avatarAttemptsText.gameObject.SetActive(true);
+        }
+
         // Si no asignas LocalizedString, fallback al texto hardcodeado
         if (attemptsTextTemplate.IsEmpty)
         {
-            if (bgAttemptsText != null)
-                bgAttemptsText.text = $"Intentos restantes: {GetRemainingBG()}/{maxAttemptsPerDay}";
-            if (avatarAttemptsText != null)
-                avatarAttemptsText.text = $"Intentos restantes: {GetRemainingAV()}/{maxAttemptsPerDay}";
+            if (bgAttemptsText != null && bgAttemptsText.gameObject.activeSelf)
+                bgAttemptsText.text = $"Intentos restantes: {remainingBG}/{maxAttemptsPerDay}";
+
+            if (avatarAttemptsText != null && avatarAttemptsText.gameObject.activeSelf)
+                avatarAttemptsText.text = $"Intentos restantes: {remainingAV}/{maxAttemptsPerDay}";
+
             return;
         }
 
-        string bgLine = await GetLocalized(attemptsTextTemplate, GetRemainingBG(), maxAttemptsPerDay);
-        string avLine = await GetLocalized(attemptsTextTemplate, GetRemainingAV(), maxAttemptsPerDay);
+        string bgLine = await GetLocalized(attemptsTextTemplate, remainingBG, maxAttemptsPerDay);
+        string avLine = await GetLocalized(attemptsTextTemplate, remainingAV, maxAttemptsPerDay);
 
-        if (bgAttemptsText != null) bgAttemptsText.text = bgLine;
-        if (avatarAttemptsText != null) avatarAttemptsText.text = avLine;
+        if (bgAttemptsText != null && bgAttemptsText.gameObject.activeSelf)
+            bgAttemptsText.text = bgLine;
+
+        if (avatarAttemptsText != null && avatarAttemptsText.gameObject.activeSelf)
+            avatarAttemptsText.text = avLine;
     }
 
     private void RefreshButtonsInteractable()
