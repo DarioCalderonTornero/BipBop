@@ -14,4 +14,8 @@ public class MissionTemplate : ScriptableObject
 
     public Sprite xpIcon;
     public Sprite coinIcon;
+
+    [Header("Icono de misión")]
+    [Tooltip("Sprite principal que representa esta misión (opcional).")]
+    public Sprite missionIcon;
 }

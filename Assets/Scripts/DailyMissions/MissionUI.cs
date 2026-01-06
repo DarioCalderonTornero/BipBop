@@ -20,6 +20,9 @@ public class MissionUI : MonoBehaviour
     [SerializeField] private Image coinIconImage;
     [SerializeField] private TextMeshProUGUI coinRewardText;
 
+    [Header("Icono de misión")]
+    [SerializeField] private Image missionIconImage;
+
     [Header("Completed Style")]
     [SerializeField] private Color completedColor = Color.gray;
 
@@ -42,6 +45,19 @@ public class MissionUI : MonoBehaviour
         this.mission = mission;
 
         defaultColor = descriptionText.color;
+
+        if (missionIconImage != null)
+        {
+            if (mission.template.missionIcon != null)
+            {
+                missionIconImage.sprite = mission.template.missionIcon;
+                missionIconImage.gameObject.SetActive(true);
+            }
+            else
+            {
+                missionIconImage.gameObject.SetActive(false);
+            }
+        }
 
         // --- XP ---
         xpRewardText.text = "+" + mission.template.xpReward;

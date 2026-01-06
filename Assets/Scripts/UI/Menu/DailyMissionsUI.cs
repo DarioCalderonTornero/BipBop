@@ -23,6 +23,8 @@ public class DailyMissionsUI : MonoBehaviour
     private Vector2 shownTextPos, hiddenTextPos;
     private Coroutine slideCoroutine;
 
+    [SerializeField] private TextMeshProUGUI extraDailyMissionsText;
+
     private void Awake()
     {
         dailyMissionsButton.onClick.AddListener(OnDailyMissionsButtonClicked);
@@ -42,7 +44,10 @@ public class DailyMissionsUI : MonoBehaviour
 
         dailyMissionsPanel.anchoredPosition = hiddenPanelPos;
         timerDailyMissionsText.gameObject.SetActive(false);
-        
+
+        if (extraDailyMissionsText != null)
+            extraDailyMissionsText.gameObject.SetActive(false);
+
         if (DailyMissionManager.Instance != null)
             DailyMissionManager.Instance.RegisterTimerText(timerDailyMissionsText);
     }
@@ -63,6 +68,9 @@ public class DailyMissionsUI : MonoBehaviour
     {
         isVisible = true;
         timerDailyMissionsText.gameObject.SetActive(true);
+
+        if (extraDailyMissionsText != null)
+            extraDailyMissionsText.gameObject.SetActive(true);
 
         if (slideCoroutine != null) StopCoroutine(slideCoroutine);
         slideCoroutine = StartCoroutine(SlideBoth(
@@ -85,6 +93,8 @@ public class DailyMissionsUI : MonoBehaviour
             () =>
             {
                 timerDailyMissionsText.gameObject.SetActive(false);
+                if (extraDailyMissionsText != null)
+                    extraDailyMissionsText.gameObject.SetActive(false);
                 isAnimating = false; // Rehabilitar botón
             }
         ));

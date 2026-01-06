@@ -293,7 +293,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1156087655923712
-    m_Localized: Daily missions {0}
+    m_Localized: New missions in {0}
     m_Metadata:
       m_Items: []
   - m_Id: 1390474423140352
