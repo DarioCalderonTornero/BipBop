@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Localization;
-using UnityEngine.SceneManagement;
-using UnityEngine.SocialPlatforms.Impl;
 using UnityEngine.UI;
 
 public class ColorManager : MonoBehaviour
@@ -13,6 +10,7 @@ public class ColorManager : MonoBehaviour
     public static ColorManager Instance { get; private set; }
 
     public event EventHandler OnGameOver;
+    public event EventHandler OnVideo;
 
     [Header("UI Elements")]
     public TextMeshProUGUI colorWordText;
@@ -27,44 +25,46 @@ public class ColorManager : MonoBehaviour
 
     [Header("Color Data")]
     public LocalizedString[] colorNames;
-    public Color[] colorValues = {
-        Color.red,
-        Color.blue,
-        Color.green,
-        Color.yellow,
-        new Color(0.5f, 0f, 0.5f),
-        new Color(1f, 0.5f, 0f),
-        new Color(0.6f, 0.3f, 0.1f),
-        Color.black,
-        Color.white
-    };
+    public Color[] colorValues;
 
     private float currentTime;
     private int correctIndex;
     private int lastCorrectIndex = -1;
 
-    // Bandera para evitar múltiples finales
     private bool hasEnded = false;
-    // Bandera para saber si el minijuego ha empezado realmente (tras el Countdown)
     private bool hasStarted = false;
+
+    public enum DeathType
+    {
+        None,
+        Video,
+        GameOver
+    }
+
+    public DeathType deathType { get; private set; } = DeathType.None;
+
+    private bool hasUsedReviveOffer = false;
 
     private void Awake()
     {
         Instance = this;
+        deathType = DeathType.None;
     }
 
     private void Start()
     {
         if (ColorGameState.Instance != null)
-        {
             ColorGameState.Instance.OnPlayingColorGame += HandleOnPlayingColorGame;
-        }
     }
 
     private void Update()
     {
-        if (hasEnded) return;
-        if (!hasStarted) return; 
+        if (hasEnded || !hasStarted)
+            return;
+
+        // Si estamos muriendo (video o gameover), congelamos el juego
+        if (deathType != DeathType.None)
+            return;
 
         currentTime -= Time.deltaTime;
 
@@ -73,23 +73,22 @@ public class ColorManager : MonoBehaviour
 
         if (currentTime <= 0f)
         {
-            EndGame();
+            DecideDeathType();
         }
     }
 
     private void HandleOnPlayingColorGame(object sender, EventArgs e)
     {
-        Debug.Log("PlayingColorGame");
         if (!hasStarted)
-        {
             StartColorGame();
-        }
     }
 
     private void StartColorGame()
     {
         hasEnded = false;
         hasStarted = true;
+        hasUsedReviveOffer = false;
+        deathType = DeathType.None;
 
         currentTime = startTime;
 
@@ -101,17 +100,72 @@ public class ColorManager : MonoBehaviour
         UpdateCandidateButtonsSize();
     }
 
+    private void DecideDeathType()
+    {
+        if (deathType != DeathType.None)
+            return;
+
+        if (hasUsedReviveOffer)
+        {
+            SetDeathType(DeathType.GameOver);
+            return;
+        }
+
+        float videoProbability = UnityEngine.Random.Range(0, 10);
+
+        if (videoProbability >= 5)
+        {
+            hasUsedReviveOffer = true;    
+            SetDeathType(DeathType.Video);
+        }
+        else
+        {
+            SetDeathType(DeathType.GameOver);
+        }
+    }
+
+
+    public void SetDeathType(DeathType newType)
+    {
+        if (deathType == newType)
+            return;
+
+        deathType = newType;
+
+        switch (deathType)
+        {
+            case DeathType.Video:
+                OnVideo?.Invoke(this, EventArgs.Empty);
+                break;
+
+            case DeathType.GameOver:
+                EndGame();
+                break;
+        }
+    }
+
+    public void Revive()
+    {
+        if (deathType != DeathType.Video)
+            return;
+
+        deathType = DeathType.None;
+
+        // margen de tiempo para seguir jugando
+        currentTime = Mathf.Max(currentTime, startTime * 0.5f);
+    }
+
     private void SetupRound()
     {
-        if (hasEnded) return;
-        if (!hasStarted) return; 
+        if (hasEnded || !hasStarted)
+            return;
 
         int availableCount = 6;
         if (ColorGamePuntos.Instance.GetScore() >= 10) availableCount = 7;
         if (ColorGamePuntos.Instance.GetScore() >= 20) availableCount = 8;
         if (ColorGamePuntos.Instance.GetScore() >= 30) availableCount = 9;
 
-        // no repetir mismo color correcto
+        // Elegir color correcto (sin repetir)
         do
         {
             correctIndex = UnityEngine.Random.Range(0, availableCount);
@@ -119,19 +173,18 @@ public class ColorManager : MonoBehaviour
 
         lastCorrectIndex = correctIndex;
 
-        // nombre del color CORRECTO, ahora localizado
+        // Texto correcto
         string correctColorName = colorNames[correctIndex].GetLocalizedString();
 
-        // Color del texto (distinto al correcto)
+        // Color del texto (distinto)
         int textColorIndex;
         do
         {
             textColorIndex = UnityEngine.Random.Range(0, availableCount);
         } while (textColorIndex == correctIndex);
-        Color displayColor = colorValues[textColorIndex];
 
         colorWordText.text = correctColorName;
-        colorWordText.color = displayColor;
+        colorWordText.color = colorValues[textColorIndex];
 
         // Fondo (distinto al texto)
         int backgroundColorIndex;
@@ -139,62 +192,50 @@ public class ColorManager : MonoBehaviour
         {
             backgroundColorIndex = UnityEngine.Random.Range(0, colorValues.Length);
         } while (backgroundColorIndex == textColorIndex);
+
         colorWordBackground.color = colorValues[backgroundColorIndex];
 
-        // Construcción de la lista de candidatos
+        // Construir candidatos
         List<int> candidateIndices = new List<int> { correctIndex, textColorIndex };
+        List<int> remaining = new List<int>();
 
-        List<int> remainingIndices = new List<int>();
         for (int i = 0; i < availableCount; i++)
         {
             if (i != correctIndex && i != textColorIndex)
-                remainingIndices.Add(i);
+                remaining.Add(i);
         }
 
-        // Barajar remainingIndices
-        for (int i = 0; i < remainingIndices.Count; i++)
+        while (candidateIndices.Count < candidateButtons.Count && remaining.Count > 0)
         {
-            int r = UnityEngine.Random.Range(i, remainingIndices.Count);
-            (remainingIndices[i], remainingIndices[r]) = (remainingIndices[r], remainingIndices[i]);
+            int r = UnityEngine.Random.Range(0, remaining.Count);
+            candidateIndices.Add(remaining[r]);
+            remaining.RemoveAt(r);
         }
 
-        if (remainingIndices.Count >= 2)
-        {
-            candidateIndices.Add(remainingIndices[0]);
-            candidateIndices.Add(remainingIndices[1]);
-        }
-        else if (remainingIndices.Count == 1)
-        {
-            candidateIndices.Add(remainingIndices[0]);
-        }
-
-        // Barajar candidateIndices
         for (int i = 0; i < candidateIndices.Count; i++)
         {
             int r = UnityEngine.Random.Range(i, candidateIndices.Count);
             (candidateIndices[i], candidateIndices[r]) = (candidateIndices[r], candidateIndices[i]);
         }
 
-        // Asignar colores a los botones
+        // Asignar a botones
         for (int i = 0; i < candidateButtons.Count; i++)
         {
-            int assignedIndex = candidateIndices[i];
-            candidateButtons[i].image.color = colorValues[assignedIndex];
+            int index = candidateIndices[i];
+            candidateButtons[i].image.color = colorValues[index];
             candidateButtons[i].onClick.RemoveAllListeners();
-            int indexCaptured = assignedIndex;
-            candidateButtons[i].onClick.AddListener(() => OnCandidateSelected(indexCaptured));
+            candidateButtons[i].onClick.AddListener(() => OnCandidateSelected(index));
         }
     }
 
+
     public void OnCandidateSelected(int selectedIndex)
     {
-        if (hasEnded || !hasStarted) return;
+        if (hasEnded || !hasStarted || deathType != DeathType.None)
+            return;
 
         if (selectedIndex == correctIndex)
         {
-            // NUEVO → flash de color
-            TriggerColorFlash(colorValues[correctIndex]);
-
             ColorGamePuntos.Instance.AddScore();
             UpdateScoreText();
 
@@ -206,19 +247,8 @@ public class ColorManager : MonoBehaviour
         }
         else
         {
-            EndGame();
+            DecideDeathType();
         }
-    }
-
-    private void TriggerColorFlash(Color flashColor)
-    {
-        float fade = 0.3f; // velocidad del fade
-
-        TimeText.GetComponent<ColorFlash>().Flash(flashColor, fade);
-        scoreText.GetComponent<ColorFlash>().Flash(flashColor, fade);
-
-        // opcional:
-        timeBarImage.GetComponent<ColorFlash>().Flash(flashColor, fade);
     }
 
     private void UpdateCandidateButtonsSize()
@@ -238,10 +268,7 @@ public class ColorManager : MonoBehaviour
         }
 
         foreach (Button btn in candidateButtons)
-        {
-            RectTransform rt = btn.GetComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(size1, size2);
-        }
+            btn.GetComponent<RectTransform>().sizeDelta = new Vector2(size1, size2);
     }
 
     private void UpdateScoreText()
@@ -251,30 +278,28 @@ public class ColorManager : MonoBehaviour
 
     private void EndGame()
     {
-        if (hasEnded) return; // Previene múltiples ejecuciones
+        if (hasEnded)
+            return;
+
         hasEnded = true;
 
         ColorGamePuntos.Instance.SafeRecordIfNeeded();
-
         OnGameOver?.Invoke(this, EventArgs.Empty);
 
         if (PlayFabLoginManager.Instance != null && PlayFabLoginManager.Instance.IsLoggedIn)
         {
-            PlayFabScoreManager.Instance.SubmitScore("ColorScore", ColorGamePuntos.Instance.GetScore());
+            PlayFabScoreManager.Instance.SubmitScore(
+                "ColorScore",
+                ColorGamePuntos.Instance.GetScore()
+            );
         }
 
         int coinsEarned = ColorGamePuntos.Instance.score;
 
         CoinsRewardUI rewardUI = FindObjectOfType<CoinsRewardUI>(true);
         if (rewardUI != null)
-        {
             rewardUI.ShowReward(coinsEarned);
-        }
         else
-        {
             CurrencyManager.Instance.AddCoins(coinsEarned);
-        }
-
-        Debug.Log($"Fin de partida — Recompensa: {coinsEarned} monedas");
     }
 }

@@ -5,8 +5,6 @@ using UnityEngine.UI;
 
 public class VideoGameOver : MonoBehaviour
 {
-    public bool isVideoShow = false;
-
     [SerializeField] private Image videoGameOverBackgroundImage;
     [SerializeField] private Button playVideoButton;
     [SerializeField] private TextMeshProUGUI playVideoText;
@@ -22,20 +20,12 @@ public class VideoGameOver : MonoBehaviour
 
     private void Start()
     {
-        ColorManager.Instance.OnGameOver += ColorManager_OnGameOver;
+        ColorManager.Instance.OnVideo += ColorManager_OnVideo;
     }
 
-    private void ColorManager_OnGameOver(object sender, EventArgs e)
+    private void ColorManager_OnVideo(object sender, EventArgs e)
     {
-        isVideoShow = false;
-
-        float videoProbability = UnityEngine.Random.Range(0, 10);
-
-        if (videoProbability >= 5)
-        {
-            ShowAdOffer();
-            isVideoShow = true;
-        }
+        ShowAdOffer();
     }
 
     public void ShowAdOffer()
@@ -44,7 +34,8 @@ public class VideoGameOver : MonoBehaviour
         playVideoButton.gameObject.SetActive(true);
         playVideoText.gameObject.SetActive(true);
 
-        playVideoAnimator.SetBool("PlayVideoGameOver", true);
+        if (playVideoAnimator != null)
+            playVideoAnimator.SetBool("PlayVideoGameOver", true);
     }
 
     public void HideAdOffer()
@@ -55,16 +46,14 @@ public class VideoGameOver : MonoBehaviour
         videoGameOverBackgroundImage.gameObject.SetActive(false);
         playVideoButton.gameObject.SetActive(false);
         playVideoText.gameObject.SetActive(false);
-
-        isVideoShow = false;
     }
 
     private void OnClickPlayVideo()
     {
         if (MediationAds.Instance == null)
         {
-            Debug.LogWarning("No hay instancia de MediationAds en la escena (singleton).");
-            SceneLoader.LoadScene(SceneLoader.Scene.ColorScene);
+            Debug.LogWarning("No hay instancia de MediationAds.");
+            ColorManager.Instance.SetDeathType(ColorManager.DeathType.GameOver);
             return;
         }
 
@@ -75,19 +64,20 @@ public class VideoGameOver : MonoBehaviour
         }
         else
         {
-            Debug.Log("Anuncio no listo, recargando escena directamente.");
-            SceneLoader.LoadScene(SceneLoader.Scene.ColorScene);
+            Debug.Log("Anuncio no listo.");
+            ColorManager.Instance.SetDeathType(ColorManager.DeathType.GameOver);
         }
     }
 
     private void OnAdRewardedRevive()
     {
-        SceneLoader.LoadScene(SceneLoader.Scene.ColorScene);
+        Debug.Log("Revive Player");
+        ColorManager.Instance.Revive();
     }
 
     private void OnDestroy()
     {
         if (ColorManager.Instance != null)
-            ColorManager.Instance.OnGameOver -= ColorManager_OnGameOver;
+            ColorManager.Instance.OnVideo -= ColorManager_OnVideo;
     }
 }

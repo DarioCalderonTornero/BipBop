@@ -27,8 +27,9 @@ public class AdButtonFill : MonoBehaviour
 
         if (timer <= 0f)
         {
+            
             OnHideOffer?.Invoke(this, EventArgs.Empty);
-            videoGameOver.HideAdOffer();
+            videoGameOver.HideAdOffer();   
         }
     }
 }

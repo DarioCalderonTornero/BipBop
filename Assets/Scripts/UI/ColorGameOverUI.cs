@@ -42,25 +42,13 @@ public class ColorGameOverUI : MonoBehaviour
 
     private void AdButtonFill_OnHideOffer(object sender, System.EventArgs e)
     {
-        coinText.text = "Coins: " + ColorGamePuntos.Instance.GetScore();
-        myanimator.SetBool("IsGameOver", true);
+        ColorManager.Instance.SetDeathType(ColorManager.DeathType.GameOver);
     }
 
     private void ColorManager_OnGameOver(object sender, System.EventArgs e)
     {
-        StartCoroutine(DecideShowGameOverNextFrame());
-    }
-
-    private IEnumerator DecideShowGameOverNextFrame()
-    {
-        yield return null;
-
-        if (videoGameOver != null && videoGameOver.isVideoShow)
-            yield break;
-
         ShowGameOver();
     }
-
 
     private void ShowGameOver()
     {
