@@ -347,7 +347,16 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      FlechaAzul_0: -6576612268700956539
+      FlechaAzul_1: 2530652047270256682
+      FlechaAzul_2: -7927034671523200738
+      FlechaAzul_3: 3935230495424892387
+      FlechaAzul_4: 6043531927232676229
+      FlechaAzul_5: -5833868127709103927
+      FlechaAzul_6: -5140181459552116207
+      FlechaAzul_7: 3650598620137118227
+      FlechaAzul_8: 5774789025707301077
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

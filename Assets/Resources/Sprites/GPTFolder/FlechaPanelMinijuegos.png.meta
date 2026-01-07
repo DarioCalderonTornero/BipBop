@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      FlechaPanelMinijuegos_0: 506237713355283286
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

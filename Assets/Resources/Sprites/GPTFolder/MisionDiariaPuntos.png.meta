@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      MisionDiariaPuntos_0: 6236101352930586146
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

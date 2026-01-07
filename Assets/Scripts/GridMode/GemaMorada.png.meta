@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      GemaMorada_0: 7741029280875761419
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

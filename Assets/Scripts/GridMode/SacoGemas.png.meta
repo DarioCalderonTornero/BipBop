@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      SacoGemas_0: 1322874753382125713
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

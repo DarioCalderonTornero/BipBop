@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 093c7b8c2d9430b48bc9833d57a5ce40
+guid: 333c1dbd6a26fd045a0d888027d818fc
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 722279441011942736
-    second: MisionDiariaJugar_0
+      213: -6029366148172696342
+    second: "AvatarTibur\xF3n_0"
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: MisionDiariaJugar_0
+      name: "AvatarTibur\xF3n_0"
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 743
-        height: 680
+        x: 12
+        y: 150
+        width: 1002
+        height: 823
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 055a516235d060a00800000000000000
-      internalID: 722279441011942736
+      spriteID: ae4b665ee63635ca0800000000000000
+      internalID: -6029366148172696342
       vertices: []
       indices: 
       edges: []
@@ -147,8 +147,7 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable:
-      MisionDiariaJugar_0: 722279441011942736
+    nameFileIdTable: {}
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

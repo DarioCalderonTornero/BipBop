@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      "SpriteBot\xF3nPlay_0": 526905144565499478
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

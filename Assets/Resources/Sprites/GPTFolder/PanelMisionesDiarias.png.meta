@@ -297,7 +297,14 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      PanelMisionesDiarias_0: 317076338831572908
+      PanelMisionesDiarias_1: 3667970966261488134
+      PanelMisionesDiarias_2: 2308491730553469129
+      PanelMisionesDiarias_3: -5700678600184676277
+      PanelMisionesDiarias_4: -5621505826053651218
+      PanelMisionesDiarias_5: -2965741234069194544
+      PanelMisionesDiarias_6: 8160278977290349492
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

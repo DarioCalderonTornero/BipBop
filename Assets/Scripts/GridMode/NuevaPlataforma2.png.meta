@@ -1,43 +1,49 @@
 fileFormatVersion: 2
-guid: b8b434eb0370f094ea4b49fcd1d51026
+guid: df414ed871f185a4c8c420f2c2fbe7e4
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -27656414549156884
-    second: FlechaVerde_0
+      213: -1848445210175777032
+    second: NuevaPlataforma2_0
   - first:
-      213: 836552793802833549
-    second: FlechaVerde_1
+      213: 6930034521725617395
+    second: NuevaPlataforma2_1
   - first:
-      213: 4124145922515891599
-    second: FlechaVerde_2
+      213: 8159393730303787926
+    second: NuevaPlataforma2_2
   - first:
-      213: 4670037153211496103
-    second: FlechaVerde_3
+      213: -846814571862533409
+    second: NuevaPlataforma2_3
   - first:
-      213: -5345985536382188659
-    second: FlechaVerde_4
+      213: 2829843813459859953
+    second: NuevaPlataforma2_4
   - first:
-      213: -4969050411929195502
-    second: FlechaVerde_5
+      213: 9034615655906483541
+    second: NuevaPlataforma2_5
   - first:
-      213: 7457837599668328560
-    second: FlechaVerde_6
+      213: -6768008138269464248
+    second: NuevaPlataforma2_6
   - first:
-      213: 8513063869221670019
-    second: FlechaVerde_7
+      213: -3731333483445990702
+    second: NuevaPlataforma2_7
   - first:
-      213: 2698889567776786668
-    second: FlechaVerde_8
+      213: 4505702873943958348
+    second: NuevaPlataforma2_8
   - first:
-      213: 2671324918461671770
-    second: FlechaVerde_9
+      213: -2570170928034455361
+    second: NuevaPlataforma2_9
   - first:
-      213: 6873049683059353894
-    second: FlechaVerde_10
+      213: 9065083223001637575
+    second: NuevaPlataforma2_10
   - first:
-      213: -5323762894388246179
-    second: FlechaVerde_11
+      213: 2848625961387839622
+    second: NuevaPlataforma2_11
+  - first:
+      213: -3065966296224184576
+    second: NuevaPlataforma2_12
+  - first:
+      213: -3401421110486079968
+    second: NuevaPlataforma2_13
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -84,7 +90,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 950
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -146,13 +152,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: FlechaVerde_0
+      name: NuevaPlataforma2_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 973
-        height: 182
+        width: 1536
+        height: 1024
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -161,20 +167,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ceb590333aebd9ff0800000000000000
-      internalID: -27656414549156884
+      spriteID: 8f653b4ffd00956e0800000000000000
+      internalID: -1848445210175777032
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: FlechaVerde_1
+      name: NuevaPlataforma2_1
       rect:
         serializedVersion: 2
-        x: 110
-        y: 155
-        width: 11
-        height: 20
+        x: 81
+        y: 992
+        width: 7
+        height: 7
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -183,20 +189,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d8e7a7e65580c9b00800000000000000
-      internalID: 836552793802833549
+      spriteID: 3f446ac3ead6c2060800000000000000
+      internalID: 6930034521725617395
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: FlechaVerde_2
+      name: NuevaPlataforma2_2
       rect:
         serializedVersion: 2
-        x: 150
-        y: 158
-        width: 9
-        height: 13
+        x: 81
+        y: 983
+        width: 7
+        height: 8
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -205,20 +211,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f857f69add8eb3930800000000000000
-      internalID: 4124145922515891599
+      spriteID: 6938e4d0e5dfb3170800000000000000
+      internalID: 8159393730303787926
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: FlechaVerde_3
+      name: NuevaPlataforma2_3
       rect:
         serializedVersion: 2
-        x: 194
-        y: 160
-        width: 15
-        height: 17
+        x: 81
+        y: 974
+        width: 8
+        height: 9
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -227,20 +233,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 7a63c054c0e4fc040800000000000000
-      internalID: 4670037153211496103
+      spriteID: fda528d22a28f34f0800000000000000
+      internalID: -846814571862533409
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: FlechaVerde_4
+      name: NuevaPlataforma2_4
       rect:
         serializedVersion: 2
-        x: 151
-        y: 15
-        width: 17
-        height: 21
+        x: 81
+        y: 128
+        width: 8
+        height: 7
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -249,18 +255,40 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d8340999a7e3fc5b0800000000000000
-      internalID: -5345985536382188659
+      spriteID: 1f99c1784ff954720800000000000000
+      internalID: 2829843813459859953
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: FlechaVerde_5
+      name: NuevaPlataforma2_5
       rect:
         serializedVersion: 2
-        x: 182
-        y: 30
+        x: 81
+        y: 94
+        width: 8
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 55d1d745217616d70800000000000000
+      internalID: 9034615655906483541
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: NuevaPlataforma2_6
+      rect:
+        serializedVersion: 2
+        x: 82
+        y: 104
         width: 6
         height: 6
       alignment: 0
@@ -271,20 +299,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 21ca3fd3af26a0bb0800000000000000
-      internalID: -4969050411929195502
+      spriteID: 849ee79e4743312a0800000000000000
+      internalID: -6768008138269464248
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: FlechaVerde_6
+      name: NuevaPlataforma2_7
       rect:
         serializedVersion: 2
-        x: 217
-        y: 27
-        width: 19
-        height: 14
+        x: 81
+        y: 88
+        width: 8
+        height: 7
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -293,85 +321,85 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 07858c898cf8f7760800000000000000
-      internalID: 7457837599668328560
+      spriteID: 2da4eac57f3a73cc0800000000000000
+      internalID: -3731333483445990702
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: FlechaVerde_7
+      name: NuevaPlataforma2_8
       rect:
         serializedVersion: 2
-        x: 243
+        x: 994
+        y: 74
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c43e2e044e8778e30800000000000000
+      internalID: 4505702873943958348
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: NuevaPlataforma2_9
+      rect:
+        serializedVersion: 2
+        x: 81
+        y: 40
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fb06876882be45cd0800000000000000
+      internalID: -2570170928034455361
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: NuevaPlataforma2_10
+      rect:
+        serializedVersion: 2
+        x: 82
+        y: 32
+        width: 7
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7c2ad569925adcd70800000000000000
+      internalID: 9065083223001637575
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: NuevaPlataforma2_11
+      rect:
+        serializedVersion: 2
+        x: 994
         y: 21
-        width: 11
-        height: 7
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 38c8b232c7a742670800000000000000
-      internalID: 8513063869221670019
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: FlechaVerde_8
-      rect:
-        serializedVersion: 2
-        x: 311
-        y: 19
-        width: 10
-        height: 9
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: ce8c75733c1647520800000000000000
-      internalID: 2698889567776786668
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: FlechaVerde_9
-      rect:
-        serializedVersion: 2
-        x: 179
-        y: 0
-        width: 9
-        height: 7
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: a59ae8c2cd3721520800000000000000
-      internalID: 2671324918461671770
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: FlechaVerde_10
-      rect:
-        serializedVersion: 2
-        x: 213
-        y: 5
-        width: 12
+        width: 7
         height: 12
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -381,20 +409,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 6292d52954af16f50800000000000000
-      internalID: 6873049683059353894
+      spriteID: 6805a7e183a588720800000000000000
+      internalID: 2848625961387839622
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: FlechaVerde_11
+      name: NuevaPlataforma2_12
       rect:
         serializedVersion: 2
-        x: 722
-        y: 0
-        width: 7
-        height: 9
+        x: 81
+        y: 24
+        width: 8
+        height: 7
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -403,8 +431,30 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d594593aad13e16b0800000000000000
-      internalID: -5323762894388246179
+      spriteID: 007cc34d5ef7375d0800000000000000
+      internalID: -3065966296224184576
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: NuevaPlataforma2_13
+      rect:
+        serializedVersion: 2
+        x: 81
+        y: 0
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 02666f18589bbc0d0800000000000000
+      internalID: -3401421110486079968
       vertices: []
       indices: 
       edges: []
@@ -423,18 +473,20 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      FlechaVerde_0: -27656414549156884
-      FlechaVerde_1: 836552793802833549
-      FlechaVerde_10: 6873049683059353894
-      FlechaVerde_11: -5323762894388246179
-      FlechaVerde_2: 4124145922515891599
-      FlechaVerde_3: 4670037153211496103
-      FlechaVerde_4: -5345985536382188659
-      FlechaVerde_5: -4969050411929195502
-      FlechaVerde_6: 7457837599668328560
-      FlechaVerde_7: 8513063869221670019
-      FlechaVerde_8: 2698889567776786668
-      FlechaVerde_9: 2671324918461671770
+      NuevaPlataforma2_0: -1848445210175777032
+      NuevaPlataforma2_1: 6930034521725617395
+      NuevaPlataforma2_10: 9065083223001637575
+      NuevaPlataforma2_11: 2848625961387839622
+      NuevaPlataforma2_12: -3065966296224184576
+      NuevaPlataforma2_13: -3401421110486079968
+      NuevaPlataforma2_2: 8159393730303787926
+      NuevaPlataforma2_3: -846814571862533409
+      NuevaPlataforma2_4: 2829843813459859953
+      NuevaPlataforma2_5: 9034615655906483541
+      NuevaPlataforma2_6: -6768008138269464248
+      NuevaPlataforma2_7: -3731333483445990702
+      NuevaPlataforma2_8: 4505702873943958348
+      NuevaPlataforma2_9: -2570170928034455361
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

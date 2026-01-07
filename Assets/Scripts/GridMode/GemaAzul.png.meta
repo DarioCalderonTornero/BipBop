@@ -172,7 +172,9 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      GemaAzul_0: 6973521042241072327
+      GemaAzul_1: 3429155651947842265
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

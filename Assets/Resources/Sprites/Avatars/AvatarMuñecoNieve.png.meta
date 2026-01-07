@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 093c7b8c2d9430b48bc9833d57a5ce40
+guid: b03d37bbe705ce84f9ea38a3d59dd351
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 722279441011942736
-    second: MisionDiariaJugar_0
+      213: 1034595674862102307
+    second: "AvatarMu\xF1ecoNieve_0"
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: MisionDiariaJugar_0
+      name: "AvatarMu\xF1ecoNieve_0"
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 743
-        height: 680
+        x: 80
+        y: 80
+        width: 865
+        height: 855
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 055a516235d060a00800000000000000
-      internalID: 722279441011942736
+      spriteID: 327af46e84f9b5e00800000000000000
+      internalID: 1034595674862102307
       vertices: []
       indices: 
       edges: []
@@ -147,8 +147,7 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable:
-      MisionDiariaJugar_0: 722279441011942736
+    nameFileIdTable: {}
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
