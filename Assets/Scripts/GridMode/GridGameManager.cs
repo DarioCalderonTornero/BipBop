@@ -19,9 +19,14 @@ public class GridGameManager : MonoBehaviour
 
     [Header("Prefabs")]
     public GameObject playerPrefab;
-    public GameObject coinPrefab;
     public GameObject warningPrefab;
-    public GameObject arrowPrefab;
+    
+    [Header("Arrow Settings")]
+    public float arrowSpeed = 8f;
+    [SerializeField] private GameObject[] arrowPrefabs; // 3 variantes
+
+    [Header("Coins")]
+    [SerializeField] private GameObject[] coinPrefabs;  // 3 variantes
 
     [Header("Gameplay")]
     public float warningTime = 1f;
@@ -65,16 +70,32 @@ public class GridGameManager : MonoBehaviour
     [Header("Hit Settings")]
     [SerializeField] private float cellHitRadius = 0.4f;
 
-    [Header("Arrow Settings")]
-    public float arrowSpeed = 8f;
-
     [Header("UI Score")]
     [SerializeField] private TextMeshProUGUI scoreText;
 
-    [Header("Localization")]
-    [SerializeField] private LocalizedString scoreLabel;
-
     private bool isDyingByArrow = false;
+
+    // Squash
+    public enum Axis { Y_DOWN, Y_UP }
+
+    // Una sola corrutina de squash por plataforma
+    private Dictionary<Transform, Coroutine> platformSquashRoutines = new Dictionary<Transform, Coroutine>();
+
+    // Escala base de las casillas
+    private Vector3 cellBaseScale = new Vector3(0.79671f, 1.35f, 0.79671f);
+
+    private GridPlayerVisual playerVisual;
+
+    [Header("Positions")]
+    [SerializeField] private Vector3 playerCellOffset = new Vector3(0f, 0.2f, 0f);
+
+    [SerializeField] private Vector3 coinCellOffset = new Vector3(0f, 0.2f, 0f);
+
+    [Header("Arrow Warning")]
+    [SerializeField] private Color warningCellColor = Color.red;
+    [SerializeField] private Color defaultCellColor = Color.white;
+
+    [SerializeField] private GridGemUI gemUI;
 
     private void Awake()
     {
@@ -93,8 +114,16 @@ public class GridGameManager : MonoBehaviour
 
         playerX = 0;
         playerY = 0;
-        playerObj = Instantiate(playerPrefab, gridCells[playerX, playerY].position, Quaternion.identity, gridParent);
+        Vector3 startPos = gridCells[playerX, playerY].position + playerCellOffset;
+        playerObj = Instantiate(playerPrefab, startPos, Quaternion.identity, gridParent);
         originalScale = playerObj.transform.localScale;
+
+        playerVisual = playerObj.GetComponent<GridPlayerVisual>();
+        if (playerVisual == null)
+            playerVisual = playerObj.GetComponentInChildren<GridPlayerVisual>(true);
+
+        // estado inicial
+        playerVisual?.SetOnCell();
 
         SpawnCoin();
 
@@ -116,7 +145,6 @@ public class GridGameManager : MonoBehaviour
     {
         if (isGameOver || isDyingByArrow) return;
 
-        // Solo actualizamos el temporizador si el estado del juego es "Playing"
         if (GridState.Instance.gridGameState == GridState.GridGameStateEnum.Playing)
         {
             if (coinObj != null)
@@ -126,7 +154,6 @@ public class GridGameManager : MonoBehaviour
                 float t = Mathf.Clamp01(coinTimer / coinTimeLimit);
                 coinTimerImage.fillAmount = t;
 
-                // Interpolación de color
                 if (t > 0.5f)
                 {
                     float lerpT = (t - 0.5f) * 2f;
@@ -144,34 +171,58 @@ public class GridGameManager : MonoBehaviour
         }
     }
 
-
     private void UpdateScoreText()
     {
         if (scoreText == null) return;
-        scoreText.text = scoreLabel.GetLocalizedString(score);
+        scoreText.text = score.ToString();
     }
 
     void TryMove(int dx, int dy)
     {
         if (isGameOver || isDyingByArrow || isMoving) return;
-
-        if (GridState.Instance.gridGameState != GridState.GridGameStateEnum.Playing)
-            return;
+        if (GridState.Instance.gridGameState != GridState.GridGameStateEnum.Playing) return;
 
         int newX = playerX + dx;
         int newY = playerY + dy;
 
         if (newX >= 0 && newX < gridSize && newY >= 0 && newY < gridSize)
         {
+            int oldX = playerX;
+            int oldY = playerY;
+
             playerX = newX;
             playerY = newY;
-            StartCoroutine(MovePlayer(gridCells[playerX, playerY].position));
+
+            Transform fromCell = gridCells[oldX, oldY];
+            Transform toCell = gridCells[playerX, playerY];
+
+            // Rotación en Z según dirección (ajusta según cómo mire tu sprite)
+            float angleZ = 0f;
+
+            if (dx == 0 && dy == -1) angleZ = 180f;  // arriba
+            else if (dx == 0 && dy == 1) angleZ = 0f;    // abajo
+            else if (dx == 1 && dy == 0) angleZ = 90f;   // derecha
+            else if (dx == -1 && dy == 0) angleZ = -90f;  // izquierda
+
+            playerObj.transform.rotation = Quaternion.Euler(0f, 0f, angleZ);
+
+            // Destino con offset hacia arriba
+            Vector3 targetPos = toCell.position + playerCellOffset;
+
+            StartCoroutine(MovePlayer(targetPos, fromCell, toCell));
         }
     }
 
-    IEnumerator MovePlayer(Vector3 targetPos)
+    IEnumerator MovePlayer(Vector3 targetPos, Transform fromCell, Transform toCell)
     {
         isMoving = true;
+
+        playerVisual?.SetInAir();
+
+        // Plataforma de salida: squash al inicio
+        if (fromCell != null)
+            PlayPlatformSquash(fromCell, 0.12f, 0.12f, Axis.Y_DOWN);
+
         Vector3 startPos = playerObj.transform.position;
         Vector3 startScale = originalScale;
         Vector3 peakScale = originalScale * 1.3f;
@@ -191,31 +242,125 @@ public class GridGameManager : MonoBehaviour
             yield return null;
         }
 
+        // Posición final con offset
         playerObj.transform.position = targetPos;
         playerObj.transform.localScale = originalScale;
         isMoving = false;
 
-        if (coinObj != null && Vector3.Distance(playerObj.transform.position, coinObj.transform.position) < 0.1f)
+        playerVisual?.SetOnCell();
+
+        // Squash en plataforma de llegada
+        if (toCell != null)
+            PlayPlatformSquash(toCell, 0.1f, 0.08f, Axis.Y_UP);
+
+        // Recoger moneda
+        if (coinObj != null)
         {
-            Destroy(coinObj);
-            score++;
+            // Averiguar en qué celda está la moneda
+            int coinCellX = -1;
+            int coinCellY = -1;
+            float bestDist = float.MaxValue;
 
-#if UNITY_ANDROID || UNITY_IOS
-            Haptics.TryVibrate();
-#endif
-
-            Debug.Log("Score: " + score);
-
-            UpdateScoreText();
-
-            if (score % 2 == 0)
+            for (int x = 0; x < gridSize; x++)
             {
-                warningTime = Mathf.Max(minWarningTime, warningTime - decreaseAmount);
-                coinTimeLimit = Mathf.Max(minCoinTime, coinTimeLimit - decreaseAmount);
+                for (int y = 0; y < gridSize; y++)
+                {
+                    // Comparamos con la posición base de la celda + offset de moneda
+                    Vector3 cellPos = gridCells[x, y].position + coinCellOffset;
+                    float d = Vector3.Distance(coinObj.transform.position, cellPos);
+
+                    if (d < bestDist)
+                    {
+                        bestDist = d;
+                        coinCellX = x;
+                        coinCellY = y;
+                    }
+                }
             }
 
-            SpawnCoin();
+            // Si la moneda está en la misma celda que el jugador, la recogemos
+            if (coinCellX == playerX && coinCellY == playerY)
+            {
+                Destroy(coinObj);
+                score++;
+
+                // Efecto UI: sacudir saco + popup "+1"
+                if (gemUI != null)
+                    gemUI.PlayGemCollected();
+
+#if UNITY_ANDROID || UNITY_IOS
+                Haptics.TryVibrate();
+#endif
+
+                Debug.Log("Score: " + score);
+
+                UpdateScoreText();
+
+                if (score % 2 == 0)
+                {
+                    warningTime = Mathf.Max(minWarningTime, warningTime - decreaseAmount);
+                    coinTimeLimit = Mathf.Max(minCoinTime, coinTimeLimit - decreaseAmount);
+                }
+
+                SpawnCoin();
+            }
         }
+    }
+
+    // Lanza squash garantizando 1 corrutina por celda y reseteando escala al empezar
+    void PlayPlatformSquash(Transform target, float duration, float amount, Axis axis)
+    {
+        if (target == null) return;
+
+        if (platformSquashRoutines.TryGetValue(target, out var running) && running != null)
+        {
+            StopCoroutine(running);
+            target.localScale = cellBaseScale;
+        }
+
+        var routine = StartCoroutine(PlatformSquash(target, duration, amount, axis));
+        platformSquashRoutines[target] = routine;
+    }
+
+    IEnumerator PlatformSquash(Transform target, float duration, float amount, Axis axis)
+    {
+        if (target == null) yield break;
+
+        Vector3 original = cellBaseScale;
+        Vector3 squashed = cellBaseScale;
+
+        if (axis == Axis.Y_DOWN)
+        {
+            squashed.y = cellBaseScale.y * (1f - amount);
+            squashed.x = cellBaseScale.x * (1f + amount);
+        }
+        else if (axis == Axis.Y_UP)
+        {
+            squashed.y = cellBaseScale.y * (1f - amount);
+            squashed.x = cellBaseScale.x * (1f + amount);
+        }
+
+        float half = duration * 0.5f;
+        float t = 0f;
+
+        while (t < half)
+        {
+            float k = t / half;
+            target.localScale = Vector3.Lerp(original, squashed, k);
+            t += Time.deltaTime;
+            yield return null;
+        }
+
+        t = 0f;
+        while (t < half)
+        {
+            float k = t / half;
+            target.localScale = Vector3.Lerp(squashed, original, k);
+            t += Time.deltaTime;
+            yield return null;
+        }
+
+        target.localScale = cellBaseScale;
     }
 
     void SpawnCoin()
@@ -227,7 +372,21 @@ public class GridGameManager : MonoBehaviour
             y = UnityEngine.Random.Range(0, gridSize);
         } while (x == playerX && y == playerY);
 
-        coinObj = Instantiate(coinPrefab, gridCells[x, y].position, Quaternion.identity, gridParent);
+        // Elegir prefab de moneda aleatorio
+        if (coinPrefabs == null || coinPrefabs.Length == 0)
+        {
+            Debug.LogError("No hay coinPrefabs asignados en GridGameManager");
+            return;
+        }
+
+        int index = UnityEngine.Random.Range(0, coinPrefabs.Length);
+        GameObject chosenCoinPrefab = coinPrefabs[index];
+
+        coinObj = Instantiate(
+            chosenCoinPrefab,
+            gridCells[x, y].position + coinCellOffset,
+            Quaternion.identity,
+            gridParent);
 
         coinTimer = coinTimeLimit;
         coinTimerImage.fillAmount = 1f;
@@ -236,7 +395,6 @@ public class GridGameManager : MonoBehaviour
 
     IEnumerator ArrowRoutine()
     {
-        Camera cam = Camera.main;
         float margin = 2f;
 
         while (!isGameOver && !isDyingByArrow)
@@ -274,45 +432,32 @@ public class GridGameManager : MonoBehaviour
                 Vector3 worldEnd = reverse ? start.position : end.position;
                 Vector3 dir = (worldEnd - worldStart).normalized;
 
-                Vector3 warningStart = worldStart - dir * 10f;
-                Vector3 warningEnd = worldEnd + dir * 10f;
-
-                if (isGameOver) yield break;
-
-                GameObject warning = Instantiate(warningPrefab, gridParent);
-                warning.transform.position = (warningStart + warningEnd) / 2f;
-
-                // IMPORTANTE: el sprite de warning apunta hacia la DERECHA (eje X local)
-                warning.transform.right = dir;
-
-                float length = Vector3.Distance(warningStart, warningEnd);
-                warning.transform.localScale = new Vector3(length, 0.1f, 1f);
-
-                // === NUEVO: lista de casillas por las que pasa ESTA flecha ===
+                // === Calcular casillas por las que pasa la flecha (ya lo tenías) ===
                 List<Vector2Int> cellsOnLine = new List<Vector2Int>();
 
-                if (mode == 0) // fila horizontal
+                if (mode == 0)
                 {
                     for (int x = 0; x < gridSize; x++)
                         cellsOnLine.Add(new Vector2Int(x, index));
                 }
-                else if (mode == 1) // columna vertical
+                else if (mode == 1)
                 {
                     for (int y = 0; y < gridSize; y++)
                         cellsOnLine.Add(new Vector2Int(index, y));
                 }
-                else if (mode == 2) // diagonal principal
+                else if (mode == 2)
                 {
                     for (int k = 0; k < gridSize; k++)
                         cellsOnLine.Add(new Vector2Int(k, k));
                 }
-                else if (mode == 3) // diagonal secundaria
+                else if (mode == 3)
                 {
                     for (int k = 0; k < gridSize; k++)
                         cellsOnLine.Add(new Vector2Int(gridSize - 1 - k, k));
                 }
 
-                StartCoroutine(ShootArrowAfterWarning(warning, worldStart, worldEnd, dir, margin, cellsOnLine));
+                // === NUEVO: corrutina que ilumina las casillas y luego dispara la flecha ===
+                StartCoroutine(HighlightCellsAndShoot(worldStart, worldEnd, dir, margin, cellsOnLine));
 
                 if (i < arrowCount - 1 && multiArrowDelay > 0f)
                     yield return new WaitForSeconds(multiArrowDelay);
@@ -320,49 +465,87 @@ public class GridGameManager : MonoBehaviour
         }
     }
 
-    IEnumerator ShootArrowAfterWarning(
-    GameObject warning,
+    IEnumerator HighlightCellsAndShoot(
     Vector3 worldStart,
     Vector3 worldEnd,
     Vector3 dir,
     float margin,
     List<Vector2Int> cellsOnLine)
     {
-        // Espera de aviso
-        yield return new WaitForSeconds(warningTime);
-        if (isGameOver || isDyingByArrow) { Destroy(warning); yield break; }
+        // 1) Iluminar casillas
+        List<SpriteRenderer> renderers = new List<SpriteRenderer>();
 
-        Destroy(warning);
+        foreach (var cell in cellsOnLine)
+        {
+            Transform cellTf = gridCells[cell.x, cell.y];
+            if (cellTf == null) continue;
+
+            SpriteRenderer sr = cellTf.GetComponentInChildren<SpriteRenderer>();
+            if (sr != null)
+            {
+                renderers.Add(sr);
+                sr.color = warningCellColor;
+            }
+        }
+
+        // 2) Esperar tiempo de aviso
+        float elapsedWarn = 0f;
+        while (elapsedWarn < warningTime)
+        {
+            if (isGameOver || isDyingByArrow)
+            {
+                // Restaurar colores y salir
+                foreach (var sr in renderers)
+                    if (sr != null) sr.color = defaultCellColor;
+                yield break;
+            }
+
+            elapsedWarn += Time.deltaTime;
+            yield return null;
+        }
+
+        // 3) Restaurar colores
+        foreach (var sr in renderers)
+            if (sr != null) sr.color = defaultCellColor;
+
         if (isGameOver || isDyingByArrow) yield break;
 
+        // 4) Disparar flecha como antes
         Vector3 offStart = worldStart - dir * margin;
         Vector3 offEnd = worldEnd + dir * margin;
 
-        GameObject arrow = Instantiate(arrowPrefab, gridParent);
-        arrow.transform.position = offStart;
+        GameObject chosenPrefab = null;
+        if (arrowPrefabs != null && arrowPrefabs.Length > 0)
+        {
+            int index = UnityEngine.Random.Range(0, arrowPrefabs.Length);
+            chosenPrefab = arrowPrefabs[index];
+        }
+        else
+        {
+            Debug.LogError("No hay arrowPrefabs asignados en GridGameManager");
+            yield break;
+        }
 
-        // IMPORTANTE: tu sprite de flecha debe estar "mirando" en el eje Y local
-        arrow.transform.up = dir;
+        GameObject arrow = Instantiate(chosenPrefab, gridParent);
+        arrow.transform.position = offStart;
+        arrow.transform.right = dir;
 
         float travelDist = Vector3.Distance(offStart, offEnd);
         float travelTime = travelDist / arrowSpeed;
 
         float elapsed = 0f;
-        bool playerAttached = false;   // ¿ya hemos clavado al jugador?
+        bool playerAttached = false;
 
         while (elapsed < travelTime)
         {
-            // la flecha se sigue moviendo incluso si ya ha clavado al jugador
             float t = elapsed / travelTime;
             arrow.transform.position = Vector3.Lerp(offStart, offEnd, t);
 
-            // Si está clavado, movemos al jugador con la flecha
             if (playerAttached && playerObj != null)
             {
                 playerObj.transform.position = arrow.transform.position;
             }
 
-            // Si todavía no está clavado, comprobamos impacto SOLO en la casilla actual del jugador
             if (!playerAttached && !isGameOver && !isDyingByArrow)
             {
                 foreach (var cell in cellsOnLine)
@@ -374,11 +557,9 @@ public class GridGameManager : MonoBehaviour
 
                         if (dist <= cellHitRadius)
                         {
-                            // Marcar que estamos en animación de muerte por flecha
                             isDyingByArrow = true;
                             playerAttached = true;
 
-                            // "Clavamos" al jugador en la flecha
                             playerObj.transform.SetParent(arrow.transform);
                             playerObj.transform.position = arrow.transform.position;
 
@@ -395,10 +576,97 @@ public class GridGameManager : MonoBehaviour
             yield return null;
         }
 
-        // La flecha sale de pantalla
         Destroy(arrow);
 
-        // Si hemos llevado al jugador con la flecha, ahora sí hacemos GameOver
+        if (playerAttached)
+        {
+            GameOver();
+        }
+    }
+
+    IEnumerator ShootArrowAfterWarning(
+        GameObject warning,
+        Vector3 worldStart,
+        Vector3 worldEnd,
+        Vector3 dir,
+        float margin,
+        List<Vector2Int> cellsOnLine)
+    {
+        yield return new WaitForSeconds(warningTime);
+        if (isGameOver || isDyingByArrow) { Destroy(warning); yield break; }
+
+        Destroy(warning);
+        if (isGameOver || isDyingByArrow) yield break;
+
+        Vector3 offStart = worldStart - dir * margin;
+        Vector3 offEnd = worldEnd + dir * margin;
+
+        GameObject chosenPrefab = null;
+        if (arrowPrefabs != null && arrowPrefabs.Length > 0)
+        {
+            int index = UnityEngine.Random.Range(0, arrowPrefabs.Length);
+            chosenPrefab = arrowPrefabs[index];
+        }
+        else
+        {
+            Debug.LogError("No hay arrowPrefabs asignados en GridGameManager");
+            yield break;
+        }
+
+        GameObject arrow = Instantiate(chosenPrefab, gridParent);
+        arrow.transform.position = offStart;
+        arrow.transform.up = dir;
+
+        arrow.transform.up = dir;
+
+        float travelDist = Vector3.Distance(offStart, offEnd);
+        float travelTime = travelDist / arrowSpeed;
+
+        float elapsed = 0f;
+        bool playerAttached = false;
+
+        while (elapsed < travelTime)
+        {
+            float t = elapsed / travelTime;
+            arrow.transform.position = Vector3.Lerp(offStart, offEnd, t);
+
+            if (playerAttached && playerObj != null)
+            {
+                playerObj.transform.position = arrow.transform.position;
+            }
+
+            if (!playerAttached && !isGameOver && !isDyingByArrow)
+            {
+                foreach (var cell in cellsOnLine)
+                {
+                    if (cell.x == playerX && cell.y == playerY)
+                    {
+                        Vector3 cellPos = gridCells[cell.x, cell.y].position;
+                        float dist = Vector3.Distance(arrow.transform.position, cellPos);
+
+                        if (dist <= cellHitRadius)
+                        {
+                            isDyingByArrow = true;
+                            playerAttached = true;
+
+                            playerObj.transform.SetParent(arrow.transform);
+                            playerObj.transform.position = arrow.transform.position;
+
+#if UNITY_ANDROID || UNITY_IOS
+                            Haptics.TryVibrate();
+#endif
+                            break;
+                        }
+                    }
+                }
+            }
+
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        Destroy(arrow);
+
         if (playerAttached)
         {
             GameOver();
@@ -417,22 +685,17 @@ public class GridGameManager : MonoBehaviour
 
         Debug.Log($"GAME OVER - Score final: {score}");
 
-        OnGridGameOver?.Invoke(this, EventArgs.Empty);  
+        OnGridGameOver?.Invoke(this, EventArgs.Empty);
 
-        // Guardar récord máximo
         SaveRecordIfNeeded();
 
-        // Enviar puntuación a PlayFab
         PlayFabScoreManager.Instance.SubmitScore("GridScore", score);
 
-        // Recompensa en monedas
         int coinsEarned = score;
         int totalCoins = PlayerPrefs.GetInt("CoinCount", 0);
         totalCoins += coinsEarned;
         PlayerPrefs.SetInt("CoinCount", totalCoins);
         PlayerPrefs.Save();
-
-        // Time.timeScale = 0f;
 
         CoinsRewardUI rewardUI = FindObjectOfType<CoinsRewardUI>(true);
         if (rewardUI != null)
@@ -475,7 +738,6 @@ public class GridGameManager : MonoBehaviour
         return bestX != -1;
     }
 
-    // Nuevo método para guardar récord máximo
     private void SaveRecordIfNeeded()
     {
         int currentRecord = PlayerPrefs.GetInt("MaxRecordGrid", 0);
@@ -485,20 +747,5 @@ public class GridGameManager : MonoBehaviour
             PlayerPrefs.SetInt("MaxRecordGrid", score);
             PlayerPrefs.Save();
         }
-    }
-
-    private void OnEnable()
-    {
-        LocalizationSettings.SelectedLocaleChanged += OnLocaleChanged;
-    }
-
-    private void OnDisable()
-    {
-        LocalizationSettings.SelectedLocaleChanged -= OnLocaleChanged;
-    }
-
-    private void OnLocaleChanged(Locale newLocale)
-    {
-        UpdateScoreText();
     }
 }

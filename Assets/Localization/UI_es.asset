@@ -409,6 +409,10 @@ MonoBehaviour:
     m_Localized: "Puntuaci\xF3n: {0}"
     m_Metadata:
       m_Items: []
+  - m_Id: 19905045483978752
+    m_Localized: 'Gemas recogidas:'
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

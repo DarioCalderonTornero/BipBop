@@ -399,6 +399,10 @@ MonoBehaviour:
     m_Key: GameOver_Points
     m_Metadata:
       m_Items: []
+  - m_Id: 19905045483978752
+    m_Key: Gemas_encontradas
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
