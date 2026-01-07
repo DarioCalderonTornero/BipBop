@@ -6871,7 +6871,6 @@ GameObject:
   - component: {fileID: 1873210211}
   - component: {fileID: 1873210215}
   - component: {fileID: 1873210214}
-  - component: {fileID: 1873210213}
   - component: {fileID: 1873210212}
   m_Layer: 5
   m_Name: CountDown
@@ -6910,20 +6909,6 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7adac543744f6e043a932c9a7841e120, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  countDownText: {fileID: 1766737985}
-  myAnimator: {fileID: 1873210215}
---- !u!114 &1873210213
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1873210210}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1c1ab9504023ac447a0f61e1fe441cf1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   countDownText: {fileID: 1766737985}
