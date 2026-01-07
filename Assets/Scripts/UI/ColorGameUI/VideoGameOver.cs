@@ -71,8 +71,7 @@ public class VideoGameOver : MonoBehaviour
 
     private void OnAdRewardedRevive()
     {
-        Debug.Log("Revive Player");
-        ColorManager.Instance.Revive();
+        ColorManager.Instance.StartReviveCountdown();
     }
 
     private void OnDestroy()

@@ -12,6 +12,9 @@ public class ColorManager : MonoBehaviour
     public event EventHandler OnGameOver;
     public event EventHandler OnVideo;
 
+    [Header("Revive Countdown UI")]
+    [SerializeField] private ReviveCountdownUI reviveCountdownUI;
+
     [Header("UI Elements")]
     public TextMeshProUGUI colorWordText;
     public Image colorWordBackground;
@@ -34,6 +37,9 @@ public class ColorManager : MonoBehaviour
     private bool hasEnded = false;
     private bool hasStarted = false;
 
+    // 1 revive máximo por partida (opcional, pero recomendado)
+    private bool hasUsedReviveOffer = false;
+
     public enum DeathType
     {
         None,
@@ -42,8 +48,6 @@ public class ColorManager : MonoBehaviour
     }
 
     public DeathType deathType { get; private set; } = DeathType.None;
-
-    private bool hasUsedReviveOffer = false;
 
     private void Awake()
     {
@@ -62,7 +66,7 @@ public class ColorManager : MonoBehaviour
         if (hasEnded || !hasStarted)
             return;
 
-        // Si estamos muriendo (video o gameover), congelamos el juego
+        // Si estamos en Video/GameOver, el juego está congelado
         if (deathType != DeathType.None)
             return;
 
@@ -87,8 +91,9 @@ public class ColorManager : MonoBehaviour
     {
         hasEnded = false;
         hasStarted = true;
-        hasUsedReviveOffer = false;
         deathType = DeathType.None;
+
+        hasUsedReviveOffer = false;
 
         currentTime = startTime;
 
@@ -105,6 +110,7 @@ public class ColorManager : MonoBehaviour
         if (deathType != DeathType.None)
             return;
 
+        // Si ya tuvo revive en esta partida, no vuelve a salir
         if (hasUsedReviveOffer)
         {
             SetDeathType(DeathType.GameOver);
@@ -115,7 +121,7 @@ public class ColorManager : MonoBehaviour
 
         if (videoProbability >= 5)
         {
-            hasUsedReviveOffer = true;    
+            hasUsedReviveOffer = true;
             SetDeathType(DeathType.Video);
         }
         else
@@ -123,7 +129,6 @@ public class ColorManager : MonoBehaviour
             SetDeathType(DeathType.GameOver);
         }
     }
-
 
     public void SetDeathType(DeathType newType)
     {
@@ -144,17 +149,43 @@ public class ColorManager : MonoBehaviour
         }
     }
 
+    // Llamado desde VideoGameOver cuando el rewarded termina
+    public void StartReviveCountdown()
+    {
+        // Solo tiene sentido si estamos en el estado Video
+        if (deathType != DeathType.Video)
+            return;
+
+        // Si no hay UI asignada, revive directo (fallback)
+        if (reviveCountdownUI == null)
+        {
+            Revive();
+            return;
+        }
+
+        // Sigue congelado durante la cuenta atrás.
+        reviveCountdownUI.Play(() =>
+        {
+            Revive();
+        });
+    }
+
     public void Revive()
     {
         if (deathType != DeathType.Video)
             return;
 
+        // Reanudar
         deathType = DeathType.None;
 
-        // margen de tiempo para seguir jugando
+        // margen de tiempo para seguir jugando (ajústalo a tu gusto)
         currentTime = Mathf.Max(currentTime, startTime * 0.5f);
+
+        // opcional: podrías regenerar ronda para evitar edge cases
+        // SetupRound();
     }
 
+    // --- TU SetupRound (con shuffle corregido) ---
     private void SetupRound()
     {
         if (hasEnded || !hasStarted)
@@ -165,7 +196,6 @@ public class ColorManager : MonoBehaviour
         if (ColorGamePuntos.Instance.GetScore() >= 20) availableCount = 8;
         if (ColorGamePuntos.Instance.GetScore() >= 30) availableCount = 9;
 
-        // Elegir color correcto (sin repetir)
         do
         {
             correctIndex = UnityEngine.Random.Range(0, availableCount);
@@ -173,10 +203,8 @@ public class ColorManager : MonoBehaviour
 
         lastCorrectIndex = correctIndex;
 
-        // Texto correcto
         string correctColorName = colorNames[correctIndex].GetLocalizedString();
 
-        // Color del texto (distinto)
         int textColorIndex;
         do
         {
@@ -186,7 +214,6 @@ public class ColorManager : MonoBehaviour
         colorWordText.text = correctColorName;
         colorWordText.color = colorValues[textColorIndex];
 
-        // Fondo (distinto al texto)
         int backgroundColorIndex;
         do
         {
@@ -195,15 +222,12 @@ public class ColorManager : MonoBehaviour
 
         colorWordBackground.color = colorValues[backgroundColorIndex];
 
-        // Construir candidatos
         List<int> candidateIndices = new List<int> { correctIndex, textColorIndex };
         List<int> remaining = new List<int>();
 
         for (int i = 0; i < availableCount; i++)
-        {
             if (i != correctIndex && i != textColorIndex)
                 remaining.Add(i);
-        }
 
         while (candidateIndices.Count < candidateButtons.Count && remaining.Count > 0)
         {
@@ -212,13 +236,13 @@ public class ColorManager : MonoBehaviour
             remaining.RemoveAt(r);
         }
 
+        // SHUFFLE (clave)
         for (int i = 0; i < candidateIndices.Count; i++)
         {
             int r = UnityEngine.Random.Range(i, candidateIndices.Count);
             (candidateIndices[i], candidateIndices[r]) = (candidateIndices[r], candidateIndices[i]);
         }
 
-        // Asignar a botones
         for (int i = 0; i < candidateButtons.Count; i++)
         {
             int index = candidateIndices[i];
@@ -227,7 +251,6 @@ public class ColorManager : MonoBehaviour
             candidateButtons[i].onClick.AddListener(() => OnCandidateSelected(index));
         }
     }
-
 
     public void OnCandidateSelected(int selectedIndex)
     {
@@ -288,10 +311,7 @@ public class ColorManager : MonoBehaviour
 
         if (PlayFabLoginManager.Instance != null && PlayFabLoginManager.Instance.IsLoggedIn)
         {
-            PlayFabScoreManager.Instance.SubmitScore(
-                "ColorScore",
-                ColorGamePuntos.Instance.GetScore()
-            );
+            PlayFabScoreManager.Instance.SubmitScore("ColorScore", ColorGamePuntos.Instance.GetScore());
         }
 
         int coinsEarned = ColorGamePuntos.Instance.score;
