@@ -10,38 +10,39 @@ public class AdPanelManager : MonoBehaviour
     [SerializeField] private Button closeButton;
     [SerializeField] private Image coinImage;
     [SerializeField] private Sprite coinSprite;
-    // [SerializeField] private TextMeshProUGUI adPromptText;
-
     [SerializeField] private Button openAdPanelButton;
 
     [Header("Otros scripts")]
-    [SerializeField] private MediationAds mediationAds;
-
-    // Para el ejemplo, el GameManager responsable de sumar monedas
     [SerializeField] private CurrencyManager gameManager;
+
+    private MediationAds Mediation => MediationAds.Instance;
 
     void Start()
     {
         adPanel.SetActive(false);
-        // adPromptText.text = "¿Quieres ver un anuncio por 5 ";
         coinImage.sprite = coinSprite;
 
         watchAdButton.onClick.RemoveAllListeners();
         watchAdButton.onClick.AddListener(OnWatchAdBtnClicked);
+        watchAdButton.interactable = false;
 
         closeButton.onClick.RemoveAllListeners();
         closeButton.onClick.AddListener(ClosePanel);
-
-        // Deshabilita el botón hasta que el anuncio esté listo
-        watchAdButton.interactable = false;
-
-        // Evento desde MediationAds cuando el anuncio está listo
-        mediationAds.showAdButton = watchAdButton;
 
         if (openAdPanelButton != null)
         {
             openAdPanelButton.onClick.RemoveAllListeners();
             openAdPanelButton.onClick.AddListener(ShowPanel);
+        }
+
+        // Asigna SIEMPRE el botón al singleton cuando se entra al menú
+        if (Mediation != null)
+        {
+            Mediation.SetShowAdButton(watchAdButton);
+        }
+        else
+        {
+            Debug.LogWarning("AdPanelManager: MediationAds.Instance es null al iniciar el menú.");
         }
     }
 
@@ -49,8 +50,10 @@ public class AdPanelManager : MonoBehaviour
     {
         adPanel.SetActive(true);
 
-        // El botón sólo está habilitado si el anuncio está listo
-        watchAdButton.interactable = mediationAds.IsAdReady();
+        if (Mediation != null)
+            watchAdButton.interactable = Mediation.IsAdReady();
+        else
+            watchAdButton.interactable = false;
     }
 
     private void ClosePanel()
@@ -61,8 +64,15 @@ public class AdPanelManager : MonoBehaviour
     private void OnWatchAdBtnClicked()
     {
         ClosePanel();
-        mediationAds.ShowRewardedAd(() => {
-            // Recompensa al jugador con 5 monedas tras ver el anuncio  
+
+        if (Mediation == null)
+        {
+            Debug.LogWarning("AdPanelManager: MediationAds es null, no se puede mostrar el anuncio.");
+            return;
+        }
+
+        Mediation.ShowRewardedAd(() =>
+        {
             gameManager.AddCoins(5);
         });
     }
