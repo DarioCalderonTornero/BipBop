@@ -8,6 +8,14 @@ public class Enemy : MonoBehaviour
     public static bool GlobalFreeze = false;
 
     public float speed = 3f;
+
+    [Header("Rotación")]
+    public float rotationSpeed = 90f;   // grados por segundo
+    private float rotationDirection = 1f;
+
+    [Header("Explosion")]
+    public int explosionIndex = 0;
+
     private Transform player;
 
     private SpriteRenderer sr;
@@ -26,10 +34,12 @@ public class Enemy : MonoBehaviour
             EnemyIndicator.Instance.RegisterEnemy(transform);
     }
 
-    public void Init(Transform playerTarget, float newSpeed)
+    public void Init(Transform playerTarget, float newSpeed, float rotSpeed, float rotDir)
     {
         player = playerTarget;
         speed = newSpeed;
+        rotationSpeed = rotSpeed;
+        rotationDirection = rotDir;
     }
 
     private void Update()
@@ -42,6 +52,9 @@ public class Enemy : MonoBehaviour
 
         Vector3 dir = (player.position - transform.position).normalized;
         transform.position += dir * speed * Time.deltaTime;
+
+        // Rotación constante
+        transform.Rotate(0f, 0f, rotationSpeed * rotationDirection * Time.deltaTime);
     }
 
     private void OnTriggerEnter2D(Collider2D other)

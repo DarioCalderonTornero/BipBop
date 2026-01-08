@@ -1,62 +1,161 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.EventSystems;   // 👈 IMPORTANTE para detectar UI
+﻿using UnityEngine;
+using UnityEngine.EventSystems;
+using static UnityEngine.ParticleSystem;
 
 public class PlayerController : MonoBehaviour
 {
     public float moveSpeed = 5f;
+    public float rotationSpeed = 360f;
+    public float stopDistance = 0.1f;
+
+    [Header("Sprites")]
+    public SpriteRenderer spriteRenderer; // hijo visual o el propio
+    public Sprite idleSprite;
+    public Sprite movingSprite;
+
+    [Header("Trails")]
+    public TrailRenderer trailLeft;
+    public TrailRenderer trailRight;
+
+    public float minInputDistance = 0.35f;
+
+    [HideInInspector] public bool isIntroMoving = false;
+    [HideInInspector] public bool forceTrails = false;
+
     private Vector3 targetPosition;
+
+    [Header("Smoke")]
+    public ParticleSystem smokeLeft;
+    public ParticleSystem smokeRight;
 
     private void Start()
     {
         targetPosition = transform.position;
+
+        if (spriteRenderer == null)
+            spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+
+        SetTrailsActive(false);
     }
 
     private void Update()
     {
-        // Solo mover si el estado es Playing
-        if (DodgeState.Instance.dodgeGameState != DodgeState.DodgeGameStateEnum.Playing)
+        bool isPlaying = DodgeState.Instance != null &&
+                         DodgeState.Instance.dodgeGameState == DodgeState.DodgeGameStateEnum.Playing;
+
+        // 1) SOLO leer input si estamos en Playing
+        if (isPlaying)
+        {
+#if UNITY_EDITOR || UNITY_STANDALONE
+            if (Input.GetMouseButton(0))
+            {
+                if (EventSystem.current == null || !EventSystem.current.IsPointerOverGameObject())
+                {
+                    Vector3 mousePos = Input.mousePosition;
+                    mousePos.z = 10f;
+                    Vector3 worldPos = Camera.main.ScreenToWorldPoint(mousePos);
+
+                    if (Vector3.Distance(worldPos, transform.position) > minInputDistance)
+                        targetPosition = worldPos;
+                }
+            }
+#else
+            if (Input.touchCount > 0)
+            {
+                Touch touch = Input.GetTouch(0);
+
+                if (EventSystem.current == null ||
+                    !EventSystem.current.IsPointerOverGameObject(touch.fingerId))
+                {
+                    Vector3 touchPos = touch.position;
+                    touchPos.z = 10f;
+                    Vector3 worldPos = Camera.main.ScreenToWorldPoint(touchPos);
+
+                    if (Vector3.Distance(worldPos, transform.position) > minInputDistance)
+                        targetPosition = worldPos;
+                }
+            }
+#endif
+        }
+
+        // 2) LÓGICA DE VISUAL Y MOVIMIENTO (se ejecuta también en intro)
+        Vector3 toTarget = targetPosition - transform.position;
+        toTarget.z = 0f;
+        float dist = toTarget.magnitude;
+
+        bool isMoving = dist > stopDistance;
+
+        // Durante la intro queremos que parezca que se mueve (sprite + trails),
+        // aunque el movimiento real lo hace PlayerIntroMover
+        if (isIntroMoving && !isPlaying)
+            isMoving = true;
+
+        // Sprite según movimiento
+        if (spriteRenderer != null)
+            spriteRenderer.sprite = isMoving ? movingSprite : idleSprite;
+
+        // Trails según movimiento
+        SetTrailsActive(isMoving);
+        SetSmokeActive(isMoving);
+
+        // Si NO estamos en Playing, aquí terminamos (intro no usa este movimiento)
+        if (!isPlaying)
             return;
 
-#if UNITY_EDITOR || UNITY_STANDALONE
-        // PC - seguir mouse
-        if (Input.GetMouseButton(0))
+        // A partir de aquí solo vale para Playing
+        if (!isMoving)
         {
-            // 👇 Si el ratón está sobre UI, NO cambiamos el target
-            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
-            {
-                // Pero seguimos moviendo hacia el último targetPosition
-            }
-            else
-            {
-                Vector3 mousePos = Input.mousePosition;
-                mousePos.z = 10f; // distancia de cámara
-                targetPosition = Camera.main.ScreenToWorldPoint(mousePos);
-            }
+            transform.position = new Vector3(targetPosition.x, targetPosition.y, transform.position.z);
+            return;
         }
-#else
-        // Móvil - seguir dedo
-        if (Input.touchCount > 0)
+
+        float angle = Mathf.Atan2(toTarget.y, toTarget.x) * Mathf.Rad2Deg;
+        Quaternion targetRot = Quaternion.AngleAxis(angle - 90f, Vector3.forward);
+
+        transform.rotation = Quaternion.RotateTowards(
+            transform.rotation,
+            targetRot,
+            rotationSpeed * Time.deltaTime
+        );
+
+        transform.position += transform.up * moveSpeed * Time.deltaTime;
+    }
+
+    public void SetTrailsActive(bool active)
+    {
+        if (trailLeft != null)
         {
-            Touch touch = Input.GetTouch(0);
-
-            // 👇 Comprobamos si ese dedo está sobre UI
-            if (EventSystem.current != null &&
-                EventSystem.current.IsPointerOverGameObject(touch.fingerId))
-            {
-                // Está tocando UI → ignoramos este toque para movimiento
-            }
-            else
-            {
-                Vector3 touchPos = touch.position;
-                touchPos.z = 10f;
-                targetPosition = Camera.main.ScreenToWorldPoint(touchPos);
-            }
+            trailLeft.emitting = active;
+            if (!active) trailLeft.Clear();
         }
-#endif
 
-        // Movimiento suave hacia el último target "válido"
-        transform.position = Vector3.Lerp(transform.position, targetPosition, moveSpeed * Time.deltaTime);
+        if (trailRight != null)
+        {
+            trailRight.emitting = active;
+            if (!active) trailRight.Clear();
+        }
+    }
+
+    public void SetSmokeActive(bool active)
+    {
+        if (smokeLeft != null)
+        {
+            var em = smokeLeft.emission;
+            em.enabled = active;
+            if (!active) smokeLeft.Clear();
+        }
+
+        if (smokeRight != null)
+        {
+            var em = smokeRight.emission;
+            em.enabled = active;
+            if (!active) smokeRight.Clear();
+        }
+    }
+
+
+    public void ResetTargetToCurrentPosition()
+    {
+        targetPosition = transform.position;
     }
 }

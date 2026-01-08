@@ -13,7 +13,9 @@ public class EnemyIndicator : MonoBehaviour
 
     [Header("Settings")]
     [Range(0f, 0.5f)]
-    public float screenMargin = 0.08f; // margen en viewport (0 = borde total, 0.1 = más separado)
+    public float screenMarginX = 0.08f;
+    [Range(0f, 0.5f)]
+    public float screenMarginY = 0.08f;
 
     private Dictionary<Transform, RectTransform> activeIndicators = new Dictionary<Transform, RectTransform>();
 
@@ -39,47 +41,7 @@ public class EnemyIndicator : MonoBehaviour
                 continue;
             }
 
-            Vector3 viewportPos = mainCamera.WorldToViewportPoint(enemy.position);
-
-            bool isVisible = viewportPos.z > 0 &&
-                             viewportPos.x > 0 && viewportPos.x < 1 &&
-                             viewportPos.y > 0 && viewportPos.y < 1;
-
-            indicator.gameObject.SetActive(!isVisible);
-
-            if (!isVisible)
-            {
-                Vector3 dir = viewportPos - new Vector3(0.5f, 0.5f, 0);
-                dir.z = 0;
-
-                float absX = Mathf.Abs(dir.x);
-                float absY = Mathf.Abs(dir.y);
-
-                Vector2 edgeViewportPos = new Vector2(0.5f, 0.5f);
-
-                if (absX > absY)
-                {
-                    // Izquierda o derecha
-                    edgeViewportPos.x = dir.x > 0 ? 1f - screenMargin : screenMargin;
-                    edgeViewportPos.y = Mathf.Clamp(viewportPos.y, screenMargin, 1f - screenMargin);
-                }
-                else
-                {
-                    // Arriba o abajo
-                    edgeViewportPos.y = dir.y > 0 ? 1f - screenMargin : screenMargin;
-                    edgeViewportPos.x = Mathf.Clamp(viewportPos.x, screenMargin, 1f - screenMargin);
-                }
-
-                // Convertir a posición en canvas
-                RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                    canvas.transform as RectTransform,
-                    mainCamera.ViewportToScreenPoint(edgeViewportPos),
-                    canvas.worldCamera,
-                    out Vector2 canvasPos);
-
-                indicator.localPosition = canvasPos;
-                indicator.localRotation = Quaternion.identity;
-            }
+            UpdateSingleIndicator(enemy, indicator);
         }
 
         foreach (var e in toRemove)
@@ -88,10 +50,60 @@ public class EnemyIndicator : MonoBehaviour
 
     public void RegisterEnemy(Transform enemy)
     {
-        if (!activeIndicators.ContainsKey(enemy))
+        if (activeIndicators.ContainsKey(enemy))
+            return;
+
+        RectTransform newIndicator = Instantiate(indicatorPrefab, canvas.transform);
+        newIndicator.gameObject.SetActive(false); // no mostrarlo aún
+
+        activeIndicators.Add(enemy, newIndicator);
+
+        // Posicionar inmediatamente para evitar “parpadeo” en el centro
+        UpdateSingleIndicator(enemy, newIndicator);
+    }
+
+    private void UpdateSingleIndicator(Transform enemy, RectTransform indicator)
+    {
+        if (enemy == null || indicator == null)
+            return;
+
+        Vector3 viewportPos = mainCamera.WorldToViewportPoint(enemy.position);
+
+        bool isVisible = viewportPos.z > 0 &&
+                         viewportPos.x > 0 && viewportPos.x < 1 &&
+                         viewportPos.y > 0 && viewportPos.y < 1;
+
+        indicator.gameObject.SetActive(!isVisible);
+
+        if (!isVisible)
         {
-            RectTransform newIndicator = Instantiate(indicatorPrefab, canvas.transform);
-            activeIndicators.Add(enemy, newIndicator);
+            Vector3 dir = viewportPos - new Vector3(0.5f, 0.5f, 0);
+            dir.z = 0;
+
+            float absX = Mathf.Abs(dir.x);
+            float absY = Mathf.Abs(dir.y);
+
+            Vector2 edgeViewportPos = new Vector2(0.5f, 0.5f);
+
+            if (absX > absY)
+            {
+                edgeViewportPos.x = dir.x > 0 ? 1f - screenMarginX : screenMarginX;
+                edgeViewportPos.y = Mathf.Clamp(viewportPos.y, screenMarginY, 1f - screenMarginY);
+            }
+            else
+            {
+                edgeViewportPos.y = dir.y > 0 ? 1f - screenMarginY : screenMarginY;
+                edgeViewportPos.x = Mathf.Clamp(viewportPos.x, screenMarginX, 1f - screenMarginX);
+            }
+
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                canvas.transform as RectTransform,
+                mainCamera.ViewportToScreenPoint(edgeViewportPos),
+                canvas.worldCamera,
+                out Vector2 canvasPos);
+
+            indicator.localPosition = canvasPos;
+            indicator.localRotation = Quaternion.identity;
         }
     }
 
