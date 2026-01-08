@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class VideoGameOver : MonoBehaviour
+public class ColorVideoGameOver : MonoBehaviour
 {
     [SerializeField] private Image videoGameOverBackgroundImage;
     [SerializeField] private Button playVideoButton;

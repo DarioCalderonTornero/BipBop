@@ -16,7 +16,7 @@ public class ColorGameOverUI : MonoBehaviour
 
     [SerializeField] private Animator myanimator;
 
-    [SerializeField] private VideoGameOver videoGameOver;
+    [SerializeField] private ColorVideoGameOver videoGameOver;
     [SerializeField] private AdButtonFill adButtonFill;
 
     private void Awake()

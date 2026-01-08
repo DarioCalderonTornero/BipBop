@@ -9,7 +9,7 @@ public class AdButtonFill : MonoBehaviour
     [SerializeField] private Image fillImage;
     [SerializeField] private float duration = 5f;
 
-    [SerializeField] VideoGameOver videoGameOver;
+    [SerializeField] ColorVideoGameOver videoGameOver;
 
     private float timer;
 
