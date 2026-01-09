@@ -38,6 +38,12 @@ public class GridState : MonoBehaviour
         {
             GridCountDownUI.Instance.Show();
         }
+
+        // Empezar la caída del personaje durante la cuenta atrás
+        if (GridGameManager.Instance != null)
+        {
+            GridGameManager.Instance.StartIntroDropDuringCountdown();
+        }
     }
 
     private void Update()
@@ -49,9 +55,6 @@ public class GridState : MonoBehaviour
     {
         switch (gridGameState)
         {
-            case GridGameStateEnum.None:
-                break;
-
             case GridGameStateEnum.Countdown:
                 countDownTimer -= Time.deltaTime;
                 timer = timerMax;
@@ -63,6 +66,12 @@ public class GridState : MonoBehaviour
                     if (GridCountDownUI.Instance != null)
                     {
                         GridCountDownUI.Instance.ShowGo(0.7f);
+                    }
+
+                    // Cuando termina la cuenta atrás: primera gema + flechas
+                    if (GridGameManager.Instance != null)
+                    {
+                        GridGameManager.Instance.StartGameplayAfterCountdown();
                     }
                 }
                 break;
@@ -86,6 +95,7 @@ public class GridState : MonoBehaviour
     }
     public void StartGameAfterGo()
     {
+        // Llamado desde la UI del "GO" cuando desaparece:
         gridGameState = GridGameStateEnum.Playing;
     }
 }

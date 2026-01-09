@@ -103,13 +103,30 @@ public class GridGameManager : MonoBehaviour
 
     [SerializeField] private GridGemUI gemUI;
 
+    [Header("FX")]
+    [SerializeField] private GemSpawnFX gemSpawnFxPrefab;
+    [SerializeField] private Color blueGemColor = new Color(0.2f, 0.6f, 1f);
+    [SerializeField] private Color greenGemColor = new Color(0.3f, 0.9f, 0.3f);
+    [SerializeField] private Color purpleGemColor = new Color(0.8f, 0.2f, 0.9f);
+
+    [Header("Intro Drop")]
+    [SerializeField] private float introDropHeight = 3f;
+    [SerializeField] private float introDropDuration = 0.8f;
+
+    // Si tus 3 prefabs de gemas coinciden con azul, verde, morado:
+    Color GetGemColorFromPrefab(GameObject prefab)
+    {
+        if (prefab.name.Contains("GemaAzul")) return blueGemColor;
+        if (prefab.name.Contains("GemaVerde")) return greenGemColor;
+        if (prefab.name.Contains("GemaMorada")) return purpleGemColor;
+        return Color.white;
+    }
+
     private void Awake()
     {
         Instance = this;
-    }
 
-    private void Start()
-    {
+        // IMPORTANTE: inicializar aquí
         gridCells = new Transform[gridSize, gridSize];
         int index = 0;
         for (int y = 0; y < gridSize; y++)
@@ -117,34 +134,97 @@ public class GridGameManager : MonoBehaviour
             for (int x = 0; x < gridSize; x++)
                 gridCells[x, y] = gridParent.GetChild(index++);
         }
+    }
 
-        playerX = 0;
-        playerY = 0;
-        Vector3 startPos = gridCells[playerX, playerY].position + playerCellOffset;
-        playerObj = Instantiate(playerPrefab, startPos, Quaternion.identity, gridParent);
-        originalScale = playerObj.transform.localScale;
-
-        playerVisual = playerObj.GetComponent<GridPlayerVisual>();
-        if (playerVisual == null)
-            playerVisual = playerObj.GetComponentInChildren<GridPlayerVisual>(true);
-
-        // estado inicial
-        playerVisual?.SetOnCell();
-
-        SpawnCoin();
-
+    private void Start()
+    {
+        // YA NO rellenes gridCells aquí
         upButton.onClick.AddListener(() => TryMove(0, -1));
         downButton.onClick.AddListener(() => TryMove(0, 1));
         leftButton.onClick.AddListener(() => TryMove(-1, 0));
         rightButton.onClick.AddListener(() => TryMove(1, 0));
-
-        StartCoroutine(ArrowRoutine());
 
         coinTimer = coinTimeLimit;
         coinTimerImage.fillAmount = 1f;
         coinTimerImage.color = fullColor;
 
         UpdateScoreText();
+    }
+
+    // ===== NUEVO: caída durante la cuenta atrás =====
+    public void StartIntroDropDuringCountdown()
+    {
+        if (gridCells == null || gridCells.Length == 0)
+        {
+            Debug.LogError("GridGameManager: gridCells no está inicializado");
+            return;
+        }
+
+        if (playerPrefab == null)
+        {
+            Debug.LogError("GridGameManager: playerPrefab no está asignado en el Inspector");
+            return;
+        }
+
+        playerX = 0;
+        playerY = 0;
+
+        Transform firstCell = gridCells[playerX, playerY];
+        if (firstCell == null)
+        {
+            Debug.LogError("GridGameManager: gridCells[0,0] es null");
+            return;
+        }
+
+        Vector3 cellPos = firstCell.position + playerCellOffset;
+        Vector3 spawnFrom = cellPos + Vector3.up * introDropHeight;
+
+        playerObj = Instantiate(playerPrefab, spawnFrom, Quaternion.identity, gridParent);
+        originalScale = playerObj.transform.localScale;
+
+        playerVisual = playerObj.GetComponent<GridPlayerVisual>();
+        if (playerVisual == null)
+            playerVisual = playerObj.GetComponentInChildren<GridPlayerVisual>(true);
+
+        if (playerVisual == null)
+        {
+            Debug.LogError("GridGameManager: el prefab del jugador no tiene GridPlayerVisual");
+            return;
+        }
+
+        playerVisual.SetInAir();
+        StartCoroutine(IntroDropRoutine(cellPos));
+    }
+
+    private IEnumerator IntroDropRoutine(Vector3 targetPos)
+    {
+        float elapsed = 0f;
+        Vector3 startPos = playerObj.transform.position;
+
+        while (elapsed < introDropDuration)
+        {
+            float t = elapsed / introDropDuration;
+            float eased = t * t * (3f - 2f * t); // suavizado
+            playerObj.transform.position = Vector3.Lerp(startPos, targetPos, eased);
+
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        playerObj.transform.position = targetPos;
+        // se queda en la primera plataforma en pose de estar en casilla
+        playerVisual?.SetOnCell();
+    }
+
+    // ===== NUEVO: arranque real del gameplay tras la cuenta atrás =====
+    public void StartGameplayAfterCountdown()
+    {
+        SpawnCoin();
+        StartCoroutine(ArrowRoutine());
+
+        coinTimer = coinTimeLimit;
+        coinTimerImage.fillAmount = 1f;
+        coinTimerImage.color = fullColor;
     }
 
     private void Update()
@@ -185,6 +265,7 @@ public class GridGameManager : MonoBehaviour
 
     void TryMove(int dx, int dy)
     {
+        if (playerObj == null) return;
         if (isGameOver || isDyingByArrow || isMoving) return;
         if (GridState.Instance.gridGameState != GridState.GridGameStateEnum.Playing) return;
 
@@ -381,7 +462,6 @@ public class GridGameManager : MonoBehaviour
             y = UnityEngine.Random.Range(0, gridSize);
         } while (x == playerX && y == playerY);
 
-        // Elegir prefab de moneda aleatorio
         if (coinPrefabs == null || coinPrefabs.Length == 0)
         {
             Debug.LogError("No hay coinPrefabs asignados en GridGameManager");
@@ -391,11 +471,17 @@ public class GridGameManager : MonoBehaviour
         int index = UnityEngine.Random.Range(0, coinPrefabs.Length);
         GameObject chosenCoinPrefab = coinPrefabs[index];
 
-        coinObj = Instantiate(
-            chosenCoinPrefab,
-            gridCells[x, y].position + coinCellOffset,
-            Quaternion.identity,
-            gridParent);
+        Vector3 spawnPos = gridCells[x, y].position + coinCellOffset;
+
+        // Instanciar la gema
+        coinObj = Instantiate(chosenCoinPrefab, spawnPos, Quaternion.identity, gridParent);
+
+        // Instanciar FX de aparición
+        if (gemSpawnFxPrefab != null)
+        {
+            var fx = Instantiate(gemSpawnFxPrefab, spawnPos, Quaternion.identity, gridParent);
+            fx.Play(GetGemColorFromPrefab(chosenCoinPrefab));
+        }
 
         coinTimer = coinTimeLimit;
         coinTimerImage.fillAmount = 1f;
