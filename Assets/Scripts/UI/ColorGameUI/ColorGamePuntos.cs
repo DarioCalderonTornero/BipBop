@@ -3,8 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Localization;
-using UnityEngine.Localization.Settings;
 
 public class ColorGamePuntos : MonoBehaviour
 {
@@ -13,12 +11,9 @@ public class ColorGamePuntos : MonoBehaviour
     public static event EventHandler OnColorAddScore;
 
     [SerializeField] private TextMeshProUGUI scoreText;
-    [SerializeField] private RectTransform scoreEffectGroup; // <- lo arrastras desde la UI
+    [SerializeField] private RectTransform scoreEffectGroup;
     public int score = 0;
     private bool isAnimating = false;
-
-    [Header("Localization")]
-    public LocalizedString scoreLabel;
 
     private void Awake()
     {
@@ -27,11 +22,11 @@ public class ColorGamePuntos : MonoBehaviour
 
     private void Start()
     {
-        scoreText.text = "Puntos: 0";
-        if (scoreEffectGroup != null)
-            scoreEffectGroup.localScale = Vector3.one; // aseguramos tamaño original
+        score = 0;
+        UpdateScoreText();
 
-        UpdateLocalizedScore();
+        if (scoreEffectGroup != null)
+            scoreEffectGroup.localScale = Vector3.one;
     }
 
     public int GetScore()
@@ -39,9 +34,10 @@ public class ColorGamePuntos : MonoBehaviour
         return score;
     }
 
-    private void UpdateLocalizedScore()
+    private void UpdateScoreText()
     {
-        scoreText.text = scoreLabel.GetLocalizedString(score);
+        if (scoreText != null)
+            scoreText.text = score.ToString();
     }
 
     public void AddScore()
@@ -50,13 +46,19 @@ public class ColorGamePuntos : MonoBehaviour
         score++;
         CurrencyManager.Instance.AddCoins(1);
         PlayerLevelManager.Instance.AddXP(5);
-        UpdateLocalizedScore();
-        // PlayScoreEffect(); // <- dispara el zoom
+        UpdateScoreText();
+        // PlayScoreEffect();
+    }
+
+    public void AddScoreRaw(int amount)
+    {
+        score += amount;
+        UpdateScoreText();
     }
 
     public void ShowScore()
     {
-        UpdateLocalizedScore();
+        UpdateScoreText();
     }
 
     public void SafeRecordIfNeeded()
@@ -82,7 +84,7 @@ public class ColorGamePuntos : MonoBehaviour
         float duration = 0.05f;
         float halfDuration = duration / 2f;
         Vector3 originalScale = Vector3.one;
-        Vector3 zoomScale = new Vector3(1.2f, 1.2f, 1); // pequeño zoom
+        Vector3 zoomScale = new Vector3(1.2f, 1.2f, 1);
 
         float time = 0;
         while (time < halfDuration)
@@ -103,21 +105,4 @@ public class ColorGamePuntos : MonoBehaviour
         scoreEffectGroup.localScale = originalScale;
         isAnimating = false;
     }
-
-    private void OnEnable()
-    {
-        LocalizationSettings.SelectedLocaleChanged += OnLocaleChanged;
-    }
-
-    private void OnDisable()
-    {
-        LocalizationSettings.SelectedLocaleChanged -= OnLocaleChanged;
-    }
-
-    private void OnLocaleChanged(Locale locale)
-    {
-        // Al cambiar idioma, actualizar la línea de puntuación
-        UpdateLocalizedScore();
-    }
 }
-
