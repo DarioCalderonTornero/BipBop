@@ -49,6 +49,12 @@ public class GridGameManager : MonoBehaviour
     [Header("UI Timer")]
     public Image coinTimerImage;
 
+    [Header("AudioClips")]
+    [SerializeField] private AudioClip jumpAudioClip;
+    [SerializeField] private AudioClip pickUpAudioClip;
+    [SerializeField] private AudioClip arrowAudioClip;
+
+
     public event EventHandler OnGameOver;
 
     private int playerX, playerY;
@@ -219,6 +225,8 @@ public class GridGameManager : MonoBehaviour
 
         playerVisual?.SetInAir();
 
+        SoundManager.Instance.PlaySound(jumpAudioClip, 0.5f);
+
         // Plataforma de salida: squash al inicio
         if (fromCell != null)
             PlayPlatformSquash(fromCell, 0.12f, 0.12f, Axis.Y_DOWN);
@@ -283,6 +291,7 @@ public class GridGameManager : MonoBehaviour
             {
                 Destroy(coinObj);
                 score++;
+                SoundManager.Instance.PlaySound(pickUpAudioClip, 0.75f);
 
                 // Efecto UI: sacudir saco + popup "+1"
                 if (gemUI != null)
@@ -529,6 +538,8 @@ public class GridGameManager : MonoBehaviour
         GameObject arrow = Instantiate(chosenPrefab, gridParent);
         arrow.transform.position = offStart;
         arrow.transform.right = dir;
+
+        SoundManager.Instance.PlaySound(arrowAudioClip, 0.75f);
 
         float travelDist = Vector3.Distance(offStart, offEnd);
         float travelTime = travelDist / arrowSpeed;

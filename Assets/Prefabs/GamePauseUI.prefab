@@ -1187,8 +1187,8 @@ MonoBehaviour:
   root: {fileID: 4911108545432565909}
   countdownText: {fileID: 3133405034361631961}
   animator: {fileID: 8719650515866917184}
-  numberDuration: 0.6
-  goDuration: 0.7
+  numberDuration: 1
+  goDuration: 1
   triggerName: Pop
 --- !u!95 &8719650515866917184
 Animator:

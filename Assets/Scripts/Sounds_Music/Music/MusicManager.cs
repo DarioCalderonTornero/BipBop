@@ -23,6 +23,7 @@ public class MusicManager : MonoBehaviour
     [SerializeField] private AudioClip menuSceneMusicClip;
     [SerializeField] private AudioClip bipbopSceneMusicClip;
     [SerializeField] private AudioClip colorSceneMusicClip;
+    [SerializeField] private AudioClip gridSceneMusicClip;
 
     // Cancel Music stuff
     private bool isMusicCancel = false;
@@ -85,6 +86,15 @@ public class MusicManager : MonoBehaviour
                 break;
             case "ColorScene":
                 PlayMusic(colorSceneMusicClip);
+                break;
+            case "GeometricScene":
+                //PlayMusic(colorSceneMusicClip);
+                break;
+            case "DodgeScene":
+                //PlayMusic(colorSceneMusicClip);
+                break;
+            case "GridScene":
+                PlayMusic(gridSceneMusicClip);
                 break;
             default:
                 //musicAudioSource.Stop();

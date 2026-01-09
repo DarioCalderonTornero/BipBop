@@ -67,10 +67,10 @@ public class SoundManager : MonoBehaviour
 
     private void ColorGamePuntos_OnColorAddScore(object sender, EventArgs e)
     {
-        PlaySound(onColorGameModePoint);
+        PlaySound(onColorGameModePoint, 1.0f);
     }
 
-    public void PlaySound(AudioClip audioClip)
+    public void PlaySound(AudioClip audioClip, float volume)
     {
         if (audioClip == null || soundAudioSource == null) return;
 
