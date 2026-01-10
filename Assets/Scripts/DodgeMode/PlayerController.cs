@@ -44,38 +44,30 @@ public class PlayerController : MonoBehaviour
                          DodgeState.Instance.dodgeGameState == DodgeState.DodgeGameStateEnum.Playing;
 
         // 1) SOLO leer input si estamos en Playing
+        //    (CAMBIO MÍNIMO: en vez de touch/mouse, leemos del InputManager -> stick Vector2)
         if (isPlaying)
         {
-#if UNITY_EDITOR || UNITY_STANDALONE
-            if (Input.GetMouseButton(0))
+            Vector2 move = Vector2.zero;
+
+            if (InputManager.Instance != null)
+                move = InputManager.Instance.GetDodgePlayerMovement();
+
+            // Si hay input suficiente, convertimos esa dirección a un "targetPosition"
+            // para mantener exactamente la misma lógica de rotación + avance hacia target.
+            if (move.sqrMagnitude > 0.0001f)
             {
-                if (EventSystem.current == null || !EventSystem.current.IsPointerOverGameObject())
-                {
-                    Vector3 mousePos = Input.mousePosition;
-                    mousePos.z = 10f;
-                    Vector3 worldPos = Camera.main.ScreenToWorldPoint(mousePos);
+                // Direction -> world
+                Vector3 dir = new Vector3(move.x, move.y, 0f).normalized;
 
-                    if (Vector3.Distance(worldPos, transform.position) > minInputDistance)
-                        targetPosition = worldPos;
-                }
+                // Un target suficientemente lejos para que siempre "estemos moviendo"
+                // (mantenemos minInputDistance como referencia de escala)
+                float targetDistance = Mathf.Max(minInputDistance, stopDistance * 2f);
+
+                Vector3 desiredTarget = transform.position + dir * targetDistance;
+
+                if (Vector3.Distance(desiredTarget, transform.position) > minInputDistance)
+                    targetPosition = desiredTarget;
             }
-#else
-            if (Input.touchCount > 0)
-            {
-                Touch touch = Input.GetTouch(0);
-
-                if (EventSystem.current == null ||
-                    !EventSystem.current.IsPointerOverGameObject(touch.fingerId))
-                {
-                    Vector3 touchPos = touch.position;
-                    touchPos.z = 10f;
-                    Vector3 worldPos = Camera.main.ScreenToWorldPoint(touchPos);
-
-                    if (Vector3.Distance(worldPos, transform.position) > minInputDistance)
-                        targetPosition = worldPos;
-                }
-            }
-#endif
         }
 
         // 2) LÓGICA DE VISUAL Y MOVIMIENTO (se ejecuta también en intro)
@@ -152,7 +144,6 @@ public class PlayerController : MonoBehaviour
             if (!active) smokeRight.Clear();
         }
     }
-
 
     public void ResetTargetToCurrentPosition()
     {

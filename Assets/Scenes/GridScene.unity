@@ -2351,6 +2351,7 @@ MonoBehaviour:
   jumpAudioClip: {fileID: 8300000, guid: 754ffdf26ca19fd4eadadab00c9488c7, type: 3}
   pickUpAudioClip: {fileID: 8300000, guid: d66e244ca0797b7418cda4488cdfb89f, type: 3}
   arrowAudioClip: {fileID: 8300000, guid: 6c37ba36eee929e4d9f85cf79db6764e, type: 3}
+  deathAudioClip: {fileID: 8300000, guid: a49a873082d7bdd4a8d967be558faa0b, type: 3}
   cellHitRadius: 0.4
   scoreText: {fileID: 691293951}
   playerCellOffset: {x: 0, y: 0.2, z: 0}
@@ -2362,6 +2363,8 @@ MonoBehaviour:
   blueGemColor: {r: 0.2, g: 0.6, b: 1, a: 1}
   greenGemColor: {r: 0.3, g: 0.9, b: 0.3, a: 1}
   purpleGemColor: {r: 0.8, g: 0.2, b: 0.9, a: 1}
+  introDropHeight: 3
+  introDropDuration: 0.8
 --- !u!4 &755297624
 Transform:
   m_ObjectHideFlags: 0

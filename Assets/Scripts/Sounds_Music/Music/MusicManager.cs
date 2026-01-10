@@ -20,10 +20,15 @@ public class MusicManager : MonoBehaviour
 
     private AudioSource musicAudioSource;
 
+    [Header("Music Clips")]
     [SerializeField] private AudioClip menuSceneMusicClip;
     [SerializeField] private AudioClip bipbopSceneMusicClip;
     [SerializeField] private AudioClip colorSceneMusicClip;
     [SerializeField] private AudioClip gridSceneMusicClip;
+
+    [Header("Global Music Multiplier (Design)")]
+    [SerializeField, Range(0f, 1f)]
+    private float masterMusicMultiplier = 0.5f; // <- Baja toda la música al 50% (sin cambiar tu sistema 0..10)
 
     // Cancel Music stuff
     private bool isMusicCancel = false;
@@ -64,7 +69,9 @@ public class MusicManager : MonoBehaviour
     private void Start()
     {
         musicAudioSource = GetComponent<AudioSource>();
-        musicAudioSource.volume = GetMusicVolumeNormalized();
+
+        ApplyMusicVolume();
+
         musicAudioSource.clip = menuSceneMusicClip;
         musicAudioSource.Play();
 
@@ -88,16 +95,15 @@ public class MusicManager : MonoBehaviour
                 PlayMusic(colorSceneMusicClip);
                 break;
             case "GeometricScene":
-                //PlayMusic(colorSceneMusicClip);
+                // PlayMusic(colorSceneMusicClip);
                 break;
             case "DodgeScene":
-                //PlayMusic(colorSceneMusicClip);
+                // PlayMusic(colorSceneMusicClip);
                 break;
             case "GridScene":
                 PlayMusic(gridSceneMusicClip);
                 break;
             default:
-                //musicAudioSource.Stop();
                 Debug.Log("Music default state");
                 break;
         }
@@ -105,6 +111,11 @@ public class MusicManager : MonoBehaviour
 
     private void PlayMusic(AudioClip clip)
     {
+        if (musicAudioSource == null || clip == null) return;
+
+        // Por si el volumen cambió antes de cargar la escena o por prefs
+        ApplyMusicVolume();
+
         float previousTime = musicAudioSource.time;
 
         if (clip == menuSceneMusicClip)
@@ -122,23 +133,38 @@ public class MusicManager : MonoBehaviour
 
     private void Update()
     {
-        musicTime = musicAudioSource.time;
+        if (musicAudioSource != null)
+            musicTime = musicAudioSource.time;
+    }
+
+    /// <summary>
+    /// Aplica el volumen final: (0..10 -> 0..1) * multiplicador global de diseño (por defecto 0.5)
+    /// </summary>
+    private void ApplyMusicVolume()
+    {
+        if (musicAudioSource == null) return;
+
+        float normalized = GetMusicVolumeNormalized();
+        float finalVol = normalized * masterMusicMultiplier;
+
+        // Seguridad por si tocas el multiplier en inspector a valores raros
+        musicAudioSource.volume = Mathf.Clamp01(finalVol);
     }
 
     public void ChangeMusicVolume()
     {
-        // Igual que en SoundManager: 0..MUSIC_VOLUME_MAX (incluido)
+        // 0..MUSIC_VOLUME_MAX (incluido)
         musicVolume = (musicVolume + 1) % (MUSIC_VOLUME_MAX + 1);
         SaveVolume();
 
-        if (musicAudioSource != null)
-            musicAudioSource.volume = GetMusicVolumeNormalized();
+        ApplyMusicVolume();
 
         OnMusicVolumeChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public int CancelMusicVolume()
     {
+        // Si el volumen es 0, consideramos que está muteado
         if (GetMusicVolumeNormalized() == 0)
             isMusicCancel = true;
 
@@ -153,8 +179,7 @@ public class MusicManager : MonoBehaviour
             PlayerPrefs.SetInt(PREFS_MUTED, 1);
             SaveVolume();
 
-            if (musicAudioSource != null)
-                musicAudioSource.volume = GetMusicVolumeNormalized();
+            ApplyMusicVolume();
 
             OnMusicVolumeChanged?.Invoke(this, EventArgs.Empty);
             return musicVolume;
@@ -172,8 +197,7 @@ public class MusicManager : MonoBehaviour
             PlayerPrefs.SetInt(PREFS_MUTED, 0);
             SaveVolume();
 
-            if (musicAudioSource != null)
-                musicAudioSource.volume = GetMusicVolumeNormalized();
+            ApplyMusicVolume();
 
             OnMusicVolumeChanged?.Invoke(this, EventArgs.Empty);
             return musicVolume;
@@ -186,8 +210,7 @@ public class MusicManager : MonoBehaviour
         isMusicCancel = (musicVolume == 0);
         SaveVolume();
 
-        if (musicAudioSource != null)
-            musicAudioSource.volume = GetMusicVolumeNormalized();
+        ApplyMusicVolume();
 
         OnMusicVolumeChanged?.Invoke(this, EventArgs.Empty);
     }

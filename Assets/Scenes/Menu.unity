@@ -8648,6 +8648,7 @@ MonoBehaviour:
   bipbopSceneMusicClip: {fileID: 8300000, guid: 87808d57c907bcc4c95e971e35bdb249, type: 3}
   colorSceneMusicClip: {fileID: 8300000, guid: 17b8cba9768012140b9986b3bc8ca77c, type: 3}
   gridSceneMusicClip: {fileID: 8300000, guid: 3f777968df73d394b8891fc8d473af6e, type: 3}
+  masterMusicMultiplier: 0.2
 --- !u!82 &319449791
 AudioSource:
   m_ObjectHideFlags: 0
@@ -8661,7 +8662,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 0
-  m_Volume: 1
+  m_Volume: 0.5
   m_Pitch: 1
   Loop: 1
   Mute: 0

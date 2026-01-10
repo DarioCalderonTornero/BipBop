@@ -53,6 +53,7 @@ public class GridGameManager : MonoBehaviour
     [SerializeField] private AudioClip jumpAudioClip;
     [SerializeField] private AudioClip pickUpAudioClip;
     [SerializeField] private AudioClip arrowAudioClip;
+    [SerializeField] private AudioClip deathAudioClip;
 
 
     public event EventHandler OnGameOver;
@@ -779,6 +780,8 @@ public class GridGameManager : MonoBehaviour
     {
         if (isGameOver) return;
         isGameOver = true;
+
+        SoundManager.Instance.PlaySound(deathAudioClip, 1f);
 
         Debug.Log($"GAME OVER - Score final: {score}");
 
