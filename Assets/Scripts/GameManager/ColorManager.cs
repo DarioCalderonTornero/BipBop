@@ -250,6 +250,11 @@ public class ColorManager : MonoBehaviour
         if (ColorGamePuntos.Instance.GetScore() >= 20) availableCount = 8;
         if (ColorGamePuntos.Instance.GetScore() >= 30) availableCount = 9;
 
+        // --- (MINI safety) no dejes que availableCount supere tus arrays ---
+        if (colorValues != null) availableCount = Mathf.Min(availableCount, colorValues.Length);
+        if (colorNames != null) availableCount = Mathf.Min(availableCount, colorNames.Length);
+        // backgroundSprites puede ser más corto o igual, lo controlamos abajo
+
         // 1) Elegir colores base
         int backgroundColorIndex, textColorIndex, wordColorIndex;
 
@@ -261,14 +266,16 @@ public class ColorManager : MonoBehaviour
             textColorIndex = UnityEngine.Random.Range(0, availableCount);
         } while (textColorIndex == wordColorIndex);
 
+        // ✅ CAMBIO MINIMO CLAVE: el fondo también sale del mismo pool (availableCount)
         do
         {
-            backgroundColorIndex = UnityEngine.Random.Range(0, colorValues.Length);
-        } while (backgroundColorIndex == textColorIndex);
+            backgroundColorIndex = UnityEngine.Random.Range(0, availableCount);
+        } while (backgroundColorIndex == textColorIndex || backgroundColorIndex == wordColorIndex);
 
         colorWordText.text = correctColorName;
         colorWordText.color = colorValues[textColorIndex];
 
+        // Fondo: se queda EXACTAMENTE como lo tenías (backgroundSprites independiente)
         if (backgroundSprites != null &&
             backgroundColorIndex < backgroundSprites.Length &&
             backgroundSprites[backgroundColorIndex] != null)
@@ -291,7 +298,6 @@ public class ColorManager : MonoBehaviour
         }
         else if (score < 25)
         {
-            // alterna solo entre Significado y Fondo
             if (currentMode == RoundMode.WordMeaning)
                 currentMode = RoundMode.BackgroundColor;
             else
@@ -299,7 +305,6 @@ public class ColorManager : MonoBehaviour
         }
         else
         {
-            // ciclo Fondo -> Significado -> Texto -> Fondo...
             switch (currentMode)
             {
                 case RoundMode.BackgroundColor:
@@ -317,7 +322,7 @@ public class ColorManager : MonoBehaviour
 
         UpdateModeIconsUI();
 
-        // 3) Índice correcto según modo (NO se vuelve a modificar después)
+        // 3) Índice correcto según modo
         switch (currentMode)
         {
             case RoundMode.BackgroundColor:
@@ -331,9 +336,6 @@ public class ColorManager : MonoBehaviour
                 break;
         }
 
-        // IMPORTANTE: eliminar cualquier lógica que re‑randomice correctIndex aquí.
-        // Nada de "if (lastCorrectIndex == correctIndex) newIndex...".
-        // Solo recordamos qué color fue el correcto la ronda anterior:
         lastCorrectIndex = correctIndex;
 
         // 4) Construir candidatos
@@ -361,8 +363,20 @@ public class ColorManager : MonoBehaviour
         // 6) Pintar botones y listeners
         for (int i = 0; i < candidateButtons.Count; i++)
         {
-            int index = candidateIndices[i];
             Button btn = candidateButtons[i];
+
+            // (mini safety) si hay más botones que candidatos posibles, no rompas el juego
+            if (i >= candidateIndices.Count)
+            {
+                btn.gameObject.SetActive(false);
+                continue;
+            }
+            else
+            {
+                btn.gameObject.SetActive(true);
+            }
+
+            int index = candidateIndices[i];
 
             var img = btn.image;
             if (colorSprites != null && index < colorSprites.Length && colorSprites[index] != null)
@@ -386,6 +400,7 @@ public class ColorManager : MonoBehaviour
             });
         }
     }
+
 
 
     private void UpdateModeIconsUI()
