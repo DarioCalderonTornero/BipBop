@@ -12,16 +12,18 @@ public class LogicaJuego : MonoBehaviour
 {
     public static LogicaJuego Instance { get; private set; }
 
-    public TextMeshProUGUI instructionText; // Texto para mostrar la instrucción
-    public Image timerUI; // Slider para mostrar el tiempo restante
-    public float startTime; // Tiempo inicial en segundos
+    [Header("UI")]
+    public TextMeshProUGUI instructionText;   // Texto para mostrar la instrucción
+    public Image instructionIcon;            // <-- NUEVO: icono de la instrucción
+    public Image timerUI;                    // Imagen radial para mostrar el tiempo restante
+    public float startTime;                  // Tiempo inicial en segundos
 
     private float currentTime;
     private bool isGameActive = false; // Se desactiva hasta que pasen los 3 segundos
 
     public event EventHandler OnGameOver;
 
-    private bool isTaskCompleted = false; // Verifica si la tarea actual ya fue completada
+    private bool isTaskCompleted = false;
     private TaskInfo currentTask;
     private TaskType lastTaskType;
     public TaskInfo[] tasks;
@@ -47,19 +49,27 @@ public class LogicaJuego : MonoBehaviour
     public class TaskInfo
     {
         public TaskType type;             // Identificador lógico
-        public LocalizedString text;      // Texto localizado (ES/EN), ej: "¡Toca la pantalla!"
+        public LocalizedString text;      // Texto localizado
+        public Sprite icon;               // <-- NUEVO: icono para esta tarea
     }
 
     [Header("Localization")]
-    public LocalizedString readyText;        // "Prepárate..." / "Get ready..."
-    public LocalizedString goText;           // "GO!"
+    public LocalizedString readyText;
+    public LocalizedString goText;
     public LocalizedString gameOverText;
+
+    [Header("Countdown Icon Shuffle")]
+    [SerializeField] private float iconShuffleInterval = 0.08f; 
+    [SerializeField] private float iconShuffleDuration = 2f;
 
     private void Awake()
     {
         Instance = this;
+
         instructionText.text = readyText.GetLocalizedString();
-        timerUI.fillAmount = 1;
+        SetInstructionIcon(null); // Oculta icono en "Ready"
+
+        timerUI.fillAmount = 0f;
     }
 
     void Start()
@@ -71,6 +81,9 @@ public class LogicaJuego : MonoBehaviour
     {
         CountDownUI.Instance.Show();
 
+        StartCoroutine(FillTimerDuringCountdown(2f));
+        StartCoroutine(ShuffleTaskIcons(iconShuffleDuration));
+
         yield return new WaitForSeconds(delay);
 
         CountDownUI.Instance.ShowMessage(goText.GetLocalizedString());
@@ -79,7 +92,9 @@ public class LogicaJuego : MonoBehaviour
 
         CountDownUI.Instance.Hide();
         isGameActive = true;
+
         instructionText.text = "";
+        SetInstructionIcon(null); // Oculta icono al arrancar
 
         StartNewTask();
     }
@@ -95,7 +110,7 @@ public class LogicaJuego : MonoBehaviour
         if (currentTime <= 0f)
         {
             OnGameOver?.Invoke(this, EventArgs.Empty);
-            EndGame(); 
+            EndGame();
         }
     }
 
@@ -105,7 +120,6 @@ public class LogicaJuego : MonoBehaviour
 
         if (actionType == currentTask.type)
         {
-            // Aquí lanzamos el efecto de UI
             if (ClassicModeUIEffects.Instance != null)
             {
                 ClassicModeUIEffects.Instance.PlayEffectForTask(actionType);
@@ -124,7 +138,6 @@ public class LogicaJuego : MonoBehaviour
         MainGamePoints.Instance.AddScore();
         UpdateScoreText();
 
-        // Copia lista de tareas disponibles
         List<TaskInfo> availableTasks = new List<TaskInfo>(tasks);
 
         // Filtrar por PlayerPrefs
@@ -138,21 +151,96 @@ public class LogicaJuego : MonoBehaviour
             );
         }
 
+        if (availableTasks.Count == 0)
+        {
+            // Por seguridad, si el jugador desactiva todo, forzamos TAP
+            currentTask = null;
+            instructionText.text = "";
+            SetInstructionIcon(null);
+            return;
+        }
+
         // Elegir nueva tarea distinta de la anterior
         TaskInfo newTask;
         do
         {
             newTask = availableTasks[UnityEngine.Random.Range(0, availableTasks.Count)];
-        } while (currentTask != null && newTask.type == currentTask.type);
+        } while (currentTask != null && newTask.type == currentTask.type && availableTasks.Count > 1);
 
         currentTask = newTask;
 
-        // Texto localizado según idioma actual
+        // Texto + Icono
         instructionText.text = currentTask.text.GetLocalizedString();
+        SetInstructionIcon(currentTask.icon);
 
+        // Reset tiempo
         currentTime = startTime;
         startTime = Mathf.Max(2f, startTime - 0.05f);
+
+        // Si quieres que al reiniciar el tiempo se vea lleno:
+        timerUI.fillAmount = 1f;
+        // (tu versión ponía 0f; eso visualmente parece “vacío” al empezar)
+    }
+
+    private void SetInstructionIcon(Sprite sprite)
+    {
+        if (instructionIcon == null) return;
+
+        instructionIcon.sprite = sprite;
+        instructionIcon.enabled = (sprite != null);
+    }
+
+    private IEnumerator FillTimerDuringCountdown(float duration)
+    {
+        float t = 0f;
         timerUI.fillAmount = 0f;
+
+        while (t < duration)
+        {
+            t += Time.deltaTime;
+            timerUI.fillAmount = Mathf.Clamp01(t / duration);
+            yield return null;
+        }
+
+        timerUI.fillAmount = 1f; // asegúralo al final
+    }
+
+    private IEnumerator ShuffleTaskIcons(float duration)
+    {
+        if (instructionIcon == null || tasks == null || tasks.Length == 0) yield break;
+
+        float t = 0f;
+
+        // Lista de iconos disponibles (respetando MotionTasks si quieres)
+        List<Sprite> icons = new List<Sprite>();
+        bool motionEnabled = PlayerPrefs.GetInt("MotionTasks", 1) == 1;
+
+        foreach (var task in tasks)
+        {
+            if (task == null || task.icon == null) continue;
+
+            if (!motionEnabled)
+            {
+                if (task.type == TaskType.Shake ||
+                    task.type == TaskType.LookDown ||
+                    task.type == TaskType.RotateRight ||
+                    task.type == TaskType.RotateLeft)
+                    continue;
+            }
+
+            icons.Add(task.icon);
+        }
+
+        if (icons.Count == 0) yield break;
+
+        instructionIcon.enabled = true;
+
+        while (t < duration)
+        {
+            instructionIcon.sprite = icons[UnityEngine.Random.Range(0, icons.Count)];
+            yield return new WaitForSeconds(iconShuffleInterval);
+            t += iconShuffleInterval;
+        }
     }
 
     private void UpdateScoreText()
@@ -167,9 +255,7 @@ public class LogicaJuego : MonoBehaviour
 
     private void SaveRecordIfNeeded()
     {
-        // Recupera el récord actual
         int currentRecord = PlayerPrefs.GetInt("MaxRecord", 0);
-
         MainGamePoints.Instance.SafeRecordIfNeeded();
     }
 
@@ -179,7 +265,9 @@ public class LogicaJuego : MonoBehaviour
 
         isGameActive = false;
         hasEnded = true;
+
         instructionText.text = gameOverText.GetLocalizedString();
+        SetInstructionIcon(null); // Oculta icono en Game Over
 
         int coinsEarned = MainGamePoints.Instance.GetScore();
 
@@ -200,7 +288,6 @@ public class LogicaJuego : MonoBehaviour
             PlayFabScoreManager.Instance.SubmitScore("HighScore", MainGamePoints.Instance.GetScore());
         }
 
-        //PlayFabScoreManager.Instance.SubmitScore("HighScore", MainGamePoints.Instance.GetScore());
         int totalCoins = PlayerPrefs.GetInt("CoinCount", 0);
         totalCoins += coinsEarned;
         PlayerPrefs.SetInt("CoinCount", totalCoins);

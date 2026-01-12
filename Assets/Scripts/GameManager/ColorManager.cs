@@ -93,6 +93,11 @@ public class ColorManager : MonoBehaviour
 
     private Coroutine comboShakeRoutine;
 
+    [Header("Countdown Candidates Shuffle")]
+    [SerializeField] private float candidatesShuffleInterval = 0.06f; 
+    [SerializeField] private float candidatesShuffleDuration = 3f;    
+    private Coroutine candidatesShuffleRoutine;
+
     private void Awake()
     {
         Instance = this;
@@ -104,6 +109,67 @@ public class ColorManager : MonoBehaviour
     {
         if (ColorGameState.Instance != null)
             ColorGameState.Instance.OnPlayingColorGame += HandleOnPlayingColorGame;
+
+        if (GameStates.Instance != null)
+            GameStates.Instance.OnCountDown += GameStates_OnCountDown;
+    }
+
+    private void GameStates_OnCountDown(object sender, EventArgs e)
+    {
+        if (hasStarted) return; // aún no ha empezado el juego real
+
+        if (candidatesShuffleRoutine == null)
+            candidatesShuffleRoutine = StartCoroutine(ShuffleCandidatesDuringCountdown());
+    }
+
+    private IEnumerator ShuffleCandidatesDuringCountdown()
+    {
+        if (candidateButtons == null || candidateButtons.Count == 0 || colorSprites == null || colorSprites.Length == 0)
+            yield break;
+
+        float duration = candidatesShuffleDuration;
+
+        // estado inicial (por si acaso)
+        foreach (var btn in candidateButtons)
+        {
+            if (btn == null) continue;
+            var img = btn.image;
+            if (img == null) continue;
+            // se quedan blancos si tú ya lo pones, no lo toco aquí
+        }
+
+        // Sprites actuales por casilla (para rotarlos)
+        Sprite[] current = new Sprite[candidateButtons.Count];
+
+        float t = 0f;
+
+        while (t < duration && GameStates.Instance != null && GameStates.Instance.countDown() && !hasStarted && !hasEnded)
+        {
+            // 1) rota: casilla i toma lo que tenía la anterior
+            for (int i = current.Length - 1; i > 0; i--)
+                current[i] = current[i - 1];
+
+            // 2) en la casilla 0 metemos un color aleatorio nuevo
+            current[0] = colorSprites[UnityEngine.Random.Range(0, colorSprites.Length)];
+
+            // 3) aplicar a botones en orden (1..4)
+            for (int i = 0; i < candidateButtons.Count; i++)
+            {
+                var btn = candidateButtons[i];
+                if (btn == null) continue;
+
+                var img = btn.image;
+                if (img == null) continue;
+
+                img.sprite = current[i];
+                img.color = Color.white; // importante: que se vea el sprite tal cual
+            }
+
+            yield return new WaitForSeconds(candidatesShuffleInterval);
+            t += candidatesShuffleInterval;
+        }
+
+        candidatesShuffleRoutine = null;
     }
 
     private void Update()
@@ -140,6 +206,12 @@ public class ColorManager : MonoBehaviour
 
     private void StartColorGame()
     {
+        if (candidatesShuffleRoutine != null)
+        {
+            StopCoroutine(candidatesShuffleRoutine);
+            candidatesShuffleRoutine = null;
+        }
+
         hasEnded = false;
         hasStarted = true;
         deathType = DeathType.None;

@@ -153,7 +153,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 44798418321408
-    m_Localized: Turn your phone upside down!
+    m_Localized: Phone upside down!
     m_Metadata:
       m_Items: []
   - m_Id: 44946506612736
@@ -181,7 +181,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 92462652555264
-    m_Localized: 'Points: {0}'
+    m_Localized: You have completed {0} tasks
     m_Metadata:
       m_Items: []
   - m_Id: 93960195244032

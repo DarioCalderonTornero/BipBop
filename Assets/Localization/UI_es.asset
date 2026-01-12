@@ -153,7 +153,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 44798418321408
-    m_Localized: "\xA1Pon el tel\xE9fono boca abajo!"
+    m_Localized: "\xA1Tel\xE9fono boca abajo!"
     m_Metadata:
       m_Items: []
   - m_Id: 44946506612736
@@ -173,15 +173,15 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 45334840442880
-    m_Localized: "\xA1Rota el tel\xE9fono hacia la derecha!"
+    m_Localized: "\xA1Rota hacia la derecha!"
     m_Metadata:
       m_Items: []
   - m_Id: 45502721654784
-    m_Localized: "\xA1Rota el tel\xE9fono hacia la izquierda!"
+    m_Localized: "\xA1Rota hacia la izquierda!"
     m_Metadata:
       m_Items: []
   - m_Id: 92462652555264
-    m_Localized: 'Puntos: {0}'
+    m_Localized: Has completado {0} tareas
     m_Metadata:
       m_Items: []
   - m_Id: 93960195244032
