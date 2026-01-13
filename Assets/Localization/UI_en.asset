@@ -245,7 +245,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 101333290942464
-    m_Localized: Tap the {0}!
+    m_Localized: '{0}'
     m_Metadata:
       m_Items: []
   - m_Id: 101846778609664
@@ -411,6 +411,10 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 19905045483978752
     m_Localized: 'Found Gems:'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22133263607758848
+    m_Localized: '{0} hits'
     m_Metadata:
       m_Items: []
   references:

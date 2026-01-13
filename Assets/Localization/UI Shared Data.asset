@@ -403,6 +403,10 @@ MonoBehaviour:
     m_Key: Gemas_encontradas
     m_Metadata:
       m_Items: []
+  - m_Id: 22133263607758848
+    m_Key: Jellys_score
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

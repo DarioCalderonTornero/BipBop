@@ -14,14 +14,18 @@ public class GeometricModeManager : MonoBehaviour
 
     [Header("UI Elements")]
     public TextMeshProUGUI instructionText;  // Indica qué figura tocar
+    public Image instructionIcon; 
     public TextMeshProUGUI scoreText;        // Puntuación actual
     public Image timeBarImage;               // Barra de tiempo
     public float startTime = 60f;            // Tiempo inicial (en segundos)
 
     [Header("Game Settings")]
     public float speedMultiplier = 1f;         // Multiplicador de velocidad actual
-    public float speedIncreaseFactor = 1.05f;  // Factor de incremento de velocidad al acertar
-    public float timeDecreaseFactor = 0.95f;   // (no lo usas ahora, pero lo dejo)
+
+    [Header("Difficulty (Option 1)")]
+    [SerializeField] private float baseSpeedMult = 1f;
+    [SerializeField] private float maxSpeedMult = 2.2f;
+    [SerializeField] private int scoreToReachMaxSpeed = 60;
 
     [Header("Shapes")]
     public List<BouncingShape> shapes;         // Lista de figuras en escena
@@ -39,7 +43,16 @@ public class GeometricModeManager : MonoBehaviour
 
     public event EventHandler OnGameOver;
 
-    private bool isShuffling = false;
+    [Header("Intro / Countdown")]
+    [SerializeField] private LocalizedString prepareInstruction; // "Prepárate..."
+    [SerializeField] private Sprite prepareIcon;                 // icono que tú quieras durante la cuenta atrás
+    [SerializeField] private float introMoveDuration = 0.45f;
+    [SerializeField] private float introStagger = 0.08f;
+    [SerializeField] private float introOffscreenPadding = 1.2f;
+    [SerializeField] private float introWobbleDuration = 0.16f;
+
+    private bool introAnimDone = false;
+    private bool movementStarted = false;
 
     private void Awake()
     {
@@ -93,12 +106,13 @@ public class GeometricModeManager : MonoBehaviour
 
     private void StartGame()
     {
-        if (hasGameStarted) return;  // evita dobles inicializaciones
+        if (hasGameStarted) return;
         hasGameStarted = true;
 
         hasEnded = false;
         gameOverInvoked = false;
         score = 0;
+        UpdateDifficulty();
         currentTime = startTime;
 
         if (timeBarImage != null)
@@ -106,20 +120,36 @@ public class GeometricModeManager : MonoBehaviour
 
         UpdateScoreText();
 
+        foreach (var s in shapes.FindAll(x => x.gameObject.activeSelf))
+            StopShapeParticles(s, clear: true);
+
         // Activa solo las primeras 3 figuras al iniciar
         for (int i = 0; i < shapes.Count; i++)
-        {
             shapes[i].gameObject.SetActive(i < 3);
-        }
 
-        ChooseNewTarget();
+        // Intro state
+        currentTarget = null;
+        introAnimDone = false;
+        movementStarted = false;
+
+        SetPrepareUI();
+        FreezeActiveShapes(true);
+
+        StartCoroutine(IntroSpawnRoutine());
     }
 
     private void Update()
     {
         if (hasEnded) return;
 
-        // No empezamos a gastar tiempo hasta que el estado sea Playing
+        // Espera a terminar la intro + que el estado sea Playing para arrancar el movimiento
+        if (!movementStarted)
+        {
+            TryStartMovementAfterIntro();
+            return; // no gastamos tiempo ni nada durante intro
+        }
+
+        // (tu código actual a partir de aquí)
         if (GeometricState.Instance != null &&
             GeometricState.Instance.geometricGameState != GeometricState.GeometricGameStateEnum.Playing)
             return;
@@ -130,9 +160,59 @@ public class GeometricModeManager : MonoBehaviour
             timeBarImage.fillAmount = Mathf.Clamp01(currentTime / startTime);
 
         if (currentTime <= 0f)
+            StartCoroutine(SlowMotionAndEnd());
+    }
+
+    private void SetPrepareUI()
+    {
+        // Texto localizado de “Prepárate…”
+        if (instructionText != null)
         {
-            StartCoroutine(SlowMotionAndEnd(false, null));
+            string t = prepareInstruction.IsEmpty ? "Prepárate..." : prepareInstruction.GetLocalizedString();
+            instructionText.text = t;
         }
+
+        // Icono que tú quieras
+        SetInstructionIcon(prepareIcon);
+    }
+
+    private void TryStartMovementAfterIntro()
+    {
+        // Si no hay GeometricState, arrancamos cuando termine la intro
+        bool isPlaying =
+            GeometricState.Instance == null ||
+            GeometricState.Instance.geometricGameState == GeometricState.GeometricGameStateEnum.Playing;
+
+        if (!introAnimDone || !isPlaying) return;
+
+        movementStarted = true;
+
+        FreezeActiveShapes(false);
+        foreach (var s in shapes.FindAll(x => x.gameObject.activeSelf))
+            PlayShapeParticles(s);
+
+        // Arranca movimiento con velocidad correcta
+        var activeShapes = shapes.FindAll(s => s.gameObject.activeSelf);
+        foreach (var s in activeShapes)
+        {
+            // fuerza nueva dirección/velocidad al arrancar
+            s.RandomizeDirection();
+            s.UpdateSpeed(speedMultiplier);
+
+            // limpia trail al empezar a moverse
+            var tr = s.GetComponentInChildren<TrailRenderer>(true);
+            if (tr) tr.Clear();
+        }
+
+        // Ya empezamos el juego “real”
+        ChooseNewTarget();
+    }
+
+    private void SetInstructionIcon(Sprite s)
+    {
+        if (instructionIcon == null) return;
+        instructionIcon.sprite = s;
+        instructionIcon.enabled = (s != null);
     }
 
     // Se llama cuando se toca una figura
@@ -144,115 +224,211 @@ public class GeometricModeManager : MonoBehaviour
             GeometricState.Instance.geometricGameState != GeometricState.GeometricGameStateEnum.Playing)
             return;
 
+        if (!movementStarted) return;
+
+        shape.PlayTapSquish();
+        shape.GetComponent<JellyFXTrailSparkles>()?.BurstTapWide();
+
         if (shape == currentTarget)
         {
-            shape.TemporarilyChangeColor(Color.green, 0.5f);
+            // ✅ NO cambiamos color
 
-            // NUEVO: usamos el Animator de esa figura
+            // Animator (se queda)
             Animator anim = shape.GetComponent<Animator>();
             if (anim != null)
-            {
                 anim.SetTrigger("isHitAnim");
-            }
 
             AddScore();
 
-            startTime = Mathf.Max(1.5f, startTime - 0.1f);
+            shape.PlayScaredSprite();
+
+            startTime = Mathf.Max(3.0f, startTime - 0.04f);
             currentTime = startTime;
 
-            speedMultiplier = Mathf.Min(4f, speedMultiplier * speedIncreaseFactor);
-            UpdateShapesSpeed();
 
             CheckForAdditionalShapes();
 
-            // 🔹 Nueva animación: mezclar posiciones + cambiar dirección
-            StartCoroutine(ShuffleShapesAndRetarget());
+            // ✅ EN VEZ DE SHUFFLE: invertir dirección de todas
+            ReverseAllActiveShapesDirections();
+
+            // Nuevo objetivo
+            ChooseNewTarget();
         }
         else
         {
-            StartCoroutine(SlowMotionAndEnd(true, shape));
+            // ✅ NO cambiamos color al fallar
+            StartCoroutine(SlowMotionAndEnd());
         }
     }
-    private IEnumerator ShuffleShapesAndRetarget()
+
+    private IEnumerator IntroSpawnRoutine()
     {
-        if (isShuffling) yield break;
-        isShuffling = true;
+        // Solo las 3 primeras activas
+        List<BouncingShape> active = shapes.FindAll(s => s.gameObject.activeSelf);
+        int count = Mathf.Min(3, active.Count);
+        if (count == 0) { introAnimDone = true; yield break; }
 
-        // Solo figuras activas
-        List<BouncingShape> activeShapes = shapes.FindAll(s => s.gameObject.activeSelf);
+        Camera cam = Camera.main;
 
-        if (activeShapes.Count <= 1)
+        // Guardamos posiciones “finales” (las que tienes puestas en escena)
+        Vector3[] endPos = new Vector3[count];
+        for (int i = 0; i < count; i++) endPos[i] = active[i].transform.position;
+
+        // Calcula start offscreen: 0=izq, 1=dcha, 2=abajo
+        Vector3 GetOffscreenFrom(Vector3 target, int slot)
         {
-            isShuffling = false;
-            ChooseNewTarget();
-            yield break;
+            if (!cam) return target;
+
+            float dist = Mathf.Abs(target.z - cam.transform.position.z);
+            Vector3 left = cam.ViewportToWorldPoint(new Vector3(0f, 0.5f, dist));
+            Vector3 right = cam.ViewportToWorldPoint(new Vector3(1f, 0.5f, dist));
+            Vector3 bot = cam.ViewportToWorldPoint(new Vector3(0.5f, 0f, dist));
+
+            if (slot == 0) return new Vector3(left.x - introOffscreenPadding, target.y, target.z);
+            if (slot == 1) return new Vector3(right.x + introOffscreenPadding, target.y, target.z);
+            return new Vector3(target.x, bot.y - introOffscreenPadding, target.z);
         }
 
-        // Posiciones actuales
-        List<Vector3> originalPositions = new List<Vector3>();
-        foreach (var s in activeShapes)
-            originalPositions.Add(s.transform.position);
-
-        // Permutar posiciones
-        List<Vector3> shuffledPositions = new List<Vector3>(originalPositions);
-        int n = shuffledPositions.Count;
-        for (int i = 0; i < n; i++)
+        // Coloca al inicio offscreen y limpia FX
+        for (int i = 0; i < count; i++)
         {
-            int j = UnityEngine.Random.Range(i, n);
-            (shuffledPositions[i], shuffledPositions[j]) = (shuffledPositions[j], shuffledPositions[i]);
+            active[i].transform.position = GetOffscreenFrom(endPos[i], i);
+            var tr = active[i].GetComponentInChildren<TrailRenderer>(true);
+            if (tr) tr.Clear();
+            var ps = active[i].GetComponentInChildren<ParticleSystem>(true);
+            if (ps) ps.Clear();
         }
 
-        float totalDuration = 0.40f;      // súper rápido
-        float halfDuration = totalDuration / 2f;
-        float t;
-
-        // 1) Encoger
-        t = 0f;
-        while (t < halfDuration)
+        // Mueve + wobble (con pequeño stagger)
+        for (int i = 0; i < count; i++)
         {
-            t += Time.deltaTime;
-            float lerp = Mathf.Clamp01(t / halfDuration);
-            float scaleValue = Mathf.Lerp(1f, 0.25f, lerp);
+            PlayShapeParticles(active[i]);
+            StartCoroutine(MoveAndWobble(active[i], active[i].transform, endPos[i], introMoveDuration, introWobbleDuration));
+            yield return new WaitForSeconds(introStagger);
+        }
 
-            foreach (var s in activeShapes)
-                s.transform.localScale = new Vector3(scaleValue, scaleValue, 1f);
+        // Espera a que acabe la última
+        yield return new WaitForSeconds(introMoveDuration + introWobbleDuration);
 
+        introAnimDone = true;
+    }
+
+    private IEnumerator MoveAndWobble(BouncingShape owner, Transform root, Vector3 end, float moveDur, float wobbleDur)
+    {
+        Vector3 start = root.position;
+
+        float t = 0f;
+        while (t < moveDur)
+        {
+            t += Time.unscaledDeltaTime;
+            float u = Mathf.Clamp01(t / moveDur);
+            u = u * u * (3f - 2f * u);
+            root.position = Vector3.LerpUnclamped(start, end, u);
             yield return null;
         }
+        root.position = end;
 
-        // 2) Teleport + nueva dirección
-        for (int i = 0; i < activeShapes.Count; i++)
+        Transform vis = root.Find("Visual");
+        if (!vis) vis = root;
+
+        Vector3 baseScale = vis.localScale;
+        yield return Wobble(vis, baseScale, wobbleDur);
+        vis.localScale = baseScale;
+
+        // ✅ ya llegaron y se quedan quietas => partículas OFF
+        StopShapeParticles(owner, clear: false);
+    }
+
+    private IEnumerator Wobble(Transform t, Vector3 baseScale, float dur)
+    {
+        float part = dur / 4f;
+
+        // 1) impact squash
+        yield return ScaleTo(t, baseScale, new Vector3(baseScale.x * 1.25f, baseScale.y * 0.80f, baseScale.z), part);
+        // 2) rebound
+        yield return ScaleTo(t, t.localScale, new Vector3(baseScale.x * 0.90f, baseScale.y * 1.10f, baseScale.z), part);
+        // 3) settle
+        yield return ScaleTo(t, t.localScale, new Vector3(baseScale.x * 1.05f, baseScale.y * 0.95f, baseScale.z), part);
+        // 4) back to normal
+        yield return ScaleTo(t, t.localScale, baseScale, part);
+    }
+
+    private IEnumerator ScaleTo(Transform t, Vector3 a, Vector3 b, float dur)
+    {
+        float time = 0f;
+        while (time < dur)
         {
-            activeShapes[i].transform.position = shuffledPositions[i];
-            activeShapes[i].RandomizeDirection();
-        }
-
-        // 3) Volver a tamaño normal
-        t = 0f;
-        while (t < halfDuration)
-        {
-            t += Time.deltaTime;
-            float lerp = Mathf.Clamp01(t / halfDuration);
-            float scaleValue = Mathf.Lerp(0.25f, 1f, lerp);
-
-            foreach (var s in activeShapes)
-                s.transform.localScale = new Vector3(scaleValue, scaleValue, 1f);
-
+            time += Time.unscaledDeltaTime;
+            float u = Mathf.Clamp01(time / dur);
+            u = u * u * (3f - 2f * u);
+            t.localScale = Vector3.LerpUnclamped(a, b, u);
             yield return null;
         }
+        t.localScale = b;
+    }
 
-        foreach (var s in activeShapes)
-            s.transform.localScale = Vector3.one;
+    private void FreezeActiveShapes(bool freeze)
+    {
+        var active = shapes.FindAll(s => s.gameObject.activeSelf);
 
-        isShuffling = false;
+        foreach (var s in active)
+        {
+            // --- Física ---
+            var rb = s.GetComponent<Rigidbody2D>();
+            if (rb)
+            {
+                if (freeze)
+                {
+                    rb.simulated = false;
+                    rb.linearVelocity = Vector2.zero;
+                    rb.angularVelocity = 0f;
+                }
+                else
+                {
+                    rb.simulated = true;
+                }
+            }
 
-        // Nuevo objetivo después del shuffle
-        ChooseNewTarget();
+            // --- Partículas (TODAS las que cuelguen de la shape) ---
+            var pss = s.GetComponentsInChildren<ParticleSystem>(true);
+            foreach (var ps in pss)
+            {
+                if (!ps) continue;
+
+                if (freeze)
+                {
+                    ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+                }
+                else
+                {
+                    ps.Play(true);
+                }
+            }
+        }
+    }
+
+    private void PlayShapeParticles(BouncingShape s)
+    {
+        if (!s) return;
+        var pss = s.GetComponentsInChildren<ParticleSystem>(true);
+        foreach (var ps in pss) ps.Play(true);
+    }
+
+    private void StopShapeParticles(BouncingShape s, bool clear = true)
+    {
+        if (!s) return;
+        var pss = s.GetComponentsInChildren<ParticleSystem>(true);
+        foreach (var ps in pss)
+        {
+            if (clear) ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            else ps.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+        }
     }
 
     private void AddScore()
     {
         score++;
+        UpdateDifficulty();
         UpdateScoreText();
         Haptics.TryVibrate();
         PlayerLevelManager.Instance.AddXP(50);
@@ -311,34 +487,50 @@ public class GeometricModeManager : MonoBehaviour
         return score;
     }
 
+    private void UpdateDifficulty()
+    {
+        float t = Mathf.Clamp01(score / (float)scoreToReachMaxSpeed);
+        t = t * t * (3f - 2f * t); // easing
+
+        speedMultiplier = Mathf.Lerp(baseSpeedMult, maxSpeedMult, t);
+        UpdateShapesSpeed();
+    }
+
     // Escoge una nueva figura objetivo entre las activas
     private void ChooseNewTarget()
     {
         List<BouncingShape> activeShapes = shapes.FindAll(s => s.gameObject.activeSelf);
 
-        if (activeShapes.Count > 1 && currentTarget != null)
+        if (activeShapes.Count == 0)
+        {
+            currentTarget = null;
+            instructionText.text = "";
+            SetInstructionIcon(null);
+            return;
+        }
+
+        // ✅ Primera vez: aleatorio
+        if (currentTarget == null)
+        {
+            currentTarget = activeShapes[UnityEngine.Random.Range(0, activeShapes.Count)];
+        }
+        // ✅ Siguientes veces: aleatorio pero distinto
+        else if (activeShapes.Count > 1)
         {
             BouncingShape newTarget;
             do
             {
-                int index = UnityEngine.Random.Range(0, activeShapes.Count);
-                newTarget = activeShapes[index];
+                newTarget = activeShapes[UnityEngine.Random.Range(0, activeShapes.Count)];
             } while (newTarget == currentTarget);
+
             currentTarget = newTarget;
         }
-        else if (activeShapes.Count > 0)
-        {
-            currentTarget = activeShapes[0];
-        }
+        // Si solo hay 1 activa, se queda la misma
 
-        if (currentTarget != null)
-        {
-            // Primero localizamos el nombre de la figura
-            string shapeNameText = currentTarget.shapeName.GetLocalizedString();
+        string shapeNameText = currentTarget.shapeName.GetLocalizedString();
+        instructionText.text = tapShapeInstruction.GetLocalizedString(shapeNameText);
 
-            // Luego lo metemos en la Smart String "Tap the {0}!"
-            instructionText.text = tapShapeInstruction.GetLocalizedString(shapeNameText);
-        }
+        SetInstructionIcon(currentTarget.GetUIIcon());
     }
 
     private void UpdateShapesSpeed()
@@ -380,7 +572,7 @@ public class GeometricModeManager : MonoBehaviour
         }
     }
 
-    private IEnumerator SlowMotionAndEnd(bool wrongShape, BouncingShape touchedShape = null)
+    private IEnumerator SlowMotionAndEnd()
     {
         if (hasEnded) yield break;
         hasEnded = true;
@@ -391,34 +583,19 @@ public class GeometricModeManager : MonoBehaviour
         Time.timeScale = 0.3f;
         Time.fixedDeltaTime = 0.02f * Time.timeScale;
 
-        if (wrongShape && touchedShape != null)
-        {
-            SpriteRenderer mainRenderer = touchedShape.GetComponentInChildren<SpriteRenderer>();
-
-            if (mainRenderer != null)
-            {
-                Color originalColor = mainRenderer.color;
-                Color redColor = Color.red;
-
-                int flashes = 4;
-                float flashInterval = 0.4f;
-
-                for (int i = 0; i < flashes; i++)
-                {
-                    mainRenderer.color = redColor;
-                    yield return new WaitForSecondsRealtime(flashInterval);
-                    mainRenderer.color = originalColor;
-                    yield return new WaitForSecondsRealtime(flashInterval);
-                }
-            }
-        }
-
         EndGame();
 
         yield return new WaitForSecondsRealtime(1.5f);
 
         Time.timeScale = previousTimeScale;
         Time.fixedDeltaTime = previousFixedDelta;
+    }
+
+    private void ReverseAllActiveShapesDirections()
+    {
+        var activeShapes = shapes.FindAll(s => s.gameObject.activeSelf);
+        foreach (var s in activeShapes)
+            s.ReverseDirection();
     }
 
     private void EndGame()
@@ -454,10 +631,17 @@ public class GeometricModeManager : MonoBehaviour
     {
         UpdateScoreText();
 
+        if (!movementStarted)
+        {
+            SetPrepareUI();
+            return;
+        }
+
         if (currentTarget != null)
         {
             string shapeNameText = currentTarget.shapeName.GetLocalizedString();
             instructionText.text = tapShapeInstruction.GetLocalizedString(shapeNameText);
+            SetInstructionIcon(currentTarget.GetUIIcon());
         }
     }
 }
