@@ -407,6 +407,10 @@ MonoBehaviour:
     m_Key: Jellys_score
     m_Metadata:
       m_Items: []
+  - m_Id: 22200234684678144
+    m_Key: No_Wifi
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

@@ -67,6 +67,12 @@ public class LeaderboardUI : MonoBehaviour
     [Header("Perfil jugador")]
     [SerializeField] private XPUIAnimation profilePanel;
 
+    [Header("No Connection UI")]
+    [SerializeField] private GameObject noConnectionRoot; // panel con Image + Text
+    [SerializeField] private Image noConnectionImage;
+    [SerializeField] private TextMeshProUGUI noConnectionText;
+    [SerializeField] private Sprite noConnectionSprite;
+    [SerializeField] private LocalizedString noConnectionLocalizedText; // "Sin conexión" / "No connection"
 
     public enum MyPosState
     {
@@ -106,20 +112,58 @@ public class LeaderboardUI : MonoBehaviour
         foreach (Transform child in contentParent)
             Destroy(child.gameObject);
 
+        ShowNoConnectionUI(false);
+
+        if (Application.internetReachability == NetworkReachability.NotReachable)
+        {
+            ShowNoConnectionUI(true);
+        }
+        else
+        {
+            ShowNoConnectionUI(false);
+        }
+
         // 🔹 Esperar a que PlayFab esté logueado antes de intentar cargar ranking
         StartCoroutine(WaitForPlayFabAndInit());
     }
 
-    private IEnumerator WaitForPlayFabAndInit()
+    private bool wasOffline = false;
+
+    private void Update()
     {
-        // Esperamos a que exista el login manager y esté logueado
-        while (PlayFabLoginManager.Instance == null
-               || !PlayFabLoginManager.Instance.IsLoggedIn)
+        bool offline = Application.internetReachability == NetworkReachability.NotReachable;
+
+        // Si acabamos de perder conexión
+        if (offline && !wasOffline)
         {
-            yield return null;
+            ShowNoConnectionUI(true);
         }
 
-        // (Opcional) Esperar un pelín más, por si el ScoreManager tarda un frame extra
+        // Si acabamos de recuperar conexión
+        if (!offline && wasOffline)
+        {
+            ShowNoConnectionUI(false);
+            RefreshCurrentLeaderboard(); // vuelve a pedir el ranking del modo actual
+        }
+
+        wasOffline = offline;
+    }
+
+    private IEnumerator WaitForPlayFabAndInit()
+    {
+        // ✅ Si no hay internet al entrar, mostramos el panel y no iniciamos ranking
+        if (Application.internetReachability == NetworkReachability.NotReachable)
+        {
+            ShowNoConnectionUI(true);
+            yield break;
+        }
+
+        // Si hay internet, ocultamos el panel y esperamos login
+        ShowNoConnectionUI(false);
+
+        while (PlayFabLoginManager.Instance == null || !PlayFabLoginManager.Instance.IsLoggedIn)
+            yield return null;
+
         yield return null;
 
         StartCoroutine(InitLastMode());
@@ -189,7 +233,20 @@ public class LeaderboardUI : MonoBehaviour
         }
 
         isLoading = true;
+        ShowNoConnectionUI(false);
         currentRequestedStat = statisticName;
+
+        if (Application.internetReachability == NetworkReachability.NotReachable)
+        {
+            isLoading = false;
+
+            myPosState = MyPosState.NoScores;
+            if (myPositionText != null)
+                myPositionText.text = noScoresText.GetLocalizedString();
+
+            ShowNoConnectionUI(true);
+            return;
+        }
 
         foreach (Transform child in contentParent)
             Destroy(child.gameObject);
@@ -202,15 +259,32 @@ public class LeaderboardUI : MonoBehaviour
             Debug.LogWarning("[LeaderboardUI] PlayFabScoreManager.Instance es NULL. No se puede cargar el ranking.");
 
             isLoading = false;
+
+            // Texto de abajo (tu posición) opcional: puedes dejarlo como quieras
             myPosState = MyPosState.NoScores;
             if (myPositionText != null)
                 myPositionText.text = noScoresText.GetLocalizedString();
 
+            // ✅ SOLO icono + texto, y nada de slots
+            ShowNoConnectionUI(true);
             return;
         }
 
         PlayFabScoreManager.Instance.GetLeaderboard(statisticName, top, leaderboard =>
         {
+            if (leaderboard == null)
+            {
+                // ✅ fallo de carga: icono + texto, sin slots
+                ShowNoConnectionUI(true);
+
+                isLoading = false;
+                myPosState = MyPosState.NoScores;
+                if (myPositionText != null)
+                    myPositionText.text = noScoresText.GetLocalizedString();
+
+                return;
+            }
+
             if (statisticName != currentRequestedStat)
                 return;
 
@@ -501,6 +575,32 @@ public class LeaderboardUI : MonoBehaviour
             }
         }
     }
+    
+    private void ShowNoConnectionUI(bool show)
+    {
+        if (noConnectionRoot != null)
+            noConnectionRoot.SetActive(show);
+
+        if (show)
+        {
+            // Oculta TOP 3
+            ClearTop3Slots();
+
+            // Limpia 4-10
+            foreach (Transform child in contentParent)
+                Destroy(child.gameObject);
+
+            // Set icon + text
+            if (noConnectionImage != null && noConnectionSprite != null)
+                noConnectionImage.sprite = noConnectionSprite;
+
+            if (noConnectionText != null)
+                noConnectionText.text = noConnectionLocalizedText.IsEmpty
+                    ? "Sin conexión"
+                    : noConnectionLocalizedText.GetLocalizedString();
+        }
+    }
+
 
     public void RefreshCurrentLeaderboard()
     {
