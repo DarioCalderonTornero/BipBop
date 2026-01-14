@@ -1,31 +1,40 @@
 fileFormatVersion: 2
-guid: cd95384c26d92c94b99dea61f7b5d354
+guid: 99fcef45e36f9d242be6bc31f69384f8
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -7994080516042682599
-    second: MarcoTiempoSinSombra_0
+      213: 668293627996204526
+    second: JoyStickBackground_0
   - first:
-      213: 9147247998648251336
-    second: MarcoTiempoSinSombra_1
+      213: -8065251896538319745
+    second: JoyStickBackground_1
   - first:
-      213: -5044658280056071157
-    second: MarcoTiempoSinSombra_2
+      213: 3699953137925663181
+    second: JoyStickBackground_2
   - first:
-      213: -3493789288465383790
-    second: MarcoTiempoSinSombra_3
+      213: 7062309780387278039
+    second: JoyStickBackground_3
   - first:
-      213: -9070356322550202890
-    second: MarcoTiempoSinSombra_4
+      213: 3510007330932600024
+    second: JoyStickBackground_4
   - first:
-      213: 6254560898766776516
-    second: MarcoTiempoSinSombra_5
+      213: -6428135362281827772
+    second: JoyStickBackground_5
   - first:
-      213: 8553334806266146933
-    second: MarcoTiempoSinSombra_6
+      213: -4716148558773682277
+    second: JoyStickBackground_6
   - first:
-      213: -6565173209822704954
-    second: MarcoTiempoSinSombra_7
+      213: 58869764970554479
+    second: JoyStickBackground_7
+  - first:
+      213: -1431745832021947153
+    second: JoyStickBackground_8
+  - first:
+      213: 7959402898364445368
+    second: JoyStickBackground_9
+  - first:
+      213: -7223531815619654314
+    second: JoyStickBackground_10
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -147,13 +156,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: MarcoTiempoSinSombra_0
+      name: JoyStickBackground_0
       rect:
         serializedVersion: 2
-        x: 2
-        y: 4
-        width: 774
-        height: 764
+        x: 0
+        y: 0
+        width: 1024
+        height: 1532
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -162,19 +171,19 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 91f876700225f0190800000000000000
-      internalID: -7994080516042682599
+      spriteID: eedee5e8381464900800000000000000
+      internalID: 668293627996204526
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: MarcoTiempoSinSombra_1
+      name: JoyStickBackground_1
       rect:
         serializedVersion: 2
-        x: 334
-        y: 760
-        width: 10
+        x: 78
+        y: 1353
+        width: 6
         height: 6
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -184,19 +193,41 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 8c3f4df279d81fe70800000000000000
-      internalID: 9147247998648251336
+      spriteID: f74b9c2b128721090800000000000000
+      internalID: -8065251896538319745
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: MarcoTiempoSinSombra_2
+      name: JoyStickBackground_2
       rect:
         serializedVersion: 2
-        x: 339
-        y: 761
-        width: 81
+        x: 85
+        y: 1353
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dc9a6a796cfd85330800000000000000
+      internalID: 3699953137925663181
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: JoyStickBackground_3
+      rect:
+        serializedVersion: 2
+        x: 22
+        y: 415
+        width: 9
         height: 8
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -206,19 +237,151 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b0c5604a506cdf9b0800000000000000
-      internalID: -5044658280056071157
+      spriteID: 7dc20c9d35d520260800000000000000
+      internalID: 7062309780387278039
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: MarcoTiempoSinSombra_3
+      name: JoyStickBackground_4
       rect:
         serializedVersion: 2
-        x: 415
-        y: 761
-        width: 26
+        x: 265
+        y: 415
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8dc2147121d06b030800000000000000
+      internalID: 3510007330932600024
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: JoyStickBackground_5
+      rect:
+        serializedVersion: 2
+        x: 297
+        y: 415
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 442901b12fcaac6a0800000000000000
+      internalID: -6428135362281827772
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: JoyStickBackground_6
+      rect:
+        serializedVersion: 2
+        x: 361
+        y: 415
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b9ff25e7fdfdc8eb0800000000000000
+      internalID: -4716148558773682277
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: JoyStickBackground_7
+      rect:
+        serializedVersion: 2
+        x: 681
+        y: 415
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f64a4154db521d000800000000000000
+      internalID: 58869764970554479
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: JoyStickBackground_8
+      rect:
+        serializedVersion: 2
+        x: 873
+        y: 415
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fec8fa160ca612ce0800000000000000
+      internalID: -1431745832021947153
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: JoyStickBackground_9
+      rect:
+        serializedVersion: 2
+        x: 930
+        y: 415
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8b23a3de3ca757e60800000000000000
+      internalID: 7959402898364445368
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: JoyStickBackground_10
+      rect:
+        serializedVersion: 2
+        x: 937
+        y: 415
+        width: 8
         height: 8
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -228,96 +391,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 29eb4fc2721938fc0800000000000000
-      internalID: -3493789288465383790
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: MarcoTiempoSinSombra_4
-      rect:
-        serializedVersion: 2
-        x: 443
-        y: 761
-        width: 6
-        height: 7
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 6fd3d204bfe9f1280800000000000000
-      internalID: -9070356322550202890
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: MarcoTiempoSinSombra_5
-      rect:
-        serializedVersion: 2
-        x: 10
-        y: 290
-        width: 133
-        height: 383
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 4c8aa05dff9acc650800000000000000
-      internalID: 6254560898766776516
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: MarcoTiempoSinSombra_6
-      rect:
-        serializedVersion: 2
-        x: 723
-        y: 448
-        width: 46
-        height: 117
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 5707a7450bc83b670800000000000000
-      internalID: 8553334806266146933
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: MarcoTiempoSinSombra_7
-      rect:
-        serializedVersion: 2
-        x: 766
-        y: 343
-        width: 6
-        height: 24
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 6ca4b9bdfb1d3e4a0800000000000000
-      internalID: -6565173209822704954
+      spriteID: 65d024ae51cd0cb90800000000000000
+      internalID: -7223531815619654314
       vertices: []
       indices: 
       edges: []
@@ -335,15 +410,7 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable:
-      MarcoTiempoSinSombra_0: -7994080516042682599
-      MarcoTiempoSinSombra_1: 9147247998648251336
-      MarcoTiempoSinSombra_2: -5044658280056071157
-      MarcoTiempoSinSombra_3: -3493789288465383790
-      MarcoTiempoSinSombra_4: -9070356322550202890
-      MarcoTiempoSinSombra_5: 6254560898766776516
-      MarcoTiempoSinSombra_6: 8553334806266146933
-      MarcoTiempoSinSombra_7: -6565173209822704954
+    nameFileIdTable: {}
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

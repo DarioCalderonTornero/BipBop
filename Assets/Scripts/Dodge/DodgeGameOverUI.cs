@@ -14,6 +14,8 @@ public class DodgeGameOverUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI coinText;
     [SerializeField] private TextMeshProUGUI gameOverText;
 
+    [SerializeField] private TurboController turboController;
+
     [Header("Localization")]
     [Tooltip("Smart String con {0}. Ej: 'Coins: {0}'")]
     [SerializeField] private LocalizedString coinsTextTemplate;

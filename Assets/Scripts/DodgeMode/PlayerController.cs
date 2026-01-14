@@ -8,6 +8,7 @@ public class PlayerController : MonoBehaviour
     public float rotationSpeed = 360f;
     public float stopDistance = 0.1f;
 
+
     [Header("Sprites")]
     public SpriteRenderer spriteRenderer; // hijo visual o el propio
     public Sprite idleSprite;
