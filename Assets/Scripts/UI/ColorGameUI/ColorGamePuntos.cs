@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -34,6 +34,12 @@ public class ColorGamePuntos : MonoBehaviour
         return score;
     }
 
+    // ✅ 1 moneda cada 3 puntos
+    public int GetCoinsEarned()
+    {
+        return score / 3;
+    }
+
     private void UpdateScoreText()
     {
         if (scoreText != null)
@@ -44,7 +50,10 @@ public class ColorGamePuntos : MonoBehaviour
     {
         OnColorAddScore?.Invoke(this, EventArgs.Empty);
         score++;
-        CurrencyManager.Instance.AddCoins(1);
+
+        // ❌ Ya NO damos 1 moneda por punto
+        // CurrencyManager.Instance.AddCoins(1);
+
         PlayerLevelManager.Instance.AddXP(5);
         UpdateScoreText();
         // PlayScoreEffect();

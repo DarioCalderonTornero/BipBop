@@ -791,7 +791,7 @@ public class GridGameManager : MonoBehaviour
 
         PlayFabScoreManager.Instance.SubmitScore("GridScore", score);
 
-        int coinsEarned = score;
+        int coinsEarned = score / 3;
         int totalCoins = PlayerPrefs.GetInt("CoinCount", 0);
         totalCoins += coinsEarned;
         PlayerPrefs.SetInt("CoinCount", totalCoins);

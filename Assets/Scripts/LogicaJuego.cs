@@ -269,7 +269,7 @@ public class LogicaJuego : MonoBehaviour
         instructionText.text = gameOverText.GetLocalizedString();
         SetInstructionIcon(null); // Oculta icono en Game Over
 
-        int coinsEarned = MainGamePoints.Instance.GetScore();
+        int coinsEarned = MainGamePoints.Instance.GetCoinsEarned();
 
         SaveRecordIfNeeded();
 

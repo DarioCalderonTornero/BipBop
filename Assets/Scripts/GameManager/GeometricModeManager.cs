@@ -612,7 +612,7 @@ public class GeometricModeManager : MonoBehaviour
         if (PlayFabLoginManager.Instance != null && PlayFabLoginManager.Instance.IsLoggedIn)
             PlayFabScoreManager.Instance.SubmitScore("GeometricScore", score);
 
-        int coinsEarned = score;
+        int coinsEarned = score / 3;
 
         CoinsRewardUI rewardUI = FindObjectOfType<CoinsRewardUI>(true);
         if (rewardUI != null)

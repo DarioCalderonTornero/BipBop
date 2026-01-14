@@ -411,6 +411,14 @@ MonoBehaviour:
     m_Key: No_Wifi
     m_Metadata:
       m_Items: []
+  - m_Id: 22471381644967936
+    m_Key: Coins_GameOver
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22471387386970112
+    m_Key: New Entry 1
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

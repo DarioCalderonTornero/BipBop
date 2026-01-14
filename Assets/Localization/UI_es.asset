@@ -421,6 +421,10 @@ MonoBehaviour:
     m_Localized: "Sin conexi\xF3n"
     m_Metadata:
       m_Items: []
+  - m_Id: 22471381644967936
+    m_Localized: 'Monedas: {0}'
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

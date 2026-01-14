@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -12,7 +13,11 @@ public class ColorGameOverUI : MonoBehaviour
     [SerializeField] private Button mainMenuButton;
     [SerializeField] private Image backGround;
     [SerializeField] private TextMeshProUGUI coinText;
+    [SerializeField] private TextMeshProUGUI scoreText;
     [SerializeField] private TextMeshProUGUI gameOverText;
+
+    [Header("Localization")]
+    [SerializeField] private LocalizedString coinsObtainedLocalized; // "Monedas obtenidas: {0}"
 
     [SerializeField] private Animator myanimator;
 
@@ -21,7 +26,6 @@ public class ColorGameOverUI : MonoBehaviour
 
     private void Awake()
     {
-        //Hide();
         retryButton.onClick.AddListener(() =>
         {
             SceneLoader.LoadScene(SceneLoader.Scene.ColorScene);
@@ -52,13 +56,22 @@ public class ColorGameOverUI : MonoBehaviour
 
     private void ShowGameOver()
     {
-        coinText.text = "Coins: " + ColorGamePuntos.Instance.GetScore();
+        int score = ColorGamePuntos.Instance.GetScore();
+        int coinsEarned = ColorGamePuntos.Instance.GetCoinsEarned();
+
+        // Monedas obtenidas: X (localizable)
+        coinText.text = coinsObtainedLocalized.GetLocalizedString(coinsEarned);
+
+        // Score: solo el número
+        scoreText.text = score.ToString();
+
         myanimator.SetBool("IsGameOver", true);
     }
 
     private void OnDestroy()
     {
-        ColorManager.Instance.OnGameOver -= ColorManager_OnGameOver;
+        if (ColorManager.Instance != null)
+            ColorManager.Instance.OnGameOver -= ColorManager_OnGameOver;
     }
 }
 

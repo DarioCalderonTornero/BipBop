@@ -1,9 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
-using TMPro;
+ï»¿using TMPro;
 using UnityEngine;
 using UnityEngine.Localization;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class GameOver : MonoBehaviour
@@ -11,30 +8,25 @@ public class GameOver : MonoBehaviour
     [SerializeField] private Button retryButton;
     [SerializeField] private Button mainMenuButton;
     [SerializeField] private Image backGround;
+
+    [Header("Texts")]
     [SerializeField] private TextMeshProUGUI coinText;
+    [SerializeField] private TextMeshProUGUI scoreText;   // âœ… NUEVO: solo nÃºmero
     [SerializeField] private TextMeshProUGUI gameOverText;
+
+    [Header("Localization")]
+    [SerializeField] private LocalizedString coinsObtainedLocalized; // "Monedas obtenidas: {0}"
 
     [SerializeField] private Animator myanimator;
 
     [Header("Transition")]
-    [SerializeField] private string mainMenuSceneName = "Menu";         // nombre EXACTO de la escena del menú
-    [SerializeField] private LocalizedString mainMenuTransitionLabel;   // "Menú" / "Main Menu"
+    [SerializeField] private string mainMenuSceneName = "Menu";
+    [SerializeField] private LocalizedString mainMenuTransitionLabel;
 
     private void Awake()
     {
-        // Retry: puedes dejarlo directo o también hacerlo con transición, como quieras.
         retryButton.onClick.AddListener(() =>
         {
-            // Si quieres usar transición también aquí:
-            // if (TransitionScript.Instance != null)
-            // {
-            //     TransitionScript.Instance.TransitionToScene("GameScene", "BipBop");
-            // }
-            // else
-            // {
-            //     SceneLoader.LoadScene(SceneLoader.Scene.GameScene);
-            // }
-
             SceneLoader.LoadScene(SceneLoader.Scene.GameScene);
         });
 
@@ -50,29 +42,40 @@ public class GameOver : MonoBehaviour
     private void LogicaPuntos_OnGameOver(object sender, System.EventArgs e)
     {
         Debug.Log("Show");
+
+        // âœ… SCORE: solo nÃºmero de esta partida
+        if (scoreText != null && MainGamePoints.Instance != null)
+            scoreText.text = MainGamePoints.Instance.GetScore().ToString();
+
+        // âœ… COINS: "Monedas obtenidas: X" (localizable)
+        if (coinText != null && coinsObtainedLocalized != null && MainGamePoints.Instance != null)
+        {
+            int coinsEarned = MainGamePoints.Instance.GetCoinsEarned(); // si ya lo tienes (1 cada 3)
+            // Si todavÃ­a NO tienes GetCoinsEarned(), usa temporalmente:
+            // int coinsEarned = MainGamePoints.Instance.GetScore();
+
+            coinText.text = coinsObtainedLocalized.GetLocalizedString(coinsEarned);
+        }
+
         myanimator.SetBool("IsGameOver", true);
     }
 
     private void OnMainMenuClicked()
     {
-        // 1) Si tenemos TransitionScript en la escena, usamos la animación
         if (TransitionScript.Instance != null)
         {
-            // Texto centrado que irá en la transición
             string label = mainMenuTransitionLabel.GetLocalizedString();
-            // Ej: "Menú" / "Main Menu"
-
             TransitionScript.Instance.TransitionToScene(mainMenuSceneName, label);
         }
         else
         {
-            // 2) Fallback por si no existe TransitionScript en esta escena (para que no casque)
             SceneLoader.LoadScene(SceneLoader.Scene.Menu);
         }
     }
 
     private void OnDestroy()
     {
-        LogicaJuego.Instance.OnGameOver -= LogicaPuntos_OnGameOver;
+        if (LogicaJuego.Instance != null)
+            LogicaJuego.Instance.OnGameOver -= LogicaPuntos_OnGameOver;
     }
 }

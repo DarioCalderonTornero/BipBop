@@ -61,6 +61,11 @@ public class MainGamePoints : MonoBehaviour
         }
     }
 
+    public int GetCoinsEarned()
+    {
+        return score / 3;
+    }
+
     private void OnEnable()
     {
         LocalizationSettings.SelectedLocaleChanged += OnLocaleChanged;

@@ -740,7 +740,7 @@ public class ColorManager : MonoBehaviour
             PlayFabScoreManager.Instance.SubmitScore("ColorScore", ColorGamePuntos.Instance.GetScore());
         }
 
-        int coinsEarned = ColorGamePuntos.Instance.score;
+        int coinsEarned = ColorGamePuntos.Instance.GetCoinsEarned();
 
         CoinsRewardUI rewardUI = FindObjectOfType<CoinsRewardUI>(true);
         if (rewardUI != null)
