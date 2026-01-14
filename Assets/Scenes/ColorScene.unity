@@ -1027,8 +1027,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -24, y: 12}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchoredPosition: {x: -98.05455, y: 14.9623}
+  m_SizeDelta: {x: 348.1091, y: 123.0672}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &368887587
 MonoBehaviour:
@@ -1050,7 +1050,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: CoinsText
+  m_text: 1000
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 1b4a1f76817a44c4a886ba5c35919310, type: 2}
   m_sharedMaterial: {fileID: -1839985413152155028, guid: 1b4a1f76817a44c4a886ba5c35919310, type: 2}
@@ -1077,8 +1077,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 51.09
-  m_fontSizeBase: 51.09
+  m_fontSize: 92.58
+  m_fontSizeBase: 92.58
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -1115,7 +1115,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: -165.93187, y: -64.92997, z: 0, w: -63.126366}
+  m_margin: {x: -0.049674984, y: -1.7368584, z: 0, w: 0.06692509}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -2906,7 +2906,7 @@ RectTransform:
   m_GameObject: {fileID: 879476446}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.89386785, y: 0.89386785, z: 0.89386785}
+  m_LocalScale: {x: 0.7279391, y: 0.7279391, z: 0.7279391}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1317340392}
@@ -2916,7 +2916,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 318, y: -111}
+  m_AnchoredPosition: {x: 295, y: -111}
   m_SizeDelta: {x: 641.345, y: 276.682}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!225 &879476448
@@ -4732,7 +4732,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 32a7d2b5d6687e0448385067d38d44cc, type: 3}
+  m_Sprite: {fileID: 3176414341785403447, guid: e7a75f6c90988ac4a86b06f416a97b83, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1

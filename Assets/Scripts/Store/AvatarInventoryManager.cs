@@ -359,6 +359,7 @@ public class AvatarInventoryManager : MonoBehaviour
         if (menuAvatar != null)
         {
             menuAvatar.LoadCurrentAvatarSprite();
+            menuAvatar.UpdateOpenButtonAvatar();
         }
 
         LeaderboardUI.Instance.RefreshCurrentLeaderboard();
@@ -386,6 +387,7 @@ public class AvatarInventoryManager : MonoBehaviour
                 XPUIAnimation menuAvatar = FindFirstObjectByType<XPUIAnimation>();
                 if (menuAvatar != null)
                     menuAvatar.LoadCurrentAvatarSprite();
+                menuAvatar.UpdateOpenButtonAvatar();
             },
             error =>
             {

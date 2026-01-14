@@ -13,6 +13,9 @@ public class XPUIAnimation : MonoBehaviour
     [SerializeField] private Button openButton;     // Botón de usuario (icono arriba en el HUD)
     [SerializeField] private Button closeButton;    // Botón X dentro del panel
 
+    [Header("Open Button Avatar")]
+    [SerializeField] private Image openAvatarImage;
+
     [Header("Animación")]
     [SerializeField] private float slideDuration = 0.25f;
     [SerializeField]
@@ -75,10 +78,22 @@ public class XPUIAnimation : MonoBehaviour
     private int pendingRemoteLoads = 0;
     private bool remoteOpenStarted = false;
 
+    [Header("Open Button Pop (hide/show)")]
+    [SerializeField] private float openBtnHideDuration = 0.10f;
+    [SerializeField] private float openBtnShowDuration = 0.12f;
+    [SerializeField] private float openBtnHideScale = 0.85f; // pop inverso
+    [SerializeField] private float openBtnShowOvershoot = 1.08f; // pop suave
+
+    private Vector3 openBtnOriginalScale = Vector3.one;
+    private Coroutine openBtnRoutine;
+
     private void Awake()
     {
         if (panel == null)
             panel = GetComponent<RectTransform>();
+
+        if (openButton != null)
+            openBtnOriginalScale = openButton.transform.localScale;
 
         // Guardamos la escala original EXACTA del editor (X=0.88749, etc.)
         originalScale = panel.localScale;
@@ -129,6 +144,7 @@ public class XPUIAnimation : MonoBehaviour
     {
         LoadCurrentAvatarSprite();
         UpdateLevelUI();
+        UpdateOpenButtonAvatar();
         LoadUsername();
         UpdateRecordsUI();
         UpdateAvatarAndBackgroundCount();
@@ -177,6 +193,31 @@ public class XPUIAnimation : MonoBehaviour
             backgroundCountText.text = $"{ownedBackgrounds} / {totalBackgrounds}";
     }
 
+    public void UpdateOpenButtonAvatar()
+    {
+        if (openAvatarImage == null || avatarCatalog == null)
+            return;
+
+        string avatarId = PlayerPrefs.GetString("EquippedAvatarId", "NormalAvatar");
+        AvatarDataSO data = GetAvatarById(avatarId);
+
+        if (data != null && data.sprite != null)
+        {
+            openAvatarImage.sprite = data.sprite;
+
+            // Si quieres que el botón NO use el shader (recomendado en HUD):
+            openAvatarImage.material = null;
+
+            openAvatarImage.enabled = true;
+        }
+        else
+        {
+            openAvatarImage.sprite = fallbackAvatar;
+            openAvatarImage.material = null;
+            openAvatarImage.enabled = (fallbackAvatar != null);
+        }
+    }
+
     private void Update()
     {
         if (!isRemoteProfile)
@@ -197,6 +238,8 @@ public class XPUIAnimation : MonoBehaviour
             backgroundButton.gameObject.SetActive(true);
         if (backgroundImage != null)
             backgroundImage.gameObject.SetActive(true);
+        if (openButton != null)
+            HideOpenButtonPop();
 
     }
 
@@ -627,6 +670,9 @@ public class XPUIAnimation : MonoBehaviour
         if (closeButton != null)
             StartCoroutine(CloseButtonPopAnimation());
 
+        if (openButton != null)
+            ShowOpenButtonPop();
+
         if (currentRoutine != null) StopCoroutine(currentRoutine);
         currentRoutine = StartCoroutine(SlidePanel(panel.anchoredPosition, hiddenPosition, false));
     }
@@ -750,6 +796,90 @@ public class XPUIAnimation : MonoBehaviour
 
         btn.localScale = original;
     }
+
+    private void HideOpenButtonPop()
+    {
+        if (openBtnRoutine != null) StopCoroutine(openBtnRoutine);
+        openBtnRoutine = StartCoroutine(HideOpenButtonRoutine());
+    }
+
+    private void ShowOpenButtonPop()
+    {
+        if (openBtnRoutine != null) StopCoroutine(openBtnRoutine);
+        openBtnRoutine = StartCoroutine(ShowOpenButtonRoutine());
+    }
+
+    private IEnumerator HideOpenButtonRoutine()
+    {
+        Transform t = openButton.transform;
+
+        // asegurar escala original
+        t.localScale = openBtnOriginalScale;
+
+        float time = 0f;
+        Vector3 from = openBtnOriginalScale;
+        Vector3 to = openBtnOriginalScale * openBtnHideScale;
+
+        while (time < openBtnHideDuration)
+        {
+            time += Time.unscaledDeltaTime;
+            float u = Mathf.Clamp01(time / openBtnHideDuration);
+            // ease in suave
+            float eased = u * u;
+            t.localScale = Vector3.Lerp(from, to, eased);
+            yield return null;
+        }
+
+        t.localScale = to;
+        openButton.gameObject.SetActive(false);
+
+        // reset para cuando vuelva
+        t.localScale = openBtnOriginalScale;
+        openBtnRoutine = null;
+    }
+
+    private IEnumerator ShowOpenButtonRoutine()
+    {
+        Transform t = openButton.transform;
+
+        openButton.gameObject.SetActive(true);
+
+        Vector3 baseScale = openBtnOriginalScale;
+        Vector3 start = baseScale * openBtnHideScale;
+        Vector3 overshoot = baseScale * openBtnShowOvershoot;
+
+        // arrancar pequeño
+        t.localScale = start;
+
+        // 1) subir hasta overshoot
+        float time = 0f;
+        float half = openBtnShowDuration * 0.6f;
+        while (time < half)
+        {
+            time += Time.unscaledDeltaTime;
+            float u = Mathf.Clamp01(time / half);
+            float eased = EaseOutCubic(u);
+            t.localScale = Vector3.LerpUnclamped(start, overshoot, eased);
+            yield return null;
+        }
+
+        // 2) volver a escala normal
+        time = 0f;
+        float settle = openBtnShowDuration * 0.4f;
+        while (time < settle)
+        {
+            time += Time.unscaledDeltaTime;
+            float u = Mathf.Clamp01(time / settle);
+            float eased = EaseOutCubic(u);
+            t.localScale = Vector3.LerpUnclamped(overshoot, baseScale, eased);
+            yield return null;
+        }
+
+        t.localScale = baseScale;
+        openBtnRoutine = null;
+    }
+
+    private float EaseOutCubic(float t) => 1f - Mathf.Pow(1f - t, 3f);
 
     /// <summary>
     /// Animación: el panel sube desde abajo y cambia de escala SOLO en Y,
