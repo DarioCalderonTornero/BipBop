@@ -197,7 +197,7 @@ MonoBehaviour:
   playerTransform: {fileID: 1509769155}
   playerSpawnPoint: {fileID: 0}
   reviveInvulSeconds: 2
-  reviveCountdownUI: {fileID: 0}
+  reviveCountdownUI: {fileID: 1794233588}
 --- !u!4 &14690690
 Transform:
   m_ObjectHideFlags: 0

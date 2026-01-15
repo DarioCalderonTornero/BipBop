@@ -242,12 +242,12 @@ public class DodgeManager : MonoBehaviour
 
         if (reviveCountdownUI == null)
         {
+            Debug.Log("nfjkoandfj'qfnwoqèf");
             // fallback: revive directo
             ReviveNow();
             return;
         }
 
-        // Sigue “congelado” durante la cuenta atrás (Enemy.GlobalFreeze true y player apagado)
         reviveCountdownUI.Play(ReviveNow);
     }
 
