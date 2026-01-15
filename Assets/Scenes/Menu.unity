@@ -56128,7 +56128,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   miniGames:
-  - image: {fileID: 21300000, guid: 758ac31a9bff9ac4181f54de54a6ecb7, type: 3}
+  - image: {fileID: 3467238661014694703, guid: 4eba9fca8ce4b66429d91ea2324e67a4, type: 3}
     name:
       m_TableReference:
         m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
@@ -56159,7 +56159,7 @@ MonoBehaviour:
     recordKey: MaxRecord
     sceneName: GameScene
     showMotionTasksToggle: 1
-  - image: {fileID: -2173927488418099776, guid: 749bf42621ffaa648b624e580410afca, type: 3}
+  - image: {fileID: -2802471344384215956, guid: 67067bab247e8cf4fb2258a51cdc4cb7, type: 3}
     name:
       m_TableReference:
         m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
@@ -56190,7 +56190,7 @@ MonoBehaviour:
     recordKey: MaxRecordColor
     sceneName: ColorScene
     showMotionTasksToggle: 0
-  - image: {fileID: 1618036454705851656, guid: 7e73d50e92d661749b81bb657aa8981a, type: 3}
+  - image: {fileID: 8935794464785332713, guid: 39b55c87475c1934fa624d8bb2fc7afe, type: 3}
     name:
       m_TableReference:
         m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
@@ -56221,7 +56221,7 @@ MonoBehaviour:
     recordKey: MaxRecordGeometric
     sceneName: GeometricScene
     showMotionTasksToggle: 0
-  - image: {fileID: 21300000, guid: bd3249e8aae01e748aaca0c062e2c19c, type: 3}
+  - image: {fileID: -5804495057902975185, guid: cdf500405cae98f4c99b741b074a59b5, type: 3}
     name:
       m_TableReference:
         m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
@@ -56252,7 +56252,7 @@ MonoBehaviour:
     recordKey: MaxRecordDodge
     sceneName: DodgeScene
     showMotionTasksToggle: 0
-  - image: {fileID: 21300000, guid: 74087f6d03f233e4a8a142fa01f9e5cf, type: 3}
+  - image: {fileID: 8960588234837975079, guid: cadb4a6df514af4439f1fc7a18ae54fa, type: 3}
     name:
       m_TableReference:
         m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
