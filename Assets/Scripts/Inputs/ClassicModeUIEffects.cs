@@ -6,8 +6,9 @@ public class ClassicModeUIEffects : MonoBehaviour
 {
     public static ClassicModeUIEffects Instance { get; private set; }
 
-    [Header("Root de UI a animar")]
-    [SerializeField] private RectTransform uiRoot;
+    [Header("Targets de UI a animar (sin Empty)")]
+    [Tooltip("Arrastra aquí los RectTransforms que quieres animar a la vez (texto, icono, fondo, etc.).")]
+    [SerializeField] private RectTransform[] uiTargets;
 
     [Header("Parámetros de movimiento")]
     [SerializeField] private float moveDistance = 60f;
@@ -26,14 +27,13 @@ public class ClassicModeUIEffects : MonoBehaviour
     [SerializeField] private float shakeDuration = 0.2f;
     [SerializeField] private float shakeMagnitude = 25f;
 
-    // Para el efecto de TAP (un pequeño "bump")
     [Header("Parámetros de tap")]
     [SerializeField] private float tapScale = 1.1f;
     [SerializeField] private float tapDuration = 0.06f;
 
-    private Vector3 originalPos;
-    private Vector3 originalScale;
-    private Quaternion originalRot;
+    private Vector2[] originalAnchoredPos;
+    private Vector3[] originalScale;
+    private Quaternion[] originalRot;
 
     private Coroutine currentEffect;
 
@@ -44,94 +44,105 @@ public class ClassicModeUIEffects : MonoBehaviour
             Destroy(gameObject);
             return;
         }
-
         Instance = this;
     }
 
     private void Start()
     {
-        if (uiRoot == null)
-            uiRoot = GetComponent<RectTransform>();
+        // Si no has asignado targets, usa el RectTransform del objeto (fallback)
+        if (uiTargets == null || uiTargets.Length == 0)
+        {
+            var rt = GetComponent<RectTransform>();
+            if (rt != null) uiTargets = new[] { rt };
+        }
 
-        originalPos = uiRoot.localPosition;
-        originalScale = uiRoot.localScale;
-        originalRot = uiRoot.localRotation;
+        CacheOriginals();
+    }
+
+    private void CacheOriginals()
+    {
+        if (uiTargets == null) return;
+
+        originalAnchoredPos = new Vector2[uiTargets.Length];
+        originalScale = new Vector3[uiTargets.Length];
+        originalRot = new Quaternion[uiTargets.Length];
+
+        for (int i = 0; i < uiTargets.Length; i++)
+        {
+            if (uiTargets[i] == null) continue;
+
+            originalAnchoredPos[i] = uiTargets[i].anchoredPosition;
+            originalScale[i] = uiTargets[i].localScale;
+            originalRot[i] = uiTargets[i].localRotation;
+        }
     }
 
     public void PlayEffectForTask(TaskType taskType)
     {
-        if (uiRoot == null) return;
+        if (uiTargets == null || uiTargets.Length == 0) return;
 
         // Si hay una animación en marcha, la paramos y reseteamos
         if (currentEffect != null)
         {
             StopCoroutine(currentEffect);
-            ResetTransform();
+            ResetTransforms();
         }
 
         switch (taskType)
         {
-            case TaskType.SwipeRight:
-                currentEffect = StartCoroutine(DoMoveEffect(Vector2.right));
-                break;
-            case TaskType.SwipeLeft:
-                currentEffect = StartCoroutine(DoMoveEffect(Vector2.left));
-                break;
-            case TaskType.SwipeUp:
-                currentEffect = StartCoroutine(DoMoveEffect(Vector2.up));
-                break;
-            case TaskType.SwipeDown:
-                currentEffect = StartCoroutine(DoMoveEffect(Vector2.down));
-                break;
+            case TaskType.SwipeRight: currentEffect = StartCoroutine(DoMoveEffect(Vector2.right)); break;
+            case TaskType.SwipeLeft: currentEffect = StartCoroutine(DoMoveEffect(Vector2.left)); break;
+            case TaskType.SwipeUp: currentEffect = StartCoroutine(DoMoveEffect(Vector2.up)); break;
+            case TaskType.SwipeDown: currentEffect = StartCoroutine(DoMoveEffect(Vector2.down)); break;
 
-            case TaskType.RotateRight:
-                currentEffect = StartCoroutine(DoRotateEffect(-rotateAngle)); // horario
-                break;
-            case TaskType.RotateLeft:
-                currentEffect = StartCoroutine(DoRotateEffect(rotateAngle));  // antihorario
-                break;
+            case TaskType.RotateRight: currentEffect = StartCoroutine(DoRotateEffect(-rotateAngle)); break; // horario
+            case TaskType.RotateLeft: currentEffect = StartCoroutine(DoRotateEffect(rotateAngle)); break; // antihorario
 
-            case TaskType.Shake:
-                currentEffect = StartCoroutine(DoShakeEffect());
-                break;
+            case TaskType.Shake: currentEffect = StartCoroutine(DoShakeEffect()); break;
 
-            case TaskType.ZoomIn:
-                currentEffect = StartCoroutine(DoZoomEffect(zoomFactorIn));
-                break;
-            case TaskType.ZoomOut:
-                currentEffect = StartCoroutine(DoZoomEffect(zoomFactorOut));
-                break;
+            case TaskType.ZoomIn: currentEffect = StartCoroutine(DoZoomEffect(zoomFactorIn)); break;
+            case TaskType.ZoomOut: currentEffect = StartCoroutine(DoZoomEffect(zoomFactorOut)); break;
 
             case TaskType.LookDown:
-                // pequeño golpe hacia abajo y vuelta
                 currentEffect = StartCoroutine(DoMoveEffect(Vector2.down));
                 break;
 
             case TaskType.Tap:
             default:
-                // Para TAP: un pequeño “bump” de escala
                 currentEffect = StartCoroutine(DoTapEffect());
                 break;
         }
     }
 
-    private void ResetTransform()
+    private void ResetTransforms()
     {
-        uiRoot.localPosition = originalPos;
-        uiRoot.localScale = originalScale;
-        uiRoot.localRotation = originalRot;
+        for (int i = 0; i < uiTargets.Length; i++)
+        {
+            var rt = uiTargets[i];
+            if (rt == null) continue;
+
+            rt.anchoredPosition = originalAnchoredPos[i];
+            rt.localScale = originalScale[i];
+            rt.localRotation = originalRot[i];
+        }
     }
 
     private IEnumerator DoMoveEffect(Vector2 dir)
     {
-        Vector3 offset = new Vector3(dir.x, dir.y, 0f) * moveDistance;
+        Vector2 offset = dir * moveDistance;
 
         // Ida
         float t = 0f;
         while (t < 1f)
         {
             t += Time.deltaTime / moveDuration;
-            uiRoot.localPosition = Vector3.Lerp(originalPos, originalPos + offset, t);
+            for (int i = 0; i < uiTargets.Length; i++)
+            {
+                var rt = uiTargets[i];
+                if (rt == null) continue;
+
+                rt.anchoredPosition = Vector2.Lerp(originalAnchoredPos[i], originalAnchoredPos[i] + offset, t);
+            }
             yield return null;
         }
 
@@ -140,24 +151,35 @@ public class ClassicModeUIEffects : MonoBehaviour
         while (t < 1f)
         {
             t += Time.deltaTime / moveDuration;
-            uiRoot.localPosition = Vector3.Lerp(originalPos + offset, originalPos, t);
+            for (int i = 0; i < uiTargets.Length; i++)
+            {
+                var rt = uiTargets[i];
+                if (rt == null) continue;
+
+                rt.anchoredPosition = Vector2.Lerp(originalAnchoredPos[i] + offset, originalAnchoredPos[i], t);
+            }
             yield return null;
         }
 
-        ResetTransform();
+        ResetTransforms();
         currentEffect = null;
     }
 
     private IEnumerator DoRotateEffect(float angle)
     {
-        Quaternion targetRot = Quaternion.Euler(0, 0, angle) * originalRot;
-
         // Ida
         float t = 0f;
         while (t < 1f)
         {
             t += Time.deltaTime / rotateDuration;
-            uiRoot.localRotation = Quaternion.Slerp(originalRot, targetRot, t);
+            for (int i = 0; i < uiTargets.Length; i++)
+            {
+                var rt = uiTargets[i];
+                if (rt == null) continue;
+
+                Quaternion targetRot = Quaternion.Euler(0, 0, angle) * originalRot[i];
+                rt.localRotation = Quaternion.Slerp(originalRot[i], targetRot, t);
+            }
             yield return null;
         }
 
@@ -166,24 +188,36 @@ public class ClassicModeUIEffects : MonoBehaviour
         while (t < 1f)
         {
             t += Time.deltaTime / rotateDuration;
-            uiRoot.localRotation = Quaternion.Slerp(targetRot, originalRot, t);
+            for (int i = 0; i < uiTargets.Length; i++)
+            {
+                var rt = uiTargets[i];
+                if (rt == null) continue;
+
+                Quaternion targetRot = Quaternion.Euler(0, 0, angle) * originalRot[i];
+                rt.localRotation = Quaternion.Slerp(targetRot, originalRot[i], t);
+            }
             yield return null;
         }
 
-        ResetTransform();
+        ResetTransforms();
         currentEffect = null;
     }
 
     private IEnumerator DoZoomEffect(float targetScaleFactor)
     {
-        Vector3 targetScale = originalScale * targetScaleFactor;
-
         // Ida
         float t = 0f;
         while (t < 1f)
         {
             t += Time.deltaTime / zoomDuration;
-            uiRoot.localScale = Vector3.Lerp(originalScale, targetScale, t);
+            for (int i = 0; i < uiTargets.Length; i++)
+            {
+                var rt = uiTargets[i];
+                if (rt == null) continue;
+
+                Vector3 targetScale = originalScale[i] * targetScaleFactor;
+                rt.localScale = Vector3.Lerp(originalScale[i], targetScale, t);
+            }
             yield return null;
         }
 
@@ -192,11 +226,18 @@ public class ClassicModeUIEffects : MonoBehaviour
         while (t < 1f)
         {
             t += Time.deltaTime / zoomDuration;
-            uiRoot.localScale = Vector3.Lerp(targetScale, originalScale, t);
+            for (int i = 0; i < uiTargets.Length; i++)
+            {
+                var rt = uiTargets[i];
+                if (rt == null) continue;
+
+                Vector3 targetScale = originalScale[i] * targetScaleFactor;
+                rt.localScale = Vector3.Lerp(targetScale, originalScale[i], t);
+            }
             yield return null;
         }
 
-        ResetTransform();
+        ResetTransforms();
         currentEffect = null;
     }
 
@@ -208,17 +249,24 @@ public class ClassicModeUIEffects : MonoBehaviour
         {
             elapsed += Time.deltaTime;
             Vector2 randomOffset = Random.insideUnitCircle * shakeMagnitude;
-            uiRoot.localPosition = originalPos + new Vector3(randomOffset.x, randomOffset.y, 0f);
+
+            for (int i = 0; i < uiTargets.Length; i++)
+            {
+                var rt = uiTargets[i];
+                if (rt == null) continue;
+
+                rt.anchoredPosition = originalAnchoredPos[i] + randomOffset;
+            }
+
             yield return null;
         }
 
-        ResetTransform();
+        ResetTransforms();
         currentEffect = null;
     }
 
     private IEnumerator DoTapEffect()
     {
-        Vector3 big = originalScale * tapScale;
         float half = tapDuration;
 
         // Subir
@@ -226,7 +274,14 @@ public class ClassicModeUIEffects : MonoBehaviour
         while (t < 1f)
         {
             t += Time.deltaTime / half;
-            uiRoot.localScale = Vector3.Lerp(originalScale, big, t);
+            for (int i = 0; i < uiTargets.Length; i++)
+            {
+                var rt = uiTargets[i];
+                if (rt == null) continue;
+
+                Vector3 big = originalScale[i] * tapScale;
+                rt.localScale = Vector3.Lerp(originalScale[i], big, t);
+            }
             yield return null;
         }
 
@@ -235,11 +290,18 @@ public class ClassicModeUIEffects : MonoBehaviour
         while (t < 1f)
         {
             t += Time.deltaTime / half;
-            uiRoot.localScale = Vector3.Lerp(big, originalScale, t);
+            for (int i = 0; i < uiTargets.Length; i++)
+            {
+                var rt = uiTargets[i];
+                if (rt == null) continue;
+
+                Vector3 big = originalScale[i] * tapScale;
+                rt.localScale = Vector3.Lerp(big, originalScale[i], t);
+            }
             yield return null;
         }
 
-        ResetTransform();
+        ResetTransforms();
         currentEffect = null;
     }
 }

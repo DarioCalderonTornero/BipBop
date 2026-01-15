@@ -89,7 +89,10 @@ public class GridGameManager : MonoBehaviour
     private Dictionary<Transform, Coroutine> platformSquashRoutines = new Dictionary<Transform, Coroutine>();
 
     // Escala base de las casillas
-    private Vector3 cellBaseScale = new Vector3(0.79671f, 1.35f, 0.79671f);
+    // private Vector3 cellBaseScale = new Vector3(0.79671f, 1.35f, 0.79671f);
+    private Vector3 cellBaseScale = new Vector3(0.59f, 1.01773f, 0.59f);
+
+    [SerializeField] private float playerCellScaleMultiplier = 1.28f;
 
     private GridPlayerVisual playerVisual;
 
@@ -129,6 +132,7 @@ public class GridGameManager : MonoBehaviour
 
         // IMPORTANTE: inicializar aquí
         gridCells = new Transform[gridSize, gridSize];
+        ApplyBaseScaleToAllCells();
         int index = 0;
         for (int y = 0; y < gridSize; y++)
         {
@@ -215,6 +219,45 @@ public class GridGameManager : MonoBehaviour
         playerObj.transform.position = targetPos;
         // se queda en la primera plataforma en pose de estar en casilla
         playerVisual?.SetOnCell();
+        ForceCellScale(gridCells[playerX, playerY]);
+    }
+
+    private Vector3 GetRestScaleForCell(Transform cell)
+    {
+        if (cell == null) return cellBaseScale;
+
+        Transform playerCell = null;
+        if (gridCells != null &&
+            playerX >= 0 && playerX < gridSize &&
+            playerY >= 0 && playerY < gridSize)
+        {
+            playerCell = gridCells[playerX, playerY];
+        }
+
+        return (cell == playerCell) ? (cellBaseScale * playerCellScaleMultiplier) : cellBaseScale;
+    }
+
+    // ✅ CAMBIO: aplica base a todas las casillas
+    private void ApplyBaseScaleToAllCells()
+    {
+        for (int y = 0; y < gridSize; y++)
+            for (int x = 0; x < gridSize; x++)
+                if (gridCells[x, y] != null)
+                    gridCells[x, y].localScale = cellBaseScale;
+    }
+
+    // ✅ CAMBIO: fuerza escala correcta a una casilla (corta squash si lo hubiera)
+    private void ForceCellScale(Transform cell)
+    {
+        if (cell == null) return;
+
+        if (platformSquashRoutines.TryGetValue(cell, out var running) && running != null)
+        {
+            StopCoroutine(running);
+            platformSquashRoutines[cell] = null;
+        }
+
+        cell.localScale = GetRestScaleForCell(cell);
     }
 
     // ===== NUEVO: arranque real del gameplay tras la cuenta atrás =====
@@ -309,6 +352,13 @@ public class GridGameManager : MonoBehaviour
 
         SoundManager.Instance.PlaySound(jumpAudioClip, 0.5f);
 
+        if (fromCell != null)
+        {
+            // si tenía squash, lo cortamos y la dejamos en base
+            if (platformSquashRoutines.TryGetValue(fromCell, out var r) && r != null) StopCoroutine(r);
+            fromCell.localScale = cellBaseScale;
+        }
+
         // Plataforma de salida: squash al inicio
         if (fromCell != null)
             PlayPlatformSquash(fromCell, 0.12f, 0.12f, Axis.Y_DOWN);
@@ -338,6 +388,8 @@ public class GridGameManager : MonoBehaviour
         isMoving = false;
 
         playerVisual?.SetOnCell();
+
+        ForceCellScale(toCell);
 
         // Squash en plataforma de llegada
         if (toCell != null)
@@ -406,7 +458,7 @@ public class GridGameManager : MonoBehaviour
         if (platformSquashRoutines.TryGetValue(target, out var running) && running != null)
         {
             StopCoroutine(running);
-            target.localScale = cellBaseScale;
+            target.localScale = GetRestScaleForCell(target);
         }
 
         var routine = StartCoroutine(PlatformSquash(target, duration, amount, axis));
@@ -417,18 +469,18 @@ public class GridGameManager : MonoBehaviour
     {
         if (target == null) yield break;
 
-        Vector3 original = cellBaseScale;
-        Vector3 squashed = cellBaseScale;
+        Vector3 original = GetRestScaleForCell(target);
+        Vector3 squashed = original;
 
         if (axis == Axis.Y_DOWN)
         {
-            squashed.y = cellBaseScale.y * (1f - amount);
-            squashed.x = cellBaseScale.x * (1f + amount);
+            squashed.y = original.y * (1f - amount);
+            squashed.x = original.x * (1f + amount);
         }
         else if (axis == Axis.Y_UP)
         {
-            squashed.y = cellBaseScale.y * (1f - amount);
-            squashed.x = cellBaseScale.x * (1f + amount);
+            squashed.y = original.y * (1f - amount);
+            squashed.x = original.x * (1f + amount);
         }
 
         float half = duration * 0.5f;
@@ -451,7 +503,7 @@ public class GridGameManager : MonoBehaviour
             yield return null;
         }
 
-        target.localScale = cellBaseScale;
+        target.localScale = original;
     }
 
     void SpawnCoin()
@@ -627,95 +679,6 @@ public class GridGameManager : MonoBehaviour
         arrow.transform.right = dir;
 
         SoundManager.Instance.PlaySound(arrowAudioClip, 0.75f);
-
-        float travelDist = Vector3.Distance(offStart, offEnd);
-        float travelTime = travelDist / arrowSpeed;
-
-        float elapsed = 0f;
-        bool playerAttached = false;
-
-        while (elapsed < travelTime)
-        {
-            float t = elapsed / travelTime;
-            arrow.transform.position = Vector3.Lerp(offStart, offEnd, t);
-
-            if (playerAttached && playerObj != null)
-            {
-                playerObj.transform.position = arrow.transform.position;
-            }
-
-            if (!playerAttached && !isGameOver && !isDyingByArrow)
-            {
-                foreach (var cell in cellsOnLine)
-                {
-                    if (cell.x == playerX && cell.y == playerY)
-                    {
-                        Vector3 cellPos = gridCells[cell.x, cell.y].position;
-                        float dist = Vector3.Distance(arrow.transform.position, cellPos);
-
-                        if (dist <= cellHitRadius)
-                        {
-                            isDyingByArrow = true;
-                            playerAttached = true;
-
-                            playerObj.transform.SetParent(arrow.transform);
-                            playerObj.transform.position = arrow.transform.position;
-
-#if UNITY_ANDROID || UNITY_IOS
-                            Haptics.TryVibrate();
-#endif
-                            break;
-                        }
-                    }
-                }
-            }
-
-            elapsed += Time.deltaTime;
-            yield return null;
-        }
-
-        Destroy(arrow);
-
-        if (playerAttached)
-        {
-            GameOver();
-        }
-    }
-
-    IEnumerator ShootArrowAfterWarning(
-        GameObject warning,
-        Vector3 worldStart,
-        Vector3 worldEnd,
-        Vector3 dir,
-        float margin,
-        List<Vector2Int> cellsOnLine)
-    {
-        yield return new WaitForSeconds(warningTime);
-        if (isGameOver || isDyingByArrow) { Destroy(warning); yield break; }
-
-        Destroy(warning);
-        if (isGameOver || isDyingByArrow) yield break;
-
-        Vector3 offStart = worldStart - dir * margin;
-        Vector3 offEnd = worldEnd + dir * margin;
-
-        GameObject chosenPrefab = null;
-        if (arrowPrefabs != null && arrowPrefabs.Length > 0)
-        {
-            int index = UnityEngine.Random.Range(0, arrowPrefabs.Length);
-            chosenPrefab = arrowPrefabs[index];
-        }
-        else
-        {
-            Debug.LogError("No hay arrowPrefabs asignados en GridGameManager");
-            yield break;
-        }
-
-        GameObject arrow = Instantiate(chosenPrefab, gridParent);
-        arrow.transform.position = offStart;
-        arrow.transform.up = dir;
-
-        arrow.transform.up = dir;
 
         float travelDist = Vector3.Distance(offStart, offEnd);
         float travelTime = travelDist / arrowSpeed;

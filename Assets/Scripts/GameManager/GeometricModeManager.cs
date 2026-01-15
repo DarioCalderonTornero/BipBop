@@ -118,6 +118,16 @@ public class GeometricModeManager : MonoBehaviour
         if (timeBarImage != null)
             timeBarImage.fillAmount = 1f;
 
+        if (scoreEffectTargets != null && scoreEffectTargets.Length > 0)
+        {
+            originalScales = new Vector3[scoreEffectTargets.Length];
+            for (int i = 0; i < scoreEffectTargets.Length; i++)
+            {
+                if (scoreEffectTargets[i] == null) continue;
+                originalScales[i] = scoreEffectTargets[i].localScale;
+            }
+        }
+
         UpdateScoreText();
 
         foreach (var s in shapes.FindAll(x => x.gameObject.activeSelf))
@@ -438,8 +448,9 @@ public class GeometricModeManager : MonoBehaviour
             FallingShapesManager.Instance.SpawnFallingShapes();
     }
 
-    [SerializeField] private RectTransform scoreEffectGroup;
+    [SerializeField] private RectTransform[] scoreEffectTargets;
     private bool isAnimating = false;
+    private Vector3[] originalScales;
 
     private void PlayScoreEffect()
     {
@@ -453,26 +464,65 @@ public class GeometricModeManager : MonoBehaviour
 
         float duration = 0.05f;
         float halfDuration = duration / 2f;
-        Vector3 originalScale = Vector3.one;
-        Vector3 zoomScale = new Vector3(1.2f, 1.2f, 1);
+        float mult = 1.2f;
 
+        // Si no hay targets, salimos limpio
+        if (scoreEffectTargets == null || scoreEffectTargets.Length == 0)
+        {
+            isAnimating = false;
+            yield break;
+        }
+
+        // Ida
         float time = 0;
         while (time < halfDuration)
         {
-            scoreEffectGroup.localScale = Vector3.Lerp(originalScale, zoomScale, time / halfDuration);
+            float t = time / halfDuration;
+
+            for (int i = 0; i < scoreEffectTargets.Length; i++)
+            {
+                var rt = scoreEffectTargets[i];
+                if (rt == null) continue;
+
+                Vector3 a = (originalScales != null && i < originalScales.Length) ? originalScales[i] : rt.localScale;
+                Vector3 b = a * mult;
+                rt.localScale = Vector3.Lerp(a, b, t);
+            }
+
             time += Time.deltaTime;
             yield return null;
         }
 
+        // Vuelta
         time = 0;
         while (time < halfDuration)
         {
-            scoreEffectGroup.localScale = Vector3.Lerp(zoomScale, originalScale, time / halfDuration);
+            float t = time / halfDuration;
+
+            for (int i = 0; i < scoreEffectTargets.Length; i++)
+            {
+                var rt = scoreEffectTargets[i];
+                if (rt == null) continue;
+
+                Vector3 a = (originalScales != null && i < originalScales.Length) ? originalScales[i] : rt.localScale;
+                Vector3 b = a * mult;
+                rt.localScale = Vector3.Lerp(b, a, t);
+            }
+
             time += Time.deltaTime;
             yield return null;
         }
 
-        scoreEffectGroup.localScale = originalScale;
+        // Reset exacto
+        for (int i = 0; i < scoreEffectTargets.Length; i++)
+        {
+            var rt = scoreEffectTargets[i];
+            if (rt == null) continue;
+
+            if (originalScales != null && i < originalScales.Length)
+                rt.localScale = originalScales[i];
+        }
+
         isAnimating = false;
     }
 

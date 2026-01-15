@@ -1,19 +1,23 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
 public class ColorGamePuntos : MonoBehaviour
 {
     public static ColorGamePuntos Instance { get; private set; }
-
     public static event EventHandler OnColorAddScore;
 
+    [Header("UI")]
     [SerializeField] private TextMeshProUGUI scoreText;
-    [SerializeField] private RectTransform scoreEffectGroup;
+
+    [Tooltip("Elementos que harán el efecto (sin meterlos en un padre).")]
+    [SerializeField] private RectTransform[] scoreEffectTargets;
+
     public int score = 0;
+
     private bool isAnimating = false;
+    private Vector3[] originalScales;
 
     private void Awake()
     {
@@ -25,20 +29,24 @@ public class ColorGamePuntos : MonoBehaviour
         score = 0;
         UpdateScoreText();
 
-        if (scoreEffectGroup != null)
-            scoreEffectGroup.localScale = Vector3.one;
+        // Guardar escalas originales
+        if (scoreEffectTargets != null && scoreEffectTargets.Length > 0)
+        {
+            originalScales = new Vector3[scoreEffectTargets.Length];
+            for (int i = 0; i < scoreEffectTargets.Length; i++)
+            {
+                if (scoreEffectTargets[i] != null)
+                {
+                    originalScales[i] = scoreEffectTargets[i].localScale;
+                    scoreEffectTargets[i].localScale = originalScales[i];
+                }
+            }
+        }
     }
 
-    public int GetScore()
-    {
-        return score;
-    }
+    public int GetScore() => score;
 
-    // ✅ 1 moneda cada 3 puntos
-    public int GetCoinsEarned()
-    {
-        return score / 3;
-    }
+    public int GetCoinsEarned() => score / 3;
 
     private void UpdateScoreText()
     {
@@ -51,12 +59,10 @@ public class ColorGamePuntos : MonoBehaviour
         OnColorAddScore?.Invoke(this, EventArgs.Empty);
         score++;
 
-        // ❌ Ya NO damos 1 moneda por punto
-        // CurrencyManager.Instance.AddCoins(1);
-
         PlayerLevelManager.Instance.AddXP(5);
         UpdateScoreText();
-        // PlayScoreEffect();
+
+        PlayScoreEffect(); // ✅ Actívalo si quieres el pop
     }
 
     public void AddScoreRaw(int amount)
@@ -65,10 +71,7 @@ public class ColorGamePuntos : MonoBehaviour
         UpdateScoreText();
     }
 
-    public void ShowScore()
-    {
-        UpdateScoreText();
-    }
+    public void ShowScore() => UpdateScoreText();
 
     public void SafeRecordIfNeeded()
     {
@@ -82,7 +85,7 @@ public class ColorGamePuntos : MonoBehaviour
 
     private void PlayScoreEffect()
     {
-        if (!isAnimating)
+        if (!isAnimating && scoreEffectTargets != null && scoreEffectTargets.Length > 0)
             StartCoroutine(AnimateScoreEffect());
     }
 
@@ -91,27 +94,56 @@ public class ColorGamePuntos : MonoBehaviour
         isAnimating = true;
 
         float duration = 0.05f;
-        float halfDuration = duration / 2f;
-        Vector3 originalScale = Vector3.one;
-        Vector3 zoomScale = new Vector3(1.2f, 1.2f, 1);
+        float half = duration / 2f;
+        float time;
 
-        float time = 0;
-        while (time < halfDuration)
+        float mult = 1.2f;
+
+        // Zoom in
+        time = 0f;
+        while (time < half)
         {
-            scoreEffectGroup.localScale = Vector3.Lerp(originalScale, zoomScale, time / halfDuration);
+            float t = time / half;
+            for (int i = 0; i < scoreEffectTargets.Length; i++)
+            {
+                var rt = scoreEffectTargets[i];
+                if (rt == null) continue;
+
+                Vector3 from = originalScales[i];
+                Vector3 to = originalScales[i] * mult;
+                rt.localScale = Vector3.Lerp(from, to, t);
+            }
+
             time += Time.deltaTime;
             yield return null;
         }
 
-        time = 0;
-        while (time < halfDuration)
+        // Zoom out
+        time = 0f;
+        while (time < half)
         {
-            scoreEffectGroup.localScale = Vector3.Lerp(zoomScale, originalScale, time / halfDuration);
+            float t = time / half;
+            for (int i = 0; i < scoreEffectTargets.Length; i++)
+            {
+                var rt = scoreEffectTargets[i];
+                if (rt == null) continue;
+
+                Vector3 from = originalScales[i] * mult;
+                Vector3 to = originalScales[i];
+                rt.localScale = Vector3.Lerp(from, to, t);
+            }
+
             time += Time.deltaTime;
             yield return null;
         }
 
-        scoreEffectGroup.localScale = originalScale;
+        // Reset exacto
+        for (int i = 0; i < scoreEffectTargets.Length; i++)
+        {
+            if (scoreEffectTargets[i] != null)
+                scoreEffectTargets[i].localScale = originalScales[i];
+        }
+
         isAnimating = false;
     }
 }
