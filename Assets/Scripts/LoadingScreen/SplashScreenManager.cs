@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,24 +7,21 @@ using UnityEngine.SceneManagement;
 public class SplashScreenManager : MonoBehaviour
 {
     [Header("UI References")]
-    [SerializeField] private TextMeshProUGUI gameTitle;
-    [SerializeField] private TextMeshProUGUI subtitleText;   // ← segundo texto
-    [SerializeField] private Image progressBarFill;
+    [SerializeField] private Image firstImage;
+    [SerializeField] private TextMeshProUGUI subtitleText;
+    [SerializeField] private LoadingBarScrollFill loadingBar;
     [SerializeField] private TextMeshProUGUI percentageText;
-    [SerializeField] private TextMeshProUGUI loadingText;    // frases tipo "Cargando..."
-    [SerializeField] private CanvasGroup loadingGroup;       // grupo de barra + % + texto
+    [SerializeField] private TextMeshProUGUI loadingText;
+    [SerializeField] private CanvasGroup loadingGroup;
 
     [Header("Intro Animation")]
     [SerializeField] private float popDuration = 0.35f;
     [SerializeField] private float popOvershoot = 1.15f;
-    [SerializeField] private float delayBetweenTexts = 0.4f;     // ⬅️ AQUÍ AJUSTAS LA ESPERA
-    [SerializeField] private float delayBeforeLoadingUI = 0.3f;  // espera antes de mostrar barra
+    [SerializeField] private float delayBetweenTexts = 0.25f;
+    [SerializeField] private float delayBeforeLoadingUI = 0.25f;
 
     [Header("Loading / Fade")]
-    [SerializeField] private float fakeLoadDuration = 4f;
     [SerializeField] private string nextSceneName = "Menu";
-    [SerializeField] private float fadeDuration = 0.5f;
-    [SerializeField] private Image fadeImage;
 
     private string[] loadingMessages =
     {
@@ -34,111 +30,58 @@ public class SplashScreenManager : MonoBehaviour
         "Preparando sonidos...",
         "Cargando fondos...",
         "Optimizando shaders...",
-        "Ajustando luces...",
         "Casi listo..."
     };
 
     private void Start()
     {
-        // Ocultamos elementos al inicio
-        if (loadingGroup != null) loadingGroup.alpha = 0f;
-        if (fadeImage != null)
-        {
-            fadeImage.gameObject.SetActive(true);
-            fadeImage.color = new Color(0, 0, 0, 0);
-        }
+        // Estado inicial
+        if (firstImage != null) firstImage.gameObject.SetActive(false);
+        if (subtitleText != null) subtitleText.gameObject.SetActive(false);
 
-        // Empieza la secuencia completa
+        if (loadingGroup != null) loadingGroup.alpha = 0f;
+
+        // ✅ Barra y % vacíos desde el inicio
+        if (loadingBar != null) loadingBar.SetFill01(0f);
+        if (percentageText != null) percentageText.text = "0%";
+
         StartCoroutine(SplashSequence());
     }
 
     private IEnumerator SplashSequence()
     {
-        // Ocultar textos al principio
-        if (gameTitle != null) gameTitle.gameObject.SetActive(false);
-        if (subtitleText != null) subtitleText.gameObject.SetActive(false);
+        // 1) Pop imagen
+        if (firstImage != null)
+            yield return StartCoroutine(AnimatePop(firstImage.rectTransform));
 
-        // 1) Animar título
-        if (gameTitle != null)
-            yield return StartCoroutine(AnimatePop(gameTitle));
-
-        // 2) Espera configurable entre primer y segundo texto
+        // 2) Pop subtitle
         yield return new WaitForSeconds(delayBetweenTexts);
 
-        // 3) Animar subtítulo
         if (subtitleText != null)
-            yield return StartCoroutine(AnimatePop(subtitleText));
+            yield return StartCoroutine(AnimatePop(subtitleText.rectTransform));
 
-        // 4) Pequeña espera antes de mostrar barra de carga
+        // 3) Espera antes del loading
         yield return new WaitForSeconds(delayBeforeLoadingUI);
 
-        // 5) Fade-in de barra + porcentaje + texto de estado
+        // ✅ asegúrate de que justo ANTES del fade sigue vacío
+        if (loadingBar != null) loadingBar.SetFill01(0f);
+        if (percentageText != null) percentageText.text = "0%";
+
+        // 4) Fade-in del grupo de carga
         if (loadingGroup != null)
-        {
             yield return StartCoroutine(FadeCanvasGroup(loadingGroup, 0f, 1f, 0.4f));
-        }
 
         if (loadingText != null)
             loadingText.text = GetRandomMessage();
 
-        // 6) Empezar la carga falsa
-        StartCoroutine(FakeLoading());
+        // 5) Empieza el fake loading (ahora sí se verá subir)
+        yield return StartCoroutine(FakeLoading());
+
+        // extra y fade out
+        yield return new WaitForSeconds(0.2f); 
+        SceneManager.LoadScene(nextSceneName);
     }
 
-    private IEnumerator AnimatePop(TextMeshProUGUI target)
-    {
-        target.gameObject.SetActive(true);
-
-        // Escala original definida en el editor (NO la tocamos permanentemente)
-        Vector3 originalScale = target.transform.localScale;
-        Vector3 startScale = originalScale * 0.1f;         // lejos/pequeño
-        Vector3 overshootScale = originalScale * popOvershoot;
-
-        float expandTime = popDuration * 0.7f;
-        float settleTime = popDuration * 0.3f;
-
-        // Empezar pequeño
-        target.transform.localScale = startScale;
-
-        // 1) Expandir hasta overshoot
-        float t = 0f;
-        while (t < expandTime)
-        {
-            t += Time.deltaTime;
-            float lerp = t / expandTime;
-            target.transform.localScale =
-                Vector3.Lerp(startScale, overshootScale, Mathf.SmoothStep(0, 1, lerp));
-            yield return null;
-        }
-
-        // 2) Volver a su escala original (la del editor)
-        t = 0f;
-        while (t < settleTime)
-        {
-            t += Time.deltaTime;
-            float lerp = t / settleTime;
-            target.transform.localScale =
-                Vector3.Lerp(overshootScale, originalScale, Mathf.SmoothStep(0, 1, lerp));
-            yield return null;
-        }
-
-        target.transform.localScale = originalScale;
-    }
-
-    private IEnumerator FadeCanvasGroup(CanvasGroup cg, float from, float to, float duration)
-    {
-        float t = 0f;
-        cg.alpha = from;
-        while (t < 1f)
-        {
-            t += Time.deltaTime / duration;
-            cg.alpha = Mathf.Lerp(from, to, t);
-            yield return null;
-        }
-        cg.alpha = to;
-    }
-
-    // El FakeLoading y FadeOut los puedes dejar tal como los tenías
     private IEnumerator FakeLoading()
     {
         float progress = 0f;
@@ -161,32 +104,62 @@ public class SplashScreenManager : MonoBehaviour
 
             yield return null;
         }
-
-        yield return new WaitForSeconds(0.5f);
-        StartCoroutine(FadeOut());
     }
 
     private void UpdateProgressUI(float progress)
     {
-        if (progressBarFill != null)
-            progressBarFill.fillAmount = progress;
+        if (loadingBar != null)
+            loadingBar.SetFill01(progress);
 
         if (percentageText != null)
             percentageText.text = Mathf.RoundToInt(progress * 100f) + "%";
     }
 
-    private IEnumerator FadeOut()
+    private IEnumerator AnimatePop(RectTransform target)
     {
-        float t = 0;
-        while (t < fadeDuration)
+        target.gameObject.SetActive(true);
+
+        Vector3 originalScale = target.localScale;
+        Vector3 startScale = originalScale * 0.1f;
+        Vector3 overshootScale = originalScale * popOvershoot;
+
+        float expandTime = popDuration * 0.7f;
+        float settleTime = popDuration * 0.3f;
+
+        target.localScale = startScale;
+
+        float t = 0f;
+        while (t < expandTime)
         {
             t += Time.deltaTime;
-            if (fadeImage != null)
-                fadeImage.color = new Color(0, 0, 0, t / fadeDuration);
+            float lerp = t / expandTime;
+            target.localScale = Vector3.Lerp(startScale, overshootScale, Mathf.SmoothStep(0, 1, lerp));
             yield return null;
         }
 
-        SceneManager.LoadScene(nextSceneName);
+        t = 0f;
+        while (t < settleTime)
+        {
+            t += Time.deltaTime;
+            float lerp = t / settleTime;
+            target.localScale = Vector3.Lerp(overshootScale, originalScale, Mathf.SmoothStep(0, 1, lerp));
+            yield return null;
+        }
+
+        target.localScale = originalScale;
+    }
+
+    private IEnumerator FadeCanvasGroup(CanvasGroup cg, float from, float to, float duration)
+    {
+        float t = 0f;
+        cg.alpha = from;
+        while (t < 1f)
+        {
+            t += Time.deltaTime / duration;
+            cg.alpha = Mathf.Lerp(from, to, t);
+            yield return null;
+        }
+        cg.alpha = to;
     }
 
     private string GetRandomMessage()
