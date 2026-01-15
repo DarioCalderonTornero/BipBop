@@ -1235,9 +1235,6 @@ RectTransform:
   m_Children:
   - {fileID: 1990694272}
   - {fileID: 1520335299}
-  - {fileID: 2009711221}
-  - {fileID: 1904897926}
-  - {fileID: 1312029946}
   - {fileID: 1234438468}
   - {fileID: 67270016}
   m_Father: {fileID: 224702197}
@@ -3134,7 +3131,10 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 2009711221}
+  - {fileID: 1904897926}
+  - {fileID: 1312029946}
   m_Father: {fileID: 224702197}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
@@ -4557,11 +4557,11 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 377391909}
+  m_Father: {fileID: 994703117}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: 0.080603, y: 180.39}
+  m_AnchoredPosition: {x: 4.080622, y: 234.47098}
   m_SizeDelta: {x: 628.2, y: 94.6372}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1312029947
@@ -7587,11 +7587,11 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 377391909}
+  m_Father: {fileID: 994703117}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -283, y: 304}
+  m_AnchoredPosition: {x: -77.29265, y: 358.08102}
   m_SizeDelta: {x: 447.91772, y: 102.6213}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1904897927
@@ -7641,9 +7641,9 @@ MonoBehaviour:
   m_colorMode: 2
   m_fontColorGradient:
     topLeft: {r: 0.31132078, g: 0.31132078, b: 0.31132078, a: 1}
-    topRight: {r: 0.31132078, g: 0.31132078, b: 0.31132078, a: 1}
+    topRight: {r: 1, g: 1, b: 1, a: 1}
     bottomLeft: {r: 1, g: 1, b: 1, a: 1}
-    bottomRight: {r: 1, g: 1, b: 1, a: 1}
+    bottomRight: {r: 0.38679248, g: 0.38679248, b: 0.38679248, a: 1}
   m_fontColorGradientPreset: {fileID: 0}
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
@@ -7887,11 +7887,11 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 377391909}
+  m_Father: {fileID: 994703117}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: -3.8564, y: 84.15289}
+  m_AnchoredPosition: {x: 0.14361906, y: 138.23387}
   m_SizeDelta: {x: 636.07, y: 214.4482}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2009711222
@@ -7933,7 +7933,7 @@ MonoBehaviour:
     topLeft: {r: 1, g: 1, b: 1, a: 1}
     topRight: {r: 1, g: 1, b: 1, a: 1}
     bottomLeft: {r: 0.3882353, g: 0.3882353, b: 0.3882353, a: 1}
-    bottomRight: {r: 0.3882353, g: 0.3882353, b: 0.3882353, a: 1}
+    bottomRight: {r: 0.38679248, g: 0.38679248, b: 0.38679248, a: 1}
   m_fontColorGradientPreset: {fileID: 0}
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0

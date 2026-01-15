@@ -314,7 +314,7 @@ public class DodgeManager : MonoBehaviour
         if (PlayFabLoginManager.Instance != null && PlayFabLoginManager.Instance.IsLoggedIn)
             PlayFabScoreManager.Instance.SubmitScore("DodgeScore", score);
 
-        int coinsEarned = score;
+        int coinsEarned = score/3;
 
         CoinsRewardUI rewardUI = FindObjectOfType<CoinsRewardUI>(true);
         if (rewardUI != null)

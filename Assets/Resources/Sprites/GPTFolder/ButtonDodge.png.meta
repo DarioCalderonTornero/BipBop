@@ -310,7 +310,14 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      ButtonDodge_0: -6992002923801621741
+      ButtonDodge_1: 4897912581952198926
+      ButtonDodge_2: 2870625274068693565
+      ButtonDodge_3: 623722181984823787
+      ButtonDodge_4: 6308085761922521684
+      ButtonDodge_5: 7614003888945900764
+      ButtonDodge_6: 7134703156078542635
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
