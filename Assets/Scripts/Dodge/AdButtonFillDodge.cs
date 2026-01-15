@@ -29,7 +29,7 @@ public class AdButtonFillDodge : MonoBehaviour
         {
 
             OnDodgeHideOffer?.Invoke(this, EventArgs.Empty);
-            dodgeVideoGameOver.HideAdOffer();
+            //dodgeVideoGameOver.HideAdOffer();
         }
     }
 }
