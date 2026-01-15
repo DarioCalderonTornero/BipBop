@@ -64,22 +64,5 @@ public class TurboUI : MonoBehaviour
 
         charge01 = Mathf.Clamp01(charge01);
         fillImage.fillAmount = charge01;
-
-        // Color progresivo
-        Color targetColor;
-
-        if (charge01 <= orangeAt)
-        {
-            float t = Mathf.InverseLerp(0f, orangeAt, charge01);
-            targetColor = Color.Lerp(green, orange, t);
-        }
-        else
-        {
-            float t = Mathf.InverseLerp(orangeAt, 1f, charge01);
-            targetColor = Color.Lerp(orange, red, t);
-        }
-
-        fillImage.color = targetColor;
     }
-
 }

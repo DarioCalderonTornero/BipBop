@@ -280,7 +280,7 @@ public class DodgeManager : MonoBehaviour
         // si tu PlayerController guarda target interno, resetealo para que no “salte”
         var pc = playerTransform.GetComponent<PlayerController>();
         if (pc != null)
-            pc.ResetTargetToCurrentPosition();
+            pc.ResetCruiseDirectionToForward();
     }
 
     private IEnumerator TemporaryInvulnerability()

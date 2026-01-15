@@ -1,16 +1,12 @@
 ﻿using UnityEngine;
-using UnityEngine.EventSystems;
-using static UnityEngine.ParticleSystem;
 
 public class PlayerController : MonoBehaviour
 {
-    public float moveSpeed = 5f;
+    public float moveSpeed = 5f;          // esto ahora es tu “crucero”
     public float rotationSpeed = 360f;
-    public float stopDistance = 0.1f;
-
 
     [Header("Sprites")]
-    public SpriteRenderer spriteRenderer; // hijo visual o el propio
+    public SpriteRenderer spriteRenderer;
     public Sprite idleSprite;
     public Sprite movingSprite;
 
@@ -18,91 +14,53 @@ public class PlayerController : MonoBehaviour
     public TrailRenderer trailLeft;
     public TrailRenderer trailRight;
 
-    public float minInputDistance = 0.35f;
+    [Header("Input")]
+    [Tooltip("Deadzone del joystick (0..1).")]
+    [SerializeField] private float inputDeadzone = 0.15f;
 
     [HideInInspector] public bool isIntroMoving = false;
-    [HideInInspector] public bool forceTrails = false;
-
-    private Vector3 targetPosition;
 
     [Header("Smoke")]
     public ParticleSystem smokeLeft;
     public ParticleSystem smokeRight;
 
+    // Dirección actual (en mundo) hacia la que “apunta” la nave (joystick)
+    private Vector3 desiredDirWorld = Vector3.up;
+
     private void Start()
     {
-        targetPosition = transform.position;
-
         if (spriteRenderer == null)
             spriteRenderer = GetComponentInChildren<SpriteRenderer>();
 
         SetTrailsActive(false);
+        SetSmokeActive(false);
+
+        desiredDirWorld = transform.up;
     }
 
     private void Update()
     {
-        bool isPlaying = DodgeState.Instance != null &&
-                         DodgeState.Instance.dodgeGameState == DodgeState.DodgeGameStateEnum.Playing;
+        bool isPlaying =
+            DodgeState.Instance != null &&
+            DodgeState.Instance.dodgeGameState == DodgeState.DodgeGameStateEnum.Playing;
 
-        // 1) SOLO leer input si estamos en Playing
-        //    (CAMBIO MÍNIMO: en vez de touch/mouse, leemos del InputManager -> stick Vector2)
-        if (isPlaying)
-        {
-            Vector2 move = Vector2.zero;
-
-            if (InputManager.Instance != null)
-                move = InputManager.Instance.GetDodgePlayerMovement();
-
-            // Si hay input suficiente, convertimos esa dirección a un "targetPosition"
-            // para mantener exactamente la misma lógica de rotación + avance hacia target.
-            if (move.sqrMagnitude > 0.0001f)
-            {
-                // Direction -> world
-                Vector3 dir = new Vector3(move.x, move.y, 0f).normalized;
-
-                // Un target suficientemente lejos para que siempre "estemos moviendo"
-                // (mantenemos minInputDistance como referencia de escala)
-                float targetDistance = Mathf.Max(minInputDistance, stopDistance * 2f);
-
-                Vector3 desiredTarget = transform.position + dir * targetDistance;
-
-                if (Vector3.Distance(desiredTarget, transform.position) > minInputDistance)
-                    targetPosition = desiredTarget;
-            }
-        }
-
-        // 2) LÓGICA DE VISUAL Y MOVIMIENTO (se ejecuta también en intro)
-        Vector3 toTarget = targetPosition - transform.position;
-        toTarget.z = 0f;
-        float dist = toTarget.magnitude;
-
-        bool isMoving = dist > stopDistance;
-
-        // Durante la intro queremos que parezca que se mueve (sprite + trails),
-        // aunque el movimiento real lo hace PlayerIntroMover
-        if (isIntroMoving && !isPlaying)
-            isMoving = true;
-
-        // Sprite según movimiento
-        if (spriteRenderer != null)
-            spriteRenderer.sprite = isMoving ? movingSprite : idleSprite;
-
-        // Trails según movimiento
-        SetTrailsActive(isMoving);
-        SetSmokeActive(isMoving);
-
-        // Si NO estamos en Playing, aquí terminamos (intro no usa este movimiento)
         if (!isPlaying)
-            return;
-
-        // A partir de aquí solo vale para Playing
-        if (!isMoving)
         {
-            transform.position = new Vector3(targetPosition.x, targetPosition.y, transform.position.z);
+            bool visualMoving = isIntroMoving;
+            UpdateVisuals(visualMoving);
             return;
         }
 
-        float angle = Mathf.Atan2(toTarget.y, toTarget.x) * Mathf.Rad2Deg;
+        Vector2 move = Vector2.zero;
+        if (InputManager.Instance != null)
+            move = InputManager.Instance.GetDodgePlayerMovement();
+
+        if (move.sqrMagnitude >= inputDeadzone * inputDeadzone)
+        {
+            desiredDirWorld = new Vector3(move.x, move.y, 0f).normalized;
+        }
+
+        float angle = Mathf.Atan2(desiredDirWorld.y, desiredDirWorld.x) * Mathf.Rad2Deg;
         Quaternion targetRot = Quaternion.AngleAxis(angle - 90f, Vector3.forward);
 
         transform.rotation = Quaternion.RotateTowards(
@@ -112,6 +70,17 @@ public class PlayerController : MonoBehaviour
         );
 
         transform.position += transform.up * moveSpeed * Time.deltaTime;
+
+        UpdateVisuals(true);
+    }
+
+    private void UpdateVisuals(bool moving)
+    {
+        if (spriteRenderer != null)
+            spriteRenderer.sprite = moving ? movingSprite : idleSprite;
+
+        SetTrailsActive(moving);
+        SetSmokeActive(moving);
     }
 
     public void SetTrailsActive(bool active)
@@ -146,8 +115,8 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    public void ResetTargetToCurrentPosition()
+    public void ResetCruiseDirectionToForward()
     {
-        targetPosition = transform.position;
+        desiredDirWorld = transform.up;
     }
 }

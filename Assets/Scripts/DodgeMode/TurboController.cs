@@ -8,8 +8,8 @@ public class TurboController : MonoBehaviour
         Idle,        // 0% de carga
         Boosting,    // Manteniendo botón, sube carga
         Cooling,     // Botón suelto, baja carga
-        Full,        // 100% (solo si llegas al tope y sueltas justo antes de explotar, o si decides usarlo en UI)
-        Exploded     // Explotó (GameOver)
+        Full,        // 100%
+        Exploded     // Explotó
     }
 
     [Header("References")]
@@ -18,7 +18,12 @@ public class TurboController : MonoBehaviour
     [Header("Turbo Settings")]
     [SerializeField] private float boostMultiplier = 1.8f;   // multiplicador de velocidad al mantener
     [SerializeField] private float fillSeconds = 2.0f;       // tiempo en llenarse (y vaciarse)
+
+    [Tooltip("Si está activo, al llegar al 100% mientras sigues manteniendo, entrará en 'peligro' y explotará tras un delay.")]
     [SerializeField] private bool explodeWhenFullAndHeld = true;
+
+    [Tooltip("Tiempo extra desde que llegas a 100% (manteniendo) hasta explotar.")]
+    [SerializeField] private float explodeDelaySeconds = 1.0f;
 
     [Header("Editor Testing (optional)")]
     [SerializeField] private bool allowKeyboardTestInEditor = true;
@@ -33,13 +38,23 @@ public class TurboController : MonoBehaviour
     public bool IsHeld => isHeld;
     public bool IsExploded => State == TurboState.Exploded;
 
-    public event Action<float> OnChargeChanged;       // para UI (barra)
-    public event Action<TurboState> OnStateChanged;   // para UI/FX
-    public event Action OnExploded;                   // para GameOver
+    // UI / FX hooks
+    public event Action<float> OnChargeChanged;         // barra normal 0..1
+    public event Action<TurboState> OnStateChanged;     // cambio de estado
+    public event Action OnExploded;                     // explotó
+
+    // NUEVO: avisos de "peligro" (para UI)
+    public event Action OnDangerStarted;                // llegó a 100% y empieza la cuenta atrás
+    public event Action<float> OnDangerTick01;          // progreso 0..1 del delay
+    public event Action OnDangerCanceled;               // soltó antes de explotar
 
     private bool isHeld = false;
     private float baseMoveSpeed = -1f;
     private float ratePerSecond; // cuánto sube/baja charge01 por segundo
+
+    // NUEVO: peligro
+    private bool isInDanger = false;
+    private float dangerTimer = 0f;
 
     private void Awake()
     {
@@ -47,7 +62,7 @@ public class TurboController : MonoBehaviour
     }
 
     private void Start()
-    { 
+    {
         if (player != null)
             baseMoveSpeed = player.moveSpeed;
 
@@ -75,9 +90,37 @@ public class TurboController : MonoBehaviour
         {
             charge01 = Mathf.Clamp01(charge01 + ratePerSecond * Time.deltaTime);
 
-             if (explodeWhenFullAndHeld && charge01 >= 1f)
+            if (explodeWhenFullAndHeld && charge01 >= 1f)
             {
-                Explode();
+                charge01 = 1f;
+
+                if (!isInDanger)
+                {
+                    isInDanger = true;
+                    dangerTimer = 0f;
+                    OnDangerStarted?.Invoke();
+                }
+
+                dangerTimer += Time.deltaTime;
+
+                float t01 = (explodeDelaySeconds <= 0.0001f)
+                    ? 1f
+                    : Mathf.Clamp01(dangerTimer / explodeDelaySeconds);
+
+                OnDangerTick01?.Invoke(t01);
+
+                SetState(TurboState.Full);
+
+                if (dangerTimer >= explodeDelaySeconds)
+                {
+                    Explode();
+                    return;
+                }
+
+                if (!Mathf.Approximately(prev, charge01))
+                    OnChargeChanged?.Invoke(charge01);
+
+                ApplySpeedMultiplier();
                 return;
             }
 
@@ -85,6 +128,13 @@ public class TurboController : MonoBehaviour
         }
         else
         {
+            if (isInDanger)
+            {
+                isInDanger = false;
+                dangerTimer = 0f;
+                OnDangerCanceled?.Invoke();
+            }
+
             charge01 = Mathf.Clamp01(charge01 - ratePerSecond * Time.deltaTime);
 
             if (charge01 <= 0f)
@@ -123,6 +173,15 @@ public class TurboController : MonoBehaviour
     {
         isHeld = false;
         charge01 = 0f;
+
+        // reset peligro
+        if (isInDanger)
+        {
+            isInDanger = false;
+            dangerTimer = 0f;
+            OnDangerCanceled?.Invoke();
+        }
+
         SetState(TurboState.Idle, true);
         ApplySpeedMultiplier();
         OnChargeChanged?.Invoke(charge01);
@@ -158,7 +217,6 @@ public class TurboController : MonoBehaviour
 
         OnExploded?.Invoke();
     }
-
 
     private void SetState(TurboState newState, bool force = false)
     {

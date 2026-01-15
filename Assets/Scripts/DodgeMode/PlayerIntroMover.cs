@@ -66,7 +66,7 @@ public class PlayerIntroMover : MonoBehaviour
             if (playerController != null)
             {
                 // Fijar el target del PlayerController a la posición actual
-                playerController.ResetTargetToCurrentPosition();
+                playerController.ResetCruiseDirectionToForward();
 
                 // Pasar a sprite quieto y apagar trails
                 playerController.isIntroMoving = false;
