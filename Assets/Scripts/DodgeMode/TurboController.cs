@@ -169,6 +169,11 @@ public class TurboController : MonoBehaviour
         isHeld = false;
     }
 
+    public bool IsHold()
+    {
+        return isHeld;
+    }
+
     public void ResetTurbo()
     {
         isHeld = false;
