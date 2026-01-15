@@ -1,14 +1,10 @@
 using UnityEngine;
-using UnityEngine.UI;
 using Unity.Services.LevelPlay;
 using System;
 
 public class MediationAds : MonoBehaviour
 {
     public static MediationAds Instance { get; private set; }
-
-    [Header("UI")]
-    public Button showAdButton;
 
     [SerializeField] private string adUnitIdAndroid = "Rewarded_Androidd";
     [SerializeField] private string adUnitIdIOS = "Rewarded_iOS";
@@ -17,11 +13,12 @@ public class MediationAds : MonoBehaviour
     private string adUnitId;
     private Action onRewardedCallback;
 
+    public event Action<bool> OnAdAvailabilityChanged; // opcional para UI
+
     void Awake()
     {
         if (Instance != null && Instance != this)
         {
-            Debug.LogWarning("MediationAds duplicado, destruyendo este GameObject.");
             Destroy(gameObject);
             return;
         }
@@ -59,75 +56,36 @@ public class MediationAds : MonoBehaviour
         rewardedAd.OnAdRewarded += OnAdRewarded;
         rewardedAd.OnAdClosed += OnAdClosed;
 
-        // El botón puede no existir aún, se configurará desde fuera
-        if (showAdButton != null)
-            SetupButton(showAdButton);
-
         rewardedAd.LoadAd();
-    }
-
-    // Lo llamará AdPanelManager siempre que vuelva a la escena de menú
-    public void SetShowAdButton(Button button)
-    {
-        showAdButton = button;
-
-        if (showAdButton == null)
-            return;
-
-        SetupButton(showAdButton);
-
-        // Estado inicial en función de si el anuncio está listo
-        showAdButton.interactable = IsAdReady();
-    }
-
-    private void SetupButton(Button button)
-    {
-        button.interactable = false;
-        button.onClick.RemoveAllListeners();
-        button.onClick.AddListener(TryShowAd);
     }
 
     private void OnAdLoaded(LevelPlayAdInfo adInfo)
     {
-        if (showAdButton != null)
-            showAdButton.interactable = true;
+        OnAdAvailabilityChanged?.Invoke(true);
     }
 
     private void OnAdLoadFailed(LevelPlayAdError error)
     {
-        if (showAdButton != null)
-            showAdButton.interactable = false;
-
+        OnAdAvailabilityChanged?.Invoke(false);
         Invoke(nameof(RetryLoadAd), 5f);
     }
 
     private void RetryLoadAd()
     {
-        if (rewardedAd != null)
-            rewardedAd.LoadAd();
-    }
-
-    private void TryShowAd()
-    {
-        if (rewardedAd != null && rewardedAd.IsAdReady())
-        {
-            rewardedAd.ShowAd();
-
-            if (showAdButton != null)
-                showAdButton.interactable = false;
-        }
+        rewardedAd?.LoadAd();
     }
 
     private void OnAdRewarded(LevelPlayAdInfo adInfo, LevelPlayReward reward)
     {
-        CurrencyManager.Instance.AddCoins(5);
+        // IMPORTANT: aquí NO damos monedas.
         onRewardedCallback?.Invoke();
         onRewardedCallback = null;
     }
 
     private void OnAdClosed(LevelPlayAdInfo adInfo)
     {
-        rewardedAd.LoadAd();
+        rewardedAd?.LoadAd();
+        OnAdAvailabilityChanged?.Invoke(IsAdReady());
     }
 
     public void ShowRewardedAd(Action onRewarded)
@@ -136,9 +94,12 @@ public class MediationAds : MonoBehaviour
         {
             onRewardedCallback = onRewarded;
             rewardedAd.ShowAd();
-
-            if (showAdButton != null)
-                showAdButton.interactable = false;
+            OnAdAvailabilityChanged?.Invoke(false);
+        }
+        else
+        {
+            // Si quieres feedback, aquí podrías loguear
+            OnAdAvailabilityChanged?.Invoke(false);
         }
     }
 

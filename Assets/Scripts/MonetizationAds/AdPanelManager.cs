@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
@@ -16,11 +17,22 @@ public class AdPanelManager : MonoBehaviour
     [Header("Otros scripts")]
     [SerializeField] private CurrencyManager gameManager;
 
+    [Header("Progress UI (4 hitos: 30 / 50 / 80 / 20+)")]
+    [SerializeField] private Image[] milestoneIcons;          // tamaño 4 (iconos circulares)
+    [SerializeField] private TextMeshProUGUI[] milestoneTexts; // tamaño 4 ("30","50","80","20+")
+    [SerializeField] private Color milestoneGray = new Color(0.65f, 0.65f, 0.65f, 1f);
+    [SerializeField] private Color milestoneColor = Color.white; // si tus sprites ya son dorados, blanco = “a color”
+    [SerializeField] private Color claimedTextColor = new Color(0.42f, 0.24f, 0.12f);
+
+    [Header("Next reward UI")]
+    [SerializeField] private TextMeshProUGUI nextRewardText;  // "Siguiente recompensa: 30"
+    [SerializeField] private Image nextRewardCoinIcon;        // icono moneda a la derecha
+
     [Header("Pop Animation (suave)")]
     [SerializeField] private float popInDuration = 0.16f;
     [SerializeField] private float popOutDuration = 0.12f;
-    [SerializeField] private float popOvershoot = 1.06f;  // 1.04 - 1.10 recomendado
-    [SerializeField] private float popOutScale = 0.92f;   // 0.85 - 0.95 recomendado
+    [SerializeField] private float popOvershoot = 1.06f;
+    [SerializeField] private float popOutScale = 0.92f;
 
     private MediationAds Mediation => MediationAds.Instance;
 
@@ -29,15 +41,24 @@ public class AdPanelManager : MonoBehaviour
     private Coroutine animRoutine;
     private bool isOpen = false;
 
-    void Start()
+    // ---------- Daily Progress ----------
+    private const string PREF_LAST_DAY = "ADS_LAST_DAY";
+    private const string PREF_WATCHED_TODAY = "ADS_WATCHED_TODAY";
+
+    // 1º, 2º, 3º y luego 20 siempre
+    private static readonly int[] FirstRewards = { 30, 50, 80 };
+    private const int RepeatReward = 20;
+
+    private void Start()
     {
         panelRT = adPanel != null ? adPanel.GetComponent<RectTransform>() : null;
         if (panelRT != null) panelBaseScale = panelRT.localScale;
 
-        adPanel.SetActive(false);
+        if (adPanel != null) adPanel.SetActive(false);
         if (panelRT != null) panelRT.localScale = panelBaseScale;
 
-        coinImage.sprite = coinSprite;
+        if (coinImage != null) coinImage.sprite = coinSprite;
+        if (nextRewardCoinIcon != null) nextRewardCoinIcon.sprite = coinSprite;
 
         watchAdButton.onClick.RemoveAllListeners();
         watchAdButton.onClick.AddListener(OnWatchAdBtnClicked);
@@ -52,14 +73,17 @@ public class AdPanelManager : MonoBehaviour
             openAdPanelButton.onClick.AddListener(ShowPanel);
         }
 
-        if (Mediation != null)
-        {
-            Mediation.SetShowAdButton(watchAdButton);
-        }
-        else
-        {
-            Debug.LogWarning("AdPanelManager: MediationAds.Instance es null al iniciar el menú.");
-        }
+        else Debug.LogWarning("AdPanelManager: MediationAds.Instance es null al iniciar el menú.");
+
+        RefreshDailyReset();
+        RefreshUI();
+    }
+
+    private void OnApplicationFocus(bool hasFocus)
+    {
+        if (!hasFocus) return;
+        RefreshDailyReset();
+        RefreshUI();
     }
 
     public void ShowPanel()
@@ -67,15 +91,14 @@ public class AdPanelManager : MonoBehaviour
         if (adPanel == null || panelRT == null) return;
         if (isOpen) return;
 
+        RefreshDailyReset();
+        RefreshUI();
+
         isOpen = true;
         adPanel.SetActive(true);
 
-        if (Mediation != null)
-            watchAdButton.interactable = Mediation.IsAdReady();
-        else
-            watchAdButton.interactable = false;
+        watchAdButton.interactable = (Mediation != null) && Mediation.IsAdReady();
 
-        // Pop in suave
         if (animRoutine != null) StopCoroutine(animRoutine);
         animRoutine = StartCoroutine(PopInRoutine());
     }
@@ -87,13 +110,14 @@ public class AdPanelManager : MonoBehaviour
 
         isOpen = false;
 
-        // Pop out suave (y al final desactiva)
         if (animRoutine != null) StopCoroutine(animRoutine);
         animRoutine = StartCoroutine(PopOutRoutine());
     }
 
     private void OnWatchAdBtnClicked()
     {
+        // Opcional: si quieres NO cerrar el panel hasta que termine el anuncio,
+        // mueve ClosePanel() dentro del callback de recompensa.
         ClosePanel();
 
         if (Mediation == null)
@@ -104,20 +128,81 @@ public class AdPanelManager : MonoBehaviour
 
         Mediation.ShowRewardedAd(() =>
         {
-            gameManager.AddCoins(5);
+            RefreshDailyReset();
+
+            int watched = PlayerPrefs.GetInt(PREF_WATCHED_TODAY, 0);
+            int reward = GetRewardForWatchIndex(watched); // watched=0 => 30 (primer anuncio)
+            PlayerPrefs.SetInt(PREF_WATCHED_TODAY, watched + 1);
+            PlayerPrefs.Save();
+
+            if (gameManager != null) gameManager.AddCoins(reward);
+
+            RefreshUI();
         });
+    }
+
+    // ------------------ Rewards / UI ------------------
+
+    private int GetRewardForWatchIndex(int watchedSoFarToday)
+    {
+        if (watchedSoFarToday < 0) watchedSoFarToday = 0;
+        if (watchedSoFarToday < FirstRewards.Length) return FirstRewards[watchedSoFarToday];
+        return RepeatReward;
+    }
+
+    private void RefreshDailyReset()
+    {
+        string today = DateTime.Now.ToString("yyyy-MM-dd");
+        string lastDay = PlayerPrefs.GetString(PREF_LAST_DAY, "");
+
+        if (lastDay != today)
+        {
+            PlayerPrefs.SetString(PREF_LAST_DAY, today);
+            PlayerPrefs.SetInt(PREF_WATCHED_TODAY, 0);
+            PlayerPrefs.Save();
+        }
+    }
+
+    private void RefreshUI()
+    {
+        int watched = PlayerPrefs.GetInt(PREF_WATCHED_TODAY, 0);
+
+        // Milestones: 0..2 se colorean si ya los has visto, el 3 (20+) siempre gris
+        for (int i = 0; i < 4; i++)
+        {
+            bool isInfinite = (i == 3);                 // el "20+"
+            bool completed = (!isInfinite) && (watched >= (i + 1));
+
+            // ICONO (moneda)
+            Color iconColor = isInfinite ? milestoneGray : (completed ? milestoneColor : milestoneGray);
+
+            // TEXTO (número): cuando esté completado usa claimedTextColor (distinto al icono)
+            Color textColor = isInfinite ? milestoneGray : (completed ? claimedTextColor : milestoneGray);
+
+            if (milestoneIcons != null && i < milestoneIcons.Length && milestoneIcons[i] != null)
+                milestoneIcons[i].color = iconColor;
+
+            if (milestoneTexts != null && i < milestoneTexts.Length && milestoneTexts[i] != null)
+                milestoneTexts[i].color = textColor;
+        }
+
+        // Next reward text
+        int next = GetRewardForWatchIndex(watched);
+        if (nextRewardText != null)
+            nextRewardText.text = $"Siguiente anuncio: {next}";
+
+        if (nextRewardCoinIcon != null)
+            nextRewardCoinIcon.enabled = true;
     }
 
     // ------------------ Animations ------------------
 
     private IEnumerator PopInRoutine()
     {
-        // start: un poco pequeño y transparente (opcional)
         panelRT.localScale = panelBaseScale * 0.90f;
 
         float t = 0f;
 
-        // 1) scale up to overshoot
         Vector3 a = panelBaseScale * 0.90f;
         Vector3 b = panelBaseScale * popOvershoot;
 
@@ -130,7 +215,6 @@ public class AdPanelManager : MonoBehaviour
             yield return null;
         }
 
-        // 2) settle back to 1
         float settleDur = popInDuration * 0.55f;
         t = 0f;
         a = panelRT.localScale;
@@ -151,7 +235,6 @@ public class AdPanelManager : MonoBehaviour
 
     private IEnumerator PopOutRoutine()
     {
-        // 1) pequeño “shrink”
         float t = 0f;
         Vector3 a = panelRT.localScale;
         Vector3 b = panelBaseScale * popOutScale;
@@ -165,13 +248,29 @@ public class AdPanelManager : MonoBehaviour
             yield return null;
         }
 
-        // 2) apagar
         adPanel.SetActive(false);
         panelRT.localScale = panelBaseScale;
         animRoutine = null;
     }
 
-    // ------------------ Easing ------------------
+    private void OnEnable()
+    {
+        if (MediationAds.Instance != null)
+            MediationAds.Instance.OnAdAvailabilityChanged += HandleAdReadyChanged;
+    }
+
+    private void OnDisable()
+    {
+        if (MediationAds.Instance != null)
+            MediationAds.Instance.OnAdAvailabilityChanged -= HandleAdReadyChanged;
+    }
+
+    private void HandleAdReadyChanged(bool ready)
+    {
+        if (watchAdButton != null)
+            watchAdButton.interactable = ready;
+    }
+
     private float EaseOutCubic(float t) => 1f - Mathf.Pow(1f - t, 3f);
     private float EaseInCubic(float t) => t * t * t;
 }

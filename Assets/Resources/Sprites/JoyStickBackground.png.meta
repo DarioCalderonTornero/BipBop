@@ -410,7 +410,18 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      JoyStickBackground_0: 668293627996204526
+      JoyStickBackground_1: -8065251896538319745
+      JoyStickBackground_10: -7223531815619654314
+      JoyStickBackground_2: 3699953137925663181
+      JoyStickBackground_3: 7062309780387278039
+      JoyStickBackground_4: 3510007330932600024
+      JoyStickBackground_5: -6428135362281827772
+      JoyStickBackground_6: -4716148558773682277
+      JoyStickBackground_7: 58869764970554479
+      JoyStickBackground_8: -1431745832021947153
+      JoyStickBackground_9: 7959402898364445368
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
