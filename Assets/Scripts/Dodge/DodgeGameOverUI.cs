@@ -16,6 +16,8 @@ public class DodgeGameOverUI : MonoBehaviour
 
     [SerializeField] private TurboController turboController;
 
+    [SerializeField] private AdButtonFillDodge adButtonFillDodge;
+
     [Header("Localization")]
     [Tooltip("Smart String con {0}. Ej: 'Coins: {0}'")]
     [SerializeField] private LocalizedString coinsTextTemplate;
@@ -51,6 +53,12 @@ public class DodgeGameOverUI : MonoBehaviour
     {
         myanimator = GetComponent<Animator>();
         DodgeManager.Instance.OnGameOver += DodgeManager_OnGameOver;
+        adButtonFillDodge.OnDodgeHideOffer += AdButtonFillDodge_OnDodgeHideOffer;
+    }
+
+    private void AdButtonFillDodge_OnDodgeHideOffer(object sender, System.EventArgs e)
+    {
+        DodgeManager.Instance.SetDeathType(DodgeManager.DeathType.GameOver);
     }
 
     private async void DodgeManager_OnGameOver(object sender, System.EventArgs e)

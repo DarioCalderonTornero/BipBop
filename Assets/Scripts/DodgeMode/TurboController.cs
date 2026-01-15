@@ -147,14 +147,18 @@ public class TurboController : MonoBehaviour
         SetState(TurboState.Exploded, true);
         ApplySpeedMultiplier();
 
-        if (player != null)
+        if (DodgeManager.Instance != null)
         {
-            DodgeManager.Instance.GameOver();
-            Destroy(player.gameObject);
+            DodgeManager.Instance.PlayerHit(null);
+        }
+        else
+        {
+            Debug.LogWarning("No hay DodgeManager.Instance. No puedo iniciar el flujo de muerte.");
         }
 
         OnExploded?.Invoke();
     }
+
 
     private void SetState(TurboState newState, bool force = false)
     {

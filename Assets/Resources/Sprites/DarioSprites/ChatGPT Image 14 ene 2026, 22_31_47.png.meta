@@ -1,10 +1,16 @@
 fileFormatVersion: 2
-guid: a6477888fcacf9c49a6c117248cae075
+guid: 3af2bca9463e5d84eb52b0a115d70565
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 4799862800122961831
-    second: PanelAnuncios_0
+      213: -4164858884570827275
+    second: ChatGPT Image 14 ene 2026, 22_31_47_0
+  - first:
+      213: 5542181117655306805
+    second: ChatGPT Image 14 ene 2026, 22_31_47_1
+  - first:
+      213: -6422904088023622709
+    second: ChatGPT Image 14 ene 2026, 22_31_47_2
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -126,13 +132,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: PanelAnuncios_0
+      name: ChatGPT Image 14 ene 2026, 22_31_47_0
       rect:
         serializedVersion: 2
-        x: 7
-        y: 0
-        width: 928
-        height: 593
+        x: 0
+        y: 8
+        width: 1024
+        height: 1517
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +147,52 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 7afd0f339c98c9240800000000000000
-      internalID: 4799862800122961831
+      spriteID: 5f5b68d29e27336c0800000000000000
+      internalID: -4164858884570827275
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ChatGPT Image 14 ene 2026, 22_31_47_1
+      rect:
+        serializedVersion: 2
+        x: 594
+        y: 1211
+        width: 7
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 532d8bedc58c9ec40800000000000000
+      internalID: 5542181117655306805
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ChatGPT Image 14 ene 2026, 22_31_47_2
+      rect:
+        serializedVersion: 2
+        x: 595
+        y: 499
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bcb92fe03c24dd6a0800000000000000
+      internalID: -6422904088023622709
       vertices: []
       indices: 
       edges: []
@@ -160,8 +210,7 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable:
-      PanelAnuncios_0: 4799862800122961831
+    nameFileIdTable: {}
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

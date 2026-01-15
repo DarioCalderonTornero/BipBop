@@ -1,6 +1,5 @@
-using System;
+Ôªøusing System;
 using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -13,33 +12,65 @@ public class DodgeManager : MonoBehaviour
 
     [SerializeField] private TextMeshProUGUI scoreText;
 
+    [SerializeField] private TurboController turboController;
+
     public event EventHandler OnGameOver;
+    public event EventHandler OnVideo;
 
     [Header("FX")]
-    public GameObject[] asteroidExplosionPrefabs; 
+    public GameObject[] asteroidExplosionPrefabs;
     public GameObject playerExplosionPrefab;
-    public Transform playerTransform;
+
+    [Header("Player")]
+    [SerializeField] private Transform playerTransform;          // referencia al player actual
+    [SerializeField] private Transform playerSpawnPoint;         // d√≥nde reaparece / respawn
+    [SerializeField] private float reviveInvulSeconds = 2f;      // placeholder
+
+    [Header("Revive Countdown UI")]
+    [SerializeField] private ReviveCountdownUI reviveCountdownUI;
 
     private bool isGameOver = false;
+
+    // 1 revive m√°ximo por partida
+    private bool hasUsedReviveOffer = false;
+
+    public enum DeathType
+    {
+        None,
+        Video,
+        GameOver
+    }
+
+    public DeathType deathType { get; private set; } = DeathType.None;
 
     private void Awake()
     {
         Instance = this;
-        scoreText.text = $"{score}";
 
-        // Por si acaso, al entrar en escena nos aseguramos de que no haya freeze antiguo
+        if (scoreText != null)
+            scoreText.text = $"{score}";
+
         Enemy.GlobalFreeze = false;
+        deathType = DeathType.None;
+
+        // por seguridad
+        isGameOver = false;
+        hasUsedReviveOffer = false;
     }
 
     private void Start()
     {
         Time.timeScale = 1f;
+        hasUsedReviveOffer = false;
     }
 
+    // =========================
+    //  Puntos / colisiones enemy
+    // =========================
     public void EnemiesCollided(GameObject e1, GameObject e2)
     {
-        if (isGameOver)
-            return;
+        if (isGameOver) return;
+        if (deathType != DeathType.None) return; // si est√°s en Video/GameOver, no sumar
 
         Enemy enemy1 = e1.GetComponent<Enemy>();
         Enemy enemy2 = e2.GetComponent<Enemy>();
@@ -47,7 +78,6 @@ public class DodgeManager : MonoBehaviour
         if (enemy1 != null) SpawnExplosion(enemy1);
         if (enemy2 != null) SpawnExplosion(enemy2);
 
-        // Shake global cuando dos meteoritos explotan
         if (MeteorCameraShake.Instance != null)
             MeteorCameraShake.Instance.Shake(0.18f, 0.35f);
 
@@ -55,7 +85,8 @@ public class DodgeManager : MonoBehaviour
         Destroy(e2);
 
         score += 1;
-        scoreText.text = $"{score}";
+        if (scoreText != null)
+            scoreText.text = $"{score}";
 
 #if UNITY_ANDROID || UNITY_IOS
         Haptics.TryVibrate();
@@ -68,141 +99,223 @@ public class DodgeManager : MonoBehaviour
             return;
 
         int index = Mathf.Clamp(enemy.explosionIndex, 0, asteroidExplosionPrefabs.Length - 1);
-
         GameObject prefab = asteroidExplosionPrefabs[index];
-        if (prefab == null)
-            return;
+        if (prefab == null) return;
 
-        GameObject fx = Instantiate(
-            prefab,
-            enemy.transform.position,
-            Quaternion.identity
-        );
-
-        // Escala de la explosiÛn igual que el meteorito
+        GameObject fx = Instantiate(prefab, enemy.transform.position, Quaternion.identity);
         fx.transform.localScale = enemy.transform.localScale;
-
         Destroy(fx, 3f);
     }
 
     // =========================
-    //  NUEVO: jugador golpeado
+    //  Jugador golpeado
     // =========================
     public void PlayerHit(Enemy killer)
     {
-        if (isGameOver)
-            return;
+        // Si ya estamos en "muerte intermedia" o gameover, no repetir
+        if (isGameOver) return;
+        if (deathType != DeathType.None) return;
 
-        StartCoroutine(SlowMotionAndGameOver(killer));
+        StartCoroutine(SlowMotionAndThenDecide(killer));
     }
 
-    private IEnumerator SlowMotionAndGameOver(Enemy killer)
+    private IEnumerator SlowMotionAndThenDecide(Enemy killer)
     {
         isGameOver = true;
-        Debug.Log("GAME OVER (slow motion)!");
 
         float prevTimeScale = Time.timeScale;
         float prevFixedDelta = Time.fixedDeltaTime;
 
-        // C·mara lenta
+        // C√°mara lenta
         Time.timeScale = 0.1f;
         Time.fixedDeltaTime = 0.01f * Time.timeScale;
 
-        // Congelar movimiento de enemigos
+        // Congelar enemigos
         Enemy.GlobalFreeze = true;
 
-        // 1) Parpadeo rojo del meteorito que ha golpeado
+        // 1) Flash killer
         if (killer != null)
-        {
             yield return killer.FlashRedCoroutine(3, 0.15f);
-        }
         else
-        {
             yield return new WaitForSecondsRealtime(0.9f);
-        }
 
-        // 2) ExplosiÛn del meteorito (normal)
+        // 2) Explosi√≥n meteorito killer
         if (killer != null)
         {
             SpawnExplosion(killer);
             Destroy(killer.gameObject);
         }
 
-        // Shake tambiÈn en la muerte de la nave
         if (MeteorCameraShake.Instance != null)
             MeteorCameraShake.Instance.Shake(0.2f, 0.4f);
 
-        // 3) ExplosiÛn de la nave (azul)
+        // 3) Explosi√≥n nave (visual)
         if (playerExplosionPrefab != null && playerTransform != null)
         {
-            GameObject fxPlayer = Instantiate(
-                playerExplosionPrefab,
-                playerTransform.position,
-                Quaternion.identity
-            );
-
-            // NO tocar useUnscaledTime -> respeta la c·mara lenta
-
-            Destroy(fxPlayer, 2.5f); // ojo: en slowmo se ver· 10x m·s largo, ajusta si hace falta
+            GameObject fxPlayer = Instantiate(playerExplosionPrefab, playerTransform.position, Quaternion.identity);
+            Destroy(fxPlayer, 2.5f);
         }
 
-        // 4) Destruir la nave (despuÈs de spawnear la explosiÛn)
-        if (playerTransform != null)
-        {
-            Destroy(playerTransform.gameObject);
-        }
+        DisablePlayerForDeath();
 
-        // 5) PequeÒa pausa para que se vea todo el FX en c·mara lenta
         yield return new WaitForSecondsRealtime(0.6f);
 
-        // Restaurar tiempo normal
         Time.timeScale = prevTimeScale;
         Time.fixedDeltaTime = prevFixedDelta;
 
-        // LÛgica normal de GameOver
-        DoGameOverLogic();
+        DecideDeathType();
+    }
+
+    private void DisablePlayerForDeath()
+    {
+        if (playerTransform == null) return;
+
+        // opci√≥n simple y robusta:
+        // - desactiva el GO entero (se deja de mover, de colisionar, de renderizar)
+        playerTransform.gameObject.SetActive(false);
+    }
+
+    private void EnablePlayerAfterRevive()
+    {
+        if (playerTransform == null) return;
+        playerTransform.gameObject.SetActive(true);
     }
 
     // =========================
-    //  GameOver normal (sin c·mara lenta)
+    //  Decide muerte (Video/GameOver)
     // =========================
+    private void DecideDeathType()
+    {
+        if (deathType != DeathType.None) return;
+
+        // Si ya sali√≥ un revive en esta partida -> GameOver directo
+        if (hasUsedReviveOffer)
+        {
+            SetDeathType(DeathType.GameOver);
+            return;
+        }
+
+        float p = UnityEngine.Random.Range(0, 10);
+        if (p >= 1)
+        {
+            hasUsedReviveOffer = true;
+            SetDeathType(DeathType.Video);
+        }
+        else
+        {
+            SetDeathType(DeathType.GameOver);
+        }
+    }
+
+    public void SetDeathType(DeathType newType)
+    {
+        if (deathType == newType) return;
+
+        deathType = newType;
+
+        switch (deathType)
+        {
+            case DeathType.Video:
+                // Aqu√≠ NO destruimos. El player queda apagado hasta revive o hasta que el usuario rechace.
+                OnVideo?.Invoke(this, EventArgs.Empty);
+                break;
+
+            case DeathType.GameOver:
+                DestroyPlayerIfExists();
+                DoGameOverLogic();
+                break;
+        }
+    }
+
+    private void DestroyPlayerIfExists()
+    {
+        if (playerTransform == null) return;
+
+        Destroy(playerTransform.gameObject);
+        playerTransform = null;
+    }
+
+    // Llamado por DodgeVideoGameOver cuando el rewarded termina
+    public void StartReviveCountdown()
+    {
+        if (deathType != DeathType.Video) return;
+
+        if (reviveCountdownUI == null)
+        {
+            // fallback: revive directo
+            ReviveNow();
+            return;
+        }
+
+        // Sigue ‚Äúcongelado‚Äù durante la cuenta atr√°s (Enemy.GlobalFreeze true y player apagado)
+        reviveCountdownUI.Play(ReviveNow);
+    }
+
+    private void ReviveNow()
+    {
+        if (deathType != DeathType.Video) return;
+
+        // Volvemos a jugar
+        deathType = DeathType.None;
+        isGameOver = false;
+
+        // Reactivar gameplay
+        Enemy.GlobalFreeze = false;
+
+        EnablePlayerAfterRevive();
+        ResetPlayerToSpawn();
+        turboController.ResetTurbo();
+
+        StartCoroutine(TemporaryInvulnerability());
+    }
+
+
+    private void ResetPlayerToSpawn()
+    {
+        if (playerTransform == null || playerSpawnPoint == null) return;
+
+        playerTransform.position = playerSpawnPoint.position;
+        playerTransform.rotation = playerSpawnPoint.rotation;
+
+        // si tu PlayerController guarda target interno, resetealo para que no ‚Äúsalte‚Äù
+        var pc = playerTransform.GetComponent<PlayerController>();
+        if (pc != null)
+            pc.ResetTargetToCurrentPosition();
+    }
+
+    private IEnumerator TemporaryInvulnerability()
+    {
+        if (reviveInvulSeconds <= 0f) yield break;
+
+        // Placeholder: aqu√≠ activar√≠as invulnerabilidad real si tu player la tiene
+        yield return new WaitForSeconds(reviveInvulSeconds);
+    }
+
     public void GameOver()
     {
-        if (isGameOver)
-            return;
+        if (isGameOver) return;
 
         isGameOver = true;
-        DoGameOverLogic();
+        SetDeathType(DeathType.GameOver);
     }
 
-    // Extraemos aquÌ la lÛgica que ya tenÌas en GameOver
     private void DoGameOverLogic()
     {
         Debug.Log("GAME OVER!");
 
         if (score > 20)
-        {
             AvatarUnlockHelper.UnlockAvatar("Desbloqueable");
-        }
 
         DodgeState.Instance.dodgeGameState = DodgeState.DodgeGameStateEnum.GameOver;
         OnGameOver?.Invoke(this, EventArgs.Empty);
 
-        // Guardar rÈcord m·ximo
         SaveRecordIfNeeded();
 
-        // Guardar puntuaciÛn en PlayFab
         if (PlayFabLoginManager.Instance != null && PlayFabLoginManager.Instance.IsLoggedIn)
             PlayFabScoreManager.Instance.SubmitScore("DodgeScore", score);
 
-        // Guardar monedas ganadas (1 cada 15 puntos)
         int coinsEarned = score;
-        int totalCoins = PlayerPrefs.GetInt("CoinCount", 0);
-        totalCoins += coinsEarned;
-        PlayerPrefs.SetInt("CoinCount", totalCoins);
-        PlayerPrefs.Save();
 
-        // Mostrar animaciÛn de recompensa
         CoinsRewardUI rewardUI = FindObjectOfType<CoinsRewardUI>(true);
         if (rewardUI != null)
         {
@@ -217,7 +330,6 @@ public class DodgeManager : MonoBehaviour
     private void SaveRecordIfNeeded()
     {
         int currentRecord = PlayerPrefs.GetInt("MaxRecordDodge", 0);
-
         if (score > currentRecord)
         {
             PlayerPrefs.SetInt("MaxRecordDodge", score);
@@ -225,8 +337,5 @@ public class DodgeManager : MonoBehaviour
         }
     }
 
-    public int GetScore()
-    {
-        return score;
-    }
+    public int GetScore() => score;
 }

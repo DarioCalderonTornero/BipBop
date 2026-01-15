@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: a6477888fcacf9c49a6c117248cae075
+guid: a104fc21bdf0c78409872a88655c494b
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 4799862800122961831
-    second: PanelAnuncios_0
+      213: -23396298883225330
+    second: Joystick (2)_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -46,7 +46,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 2
+  spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -126,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: PanelAnuncios_0
+      name: Joystick (2)_0
       rect:
         serializedVersion: 2
-        x: 7
+        x: 11
         y: 0
-        width: 928
-        height: 593
+        width: 1513
+        height: 1024
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 7afd0f339c98c9240800000000000000
-      internalID: 4799862800122961831
+      spriteID: e09a10ca031ecaff0800000000000000
+      internalID: -23396298883225330
       vertices: []
       indices: 
       edges: []
@@ -151,7 +151,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 5e97eb03825dee720800000000000000
     internalID: 0
     vertices: []
     indices: 
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      PanelAnuncios_0: 4799862800122961831
+      Joystick (2)_0: -23396298883225330
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
