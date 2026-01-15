@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
-    // ✅ Flag global para congelar a TODOS los enemigos
     public static bool GlobalFreeze = false;
 
     public float speed = 3f;
@@ -63,16 +62,20 @@ public class Enemy : MonoBehaviour
         {
             // Colisión entre enemigos (suma score y los destruye)
             if (DodgeManager.Instance != null)
+            {
                 DodgeManager.Instance.EnemiesCollided(this.gameObject, other.gameObject);
+                SoundManager.Instance.PlayDodgeSound();
+            }
 
             if (EnemyIndicator.Instance != null)
                 EnemyIndicator.Instance.UnregisterEnemy(transform);
         }
         else if (other.CompareTag("Player"))
         {
-            // 🔥 Toca al jugador -> secuencia de cámara lenta + parpadeo + GameOver
             if (DodgeManager.Instance != null)
+            {
                 DodgeManager.Instance.PlayerHit(this);
+            }
 
             // Opcional: ya podemos quitar el indicador de este enemigo
             if (EnemyIndicator.Instance != null)
