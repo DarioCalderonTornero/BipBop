@@ -48,6 +48,9 @@ public class PlayFabLoginManager : MonoBehaviour
     public string PlayFabId { get; private set; }
     public string DisplayName { get; private set; }
 
+    private bool isLoggingIn = false;
+    private Coroutine retryCoroutine;
+
     // Evento para notificar a otros sistemas que ya estamos logueados
     public event Action OnLoginSuccess;
 
@@ -75,7 +78,7 @@ public class PlayFabLoginManager : MonoBehaviour
 
     private void Start()
     {
-        StartLoginFlow();
+        TryLogin();  // en vez de StartLoginFlow directo
 
         if (nameInput != null)
             UpdateNameCounter(nameInput.text);
@@ -115,6 +118,22 @@ public class PlayFabLoginManager : MonoBehaviour
             nameCounterText.color = counterHighColor;   // rojo
         }
     }
+
+    public void TryLogin()
+    {
+        if (IsLoggedIn) return;
+        if (isLoggingIn) return;
+
+        // Si no hay internet, no intentamos, pero dejamos el sistema listo para reintentar
+        if (Application.internetReachability == NetworkReachability.NotReachable)
+        {
+            // opcional: si quieres mostrar algún aviso global aquí
+            return;
+        }
+
+        StartLoginFlow();
+    }
+
     private IEnumerator ShakeInputField()
     {
         if (nameInput == null) yield break;
@@ -144,6 +163,11 @@ public class PlayFabLoginManager : MonoBehaviour
     #region Login Flow
     public void StartLoginFlow()
     {
+        if (IsLoggedIn) return;
+        if (isLoggingIn) return;
+
+        isLoggingIn = true;
+
         string customId = PlayerPrefs.GetString(PREF_CUSTOM_ID, "");
         if (string.IsNullOrEmpty(customId))
         {
@@ -180,6 +204,7 @@ public class PlayFabLoginManager : MonoBehaviour
 
     private void OnLoginSuccessInternal(LoginResult result)
     {
+        isLoggingIn = false;
         ShowLoading(false);
         IsLoggedIn = true;
         PlayFabId = result.PlayFabId;
@@ -248,10 +273,28 @@ public class PlayFabLoginManager : MonoBehaviour
     private void OnPlayFabError(PlayFabError error)
     {
         ShowLoading(false);
+        isLoggingIn = false;
+
         Debug.LogWarning("PlayFab error: " + error.GenerateErrorReport());
-        // Aquí puedes mostrar UI de "volver a intentar"
+
+        // Si el fallo puede ser por red, reintentamos cuando vuelva internet
+        if (retryCoroutine == null)
+            retryCoroutine = StartCoroutine(RetryWhenInternetReturns());
     }
     #endregion
+
+    private IEnumerator RetryWhenInternetReturns()
+    {
+        // Espera a recuperar internet
+        while (Application.internetReachability == NetworkReachability.NotReachable)
+            yield return new WaitForSecondsRealtime(0.5f);
+
+        // Espera un pelín por estabilidad
+        yield return new WaitForSecondsRealtime(0.25f);
+
+        retryCoroutine = null;
+        TryLogin();
+    }
 
     #region DisplayName handling
     // Llamado por el botón submit en la UI

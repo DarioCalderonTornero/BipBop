@@ -83,6 +83,9 @@ public class LeaderboardUI : MonoBehaviour
         NoScoreThisMode     // "Aún no tienes puntuación..."
     }
 
+    private int requestToken = 0;
+    private Coroutine reconnectRoutine;
+
     private void Awake()
     {
         if (Instance == null)
@@ -125,6 +128,8 @@ public class LeaderboardUI : MonoBehaviour
 
         // 🔹 Esperar a que PlayFab esté logueado antes de intentar cargar ranking
         StartCoroutine(WaitForPlayFabAndInit());
+
+        wasOffline = Application.internetReachability == NetworkReachability.NotReachable;
     }
 
     private bool wasOffline = false;
@@ -136,36 +141,96 @@ public class LeaderboardUI : MonoBehaviour
         // Si acabamos de perder conexión
         if (offline && !wasOffline)
         {
+            requestToken++;
+
+            // ✅ cancelamos cualquier carga bloqueada
+            isLoading = false;
+
             ShowNoConnectionUI(true);
+
+            // opcional: si quieres que el texto no se quede en "Cargando..."
+            if (myPositionText != null)
+            {
+                myPosState = MyPosState.NoScores;
+                myPositionText.text = noScoresText.GetLocalizedString();
+            }
         }
 
         // Si acabamos de recuperar conexión
         if (!offline && wasOffline)
         {
             ShowNoConnectionUI(false);
-            RefreshCurrentLeaderboard(); // vuelve a pedir el ranking del modo actual
+
+            if (reconnectRoutine != null) StopCoroutine(reconnectRoutine);
+            reconnectRoutine = StartCoroutine(EnsureLoginThenRefresh());
         }
 
         wasOffline = offline;
     }
 
-    private IEnumerator WaitForPlayFabAndInit()
+    private IEnumerator EnsureLoginThenRefresh()
     {
-        // ✅ Si no hay internet al entrar, mostramos el panel y no iniciamos ranking
-        if (Application.internetReachability == NetworkReachability.NotReachable)
+        // Esperar a que exista el login manager
+        while (PlayFabLoginManager.Instance == null)
+            yield return null;
+
+        // Si todavía no hay modo seleccionado (caso: entré offline y nunca se inicializó)
+        if (string.IsNullOrEmpty(currentRequestedStat))
         {
-            ShowNoConnectionUI(true);
+            PlayFabLoginManager.Instance.TryLogin();
+
+            while (!PlayFabLoginManager.Instance.IsLoggedIn)
+            {
+                PlayFabLoginManager.Instance.TryLogin();
+                yield return new WaitForSecondsRealtime(0.25f);
+            }
+
+            yield return StartCoroutine(InitLastMode());
+            reconnectRoutine = null;
             yield break;
         }
 
-        // Si hay internet, ocultamos el panel y esperamos login
+        // Caso normal
+        PlayFabLoginManager.Instance.TryLogin();
+
+        while (!PlayFabLoginManager.Instance.IsLoggedIn)
+        {
+            PlayFabLoginManager.Instance.TryLogin();
+            yield return new WaitForSecondsRealtime(0.25f);
+        }
+
+        RefreshCurrentLeaderboard();
+        reconnectRoutine = null;
+    }
+
+    private IEnumerator WaitForPlayFabAndInit()
+    {
+        // 1) Esperar a tener internet (si entraste offline)
+        while (Application.internetReachability == NetworkReachability.NotReachable)
+        {
+            ShowNoConnectionUI(true);
+            yield return new WaitForSecondsRealtime(0.25f);
+        }
+
         ShowNoConnectionUI(false);
 
-        while (PlayFabLoginManager.Instance == null || !PlayFabLoginManager.Instance.IsLoggedIn)
+        // 2) Esperar PlayFabLoginManager
+        while (PlayFabLoginManager.Instance == null)
             yield return null;
 
-        yield return null;
+        // ✅ 3) FORZAR intento de login (CRÍTICO)
+        PlayFabLoginManager.Instance.TryLogin();
 
+        // 4) Esperar login (si falla por red, TryLogin se podrá re-lanzar)
+        while (!PlayFabLoginManager.Instance.IsLoggedIn)
+        {
+            // ✅ por seguridad (si hubo un fallo antes o entró offline)
+            PlayFabLoginManager.Instance.TryLogin();
+            yield return new WaitForSecondsRealtime(0.25f);
+        }
+
+        // 5) Ya se puede iniciar el último modo
+        yield return null;
         StartCoroutine(InitLastMode());
     }
 
@@ -226,6 +291,8 @@ public class LeaderboardUI : MonoBehaviour
 
     public void ShowLeaderboard(string statisticName, int top = 10)
     {
+        int token = ++requestToken;
+
         if (contentParent == null || playerRowPrefab == null)
         {
             Debug.LogWarning("LeaderboardUI: Falta asignar referencias.");
@@ -272,6 +339,8 @@ public class LeaderboardUI : MonoBehaviour
 
         PlayFabScoreManager.Instance.GetLeaderboard(statisticName, top, leaderboard =>
         {
+            if (token != requestToken) return;
+
             if (leaderboard == null)
             {
                 // ✅ fallo de carga: icono + texto, sin slots
@@ -326,6 +395,8 @@ public class LeaderboardUI : MonoBehaviour
         {
             PlayFabScoreManager.Instance.GetPlayerRank(statisticName, myEntry =>
             {
+                if (token != requestToken) return;
+
                 if (statisticName != currentRequestedStat) return; // Evita resultados antiguos
 
                 if (myEntry != null)
