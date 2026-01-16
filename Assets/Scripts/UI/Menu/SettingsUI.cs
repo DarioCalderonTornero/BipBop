@@ -69,6 +69,16 @@ public class SettingsUI : MonoBehaviour
     [SerializeField] private Image resetImage;
     [SerializeField] private Image FPSImage;
 
+    [Header("Switch Sprites")]
+    [SerializeField] private Image soundYellowImage;
+    [SerializeField] private Image soundPurpleImage;
+
+    [SerializeField] private Image musicYellowImage;
+    [SerializeField] private Image musicPurpleImage;
+
+    [SerializeField] private Image idiomaYellowImage;
+    [SerializeField] private Image idiomaPurpleImage;
+
 
     [Header("Vibration State Images")]
     [SerializeField] private Image vibrationOnImage;
@@ -79,6 +89,29 @@ public class SettingsUI : MonoBehaviour
 
     private bool isVibrationImageOn = true;
 
+    [System.Serializable]
+    private class SwitchVisual
+    {
+        public Button button;                 // SoundVolumeButton / MusicVolumeButton / IdiomaButton
+        public Image targetImage;             // Imagen a la que cambias el sprite (si null, usa button.image)
+        public Sprite leftSprite;             // Amarillo
+        public Sprite rightSprite;            // Morado
+        public float leftX = -45f;            // Ajusta a tu UI
+        public float rightX = 45f;            // Ajusta a tu UI
+        public float moveTime = 0.12f;        // Animación
+    }
+
+    [Header("Switch Visuals (Yellow Left / Purple Right)")]
+    [SerializeField] private SwitchVisual soundSwitch;
+    [SerializeField] private SwitchVisual musicSwitch;
+    [SerializeField] private SwitchVisual idiomaSwitch;
+
+    [Header("Background Fade")]
+    [SerializeField] private CanvasGroup blackBgGroup;   // CanvasGroup del blackBackgroundImage
+    [SerializeField] private float bgFadeTime = 0.15f;
+
+    private Coroutine _bgFadeCo;
+
     private void Awake()
     {
         openSettingsButton.onClick.AddListener(Show);
@@ -86,7 +119,9 @@ public class SettingsUI : MonoBehaviour
         {
             settingsAnimator.SetBool("IsSettingsOpen", false);
             settingsAnimator.SetBool("IsSettingsClose", true);
-            //Hide();
+
+            FadeBlackBg(false); // <- fade out del fondo
+                                // El resto del panel puede seguir con su animación normal
         });
 
         vibrationButton.onClick.AddListener(() =>
@@ -100,17 +135,24 @@ public class SettingsUI : MonoBehaviour
             RefreshVibrationUI();
         });
 
-        
+
         soundVolumeButton.onClick.AddListener(() =>
         {
             SoundManager.Instance.GetCancelVolume();
             HandleCancelSoundImage();
+            RefreshSoundSwitch(false);
         });
 
         musicVolumeButton.onClick.AddListener(() =>
         {
             MusicManager.Instance.CancelMusicVolume();
             HandleCancelMusicImage();
+            RefreshMusicSwitch(false);
+        });
+
+        idiomaButton.onClick.AddListener(() =>
+        {
+            ToggleLanguage();
         });
 
         resetSettingsButton.onClick.AddListener(() =>
@@ -130,7 +172,8 @@ public class SettingsUI : MonoBehaviour
     {
         Hide();
         RefreshVibrationUI();
-        SetCancelVolumeImage();
+        HandleCancelSoundImage();
+        HandleCancelMusicImage();
 
         LocalizationSettings.SelectedLocaleChanged += LocalizationSettings_SelectedLocaleChanged;
         // RefreshLenguage(LocalizationSettings.SelectedLocale);   
@@ -142,7 +185,11 @@ public class SettingsUI : MonoBehaviour
         bool isMusicMuted = MusicManager.Instance.GetMusicVolumeNormalized() == 0; ;
         musicVolumeOffImage.gameObject.SetActive(isMusicMuted);
         musicVolumeOnImage.gameObject.SetActive(!isMusicMuted);
-        
+
+        RefreshSoundSwitch(true);
+        RefreshMusicSwitch(true);
+        RefreshIdiomaSwitch(true);
+
     }
 
     private void HandleCancelSoundImage()
@@ -162,6 +209,7 @@ public class SettingsUI : MonoBehaviour
     private void LocalizationSettings_SelectedLocaleChanged(Locale newLocale)
     {
         RefreshLenguage(newLocale);
+        RefreshIdiomaSwitch(false);
     }
 
     private void RefreshLenguage(Locale locale)
@@ -177,14 +225,6 @@ public class SettingsUI : MonoBehaviour
         {
             idiomaButtonText.text = "ENG";
         }
-    }
-
-    private void SetCancelVolumeImage()
-    {
-        isVibrationImageOn = !isVibrationImageOn;
-
-        soundVolumeOnImage.gameObject.SetActive(!isVibrationImageOn);
-        soundVolumeOffImage.gameObject.SetActive(isVibrationImageOn);
     }
 
 
@@ -245,6 +285,7 @@ public class SettingsUI : MonoBehaviour
         //Images Show
         settingsBackgroundImage.gameObject.SetActive(true);
         blackBackgroundImage.gameObject.SetActive(true);
+        FadeBlackBg(true);
 
         idiomaBackgroundImage.gameObject.SetActive(true);
         vibrationBackgroundImage.gameObject.SetActive(true);
@@ -276,6 +317,15 @@ public class SettingsUI : MonoBehaviour
         musicVolumeButton.gameObject.SetActive(true);  
         resetSettingsButton.gameObject.SetActive(true);
         FPSSettingsButton.gameObject.SetActive(true);
+
+        soundYellowImage.gameObject.SetActive(true);
+        soundPurpleImage.gameObject.SetActive(true);
+
+        musicYellowImage.gameObject.SetActive(true);
+        musicPurpleImage.gameObject.SetActive(true);
+
+        idiomaYellowImage.gameObject.SetActive(true);
+        idiomaPurpleImage.gameObject.SetActive(true);
     }
 
     public void Hide()
@@ -330,6 +380,146 @@ public class SettingsUI : MonoBehaviour
         musicVolumeButton.gameObject.SetActive(false);
         resetSettingsButton.gameObject.SetActive(false);
         FPSSettingsButton.gameObject.SetActive(false);
+
+        soundYellowImage.gameObject.SetActive(false);
+        soundPurpleImage.gameObject.SetActive(false);
+
+        musicYellowImage.gameObject.SetActive(false);
+        musicPurpleImage.gameObject.SetActive(false);
+
+        idiomaYellowImage.gameObject.SetActive(false);
+        idiomaPurpleImage.gameObject.SetActive(false);
+    }
+
+    private Coroutine _soundMoveCo, _musicMoveCo, _idiomaMoveCo;
+
+    private void ApplySwitch(SwitchVisual sw, bool left, bool instant, ref Coroutine runningCo)
+    {
+        if (sw == null || sw.button == null) return;
+
+        var img = sw.targetImage != null ? sw.targetImage : sw.button.image;
+        if (img != null) img.sprite = left ? sw.leftSprite : sw.rightSprite;
+
+        RectTransform rt = sw.button.GetComponent<RectTransform>();
+        if (rt == null) return;
+
+        float targetX = left ? sw.leftX : sw.rightX;
+
+        if (runningCo != null) StopCoroutine(runningCo);
+
+        if (instant)
+        {
+            var p = rt.anchoredPosition;
+            p.x = targetX;
+            rt.anchoredPosition = p;
+            runningCo = null;
+        }
+        else
+        {
+            runningCo = StartCoroutine(MoveX(rt, targetX, sw.moveTime));
+        }
+    }
+
+    private IEnumerator MoveX(RectTransform rt, float targetX, float t)
+    {
+        Vector2 start = rt.anchoredPosition;
+        Vector2 end = new Vector2(targetX, start.y);
+
+        if (t <= 0f)
+        {
+            rt.anchoredPosition = end;
+            yield break;
+        }
+
+        float e = 0f;
+        while (e < t)
+        {
+            e += Time.unscaledDeltaTime;
+            float a = Mathf.Clamp01(e / t);
+            // suavizado simple
+            a = a * a * (3f - 2f * a);
+            rt.anchoredPosition = Vector2.LerpUnclamped(start, end, a);
+            yield return null;
+        }
+
+        rt.anchoredPosition = end;
+    }
+
+    private void RefreshSoundSwitch(bool instant)
+    {
+        bool soundOn = SoundManager.Instance.GetSoundVolumeNormalized() > 0f;
+        // ON = izquierda (amarillo), OFF = derecha (morado)
+        ApplySwitch(soundSwitch, soundOn, instant, ref _soundMoveCo);
+    }
+
+    private void RefreshMusicSwitch(bool instant)
+    {
+        bool musicOn = MusicManager.Instance.GetMusicVolumeNormalized() > 0f;
+        ApplySwitch(musicSwitch, musicOn, instant, ref _musicMoveCo);
+    }
+
+    private void RefreshIdiomaSwitch(bool instant)
+    {
+        var loc = LocalizationSettings.SelectedLocale;
+        string code = loc != null ? loc.Identifier.Code : "es";
+        bool isSpanish = code.StartsWith("es");
+        // ESP = izquierda (amarillo), ENG = derecha (morado)
+        ApplySwitch(idiomaSwitch, isSpanish, instant, ref _idiomaMoveCo);
+    }
+
+    private void ToggleLanguage()
+    {
+        if (LocalizationSettings.AvailableLocales == null) return;
+
+        var current = LocalizationSettings.SelectedLocale;
+        string code = current != null ? current.Identifier.Code : "es";
+        bool isSpanish = code.StartsWith("es");
+
+        // Busca la otra locale (es <-> en)
+        Locale target = null;
+        foreach (var l in LocalizationSettings.AvailableLocales.Locales)
+        {
+            if (!isSpanish && l.Identifier.Code.StartsWith("es")) { target = l; break; }
+            if (isSpanish && l.Identifier.Code.StartsWith("en")) { target = l; break; }
+        }
+
+        if (target != null)
+            LocalizationSettings.SelectedLocale = target;
+
+        // Tu texto ya se actualiza por el evento SelectedLocaleChanged
+        RefreshIdiomaSwitch(false);
+    }
+
+    private void FadeBlackBg(bool show)
+    {
+        if (blackBgGroup == null) return;
+
+        if (_bgFadeCo != null) StopCoroutine(_bgFadeCo);
+        _bgFadeCo = StartCoroutine(FadeRoutine(blackBgGroup, show ? 1f : 0f, bgFadeTime, () =>
+        {
+            blackBackgroundImage.gameObject.SetActive(show);
+        }));
+    }
+
+    private IEnumerator FadeRoutine(CanvasGroup cg, float target, float time, System.Action onDone)
+    {
+        float start = cg.alpha;
+        float t = 0f;
+
+        // si vamos a mostrar, actívalo antes
+        if (target > 0f && !cg.gameObject.activeSelf)
+            cg.gameObject.SetActive(true);
+
+        while (t < time)
+        {
+            t += Time.unscaledDeltaTime;
+            float a = time <= 0f ? 1f : Mathf.Clamp01(t / time);
+            cg.alpha = Mathf.Lerp(start, target, a);
+            yield return null;
+        }
+
+        cg.alpha = target;
+        onDone?.Invoke();
     }
 
     void OnDestroy()
