@@ -19,7 +19,13 @@ MonoBehaviour:
   unlockByScore: 0
   requiredScoreKey: 
   requiredScoreValue: 0
+  unlockByOwningAvatars: 1
+  requiredOwnedAvatarIds:
+  - AvatarPayaso
   unlockDescription: 
-  hasShaderEffect: 0
+  hasShaderEffect: 1
   effectType: 0
-  effectMaterial: {fileID: 0}
+  effectMaterial: {fileID: 2100000, guid: b9082e425b15e784a881ea2fb8f55f0c, type: 2}
+  fxPreset: {fileID: 11400000, guid: a9ce636791687fb41b55db14f82ef20b, type: 2}
+  lockedMessage: 
+  ownedMessage: 

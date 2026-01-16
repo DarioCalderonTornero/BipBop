@@ -37,6 +37,8 @@ public class AvatarDataSO : ScriptableObject
     public AvatarShaderEffectType effectType = AvatarShaderEffectType.None;
     public Material effectMaterial;
 
+    public AvatarFxSO fxPreset;   // opcional
+
     [Header("Mensajes personalizados")]
     [TextArea] public string lockedMessage;  
     [TextArea] public string ownedMessage;

@@ -90,6 +90,9 @@ public class XPUIAnimation : MonoBehaviour
     private Material openAvatarMatInstance;
     private string lastOpenAvatarId;
 
+    [SerializeField] private AvatarImageBinder openAvatarBinder;
+    [SerializeField] private AvatarImageBinder profileAvatarBinder;
+
     private void Awake()
     {
         if (panel == null)
@@ -117,6 +120,12 @@ public class XPUIAnimation : MonoBehaviour
 
         if (closeButton != null)
             closeButton.onClick.AddListener(ClosePanel);
+
+        if (openAvatarBinder == null && openAvatarImage != null)
+            openAvatarBinder = openAvatarImage.GetComponent<AvatarImageBinder>();
+
+        if (profileAvatarBinder == null && avatarImage != null)
+            profileAvatarBinder = avatarImage.GetComponent<AvatarImageBinder>();
     }
 
     private void OnEnable()
@@ -196,15 +205,14 @@ public class XPUIAnimation : MonoBehaviour
             backgroundCountText.text = $"{ownedBackgrounds} / {totalBackgrounds}";
     }
 
-    public void UpdateOpenButtonAvatar()
+    public void UpdateOpenButtonAvatar(bool force = false)
     {
-        if (openAvatarImage == null || avatarCatalog == null)
-            return;
+        if (openAvatarImage == null || avatarCatalog == null) return;
 
         string avatarId = PlayerPrefs.GetString("EquippedAvatarId", "NormalAvatar");
 
-        // ✅ Evita reinstanciar si no cambió el avatar
-        if (avatarId == lastOpenAvatarId && openAvatarImage.sprite != null)
+        // ✅ Si NO forzamos y no ha cambiado el avatar, salimos
+        if (!force && avatarId == lastOpenAvatarId && openAvatarImage.sprite != null)
             return;
 
         lastOpenAvatarId = avatarId;
@@ -213,14 +221,16 @@ public class XPUIAnimation : MonoBehaviour
 
         if (data != null && data.sprite != null)
         {
-            openAvatarImage.sprite = data.sprite;
-            ApplyOpenButtonMaterial(data);
+            if (openAvatarBinder != null) openAvatarBinder.ApplyAvatar(data);
+            else openAvatarImage.sprite = data.sprite;
+
             openAvatarImage.enabled = true;
         }
         else
         {
+            // fallback
             openAvatarImage.sprite = fallbackAvatar;
-            ClearOpenButtonMaterial();
+            openAvatarImage.material = null;
             openAvatarImage.enabled = (fallbackAvatar != null);
         }
     }
@@ -445,38 +455,65 @@ public class XPUIAnimation : MonoBehaviour
             request,
             result =>
             {
+                // ✅ si el panel cambió mientras llegaba la respuesta
                 if (!isRemoteProfile || playFabId != remotePlayFabId)
                 {
                     OnRemoteLoadFinished(playFabId);
                     return;
                 }
 
-                string avatarId = null;
-                if (result.Data != null && result.Data.ContainsKey("EquippedAvatarIdPublic"))
-                    avatarId = result.Data["EquippedAvatarIdPublic"].Value;
-
-                if (string.IsNullOrEmpty(avatarId))
+                // ✅ por si el GO se destruyó/desactivó
+                if (avatarImage == null || !avatarImage)
                 {
-                    if (fallbackAvatar != null)
-                        avatarImage.sprite = fallbackAvatar;
-
                     OnRemoteLoadFinished(playFabId);
                     return;
                 }
 
-                var data = GetAvatarById(avatarId);
+                string avatarId = null;
+                if (result.Data != null && result.Data.TryGetValue("EquippedAvatarIdPublic", out var v))
+                    avatarId = v.Value;
+
+                AvatarDataSO data = null;
+                if (!string.IsNullOrEmpty(avatarId))
+                    data = GetAvatarById(avatarId);
+
+                // usa el binder ya cacheado
+                var binder = profileAvatarBinder != null ? profileAvatarBinder : avatarImage.GetComponent<AvatarImageBinder>();
+
                 if (data != null && data.sprite != null)
-                    avatarImage.sprite = data.sprite;
-                else if (fallbackAvatar != null)
-                    avatarImage.sprite = fallbackAvatar;
+                {
+                    if (binder != null) binder.ApplyAvatar(data);
+                    else
+                    {
+                        avatarImage.sprite = data.sprite;
+                        avatarImage.material = null;
+                    }
+                }
+                else
+                {
+                    // ✅ AQUÍ ESTABA EL PROBLEMA: sin fallback → sprite null → cuadrado blanco
+                    if (binder != null) binder.Clear(fallbackAvatar);
+                    else
+                    {
+                        avatarImage.sprite = fallbackAvatar;
+                        avatarImage.material = null;
+                    }
+
+                    // opcional para debug:
+                    // Debug.LogWarning($"[RemoteAvatar] No encontrado en catálogo: {avatarId}");
+                }
 
                 OnRemoteLoadFinished(playFabId);
             },
             error =>
             {
-                Debug.LogWarning("Error al cargar avatar remoto: " + error.GenerateErrorReport());
-                if (fallbackAvatar != null)
+                if (avatarImage != null && avatarImage)
+                {
+                    var binder = profileAvatarBinder != null ? profileAvatarBinder : avatarImage.GetComponent<AvatarImageBinder>();
+                    if (binder != null) binder.Clear(fallbackAvatar);
                     avatarImage.sprite = fallbackAvatar;
+                    avatarImage.material = null;
+                }
 
                 OnRemoteLoadFinished(playFabId);
             }
@@ -855,7 +892,6 @@ public class XPUIAnimation : MonoBehaviour
         Vector3 start = baseScale * openBtnHideScale;
         Vector3 overshoot = baseScale * openBtnShowOvershoot;
 
-        // arrancar pequeño
         t.localScale = start;
 
         // 1) subir hasta overshoot
@@ -883,6 +919,10 @@ public class XPUIAnimation : MonoBehaviour
         }
 
         t.localScale = baseScale;
+
+        // ✅ CLAVE: al reactivar el botón, el binder se reinicia → re-aplicamos forzado
+        UpdateOpenButtonAvatar(force: true);
+
         openBtnRoutine = null;
     }
 
@@ -1019,15 +1059,12 @@ public class XPUIAnimation : MonoBehaviour
 
         if (data != null && data.sprite != null)
         {
-            avatarImage.sprite = data.sprite;
-
-            // Aplicar shader especial si lo tiene
-            ApplyAvatarMaterial(data);
+            if (profileAvatarBinder != null) profileAvatarBinder.ApplyAvatar(data);
+            else avatarImage.sprite = data.sprite;
         }
         else if (fallbackAvatar != null)
         {
             avatarImage.sprite = fallbackAvatar;
-            // Material por defecto sin efecto
             avatarImage.material = null;
         }
     }
