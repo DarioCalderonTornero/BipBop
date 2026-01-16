@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8116731ce51618b47a0b58e595cab8e3, type: 3}
+  m_Name: AvatarCircularCaracol
+  m_EditorClassIdentifier: 
+  id: AvatarCaracol
+  displayName: Caracol
+  sprite: {fileID: 2157321275588167416, guid: e320a0f8a39d78548a4f2bcf9ec796f7, type: 3}
+  price: 400
+  unlockByScore: 0
+  requiredScoreKey: 
+  requiredScoreValue: 0
+  unlockByOwningAvatars: 0
+  requiredOwnedAvatarIds: []
+  unlockDescription: 
+  hasShaderEffect: 0
+  effectType: 0
+  effectMaterial: {fileID: 0}
+  lockedMessage: 
+  ownedMessage: 

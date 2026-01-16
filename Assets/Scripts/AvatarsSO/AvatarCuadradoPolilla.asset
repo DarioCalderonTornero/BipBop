@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8116731ce51618b47a0b58e595cab8e3, type: 3}
+  m_Name: AvatarCuadradoPolilla
+  m_EditorClassIdentifier: 
+  id: AvatarPolilla
+  displayName: Polilla
+  sprite: {fileID: 3326617689234693958, guid: 63c488f51a58af14194e873fcdf19711, type: 3}
+  price: 5000
+  unlockByScore: 0
+  requiredScoreKey: 
+  requiredScoreValue: 0
+  unlockDescription: 
+  hasShaderEffect: 1
+  effectType: 3
+  effectMaterial: {fileID: 2100000, guid: b9082e425b15e784a881ea2fb8f55f0c, type: 2}
