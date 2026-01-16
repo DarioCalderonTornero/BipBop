@@ -89,6 +89,7 @@ public class TurboController : MonoBehaviour
         if (isHeld)
         {
             charge01 = Mathf.Clamp01(charge01 + ratePerSecond * Time.deltaTime);
+            MeteorCameraShake.Instance.Shake(charge01, 0.02f);
 
             if (explodeWhenFullAndHeld && charge01 >= 1f)
             {

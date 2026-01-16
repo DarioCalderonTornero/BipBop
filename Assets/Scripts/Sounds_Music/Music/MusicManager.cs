@@ -24,11 +24,12 @@ public class MusicManager : MonoBehaviour
     [SerializeField] private AudioClip menuSceneMusicClip;
     [SerializeField] private AudioClip bipbopSceneMusicClip;
     [SerializeField] private AudioClip colorSceneMusicClip;
+    [SerializeField] private AudioClip dodgeSceneMusicClip;
     [SerializeField] private AudioClip gridSceneMusicClip;
 
     [Header("Global Music Multiplier (Design)")]
     [SerializeField, Range(0f, 1f)]
-    private float masterMusicMultiplier = 0.5f; // <- Baja toda la música al 50% (sin cambiar tu sistema 0..10)
+    private float masterMusicMultiplier = 0.5f; 
 
     // Cancel Music stuff
     private bool isMusicCancel = false;
@@ -98,7 +99,7 @@ public class MusicManager : MonoBehaviour
                 // PlayMusic(colorSceneMusicClip);
                 break;
             case "DodgeScene":
-                // PlayMusic(colorSceneMusicClip);
+                PlayMusic(dodgeSceneMusicClip);
                 break;
             case "GridScene":
                 PlayMusic(gridSceneMusicClip);
