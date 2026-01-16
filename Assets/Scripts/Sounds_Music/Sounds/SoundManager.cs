@@ -21,6 +21,9 @@ public class SoundManager : MonoBehaviour
     [Header("ColorGameSounds")]
     [SerializeField] private AudioClip onColorGameModePoint;
 
+    [Header("DodgeGameSounds")]
+    [SerializeField] private AudioClip dodgeEnemyCollideSound;
+
     [Header("AudioSources")]
     [SerializeField] private AudioSource soundAudioSource; 
 
@@ -75,6 +78,11 @@ public class SoundManager : MonoBehaviour
         if (audioClip == null || soundAudioSource == null) return;
 
         soundAudioSource.PlayOneShot(audioClip, soundVolumeNormalized);
+    }
+
+    public void PlayDodgeSound()
+    {
+        PlaySound(dodgeEnemyCollideSound, 1f);
     }
 
     public void ChangeSoundVolume()

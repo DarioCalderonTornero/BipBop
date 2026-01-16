@@ -198,6 +198,7 @@ MonoBehaviour:
   playerSpawnPoint: {fileID: 0}
   reviveInvulSeconds: 2
   reviveCountdownUI: {fileID: 1794233588}
+  gameOverAudioClip: {fileID: 8300000, guid: 5e2193e20a27767448a71e687f834b18, type: 3}
 --- !u!4 &14690690
 Transform:
   m_ObjectHideFlags: 0

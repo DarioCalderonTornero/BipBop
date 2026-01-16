@@ -22,12 +22,16 @@ public class DodgeManager : MonoBehaviour
     public GameObject playerExplosionPrefab;
 
     [Header("Player")]
-    [SerializeField] private Transform playerTransform;          // referencia al player actual
-    [SerializeField] private Transform playerSpawnPoint;         // dónde reaparece / respawn
-    [SerializeField] private float reviveInvulSeconds = 2f;      // placeholder
+    [SerializeField] private Transform playerTransform;          
+    [SerializeField] private Transform playerSpawnPoint;        
+    [SerializeField] private float reviveInvulSeconds = 2f;      
 
     [Header("Revive Countdown UI")]
     [SerializeField] private ReviveCountdownUI reviveCountdownUI;
+
+    [Header("Sounds")]
+    [SerializeField] private AudioClip gameOverAudioClip;
+
 
     private bool isGameOver = false;
 
@@ -126,12 +130,14 @@ public class DodgeManager : MonoBehaviour
         float prevTimeScale = Time.timeScale;
         float prevFixedDelta = Time.fixedDeltaTime;
 
+        
         // Cámara lenta
         Time.timeScale = 0.1f;
         Time.fixedDeltaTime = 0.01f * Time.timeScale;
 
         // Congelar enemigos
         Enemy.GlobalFreeze = true;
+        
 
         // 1) Flash killer
         if (killer != null)
@@ -213,10 +219,11 @@ public class DodgeManager : MonoBehaviour
 
         deathType = newType;
 
+        SoundManager.Instance.PlaySound(gameOverAudioClip, 1f);
+
         switch (deathType)
         {
             case DeathType.Video:
-                // Aquí NO destruimos. El player queda apagado hasta revive o hasta que el usuario rechace.
                 OnVideo?.Invoke(this, EventArgs.Empty);
                 break;
 
@@ -242,8 +249,6 @@ public class DodgeManager : MonoBehaviour
 
         if (reviveCountdownUI == null)
         {
-            Debug.Log("nfjkoandfj'qfnwoqèf");
-            // fallback: revive directo
             ReviveNow();
             return;
         }

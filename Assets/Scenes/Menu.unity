@@ -22959,6 +22959,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   onColorGameModePoint: {fileID: 8300000, guid: 8e8b3f95a8366cd43be3d1a30b6676eb, type: 3}
+  dodgeEnemyCollideSound: {fileID: 8300000, guid: 831e0bd9bde93574687251f0d79b9883, type: 3}
   soundAudioSource: {fileID: 757659594}
 --- !u!82 &757659594
 AudioSource:
