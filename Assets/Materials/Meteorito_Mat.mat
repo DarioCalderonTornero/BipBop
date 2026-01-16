@@ -12,7 +12,10 @@ Material:
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
+  - CHROMABERR_ON
   - GLOW_ON
+  - HSV_ON
+  - SHINE_ON
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -123,7 +126,7 @@ Material:
     - _Brightness: 0.16
     - _BumpScale: 1
     - _ChromAberrAlpha: 1
-    - _ChromAberrAmount: 0
+    - _ChromAberrAmount: 0.1
     - _ClipUvDown: 0
     - _ClipUvLeft: 0.13
     - _ClipUvRight: 0
@@ -191,7 +194,7 @@ Material:
     - _HologramUnmodAmount: 0.08
     - _HsvBright: 1
     - _HsvSaturation: 2
-    - _HsvShift: 275.32
+    - _HsvShift: 329.46
     - _InnerOutlineAlpha: 1
     - _InnerOutlineGlow: 1
     - _InnerOutlineThickness: 3
@@ -240,14 +243,14 @@ Material:
     - _RoundWaveSpeed: 2
     - _RoundWaveStrength: 0
     - _ShadowAlpha: 0.5
-    - _ShadowX: 0.1
+    - _ShadowX: -0.5
     - _ShadowY: -0.05
     - _ShakeUvSpeed: 1.5
     - _ShakeUvX: 1
     - _ShakeUvY: 1
-    - _ShineGlow: 1
-    - _ShineLocation: 0
-    - _ShineRotate: 2.35
+    - _ShineGlow: 0.5
+    - _ShineLocation: 0.19
+    - _ShineRotate: 1.79
     - _ShineWidth: 0.05
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
@@ -301,6 +304,6 @@ Material:
     - _OutlineColor: {r: 0, g: 1, b: 0.19823289, a: 1}
     - _OverlayColor: {r: 1, g: 1, b: 1, a: 1}
     - _ShadowColor: {r: 0, g: 0, b: 0, a: 1}
-    - _ShineColor: {r: 0.024143696, g: 0, b: 1, a: 1}
+    - _ShineColor: {r: 1, g: 0.5821822, b: 0, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

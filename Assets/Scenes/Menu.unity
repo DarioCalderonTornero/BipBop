@@ -8977,6 +8977,7 @@ MonoBehaviour:
   menuSceneMusicClip: {fileID: 8300000, guid: 63f629a809c081c47ae5266571670157, type: 3}
   bipbopSceneMusicClip: {fileID: 8300000, guid: 87808d57c907bcc4c95e971e35bdb249, type: 3}
   colorSceneMusicClip: {fileID: 8300000, guid: 17b8cba9768012140b9986b3bc8ca77c, type: 3}
+  dodgeSceneMusicClip: {fileID: 8300000, guid: fed83560cc7aa994b8415e44bee1e67c, type: 3}
   gridSceneMusicClip: {fileID: 8300000, guid: 3f777968df73d394b8891fc8d473af6e, type: 3}
   masterMusicMultiplier: 0.2
 --- !u!82 &319449791
