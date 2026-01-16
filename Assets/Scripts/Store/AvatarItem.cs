@@ -34,6 +34,8 @@ public class AvatarItem : MonoBehaviour
     // 👉 ID del avatar que NO debe aparecer en la tienda
     private const string DEFAULT_AVATAR_ID = "NormalAvatar";
 
+    [SerializeField] private AvatarCatalogSO avatarCatalog;
+
     private void Awake()
     {
         _originalScale = transform.localScale;
@@ -160,56 +162,78 @@ public class AvatarItem : MonoBehaviour
 
     private void OnBuyClicked()
     {
-        if (!_isPurchased)
-        {
-            int currentCoins = CurrencyManager.Instance.GetCoins();
-
-            if (currentCoins >= avatarData.price)
-            {
-                // Restar monedas
-                CurrencyManager.Instance.SpendCoins(avatarData.price);
-
-                // Marcar como comprado
-                _isPurchased = true;
-                PlayerPrefs.SetInt("AvatarPurchased_" + avatarData.id, 1);
-                PlayerPrefs.Save();
-
-                UpdateBuyText();
-
-                Debug.Log($"Avatar comprado: {avatarData.id}");
-
-                // 🔹 Sincronizar esta compra concreta con PlayFab
-                if (PlayFabLoginManager.Instance != null && PlayFabLoginManager.Instance.IsLoggedIn)
-                {
-                    var data = new Dictionary<string, string>
-                    {
-                        { "AvatarPurchased_" + avatarData.id, "1" }
-                    };
-
-                    var request = new UpdateUserDataRequest
-                    {
-                        Data = data,
-                        Permission = UserDataPermission.Public
-                    };
-
-                    PlayFabClientAPI.UpdateUserData(
-                        request,
-                        result => Debug.Log($"[AvatarItem] Enviado a PlayFab AvatarPurchased_{avatarData.id}=1"),
-                        error => Debug.LogWarning("[AvatarItem] Error al sincronizar avatar: " + error.GenerateErrorReport())
-                    );
-                }
-            }
-            else
-            {
-                Debug.Log("No tienes suficientes monedas.");
-                return;
-            }
-        }
-        else
+        if (_isPurchased)
         {
             Debug.Log("Este avatar ya está comprado.");
+            return;
+        }
+
+        int currentCoins = CurrencyManager.Instance.GetCoins();
+        if (currentCoins < avatarData.price)
+        {
+            Debug.Log("No tienes suficientes monedas.");
+            return;
+        }
+
+        // ========================
+        //  COMPRA
+        // ========================
+
+        CurrencyManager.Instance.SpendCoins(avatarData.price);
+
+        _isPurchased = true;
+        PlayerPrefs.SetInt("AvatarPurchased_" + avatarData.id, 1);
+        PlayerPrefs.Save();
+
+        UpdateBuyText();
+
+        Debug.Log($"Avatar comprado: {avatarData.id}");
+
+        // ========================
+        //  DESBLOQUEO POR COLECCIÓN
+        // ========================
+
+        AvatarInventoryManager manager = FindFirstObjectByType<AvatarInventoryManager>();
+        if (manager != null)
+        {
+            AvatarCatalogSO catalog = manager.GetCatalog();
+            if (catalog != null)
+            {
+                AvatarCollectionUnlocker.EvaluateCatalog(
+                    catalog.avatarDataSO,
+                    syncPlayFabIfLoggedIn: true
+                );
+            }
+        }
+
+        // ========================
+        //  SYNC PLAYFAB (este avatar)
+        // ========================
+
+        if (PlayFabLoginManager.Instance != null && PlayFabLoginManager.Instance.IsLoggedIn)
+        {
+            var data = new Dictionary<string, string>
+        {
+            { "AvatarPurchased_" + avatarData.id, "1" }
+        };
+
+            var request = new UpdateUserDataRequest
+            {
+                Data = data,
+                Permission = UserDataPermission.Public
+            };
+
+            PlayFabClientAPI.UpdateUserData(
+                request,
+                result =>
+                    Debug.Log($"[AvatarItem] Enviado a PlayFab AvatarPurchased_{avatarData.id}=1"),
+                error =>
+                    Debug.LogWarning("[AvatarItem] Error al sincronizar avatar: " +
+                                     error.GenerateErrorReport())
+            );
         }
     }
+
 
     // --------- Animación sencilla de escala ---------
 

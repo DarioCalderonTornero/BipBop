@@ -87,6 +87,9 @@ public class XPUIAnimation : MonoBehaviour
     private Vector3 openBtnOriginalScale = Vector3.one;
     private Coroutine openBtnRoutine;
 
+    private Material openAvatarMatInstance;
+    private string lastOpenAvatarId;
+
     private void Awake()
     {
         if (panel == null)
@@ -199,21 +202,25 @@ public class XPUIAnimation : MonoBehaviour
             return;
 
         string avatarId = PlayerPrefs.GetString("EquippedAvatarId", "NormalAvatar");
+
+        // ✅ Evita reinstanciar si no cambió el avatar
+        if (avatarId == lastOpenAvatarId && openAvatarImage.sprite != null)
+            return;
+
+        lastOpenAvatarId = avatarId;
+
         AvatarDataSO data = GetAvatarById(avatarId);
 
         if (data != null && data.sprite != null)
         {
             openAvatarImage.sprite = data.sprite;
-
-            // Si quieres que el botón NO use el shader (recomendado en HUD):
-            openAvatarImage.material = null;
-
+            ApplyOpenButtonMaterial(data);
             openAvatarImage.enabled = true;
         }
         else
         {
             openAvatarImage.sprite = fallbackAvatar;
-            openAvatarImage.material = null;
+            ClearOpenButtonMaterial();
             openAvatarImage.enabled = (fallbackAvatar != null);
         }
     }
@@ -1128,5 +1135,39 @@ public class XPUIAnimation : MonoBehaviour
 
         if (dodgeRecordText != null)
             dodgeRecordText.text = PlayerPrefs.GetInt("MaxRecordDodge", 0).ToString();
+    }
+
+    private void ApplyOpenButtonMaterial(AvatarDataSO data)
+    {
+        // limpia instancia anterior creada por nosotros
+        ClearOpenButtonMaterial();
+
+        if (data != null && data.hasShaderEffect && data.effectMaterial != null)
+        {
+            openAvatarMatInstance = Instantiate(data.effectMaterial);
+            openAvatarImage.material = openAvatarMatInstance;
+        }
+        else
+        {
+            openAvatarImage.material = null;
+        }
+    }
+
+    private void ClearOpenButtonMaterial()
+    {
+        // Solo destruimos lo que instanciamos nosotros
+        if (openAvatarMatInstance != null)
+        {
+            Destroy(openAvatarMatInstance);
+            openAvatarMatInstance = null;
+        }
+
+        if (openAvatarImage != null)
+            openAvatarImage.material = null;
+    }
+
+    private void OnDestroy()
+    {
+        ClearOpenButtonMaterial();
     }
 }

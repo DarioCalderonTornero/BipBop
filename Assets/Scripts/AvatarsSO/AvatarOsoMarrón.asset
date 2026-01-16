@@ -19,4 +19,11 @@ MonoBehaviour:
   unlockByScore: 0
   requiredScoreKey: 
   requiredScoreValue: 0
+  unlockByOwningAvatars: 0
+  requiredOwnedAvatarIds: []
   unlockDescription: 
+  hasShaderEffect: 0
+  effectType: 0
+  effectMaterial: {fileID: 0}
+  lockedMessage: 
+  ownedMessage: 

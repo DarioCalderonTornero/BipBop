@@ -10,20 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8116731ce51618b47a0b58e595cab8e3, type: 3}
-  m_Name: AvatarMimo
+  m_Name: AvatarPolilla
   m_EditorClassIdentifier: 
-  id: AvatarMimo
-  displayName: Mimo
-  sprite: {fileID: -7007993329593296081, guid: 7639b42730e34f3429e0407c2b62ceac, type: 3}
-  price: 120
+  id: AvatarPolilla
+  displayName: Polilla
+  sprite: {fileID: 3326617689234693958, guid: 63c488f51a58af14194e873fcdf19711, type: 3}
+  price: 5000
   unlockByScore: 0
   requiredScoreKey: 
   requiredScoreValue: 0
-  unlockByOwningAvatars: 0
-  requiredOwnedAvatarIds: []
   unlockDescription: 
-  hasShaderEffect: 0
-  effectType: 0
-  effectMaterial: {fileID: 0}
-  lockedMessage: 
-  ownedMessage: 
+  hasShaderEffect: 1
+  effectType: 3
+  effectMaterial: {fileID: 2100000, guid: b9082e425b15e784a881ea2fb8f55f0c, type: 2}

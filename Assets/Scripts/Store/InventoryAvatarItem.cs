@@ -35,6 +35,8 @@ public class InventoryAvatarItem : MonoBehaviour
     [SerializeField] private float popDuration = 0.12f;
     [SerializeField] private float popScale = 1.1f;
 
+    [SerializeField] private GameObject animatedBadge;
+
     public void Setup(AvatarDataSO avatarData)
     {
         this.avatarData = avatarData;
@@ -77,6 +79,9 @@ public class InventoryAvatarItem : MonoBehaviour
 
         ApplyOwnershipVisuals();
         ApplySelectionBackground(false); // al inicio, sin selección
+
+        if (animatedBadge != null)
+            animatedBadge.SetActive(avatarData != null && avatarData.hasShaderEffect);
 
         if (selectButton != null)
         {

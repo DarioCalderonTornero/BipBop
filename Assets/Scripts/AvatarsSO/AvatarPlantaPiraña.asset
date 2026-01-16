@@ -10,20 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8116731ce51618b47a0b58e595cab8e3, type: 3}
-  m_Name: AvatarMimo
+  m_Name: "AvatarPlantaPira\xF1a"
   m_EditorClassIdentifier: 
-  id: AvatarMimo
-  displayName: Mimo
-  sprite: {fileID: -7007993329593296081, guid: 7639b42730e34f3429e0407c2b62ceac, type: 3}
-  price: 120
+  id: "AvatarPlantaPira\xF1a"
+  displayName: "Planta pira\xF1a"
+  sprite: {fileID: 1241980959720195483, guid: 9d879a65a9f213c4a8d693af01e37261, type: 3}
+  price: 150
   unlockByScore: 0
   requiredScoreKey: 
   requiredScoreValue: 0
-  unlockByOwningAvatars: 0
-  requiredOwnedAvatarIds: []
   unlockDescription: 
   hasShaderEffect: 0
   effectType: 0
   effectMaterial: {fileID: 0}
-  lockedMessage: 
-  ownedMessage: 

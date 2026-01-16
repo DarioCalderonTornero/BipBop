@@ -71,6 +71,8 @@ public class AvatarInventoryManager : MonoBehaviour
 
         EnsureDefaultAvatarOwnedAndEquipped();
 
+        AvatarCollectionUnlocker.EvaluateCatalog(avatarCatalog.avatarDataSO, syncPlayFabIfLoggedIn: true);
+
         if (openButton != null) openButton.onClick.AddListener(OpenPanel);
         if (closeButton != null) closeButton.onClick.AddListener(ClosePanel);
         if (saveButton != null) saveButton.onClick.AddListener(SaveSelectedAvatar);
@@ -140,6 +142,8 @@ public class AvatarInventoryManager : MonoBehaviour
 
         titleText.text = "Inventario de avatares";
 
+        AvatarCollectionUnlocker.EvaluateCatalog(avatarCatalog.avatarDataSO, syncPlayFabIfLoggedIn: true);
+
         // Cargamos los avatares
         LoadAvatarsInPages();
 
@@ -162,6 +166,11 @@ public class AvatarInventoryManager : MonoBehaviour
 
         // Animación de pop del panel
         StartCoroutine(PopPanel(Vector3.zero, Vector3.one * popScale));
+    }
+
+    public AvatarCatalogSO GetCatalog()
+    {
+        return avatarCatalog;
     }
 
     public void ClosePanel()
@@ -309,11 +318,21 @@ public class AvatarInventoryManager : MonoBehaviour
         {
             if (avatarItem.IsOwned)
             {
-                selectedAvatarDescriptionText.text = defaultOwnedText;
+                // ✅ Prioridad: mensaje personalizado de conseguido
+                if (!string.IsNullOrEmpty(data.ownedMessage))
+                    selectedAvatarDescriptionText.text = data.ownedMessage;
+                else
+                    selectedAvatarDescriptionText.text = defaultOwnedText;
             }
             else
             {
-                if (!string.IsNullOrEmpty(data.unlockDescription))
+                // ✅ Prioridad: mensaje personalizado de bloqueado
+                if (!string.IsNullOrEmpty(data.lockedMessage))
+                {
+                    selectedAvatarDescriptionText.text = data.lockedMessage;
+                }
+                // (compatibilidad con lo que ya tienes)
+                else if (!string.IsNullOrEmpty(data.unlockDescription))
                 {
                     selectedAvatarDescriptionText.text = data.unlockDescription;
                 }
