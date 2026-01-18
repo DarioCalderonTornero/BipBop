@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8116731ce51618b47a0b58e595cab8e3, type: 3}
+  m_Name: AvatarCuadradoConejo
+  m_EditorClassIdentifier: 
+  id: AvatarConejo
+  displayName: Conejo
+  sprite: {fileID: 780760487261937263, guid: 4280cd1f4c45ad54ea03a173933f9570, type: 3}
+  price: 0
+  unlockByScore: 0
+  requiredScoreKey: 
+  requiredScoreValue: 0
+  unlockByOwningAvatars: 1
+  requiredOwnedAvatarIds:
+  - AvatarPayaso
+  unlockDescription: 
+  hasShaderEffect: 1
+  effectType: 0
+  effectMaterial: {fileID: 2100000, guid: b9082e425b15e784a881ea2fb8f55f0c, type: 2}
+  fxPreset: {fileID: 11400000, guid: a9ce636791687fb41b55db14f82ef20b, type: 2}
+  lockedMessage: 
+  ownedMessage: 
