@@ -18553,7 +18553,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 246.00009, y: -81.00749}
+  m_AnchoredPosition: {x: 219, y: -193}
   m_SizeDelta: {x: 146.246, y: 140.1652}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &756040100
@@ -29126,11 +29126,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d69b2c6f7bba94844996683a210f887c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ClassicButton: {fileID: 0}
-  GeometricButton: {fileID: 0}
-  ColorButton: {fileID: 0}
-  DodgeButton: {fileID: 0}
-  GridButton: {fileID: 0}
+  ClassicButton: {fileID: 1317451714}
+  GeometricButton: {fileID: 331008684}
+  ColorButton: {fileID: 1171100986}
+  DodgeButton: {fileID: 627039178}
+  GridButton: {fileID: 1562536056}
 --- !u!1 &1280726537
 GameObject:
   m_ObjectHideFlags: 0
@@ -37619,7 +37619,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1622377952
 MonoBehaviour:
   m_ObjectHideFlags: 0
