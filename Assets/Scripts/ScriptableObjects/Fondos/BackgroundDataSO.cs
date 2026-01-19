@@ -9,4 +9,7 @@ public class BackgroundDataSO : ScriptableObject
     public string displayName;
     public Sprite sprite;
     public int price;
+
+    [Header("Descripción (texto cuando NO está conseguido)")]
+    [TextArea] public string unlockDescription;
 }

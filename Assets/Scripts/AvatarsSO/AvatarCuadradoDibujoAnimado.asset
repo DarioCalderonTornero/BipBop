@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8116731ce51618b47a0b58e595cab8e3, type: 3}
-  m_Name: AvatarCuadradoConejo
+  m_Name: AvatarCuadradoDibujoAnimado
   m_EditorClassIdentifier: 
-  id: AvatarConejo
-  displayName: Conejo
-  sprite: {fileID: 780760487261937263, guid: 4280cd1f4c45ad54ea03a173933f9570, type: 3}
+  id: AvatarDibujoAnimado
+  displayName: Larry
+  sprite: {fileID: -8272395957657025955, guid: da08172a444439d4e9e01f1745973835, type: 3}
   price: 0
   unlockByScore: 0
   requiredScoreKey: 

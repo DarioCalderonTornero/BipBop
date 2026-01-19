@@ -2140,7 +2140,7 @@ MonoBehaviour:
   m_CellSize: {x: 204.38, y: 186.9}
   m_Spacing: {x: 14.3, y: 53.39}
   m_Constraint: 1
-  m_ConstraintCount: 5
+  m_ConstraintCount: 4
 --- !u!1 &82133202
 GameObject:
   m_ObjectHideFlags: 0
@@ -21745,7 +21745,7 @@ MonoBehaviour:
   m_CellSize: {x: 204.38, y: 186.9}
   m_Spacing: {x: 14.3, y: 53.39}
   m_Constraint: 1
-  m_ConstraintCount: 5
+  m_ConstraintCount: 4
 --- !u!21 &734948095
 Material:
   serializedVersion: 8
@@ -40328,7 +40328,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   backgroundPool: {fileID: 11400000, guid: c16c1d653b4bf154c8fcad22fffcf9a9, type: 2}
   avatarPool: {fileID: 11400000, guid: 85b8c3b2838f4d7409edd0a662d33fb1, type: 2}
-  rollCost: 10
+  rollCost: 0
   duplicateRefund: 75
   maxAttemptsPerDay: 10
   rollBackgroundButton: {fileID: 2031367801}

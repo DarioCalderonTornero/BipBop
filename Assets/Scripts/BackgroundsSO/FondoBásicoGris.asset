@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ad03392cd7844449b05512e140bd92a, type: 3}
+  m_Name: "FondoB\xE1sicoGris"
+  m_EditorClassIdentifier: 
+  id: "FondoB\xE1sicoGris"
+  displayName: "B\xE1sico gris"
+  sprite: {fileID: -8895070377966608123, guid: a3e9fa4b8ad12df4eb5fa7be6c92ace9, type: 3}
+  price: 0

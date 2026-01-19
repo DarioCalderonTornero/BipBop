@@ -1,4 +1,4 @@
-using System.Collections;
+Ôªøusing System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,11 +11,11 @@ public class BackgroundInventoryManager : MonoBehaviour
     [SerializeField] private Button closeButton;
     [SerializeField] private Button saveButton;
 
-    [Header("Grid Layout / P·ginas")]
+    [Header("Grid Layout / P√°ginas")]
     [SerializeField] private GameObject backgroundItemPrefab;
     [SerializeField] private Transform[] pageContainers; // Page0, Page1, Page2...
 
-    [Header("Cat·logo de Fondos")]
+    [Header("Cat√°logo de Fondos")]
     [SerializeField] private BackgroundCatalogSO backgroundCatalog;
 
     [Header("Fondo por defecto (siempre owned)")]
@@ -24,19 +24,19 @@ public class BackgroundInventoryManager : MonoBehaviour
     [Header("Pager")]
     [SerializeField] private AvatarInventoryPager inventoryPager;
 
-    [Header("AnimaciÛn")]
+    [Header("Animaci√≥n")]
     [SerializeField] private float popDuration = 0.25f;
     [SerializeField] private float popScale = 1.1f;
     [SerializeField] private AnimationCurve popCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
 
-    [Header("Detalle selecciÛn")]
+    [Header("Detalle selecci√≥n")]
     [SerializeField] private TextMeshProUGUI selectedNameText;
     [SerializeField] private TextMeshProUGUI selectedDescriptionText;
 
     [Header("Textos descriptivos")]
-    [SerializeField] private string defaultOwnedText = "°Conseguido!";
+    [SerializeField] private string defaultOwnedText = "¬°Conseguido!";
     [SerializeField] private string defaultStoreText = "Comprable en la tienda.";
-    [SerializeField] private string noSelectionText = "°Elige un fondo!";
+    [SerializeField] private string noSelectionText = "¬°Elige un fondo!";
 
     private bool isPanelVisible;
     private bool isAnimating;
@@ -97,18 +97,29 @@ public class BackgroundInventoryManager : MonoBehaviour
         if (backgroundCatalog == null || string.IsNullOrEmpty(defaultBackgroundId))
             return;
 
+        // (Opcional) comprobar que existe en el cat√°logo
         bool exists = backgroundCatalog.backgroundDataSO.Exists(b => b != null && b.id == defaultBackgroundId);
         if (!exists)
         {
-            Debug.LogWarning("[BackgroundInventoryManager] defaultBackgroundId no existe en el cat·logo: " + defaultBackgroundId);
+            Debug.LogWarning("[BackgroundInventoryManager] defaultBackgroundId no existe en el cat√°logo: " + defaultBackgroundId);
             return;
         }
 
+        // 1) Marcarlo como comprado siempre
         string purchaseKey = "Purchased_" + defaultBackgroundId;
         if (PlayerPrefs.GetInt(purchaseKey, 0) == 0)
             PlayerPrefs.SetInt(purchaseKey, 1);
 
-        if (!PlayerPrefs.HasKey("SelectedBackground"))
+        // 2) Equiparlo en cuentas nuevas (si no hay nada seleccionado o lo seleccionado es inv√°lido)
+        string selected = PlayerPrefs.GetString("SelectedBackground", "");
+
+        bool hasValidSelection = false;
+        if (!string.IsNullOrEmpty(selected))
+        {
+            hasValidSelection = backgroundCatalog.backgroundDataSO.Exists(b => b != null && b.id == selected);
+        }
+
+        if (!hasValidSelection)
             PlayerPrefs.SetString("SelectedBackground", defaultBackgroundId);
 
         PlayerPrefs.Save();
@@ -228,7 +239,7 @@ public class BackgroundInventoryManager : MonoBehaviour
     }
 
     // ========================
-    //  CARGA EN P¡GINAS
+    //  CARGA EN P√ÅGINAS
     // ========================
 
     private void LoadBackgroundsInPages()
@@ -249,7 +260,7 @@ public class BackgroundInventoryManager : MonoBehaviour
         var list = backgroundCatalog.backgroundDataSO;
         if (list == null || list.Count == 0) return;
 
-        const int ITEMS_PER_PAGE = 15;
+        const int ITEMS_PER_PAGE = 12;
 
         for (int i = 0; i < list.Count; i++)
         {
@@ -276,7 +287,7 @@ public class BackgroundInventoryManager : MonoBehaviour
     }
 
     // ========================
-    //  SELECCI”N / GUARDAR
+    //  SELECCI√ìN / GUARDAR
     // ========================
 
     public void OnBackgroundSelected(InventoryBackgroundItem item)
@@ -293,14 +304,22 @@ public class BackgroundInventoryManager : MonoBehaviour
         selectedItem.Select();
 
         if (selectedNameText != null)
-            selectedNameText.text = data.name;
+            selectedNameText.text = data.displayName;
 
         if (selectedDescriptionText != null)
         {
             if (item.IsOwned)
+            {
                 selectedDescriptionText.text = defaultOwnedText;
+            }
             else
-                selectedDescriptionText.text = defaultStoreText; // aquÌ puedes poner tu ìcÛmo se consigueî
+            {
+                // ‚úÖ personalizada si existe
+                if (!string.IsNullOrEmpty(data.unlockDescription))
+                    selectedDescriptionText.text = data.unlockDescription;
+                else
+                    selectedDescriptionText.text = defaultStoreText;
+            }
         }
 
         if (saveButton != null)
@@ -330,7 +349,7 @@ public class BackgroundInventoryManager : MonoBehaviour
         UpdateEquippedPreview();
 
         // Si quieres aplicar el fondo instant:
-        // Busca tu sistema actual y llama aquÌ (por ejemplo un manager de UI que cambie el sprite).
+        // Busca tu sistema actual y llama aqu√≠ (por ejemplo un manager de UI que cambie el sprite).
         // Ejemplo:
         // var selector = FindFirstObjectByType<FondoSelector>();
         // if (selector != null) selector.CambiarFondo(data.sprite);
