@@ -266,27 +266,20 @@ public class LeaderboardUI : MonoBehaviour
 
     private void OnModeButtonClicked(string statisticName, Button clickedButton)
     {
-        if (isLoading) return; // Ignorar clicks mientras carga
+        if (isLoading) return;
+
+        if (clickedButton != null && !clickedButton.interactable)
+            return;
 
         PlayerPrefs.SetString("LastLeaderboardMode", statisticName);
         PlayerPrefs.Save();
 
-        // Cambiar color del botón seleccionado
-        if (currentSelectedButton != null)
-            SetButtonSelected(currentSelectedButton, false);
-
-        SetButtonSelected(clickedButton, true);
+        // ✅ Botón activo = disabled
+        SetButtonActiveAsDisabled(clickedButton);
         currentSelectedButton = clickedButton;
 
+        PlayButtonPop(clickedButton);
         ShowLeaderboard(statisticName, 10);
-    }
-
-    private void SetButtonSelected(Button button, bool selected)
-    {
-        ColorBlock colors = button.colors;
-        colors.normalColor = selected ? new Color(0.8f, 0.8f, 1f) : Color.white;
-        colors.selectedColor = colors.normalColor;
-        button.colors = colors;
     }
 
     public void ShowLeaderboard(string statisticName, int top = 10)
@@ -646,7 +639,56 @@ public class LeaderboardUI : MonoBehaviour
             }
         }
     }
-    
+
+    [Header("Button Pop")]
+    [SerializeField] private float popUpScale = 1.08f;
+    [SerializeField] private float popUpDuration = 0.08f;
+    [SerializeField] private float popDownDuration = 0.10f;
+
+    private Coroutine popRoutine;
+
+    private void PlayButtonPop(Button btn)
+    {
+        if (btn == null) return;
+
+        var rt = btn.transform as RectTransform;
+        if (rt == null) return;
+
+        if (popRoutine != null)
+            StopCoroutine(popRoutine);
+
+        popRoutine = StartCoroutine(PopRoutine(rt));
+    }
+
+    private IEnumerator PopRoutine(RectTransform rt)
+    {
+        Vector3 baseScale = rt.localScale;                 // 🔴 escala real del botón
+        Vector3 upScale = baseScale * popUpScale;          // 🔴 pop relativo
+
+        // Subir
+        float t = 0f;
+        while (t < popUpDuration)
+        {
+            t += Time.unscaledDeltaTime;
+            float u = Mathf.Clamp01(t / popUpDuration);
+            rt.localScale = Vector3.Lerp(baseScale, upScale, u);
+            yield return null;
+        }
+
+        // Bajar
+        t = 0f;
+        while (t < popDownDuration)
+        {
+            t += Time.unscaledDeltaTime;
+            float u = Mathf.Clamp01(t / popDownDuration);
+            rt.localScale = Vector3.Lerp(upScale, baseScale, u);
+            yield return null;
+        }
+
+        rt.localScale = baseScale;                          // 🔴 vuelve EXACTAMENTE a su escala original
+        popRoutine = null;
+    }
+
     private void ShowNoConnectionUI(bool show)
     {
         if (noConnectionRoot != null)
@@ -670,6 +712,20 @@ public class LeaderboardUI : MonoBehaviour
                     ? "Sin conexión"
                     : noConnectionLocalizedText.GetLocalizedString();
         }
+    }
+
+    private void SetButtonActiveAsDisabled(Button activeButton)
+    {
+        // Rehabilita todos primero
+        if (classicButton != null) classicButton.interactable = true;
+        if (colorButton != null) colorButton.interactable = true;
+        if (geometricButton != null) geometricButton.interactable = true;
+        if (gridButton != null) gridButton.interactable = true;
+        if (dodgeButton != null) dodgeButton.interactable = true;
+
+        // Deshabilita el activo (feedback visual)
+        if (activeButton != null)
+            activeButton.interactable = false;
     }
 
 

@@ -16,3 +16,4 @@ MonoBehaviour:
   displayName: Diagonales grises
   sprite: {fileID: 6224532922169836754, guid: 7d1fed797fdefcc4c9812b772f4583db, type: 3}
   price: 0
+  unlockDescription: 

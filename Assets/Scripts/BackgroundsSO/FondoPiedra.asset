@@ -14,5 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: FondoPiedra
   displayName: Piedra
-  sprite: {fileID: 1786317784773522842, guid: d008ee9e597c5124195258bd0d6e0e36, type: 3}
+  sprite: {fileID: -1787538322499828994, guid: 43d684feb14554446aa9428ee8c82846, type: 3}
   price: 0
+  unlockDescription: 
