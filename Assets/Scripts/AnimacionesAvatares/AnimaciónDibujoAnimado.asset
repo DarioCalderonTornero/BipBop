@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1afa3c498bd663c4fb35674127557a30, type: 3}
+  m_Name: "Animaci\xF3nDibujoAnimado"
+  m_EditorClassIdentifier: 
+  grassRadialBlendProp: _GrassRadialBend
+  greyscaleBlendProp: _GreyscaleBlend
+  grassMin: 0
+  grassMax: 1
+  greyMin: 0
+  greyMax: 1
+  startNormalSeconds: 2
+  grassUp1Seconds: 1
+  greyUpSeconds: 1
+  grassDown1Seconds: 1
+  betweenCyclesSeconds: 5
+  grassUp2Seconds: 1
+  greyDownSeconds: 1
+  grassDown2Seconds: 1
+  smooth: 1
