@@ -425,6 +425,194 @@ MonoBehaviour:
     m_Localized: 'Coins: {0}'
     m_Metadata:
       m_Items: []
+  - m_Id: 22471387386970112
+    m_Localized: Astronaut
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24626112022675456
+    m_Localized: Fireman
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24626164208205824
+    m_Localized: Snail
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24626215353548800
+    m_Localized: Default
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24626284098191360
+    m_Localized: Cat
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24626329556058112
+    m_Localized: Lion
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24626375269777408
+    m_Localized: Sailor
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24626538906353664
+    m_Localized: Hammer
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24626596850663424
+    m_Localized: Pampering
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24626695026737152
+    m_Localized: Brown bear
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24626756007723008
+    m_Localized: Panda
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24626808537186304
+    m_Localized: Polar bear
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24626942935269376
+    m_Localized: Clown
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24626982449807360
+    m_Localized: Banana
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24627030113878016
+    m_Localized: Robot
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24627090620907520
+    m_Localized: Supreme alien
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24627157264203776
+    m_Localized: Knight
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24627235244703744
+    m_Localized: Rabbit
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24627293969154048
+    m_Localized: Larry
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24627377477746688
+    m_Localized: Sea Lord
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24627453319151616
+    m_Localized: Party monster
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24627562467524608
+    m_Localized: Snowman
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24627635603603456
+    m_Localized: Giant moth
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24627706919354368
+    m_Localized: Brown alien
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24627802817921024
+    m_Localized: Red alien
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24627879737262080
+    m_Localized: Karateka
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24627941473222656
+    m_Localized: Ketchup
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24628004375199744
+    m_Localized: Orange
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24628061711335424
+    m_Localized: Peste
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24628169978904576
+    m_Localized: Piranha plant
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24628267634884608
+    m_Localized: Rat
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24628339680444416
+    m_Localized: Queen
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24628389466832896
+    m_Localized: King
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24628448895926272
+    m_Localized: Mushroom
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24628502171975680
+    m_Localized: Shark
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24629463204462592
+    m_Localized: Available occasionally in the store
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24629567479054336
+    m_Localized: Available in the daily draw
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24629712237068288
+    m_Localized: Available after obtaining the other three aliens
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24629831455965184
+    m_Localized: Got it!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24635271464058880
+    m_Localized: Offline
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24635549034708992
+    m_Localized: Language
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24635605204828160
+    m_Localized: Vibration
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24635713505951744
+    m_Localized: Sound
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24635765133639680
+    m_Localized: Music
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24635821895155712
+    m_Localized: Credits
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24635896943837184
+    m_Localized: Reset
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24635965206134784
+    m_Localized: See
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

@@ -49,7 +49,7 @@ public class InventoryAvatarItem : MonoBehaviour
 
         if (nameText != null)
         {
-            nameText.text = avatarData.displayName;
+            nameText.text = avatarData.GetDisplayName();
             originalFontStyle = nameText.fontStyle;
         }
 

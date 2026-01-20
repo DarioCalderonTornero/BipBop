@@ -425,6 +425,194 @@ MonoBehaviour:
     m_Localized: 'Monedas: {0}'
     m_Metadata:
       m_Items: []
+  - m_Id: 22471387386970112
+    m_Localized: Astronauta
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24626112022675456
+    m_Localized: Bombero
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24626164208205824
+    m_Localized: Caracol
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24626215353548800
+    m_Localized: Simple
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24626284098191360
+    m_Localized: Gato
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24626329556058112
+    m_Localized: "Le\xF3n"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24626375269777408
+    m_Localized: Marinero
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24626538906353664
+    m_Localized: Martillo
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24626596850663424
+    m_Localized: Mimo
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24626695026737152
+    m_Localized: "Oso marr\xF3n"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24626756007723008
+    m_Localized: Oso panda
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24626808537186304
+    m_Localized: Oso polar
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24626942935269376
+    m_Localized: Payaso
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24626982449807360
+    m_Localized: "Pl\xE1tano"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24627030113878016
+    m_Localized: Robot
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24627090620907520
+    m_Localized: Alien supremo
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24627157264203776
+    m_Localized: Caballero
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24627235244703744
+    m_Localized: Conejo
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24627293969154048
+    m_Localized: Larry
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24627377477746688
+    m_Localized: Dios del mar
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24627453319151616
+    m_Localized: Monstruo de la fiesta
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24627562467524608
+    m_Localized: "Mu\xF1eco de nieve"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24627635603603456
+    m_Localized: Polilla gigante
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24627706919354368
+    m_Localized: "Alien marr\xF3n"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24627802817921024
+    m_Localized: Alien rojo
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24627879737262080
+    m_Localized: Karateka
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24627941473222656
+    m_Localized: Ketchup
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24628004375199744
+    m_Localized: Naranja
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24628061711335424
+    m_Localized: Peste
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24628169978904576
+    m_Localized: "Planta pira\xF1a"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24628267634884608
+    m_Localized: Rata
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24628339680444416
+    m_Localized: Reina
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24628389466832896
+    m_Localized: Rey
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24628448895926272
+    m_Localized: Seta
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24628502171975680
+    m_Localized: "Tibur\xF3n"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24629463204462592
+    m_Localized: Disponible de vez en cuando en la tienda
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24629567479054336
+    m_Localized: Disponible en la suerte diaria
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24629712237068288
+    m_Localized: Disponible tras conseguir los otros tres aliens
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24629831455965184
+    m_Localized: "\xA1Conseguido!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24635271464058880
+    m_Localized: "Sin conexi\xF3n"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24635549034708992
+    m_Localized: Idioma
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24635605204828160
+    m_Localized: "Vibraci\xF3n"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24635713505951744
+    m_Localized: Sonido
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24635765133639680
+    m_Localized: "M\xFAsica"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24635821895155712
+    m_Localized: "Cr\xE9ditos"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24635896943837184
+    m_Localized: Reset
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24635965206134784
+    m_Localized: Ver
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

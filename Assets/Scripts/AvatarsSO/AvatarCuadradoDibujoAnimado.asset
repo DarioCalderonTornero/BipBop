@@ -13,7 +13,16 @@ MonoBehaviour:
   m_Name: AvatarCuadradoDibujoAnimado
   m_EditorClassIdentifier: 
   id: AvatarDibujoAnimado
-  displayName: Larry
+  displayNameLS:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 24627293969154048
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  displayNameFallback: Avatar
   sprite: {fileID: -8272395957657025955, guid: da08172a444439d4e9e01f1745973835, type: 3}
   price: 0
   unlockByScore: 0
@@ -21,10 +30,40 @@ MonoBehaviour:
   requiredScoreValue: 0
   unlockByOwningAvatars: 0
   requiredOwnedAvatarIds: []
-  unlockDescription: 
+  unlockDescriptionLS:
+    m_TableReference:
+      m_TableCollectionName: 
+    m_TableEntryReference:
+      m_KeyId: 0
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  unlockDescriptionFallback: 
+  lockedMessageLS:
+    m_TableReference:
+      m_TableCollectionName: 
+    m_TableEntryReference:
+      m_KeyId: 0
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  lockedMessageFallback: 
+  ownedMessageLS:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 24629831455965184
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  ownedMessageFallback: 
   hasShaderEffect: 0
   effectType: 0
   effectMaterial: {fileID: 0}
   fxPreset: {fileID: 0}
-  lockedMessage: 
-  ownedMessage: 
+  references:
+    version: 2
+    RefIds: []

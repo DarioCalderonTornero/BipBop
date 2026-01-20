@@ -33,10 +33,7 @@ public class DailyStoreManager : MonoBehaviour
 
     private void OnEnable()
     {
-        // Cargar prefix al habilitar
         RefreshCountdownPrefix();
-
-        // Si cambia el idioma, refrescar prefix
         LocalizationSettings.SelectedLocaleChanged += OnLocaleChanged;
     }
 
@@ -48,6 +45,7 @@ public class DailyStoreManager : MonoBehaviour
     private void OnLocaleChanged(UnityEngine.Localization.Locale _)
     {
         RefreshCountdownPrefix();
+        ApplyOffersToUI(); // repinta nombres
     }
 
     private async void RefreshCountdownPrefix()
@@ -206,7 +204,7 @@ public class DailyStoreManager : MonoBehaviour
 
                 avatarSlots[i].SetContent(
                     data.sprite,
-                    data.displayName,
+                    data.GetDisplayName(),
                     price,
                     () =>
                     {

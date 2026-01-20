@@ -13,10 +13,57 @@ MonoBehaviour:
   m_Name: AvatarTriangularRata
   m_EditorClassIdentifier: 
   id: AvatarRata
-  displayName: Rata
+  displayNameLS:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 24628267634884608
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  displayNameFallback: Avatar
   sprite: {fileID: -3127118166454780910, guid: a2cb4ee5715f85d479553cb650b2bf1c, type: 3}
-  price: 150
+  price: 0
   unlockByScore: 0
   requiredScoreKey: 
   requiredScoreValue: 0
-  unlockDescription: 
+  unlockByOwningAvatars: 0
+  requiredOwnedAvatarIds: []
+  unlockDescriptionLS:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 24629567479054336
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  unlockDescriptionFallback: 
+  lockedMessageLS:
+    m_TableReference:
+      m_TableCollectionName: 
+    m_TableEntryReference:
+      m_KeyId: 0
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  lockedMessageFallback: 
+  ownedMessageLS:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 24629831455965184
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  ownedMessageFallback: 
+  hasShaderEffect: 0
+  effectType: 0
+  effectMaterial: {fileID: 0}
+  fxPreset: {fileID: 0}
+  references:
+    version: 2
+    RefIds: []

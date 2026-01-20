@@ -13,11 +13,57 @@ MonoBehaviour:
   m_Name: AvatarDesbloqueable1
   m_EditorClassIdentifier: 
   id: Desbloqueable
-  displayName: Desbloqueable
+  displayNameLS:
+    m_TableReference:
+      m_TableCollectionName: 
+    m_TableEntryReference:
+      m_KeyId: 0
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  displayNameFallback: Avatar
   sprite: {fileID: -1825931381, guid: 1201c14bb4ee74d8e99e56dc4f3f4fd1, type: 3}
   price: 0
   unlockByScore: 1
   requiredScoreKey: MaxRecordDodge
   requiredScoreValue: 22
-  unlockDescription: "Alcanza una puntuaci\xF3n de 22 como m\xEDnimo en el modo \"Dodge\"
-    para desbloquaer"
+  unlockByOwningAvatars: 0
+  requiredOwnedAvatarIds: []
+  unlockDescriptionLS:
+    m_TableReference:
+      m_TableCollectionName: 
+    m_TableEntryReference:
+      m_KeyId: 0
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  unlockDescriptionFallback: 
+  lockedMessageLS:
+    m_TableReference:
+      m_TableCollectionName: 
+    m_TableEntryReference:
+      m_KeyId: 0
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  lockedMessageFallback: 
+  ownedMessageLS:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 24629831455965184
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  ownedMessageFallback: 
+  hasShaderEffect: 0
+  effectType: 0
+  effectMaterial: {fileID: 0}
+  fxPreset: {fileID: 0}
+  references:
+    version: 2
+    RefIds: []

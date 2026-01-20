@@ -77,7 +77,7 @@ public class AvatarItem : MonoBehaviour
             avatarImage.sprite = avatarData.sprite;
 
         if (nameText != null)
-            nameText.text = avatarData.displayName;
+            nameText.text = avatarData.GetDisplayName();
 
         if (priceText != null)
             priceText.text = avatarData.price + " monedas";
@@ -113,7 +113,7 @@ public class AvatarItem : MonoBehaviour
 
     private void OnSelectClicked()
     {
-        Debug.Log($"Avatar seleccionado: {avatarData.displayName}");
+        Debug.Log($"Avatar seleccionado: {avatarData.GetDisplayName()}");
 
         // Si ya está seleccionado, no hacemos nada
         if (_isSelected)

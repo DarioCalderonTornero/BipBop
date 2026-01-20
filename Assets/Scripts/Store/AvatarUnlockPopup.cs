@@ -88,7 +88,7 @@ public class AvatarUnlockPopup : MonoBehaviour
             avatarImage.sprite = data.sprite;
 
         if (messageText != null)
-            messageText.text = $"¡{data.displayName} desbloqueado!";
+            messageText.text = $"¡{data.GetDisplayName()} desbloqueado!";
 
         if (routine != null)
             StopCoroutine(routine);

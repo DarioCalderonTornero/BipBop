@@ -416,7 +416,191 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 22471387386970112
-    m_Key: New Entry 1
+    m_Key: Avatar_Astronauta
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24626112022675456
+    m_Key: Avatar_Bombero
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24626164208205824
+    m_Key: Avatar_Caracol
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24626215353548800
+    m_Key: Avatar_Default
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24626284098191360
+    m_Key: Avatar_Gato
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24626329556058112
+    m_Key: "Avatar_Le\xF3n"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24626375269777408
+    m_Key: Avatar_Marinero
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24626538906353664
+    m_Key: Avatar_Martillo
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24626596850663424
+    m_Key: Avatar_Mimo
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24626695026737152
+    m_Key: "Avatar_OsoMarr\xF3n"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24626756007723008
+    m_Key: Avatar_OsoPanda
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24626808537186304
+    m_Key: Avatar_OsoPolar
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24626942935269376
+    m_Key: Avatar_Payaso
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24626982449807360
+    m_Key: "Avatar_Pl\xE1tano"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24627030113878016
+    m_Key: Avatar_Robot
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24627090620907520
+    m_Key: Avatar_AlienNaranja
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24627157264203776
+    m_Key: Avatar_Caballero
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24627235244703744
+    m_Key: Avatar_Conejo
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24627293969154048
+    m_Key: Avatar_DibujoAnimado
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24627377477746688
+    m_Key: "Avatar_DiosOc\xE9ano"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24627453319151616
+    m_Key: Avatar_MonstruoFiesta
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24627562467524608
+    m_Key: "Avatar_Mu\xF1ecoDeNieve"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24627635603603456
+    m_Key: Avatar_Polilla
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24627706919354368
+    m_Key: "Avatar_AlienMarr\xF3n"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24627802817921024
+    m_Key: Avatar_AlienRojo
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24627879737262080
+    m_Key: Avatar_Karateka
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24627941473222656
+    m_Key: Avatar_Ketchup
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24628004375199744
+    m_Key: Avatar_Naranja
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24628061711335424
+    m_Key: Avatar_Peste
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24628169978904576
+    m_Key: "Avatar_PlantaPira\xF1a"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24628267634884608
+    m_Key: Avatar_Rata
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24628339680444416
+    m_Key: Avatar_Reina
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24628389466832896
+    m_Key: Avatar_Rey
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24628448895926272
+    m_Key: Avatar_Seta
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24628502171975680
+    m_Key: "Avatar_Tibur\xF3n"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24629463204462592
+    m_Key: "Avatar_Descripci\xF3nTienda"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24629567479054336
+    m_Key: "Avatar_Descripci\xF3nGacha"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24629712237068288
+    m_Key: "Avatar_Descripci\xF3nAlienNaranja"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24629831455965184
+    m_Key: Avatar_Conseguido
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24635271464058880
+    m_Key: "Sin_Conexi\xF3n"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24635549034708992
+    m_Key: Settings_Idioma
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24635605204828160
+    m_Key: "Settings_Vibraci\xF3n"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24635713505951744
+    m_Key: Settings_Sonido
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24635765133639680
+    m_Key: "Settings_M\xFAsica"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24635821895155712
+    m_Key: "Settings_Cr\xE9ditos"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24635896943837184
+    m_Key: Settings_Reset
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24635965206134784
+    m_Key: Settings_Ver
     m_Metadata:
       m_Items: []
   m_Metadata:

@@ -13,13 +13,57 @@ MonoBehaviour:
   m_Name: "AvatarCircularPl\xE1tano"
   m_EditorClassIdentifier: 
   id: "AvatarPl\xE1tano"
-  displayName: "Pl\xE1tano"
+  displayNameLS:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 24626982449807360
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  displayNameFallback: Avatar
   sprite: {fileID: 3699010464792260336, guid: 3a5d677cdeba7ba40a9e6acb1e083ba1, type: 3}
-  price: 300
+  price: 800
   unlockByScore: 0
   requiredScoreKey: 
   requiredScoreValue: 0
-  unlockDescription: 
-  hasShaderEffect: 1
-  effectType: 3
-  effectMaterial: {fileID: 2100000, guid: b9082e425b15e784a881ea2fb8f55f0c, type: 2}
+  unlockByOwningAvatars: 0
+  requiredOwnedAvatarIds: []
+  unlockDescriptionLS:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 24629463204462592
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  unlockDescriptionFallback: 
+  lockedMessageLS:
+    m_TableReference:
+      m_TableCollectionName: 
+    m_TableEntryReference:
+      m_KeyId: 0
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  lockedMessageFallback: 
+  ownedMessageLS:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 24629831455965184
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  ownedMessageFallback: 
+  hasShaderEffect: 0
+  effectType: 0
+  effectMaterial: {fileID: 0}
+  fxPreset: {fileID: 0}
+  references:
+    version: 2
+    RefIds: []

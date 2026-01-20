@@ -103,7 +103,7 @@ RectTransform:
   m_GameObject: {fileID: 2357202880598883674}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.548, y: 1.548, z: 1.548}
+  m_LocalScale: {x: 1.630044, y: 1.630044, z: 1.630044}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2833437274626298942}
@@ -144,7 +144,7 @@ MonoBehaviour:
       m_Calls: []
   m_Sprite: {fileID: -1670414301305615867, guid: fc0be77a8f83db24fb324a527897b445, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -475,7 +475,7 @@ MonoBehaviour:
   selectButton: {fileID: 2545569439944345604}
   lockedIcon: {fileID: 4458773763935764748}
   selectionBgImage: {fileID: 54178885508347725}
-  lockedTint: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  lockedTint: {r: 0.084905684, g: 0.084905684, b: 0.084905684, a: 1}
   popDuration: 0.12
   popScale: 1.1
   defaultBackgroundId: DefaultBackground

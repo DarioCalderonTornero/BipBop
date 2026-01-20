@@ -13,17 +13,57 @@ MonoBehaviour:
   m_Name: "AvatarCircularLe\xF3n"
   m_EditorClassIdentifier: 
   id: "AvatarLe\xF3n"
-  displayName: "Le\xF3n"
+  displayNameLS:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 24626329556058112
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  displayNameFallback: Avatar
   sprite: {fileID: -2556583579575185930, guid: fd5bb46c00e21b74aaeec194fd6aa13b, type: 3}
-  price: 500
+  price: 0
   unlockByScore: 0
   requiredScoreKey: 
   requiredScoreValue: 0
   unlockByOwningAvatars: 0
   requiredOwnedAvatarIds: []
-  unlockDescription: 
+  unlockDescriptionLS:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 24629567479054336
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  unlockDescriptionFallback: 
+  lockedMessageLS:
+    m_TableReference:
+      m_TableCollectionName: 
+    m_TableEntryReference:
+      m_KeyId: 0
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  lockedMessageFallback: 
+  ownedMessageLS:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 24629831455965184
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  ownedMessageFallback: 
   hasShaderEffect: 0
   effectType: 0
   effectMaterial: {fileID: 0}
-  lockedMessage: 
-  ownedMessage: 
+  fxPreset: {fileID: 0}
+  references:
+    version: 2
+    RefIds: []

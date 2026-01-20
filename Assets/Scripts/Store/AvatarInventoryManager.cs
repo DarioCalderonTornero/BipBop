@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
 
 public class AvatarInventoryManager : MonoBehaviour
@@ -303,7 +304,6 @@ public class AvatarInventoryManager : MonoBehaviour
     public void OnAvatarSelected(InventoryAvatarItem avatarItem)
     {
         var data = avatarItem.GetAvatarData();
-        Debug.Log($"Avatar seleccionado: {data.displayName}");
 
         if (selectedAvatarItem != null && selectedAvatarItem != avatarItem)
             selectedAvatarItem.Deselect();
@@ -312,48 +312,54 @@ public class AvatarInventoryManager : MonoBehaviour
         selectedAvatarItem.Select();
 
         if (selectedAvatarNameText != null)
-            selectedAvatarNameText.text = data.displayName;
+            selectedAvatarNameText.text = data.GetDisplayName();
 
         if (selectedAvatarDescriptionText != null)
         {
             if (avatarItem.IsOwned)
             {
-                // ✅ Prioridad: mensaje personalizado de conseguido
-                if (!string.IsNullOrEmpty(data.ownedMessage))
-                    selectedAvatarDescriptionText.text = data.ownedMessage;
-                else
-                    selectedAvatarDescriptionText.text = defaultOwnedText;
+                string owned = data.GetOwnedMessage();
+                selectedAvatarDescriptionText.text = !string.IsNullOrEmpty(owned) ? owned : defaultOwnedText;
             }
             else
             {
-                // ✅ Prioridad: mensaje personalizado de bloqueado
-                if (!string.IsNullOrEmpty(data.lockedMessage))
-                {
-                    selectedAvatarDescriptionText.text = data.lockedMessage;
-                }
-                // (compatibilidad con lo que ya tienes)
-                else if (!string.IsNullOrEmpty(data.unlockDescription))
-                {
-                    selectedAvatarDescriptionText.text = data.unlockDescription;
-                }
-                else if (data.unlockByScore && data.requiredScoreValue > 0)
-                {
-                    selectedAvatarDescriptionText.text =
-                        string.Format(defaultScoreTemplate, data.requiredScoreValue);
-                }
-                else if (data.price > 0)
-                {
-                    selectedAvatarDescriptionText.text = defaultStoreText;
-                }
+                string locked = data.GetLockedMessage();
+                if (!string.IsNullOrEmpty(locked))
+                    selectedAvatarDescriptionText.text = locked;
                 else
                 {
-                    selectedAvatarDescriptionText.text = "";
+                    string unlockDesc = data.GetUnlockDescription();
+                    if (!string.IsNullOrEmpty(unlockDesc))
+                        selectedAvatarDescriptionText.text = unlockDesc;
+                    else if (data.unlockByScore && data.requiredScoreValue > 0)
+                        selectedAvatarDescriptionText.text = string.Format(defaultScoreTemplate, data.requiredScoreValue);
+                    else if (data.price > 0)
+                        selectedAvatarDescriptionText.text = defaultStoreText;
+                    else
+                        selectedAvatarDescriptionText.text = "";
                 }
             }
         }
 
         if (saveButton != null)
             saveButton.interactable = avatarItem.IsOwned;
+    }
+
+    private void OnEnable()
+    {
+        LocalizationSettings.SelectedLocaleChanged += OnLocaleChanged;
+    }
+
+    private void OnDisable()
+    {
+        LocalizationSettings.SelectedLocaleChanged -= OnLocaleChanged;
+    }
+
+    private void OnLocaleChanged(UnityEngine.Localization.Locale _)
+    {
+        // si hay un avatar seleccionado, repintamos su texto
+        if (selectedAvatarItem != null)
+            OnAvatarSelected(selectedAvatarItem);
     }
 
     private void SaveSelectedAvatar()

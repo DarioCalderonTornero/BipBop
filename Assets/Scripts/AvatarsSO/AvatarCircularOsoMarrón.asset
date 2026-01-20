@@ -13,17 +13,57 @@ MonoBehaviour:
   m_Name: "AvatarCircularOsoMarr\xF3n"
   m_EditorClassIdentifier: 
   id: "AvatarOsoMarr\xF3n"
-  displayName: "Oso marr\xF3n"
+  displayNameLS:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 24626695026737152
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  displayNameFallback: Avatar
   sprite: {fileID: -6513828830568356580, guid: 8be7f4fb01ff6b44f82873af61e9a8f2, type: 3}
-  price: 160
+  price: 500
   unlockByScore: 0
   requiredScoreKey: 
   requiredScoreValue: 0
   unlockByOwningAvatars: 0
   requiredOwnedAvatarIds: []
-  unlockDescription: 
+  unlockDescriptionLS:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 24629463204462592
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  unlockDescriptionFallback: 
+  lockedMessageLS:
+    m_TableReference:
+      m_TableCollectionName: 
+    m_TableEntryReference:
+      m_KeyId: 0
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  lockedMessageFallback: 
+  ownedMessageLS:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 24629831455965184
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  ownedMessageFallback: 
   hasShaderEffect: 0
   effectType: 0
   effectMaterial: {fileID: 0}
-  lockedMessage: 
-  ownedMessage: 
+  fxPreset: {fileID: 0}
+  references:
+    version: 2
+    RefIds: []

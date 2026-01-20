@@ -21,6 +21,8 @@ public class TopPlayerSlot
     public GameObject levelIcon;     // Icono de nivel
     public TextMeshProUGUI levelText; // Texto del nivel
     public Sprite defaultAvatarSprite;
+
+    [HideInInspector] public AvatarImageBinder binder;
 }
 
 public class LeaderboardUI : MonoBehaviour
@@ -88,20 +90,25 @@ public class LeaderboardUI : MonoBehaviour
 
     private void Awake()
     {
-        if (Instance == null)
-            Instance = this;
-        else
-        {
-            Destroy(gameObject);
-            return;
-        }
+        if (Instance == null) Instance = this;
+        else { Destroy(gameObject); return; }
 
-        // Listeners de los botones
         classicButton.onClick.AddListener(() => OnModeButtonClicked("HighScore", classicButton));
         colorButton.onClick.AddListener(() => OnModeButtonClicked("ColorScore", colorButton));
         geometricButton.onClick.AddListener(() => OnModeButtonClicked("GeometricScore", geometricButton));
         gridButton.onClick.AddListener(() => OnModeButtonClicked("GridScore", gridButton));
         dodgeButton.onClick.AddListener(() => OnModeButtonClicked("DodgeScore", dodgeButton));
+
+        // ✅ Cache binders top3
+        if (top3Slots != null)
+        {
+            foreach (var s in top3Slots)
+            {
+                if (s == null || s.avatarImage == null) continue;
+                s.binder = s.avatarImage.GetComponent<AvatarImageBinder>();
+                if (s.binder == null) s.binder = s.avatarImage.gameObject.AddComponent<AvatarImageBinder>();
+            }
+        }
     }
 
     private void Start()
@@ -481,6 +488,9 @@ public class LeaderboardUI : MonoBehaviour
 
                 if (avatarImg != null)
                 {
+                    var binder = avatarImg.GetComponent<AvatarImageBinder>();
+                    if (binder == null) binder = avatarImg.gameObject.AddComponent<AvatarImageBinder>();
+
                     SetAvatarForPlayFabId(entry.PlayFabId, avatarImg, null);
                 }
             }
@@ -577,10 +587,12 @@ public class LeaderboardUI : MonoBehaviour
 
             slot.root.SetActive(true);
 
-            // Reset avatar
-            if (slot.avatarImage != null && slot.defaultAvatarSprite != null)
+            if (slot.avatarImage != null)
             {
-                slot.avatarImage.sprite = slot.defaultAvatarSprite;
+                if (slot.binder == null)
+                    slot.binder = slot.avatarImage.GetComponent<AvatarImageBinder>() ?? slot.avatarImage.gameObject.AddComponent<AvatarImageBinder>();
+
+                slot.binder.Clear(slot.defaultAvatarSprite);
             }
 
             // Limpia listeners antiguos del botón del slot
@@ -780,32 +792,16 @@ public class LeaderboardUI : MonoBehaviour
     {
         if (targetImage == null) return;
 
-        if (data == null || data.sprite == null)
+        var binder = targetImage.GetComponent<AvatarImageBinder>();
+        if (binder == null) binder = targetImage.gameObject.AddComponent<AvatarImageBinder>();
+
+        if (data != null && data.sprite != null)
         {
-            // Sin datos → avatar por defecto sin shader
-            targetImage.material = null;
-            return;
-        }
-
-        targetImage.sprite = data.sprite;
-
-        if (data.hasShaderEffect && data.effectMaterial != null)
-        {
-            // Instanciamos material para no modificar el asset global
-            var matInstance = Instantiate(data.effectMaterial);
-            targetImage.material = matInstance;
-
-            // Si quieres, setea aquí los parámetros del shader
-            // Ojo con los nombres reales de las props del AllIn1SpriteShader
-           //  matInstance.SetFloat("_WaveAmount", data.waveAmount);
-           // matInstance.SetFloat("_WaveSpeed", data.waveSpeed);
-            // matInstance.SetFloat("_WaveStrength", data.waveStrength);
-            // etc. según lo que uses
+            binder.ApplyAvatar(data);  // ✅ sprite + shader (como XPUIAnimation)
         }
         else
         {
-            // Avatares sin efecto → material por defecto
-            targetImage.material = null;
+            binder.Clear(null);        // o pásale un fallback si quieres
         }
     }
 
