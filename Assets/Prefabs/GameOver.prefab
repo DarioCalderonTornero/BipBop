@@ -545,7 +545,17 @@ MonoBehaviour:
   mainMenuButton: {fileID: 6992387006686752468}
   backGround: {fileID: 6552543701441073680}
   coinText: {fileID: 4497493182453217596}
+  scoreText: {fileID: 0}
   gameOverText: {fileID: 4216481595644159573}
+  coinsObtainedLocalized:
+    m_TableReference:
+      m_TableCollectionName: 
+    m_TableEntryReference:
+      m_KeyId: 0
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
   myanimator: {fileID: 0}
   mainMenuSceneName: Menu
   mainMenuTransitionLabel:

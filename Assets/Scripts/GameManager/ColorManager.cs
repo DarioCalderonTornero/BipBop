@@ -34,6 +34,8 @@ public class ColorManager : MonoBehaviour
     [Header("Sprites de colores")]
     [SerializeField] private Sprite[] colorSprites;
 
+    [SerializeField] private AudioClip errorAudioClip;
+
     private float currentTime;
     private int correctIndex;
     private int lastCorrectIndex = -1;
@@ -266,10 +268,12 @@ public class ColorManager : MonoBehaviour
         switch (deathType)
         {
             case DeathType.Video:
+                SoundManager.Instance.PlaySound(errorAudioClip, 1f);
                 OnVideo?.Invoke(this, EventArgs.Empty);
                 break;
 
             case DeathType.GameOver:
+                SoundManager.Instance.PlaySound(errorAudioClip, 1f);
                 EndGame();
                 break;
         }

@@ -31,6 +31,7 @@ public class GeometricGameOverUI : MonoBehaviour
         mainMenuButton.onClick.AddListener(() =>
         {
             SceneLoader.LoadScene(SceneLoader.Scene.Menu);
+            Time.timeScale = 1.0f;
         });
     }
 
