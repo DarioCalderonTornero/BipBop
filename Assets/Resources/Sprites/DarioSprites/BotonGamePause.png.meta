@@ -129,10 +129,10 @@ TextureImporter:
       name: BotonGamePause_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 1024
-        height: 1525
+        x: 49
+        y: 562
+        width: 923
+        height: 423
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -151,7 +151,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: f5ff51e8b26e06447ac3611b1a4a0aa6
     internalID: 0
     vertices: []
     indices: 
@@ -160,7 +160,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      BotonGamePause_0: 6395602563653599961
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
