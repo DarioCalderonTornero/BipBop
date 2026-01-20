@@ -23,8 +23,8 @@ MonoBehaviour:
     m_WaitForCompletion: 0
     m_LocalVariables: []
   goal: 3
-  coinReward: 10
-  xpReward: 10
+  coinReward: 30
+  xpReward: 50
   xpIcon: {fileID: 5861552929389524393, guid: aabb86dd19754af4d9cb030daacbb66f, type: 3}
   coinIcon: {fileID: 21300000, guid: d90ddc08f8b8f2347a871a938a2c28cc, type: 3}
   missionIcon: {fileID: 722279441011942736, guid: 093c7b8c2d9430b48bc9833d57a5ce40, type: 3}

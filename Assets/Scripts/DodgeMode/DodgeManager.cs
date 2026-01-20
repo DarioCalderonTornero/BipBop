@@ -330,6 +330,31 @@ public class DodgeManager : MonoBehaviour
         {
             CurrencyManager.Instance.AddCoins(coinsEarned);
         }
+
+        if (DailyMissionManager.Instance != null)
+        {
+            DailyMissionManager.Instance.AddProgress("juega_1_partida", 1);
+        }
+
+        if (DailyMissionManager.Instance != null)
+        {
+            DailyMissionManager.Instance.AddProgress("juega_3_partida", 1);
+        }
+
+        if (DailyMissionManager.Instance != null)
+        {
+            DailyMissionManager.Instance.AddProgress("juega_8_partida", 1);
+        }
+
+        if (DailyMissionManager.Instance != null)
+        {
+            DailyMissionManager.Instance.AddProgress("juega_10_partida", 1);
+        }
+
+        if (DailyMissionManager.Instance != null)
+        {
+            DailyMissionManager.Instance.AddProgress("juega_1_partida_nave", 1);
+        }
     }
 
     private void SaveRecordIfNeeded()

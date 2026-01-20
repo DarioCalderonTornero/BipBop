@@ -674,7 +674,40 @@ public class GeometricModeManager : MonoBehaviour
             CurrencyManager.Instance.AddCoins(coinsEarned);
         }
 
-        Debug.Log($"Fin de partida — Recompensa: {coinsEarned} monedas");
+        if (DailyMissionManager.Instance != null)
+        {
+            DailyMissionManager.Instance.AddProgress("juega_1_partida", 1);
+        }
+
+        if (DailyMissionManager.Instance != null)
+        {
+            DailyMissionManager.Instance.AddProgress("juega_3_partida", 1);
+        }
+
+        if (DailyMissionManager.Instance != null)
+        {
+            DailyMissionManager.Instance.AddProgress("juega_8_partida", 1);
+        }
+
+        if (DailyMissionManager.Instance != null)
+        {
+            DailyMissionManager.Instance.AddProgress("juega_10_partida", 1);
+        }
+
+        if (DailyMissionManager.Instance != null && score >= 10)
+        {
+            DailyMissionManager.Instance.AddProgress("consigue_10_puntos_geométrico", 1);
+        }
+
+        if (DailyMissionManager.Instance != null && score >= 50)
+        {
+            DailyMissionManager.Instance.AddProgress("consigue_50_puntos_geométrico", 1);
+        }
+
+        if (DailyMissionManager.Instance != null)
+        {
+            DailyMissionManager.Instance.AddProgress("juega_5_partidas_geométrico", 1);
+        }
     }
 
     private void OnLocaleChanged(Locale locale)

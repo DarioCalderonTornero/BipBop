@@ -10,21 +10,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d1e43cb69092cf04f9208dc592c504fc, type: 3}
-  m_Name: "consigue_10_puntos_geom\xE9trico"
+  m_Name: consigue_20_puntos_plataformas
   m_EditorClassIdentifier: 
-  id: "consigue_10_puntos_geom\xE9trico"
+  id: consigue_20_puntos_plataformas
   description:
     m_TableReference:
       m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
     m_TableEntryReference:
-      m_KeyId: 1144528112156672
+      m_KeyId: 24665322125492224
       m_Key: 
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
   goal: 1
-  coinReward: 20
-  xpReward: 30
+  coinReward: 50
+  xpReward: 60
   xpIcon: {fileID: 5861552929389524393, guid: aabb86dd19754af4d9cb030daacbb66f, type: 3}
   coinIcon: {fileID: 21300000, guid: d90ddc08f8b8f2347a871a938a2c28cc, type: 3}
   missionIcon: {fileID: 6236101352930586146, guid: 0bde9ae4251c84a44bfdbe9fcc01665f, type: 3}

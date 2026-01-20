@@ -292,5 +292,35 @@ public class LogicaJuego : MonoBehaviour
         totalCoins += coinsEarned;
         PlayerPrefs.SetInt("CoinCount", totalCoins);
         PlayerPrefs.Save();
+
+        if (DailyMissionManager.Instance != null)
+        {
+            DailyMissionManager.Instance.AddProgress("juega_1_partida", 1);
+        }
+
+        if (DailyMissionManager.Instance != null)
+        {
+            DailyMissionManager.Instance.AddProgress("juega_3_partida", 1);
+        }
+
+        if (DailyMissionManager.Instance != null)
+        {
+            DailyMissionManager.Instance.AddProgress("juega_8_partida", 1);
+        }
+
+        if (DailyMissionManager.Instance != null)
+        {
+            DailyMissionManager.Instance.AddProgress("juega_10_partida", 1);
+        }
+
+        if (DailyMissionManager.Instance != null && MainGamePoints.Instance.GetScore() >= 10)
+        {
+            DailyMissionManager.Instance.AddProgress("consigue_10_puntos_clásico", 1);
+        }
+
+        if (DailyMissionManager.Instance != null)
+        {
+            DailyMissionManager.Instance.AddProgress("juega_5_partidas_clásico", 1);
+        }
     }
 }

@@ -613,6 +613,34 @@ MonoBehaviour:
     m_Localized: Ver
     m_Metadata:
       m_Items: []
+  - m_Id: 24664213667414016
+    m_Localized: Juega 1 partida del modo "Nave"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24664411286241280
+    m_Localized: Juega 3 partidas del modo "Colores"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24664582111854592
+    m_Localized: "Juega 5 partidas del modo \"Cl\xE1sico\""
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24664587031773184
+    m_Localized: "Juega 5 partidas del modo \"Geom\xE9trico\""
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24665038863171584
+    m_Localized: "Consigue en una partida 10 puntos en modo \"Cl\xE1sico\""
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24665322125492224
+    m_Localized: Consigue en una partida 20 puntos en modo "Plataformas"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24667121146363904
+    m_Localized: Consigue en una partida 30 puntos en modo "Plataformas"
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

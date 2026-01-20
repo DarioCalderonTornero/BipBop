@@ -52,6 +52,8 @@ public class SettingsUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI resetText;
     [SerializeField] private TextMeshProUGUI FPSText;
 
+    [SerializeField] private TextMeshProUGUI viewText;
+
     [Header("Sound Logic Images")]
     [SerializeField] private Image soundVolumeOnImage;
     [SerializeField] private Image soundVolumeOffImage;
@@ -111,6 +113,16 @@ public class SettingsUI : MonoBehaviour
     [SerializeField] private float bgFadeTime = 0.15f;
 
     private Coroutine _bgFadeCo;
+
+    [Header("Localization (Settings Table)")]
+    [SerializeField] private LocalizedString lsSettingsTitle;
+    [SerializeField] private LocalizedString lsIdioma;
+    [SerializeField] private LocalizedString lsVibration;
+    [SerializeField] private LocalizedString lsSound;
+    [SerializeField] private LocalizedString lsMusic;
+    [SerializeField] private LocalizedString lsCredits;
+    [SerializeField] private LocalizedString lsReset;
+    [SerializeField] private LocalizedString lsView;
 
     private void Awake()
     {
@@ -190,6 +202,9 @@ public class SettingsUI : MonoBehaviour
         RefreshMusicSwitch(true);
         RefreshIdiomaSwitch(true);
 
+        ApplyLocalizedTexts();
+        RefreshLenguage(LocalizationSettings.SelectedLocale);
+
     }
 
     private void HandleCancelSoundImage()
@@ -208,7 +223,8 @@ public class SettingsUI : MonoBehaviour
 
     private void LocalizationSettings_SelectedLocaleChanged(Locale newLocale)
     {
-        RefreshLenguage(newLocale);
+        ApplyLocalizedTexts();          
+        RefreshLenguage(newLocale);     
         RefreshIdiomaSwitch(false);
     }
 
@@ -488,6 +504,20 @@ public class SettingsUI : MonoBehaviour
 
         // Tu texto ya se actualiza por el evento SelectedLocaleChanged
         RefreshIdiomaSwitch(false);
+    }
+
+    private void ApplyLocalizedTexts()
+    {
+        if (settingsText != null) settingsText.text = lsSettingsTitle.GetLocalizedString();
+
+        if (idiomaText != null) idiomaText.text = lsIdioma.GetLocalizedString();
+        if (vibrationText != null) vibrationText.text = lsVibration.GetLocalizedString();
+        if (soundText != null) soundText.text = lsSound.GetLocalizedString();
+        if (musicText != null) musicText.text = lsMusic.GetLocalizedString();
+        if (creditsText != null) creditsText.text = lsCredits.GetLocalizedString();
+        if (resetText != null) resetText.text = lsReset.GetLocalizedString();
+
+        if (viewText != null) viewText.text = lsView.GetLocalizedString();
     }
 
     private void FadeBlackBg(bool show)

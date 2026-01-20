@@ -603,6 +603,34 @@ MonoBehaviour:
     m_Key: Settings_Ver
     m_Metadata:
       m_Items: []
+  - m_Id: 24664213667414016
+    m_Key: dailyManager_juega1partidanave
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24664411286241280
+    m_Key: dailyManager_juega3partidascolores
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24664582111854592
+    m_Key: "dailyManager_juega5partidascl\xE1sico"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24664587031773184
+    m_Key: "dailyMissions_juega5partidasgeom\xE9trico"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24665038863171584
+    m_Key: "dailyMissions_consigue10puntoscl\xE1sico"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24665322125492224
+    m_Key: dailyMissions_consigue20puntosplataformas
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24667121146363904
+    m_Key: dailyMissions_consigue30puntosplataformas
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

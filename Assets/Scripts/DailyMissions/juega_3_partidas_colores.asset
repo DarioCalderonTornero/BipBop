@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d1e43cb69092cf04f9208dc592c504fc, type: 3}
   m_Name: juega_3_partidas_colores
   m_EditorClassIdentifier: 
-  id: juega_3_partidas
+  id: juega_3_partidas_colores
   description:
     m_TableReference:
       m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
     m_TableEntryReference:
-      m_KeyId: 1144432050012160
+      m_KeyId: 24664411286241280
       m_Key: 
     m_FallbackState: 0
     m_WaitForCompletion: 0

@@ -613,6 +613,34 @@ MonoBehaviour:
     m_Localized: See
     m_Metadata:
       m_Items: []
+  - m_Id: 24664213667414016
+    m_Localized: "Play 1 game in \u201CNave\u201D mode"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24664411286241280
+    m_Localized: "Play 3 games in \u201CColors\u201D mode"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24664582111854592
+    m_Localized: "Play 5 games in \u201CClassic\u201D mode."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24664587031773184
+    m_Localized: "Play 5 games in \u201CGeometric\u201D mode"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24665038863171584
+    m_Localized: "Earn 10 points in a game in \u201CClassic\u201D mode"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24665322125492224
+    m_Localized: "Earn 20 points in a game in \u201CPlatforms\u201D mode"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24667121146363904
+    m_Localized: "Earn 30 points in a game in \u201CPlatforms\u201D mode"
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

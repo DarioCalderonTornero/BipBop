@@ -6322,7 +6322,6 @@ GameObject:
   - component: {fileID: 240909322}
   - component: {fileID: 240909324}
   - component: {fileID: 240909323}
-  - component: {fileID: 240909325}
   m_Layer: 5
   m_Name: CreditsText
   m_TagString: Untagged
@@ -6346,8 +6345,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -84, y: -126.99996}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchoredPosition: {x: -56, y: -126.99996}
+  m_SizeDelta: {x: 393.99, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &240909323
 MonoBehaviour:
@@ -6403,7 +6402,7 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 2
+  m_HorizontalAlignment: 1
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
@@ -6448,34 +6447,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 240909321}
   m_CullTransparentMesh: 1
---- !u!114 &240909325
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 240909321}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 56eb0353ae6e5124bb35b17aff880f16, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_StringReference:
-    m_TableReference:
-      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
-    m_TableEntryReference:
-      m_KeyId: 24635821895155712
-      m_Key: 
-    m_FallbackState: 0
-    m_WaitForCompletion: 0
-    m_LocalVariables: []
-  m_FormatArguments: []
-  m_UpdateString:
-    m_PersistentCalls:
-      m_Calls: []
-  references:
-    version: 2
-    RefIds: []
 --- !u!1 &250027333
 GameObject:
   m_ObjectHideFlags: 0
@@ -20135,7 +20106,6 @@ GameObject:
   - component: {fileID: 773516592}
   - component: {fileID: 773516594}
   - component: {fileID: 773516593}
-  - component: {fileID: 773516595}
   m_Layer: 5
   m_Name: SoundText
   m_TagString: Untagged
@@ -20261,34 +20231,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 773516591}
   m_CullTransparentMesh: 1
---- !u!114 &773516595
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 773516591}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 56eb0353ae6e5124bb35b17aff880f16, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_StringReference:
-    m_TableReference:
-      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
-    m_TableEntryReference:
-      m_KeyId: 24635713505951744
-      m_Key: 
-    m_FallbackState: 0
-    m_WaitForCompletion: 0
-    m_LocalVariables: []
-  m_FormatArguments: []
-  m_UpdateString:
-    m_PersistentCalls:
-      m_Calls: []
-  references:
-    version: 2
-    RefIds: []
 --- !u!1 &775150100
 GameObject:
   m_ObjectHideFlags: 0
@@ -24172,10 +24114,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   missionTemplates:
-  - {fileID: 11400000, guid: 96bf439e27cb30a47a6b5325e712b4ef, type: 2}
+  - {fileID: 11400000, guid: dd585eb746d10bb4f97447efe7cb29aa, type: 2}
   - {fileID: 11400000, guid: 76ab6ce9a8dddf54e9a6648ce4016e46, type: 2}
+  - {fileID: 11400000, guid: 2125870f0f9c74b4dbdc0852faf07d68, type: 2}
+  - {fileID: 11400000, guid: 0d5de3474cf531c4396a5c595282a50e, type: 2}
+  - {fileID: 11400000, guid: f86e14884bab4824e986a47cd1816053, type: 2}
   - {fileID: 11400000, guid: ef3408069304cb740b7c2ef31c26213c, type: 2}
+  - {fileID: 11400000, guid: 0c2eef70b3bdec548a378cc321820ac5, type: 2}
+  - {fileID: 11400000, guid: 96bf439e27cb30a47a6b5325e712b4ef, type: 2}
+  - {fileID: 11400000, guid: cf857a139f017d24ebeb45fd32a506d3, type: 2}
+  - {fileID: 11400000, guid: 32654159dbec247499f3b5657d71a910, type: 2}
+  - {fileID: 11400000, guid: f29daf3f074715f4997e33f70dbafd1a, type: 2}
   - {fileID: 11400000, guid: 9f5e113f198c0ab4e82f7612aaca21e4, type: 2}
+  - {fileID: 11400000, guid: d42a2d9907ff90648941d1b2d67ff4c1, type: 2}
   missionsPerDay: 3
   missionsContainerName: PanelMissionsImage
   missionUIPrefab: {fileID: 1674569013845005890, guid: ce45404dbe74bcd4f9b9161501380db1, type: 3}
@@ -29918,7 +29869,6 @@ GameObject:
   - component: {fileID: 1229783501}
   - component: {fileID: 1229783503}
   - component: {fileID: 1229783502}
-  - component: {fileID: 1229783504}
   m_Layer: 5
   m_Name: MusicText
   m_TagString: Untagged
@@ -30044,34 +29994,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1229783500}
   m_CullTransparentMesh: 1
---- !u!114 &1229783504
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1229783500}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 56eb0353ae6e5124bb35b17aff880f16, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_StringReference:
-    m_TableReference:
-      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
-    m_TableEntryReference:
-      m_KeyId: 24635765133639680
-      m_Key: 
-    m_FallbackState: 0
-    m_WaitForCompletion: 0
-    m_LocalVariables: []
-  m_FormatArguments: []
-  m_UpdateString:
-    m_PersistentCalls:
-      m_Calls: []
-  references:
-    version: 2
-    RefIds: []
 --- !u!1 &1251658268
 GameObject:
   m_ObjectHideFlags: 0
@@ -30454,7 +30376,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -108, y: 581.00006}
+  m_AnchoredPosition: {x: -98, y: 581.00006}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1267040574
@@ -30477,7 +30399,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Idioma
+  m_text: Language
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 1b4a1f76817a44c4a886ba5c35919310, type: 2}
   m_sharedMaterial: {fileID: -1839985413152155028, guid: 1b4a1f76817a44c4a886ba5c35919310, type: 2}
@@ -30504,14 +30426,14 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 60
-  m_fontSizeBase: 60
+  m_fontSize: 52
+  m_fontSizeBase: 52
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 2
+  m_HorizontalAlignment: 1
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
@@ -30542,7 +30464,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_margin: {x: -52.60305, y: 0, z: -88.76768, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -30565,25 +30487,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 1267040572}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 56eb0353ae6e5124bb35b17aff880f16, type: 3}
+  m_Script: {fileID: 11500000, guid: c6fab516b250eb44e9124219363a9bad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_StringReference:
-    m_TableReference:
-      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
-    m_TableEntryReference:
-      m_KeyId: 24635549034708992
-      m_Key: 
-    m_FallbackState: 0
-    m_WaitForCompletion: 0
-    m_LocalVariables: []
-  m_FormatArguments: []
-  m_UpdateString:
-    m_PersistentCalls:
-      m_Calls: []
-  references:
-    version: 2
-    RefIds: []
+  spanishSize: 60
+  englishSize: 52
 --- !u!1 &1269178686
 GameObject:
   m_ObjectHideFlags: 0
@@ -33285,7 +33193,6 @@ GameObject:
   - component: {fileID: 1415063872}
   - component: {fileID: 1415063874}
   - component: {fileID: 1415063873}
-  - component: {fileID: 1415063875}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -33411,34 +33318,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1415063871}
   m_CullTransparentMesh: 1
---- !u!114 &1415063875
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1415063871}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 56eb0353ae6e5124bb35b17aff880f16, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_StringReference:
-    m_TableReference:
-      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
-    m_TableEntryReference:
-      m_KeyId: 24635965206134784
-      m_Key: 
-    m_FallbackState: 0
-    m_WaitForCompletion: 0
-    m_LocalVariables: []
-  m_FormatArguments: []
-  m_UpdateString:
-    m_PersistentCalls:
-      m_Calls: []
-  references:
-    version: 2
-    RefIds: []
 --- !u!1 &1420147478
 GameObject:
   m_ObjectHideFlags: 0
@@ -35498,6 +35377,7 @@ MonoBehaviour:
   creditsText: {fileID: 240909323}
   resetText: {fileID: 1866808506}
   FPSText: {fileID: 533392585}
+  viewText: {fileID: 1415063873}
   soundVolumeOnImage: {fileID: 82133204}
   soundVolumeOffImage: {fileID: 623902899}
   musicVolumeOnImage: {fileID: 228997326}
@@ -35546,6 +35426,81 @@ MonoBehaviour:
     moveTime: 0.12
   blackBgGroup: {fileID: 2073098859}
   bgFadeTime: 0.15
+  lsSettingsTitle:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 1390586297810944
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  lsIdioma:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 24635549034708992
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  lsVibration:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 24635605204828160
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  lsSound:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 24635713505951744
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  lsMusic:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 24635765133639680
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  lsCredits:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 24635821895155712
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  lsReset:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 24635896943837184
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  lsView:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 24635965206134784
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  references:
+    version: 2
+    RefIds: []
 --- !u!225 &1464133902
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -43553,7 +43508,6 @@ GameObject:
   - component: {fileID: 1753003177}
   - component: {fileID: 1753003179}
   - component: {fileID: 1753003178}
-  - component: {fileID: 1753003180}
   m_Layer: 5
   m_Name: VibrationText
   m_TagString: Untagged
@@ -43679,34 +43633,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1753003176}
   m_CullTransparentMesh: 1
---- !u!114 &1753003180
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1753003176}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 56eb0353ae6e5124bb35b17aff880f16, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_StringReference:
-    m_TableReference:
-      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
-    m_TableEntryReference:
-      m_KeyId: 24635605204828160
-      m_Key: 
-    m_FallbackState: 0
-    m_WaitForCompletion: 0
-    m_LocalVariables: []
-  m_FormatArguments: []
-  m_UpdateString:
-    m_PersistentCalls:
-      m_Calls: []
-  references:
-    version: 2
-    RefIds: []
 --- !u!1 &1756647840
 GameObject:
   m_ObjectHideFlags: 0

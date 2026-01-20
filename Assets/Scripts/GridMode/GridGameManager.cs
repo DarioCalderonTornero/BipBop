@@ -772,6 +772,36 @@ public class GridGameManager : MonoBehaviour
 
         Haptics.TryVibrate();
 
+        if (DailyMissionManager.Instance != null && score >= 30)
+        {
+            DailyMissionManager.Instance.AddProgress("consigue_30_puntos_plataformas", 1);
+        }
+
+        if (DailyMissionManager.Instance != null && score >= 20)
+        {
+            DailyMissionManager.Instance.AddProgress("consigue_20_puntos_plataformas", 1);
+        }
+
+        if (DailyMissionManager.Instance != null)
+        {
+            DailyMissionManager.Instance.AddProgress("juega_1_partida", 1);
+        }
+
+        if (DailyMissionManager.Instance != null)
+        {
+            DailyMissionManager.Instance.AddProgress("juega_3_partida", 1);
+        }
+
+        if (DailyMissionManager.Instance != null)
+        {
+            DailyMissionManager.Instance.AddProgress("juega_8_partida", 1);
+        }
+
+        if (DailyMissionManager.Instance != null)
+        {
+            DailyMissionManager.Instance.AddProgress("juega_10_partida", 1);
+        }
+
         OnGameOver?.Invoke(this, EventArgs.Empty);
     }
 
