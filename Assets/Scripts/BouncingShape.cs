@@ -6,7 +6,7 @@ using UnityEngine.Localization;
 public class BouncingShape : MonoBehaviour
 {
     [Header("Shape Info")]
-    public LocalizedString shapeName;     // 👈 Ahora LocalizedString
+    public LocalizedString shapeName;    
     public float initialSpeed = 2f;
 
     private Rigidbody2D rb;
@@ -14,6 +14,8 @@ public class BouncingShape : MonoBehaviour
 
     [Header("UI Icon")]
     [SerializeField] private Sprite uiIcon;
+
+    //[SerializeField] private AudioClip splashAudioClip;
 
     private JellyFXTrailSparkles fx;
 
@@ -132,6 +134,7 @@ public class BouncingShape : MonoBehaviour
     {
         fx?.BurstTapWide();
         GeometricModeManager.Instance.OnShapeTapped(this);
+        //SoundManager.Instance.PlaySound(splashAudioClip, 1f);
     }
 
     private void OnCollisionEnter2D(Collision2D collision)

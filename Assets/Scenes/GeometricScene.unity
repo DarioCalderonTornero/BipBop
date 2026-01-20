@@ -333,6 +333,8 @@ MonoBehaviour:
   introStagger: 0.08
   introOffscreenPadding: 1.2
   introWobbleDuration: 0.16
+  correctHitAudioClip: {fileID: 8300000, guid: 06e039f3517808c4ab8393a6f040a072, type: 3}
+  incorrectHitAudioClip: {fileID: 8300000, guid: acb97b3c8044f7a4ebdaf0197ffa9398, type: 3}
   scoreEffectTargets:
   - {fileID: 1640095625}
   - {fileID: 1751607518}

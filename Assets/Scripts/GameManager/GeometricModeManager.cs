@@ -51,6 +51,10 @@ public class GeometricModeManager : MonoBehaviour
     [SerializeField] private float introOffscreenPadding = 1.2f;
     [SerializeField] private float introWobbleDuration = 0.16f;
 
+    [Header("Sounds")]
+    [SerializeField] private AudioClip correctHitAudioClip;
+    [SerializeField] private AudioClip incorrectHitAudioClip;
+
     private bool introAnimDone = false;
     private bool movementStarted = false;
 
@@ -241,12 +245,12 @@ public class GeometricModeManager : MonoBehaviour
 
         if (shape == currentTarget)
         {
-            // ✅ NO cambiamos color
-
-            // Animator (se queda)
+            
             Animator anim = shape.GetComponent<Animator>();
             if (anim != null)
                 anim.SetTrigger("isHitAnim");
+
+            SoundManager.Instance.PlaySound(correctHitAudioClip, 1f);
 
             AddScore();
 
@@ -258,15 +262,13 @@ public class GeometricModeManager : MonoBehaviour
 
             CheckForAdditionalShapes();
 
-            // ✅ EN VEZ DE SHUFFLE: invertir dirección de todas
             ReverseAllActiveShapesDirections();
 
-            // Nuevo objetivo
             ChooseNewTarget();
         }
         else
         {
-            // ✅ NO cambiamos color al fallar
+            SoundManager.Instance.PlaySound(incorrectHitAudioClip, 1f); 
             StartCoroutine(SlowMotionAndEnd());
         }
     }
