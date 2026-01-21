@@ -124,6 +124,8 @@ public class DailyMissionManager : MonoBehaviour
 
     private void RefreshUI()
     {
+        missionUIList.RemoveAll(ui => ui == null);
+
         if (missionUIList.Count == 0)
         {
             GenerateAndDisplayMissions();
@@ -131,8 +133,12 @@ public class DailyMissionManager : MonoBehaviour
         }
 
         foreach (var ui in missionUIList)
+        {
+            if (ui == null) continue;
             ui.Refresh();
+        }
     }
+
 
     private void GenerateAndDisplayMissions()
     {
