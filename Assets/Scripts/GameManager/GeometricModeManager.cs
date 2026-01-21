@@ -709,17 +709,17 @@ public class GeometricModeManager : MonoBehaviour
 
         if (DailyMissionManager.Instance != null)
         {
-            DailyMissionManager.Instance.AddProgress("juega_3_partida", 1);
+            DailyMissionManager.Instance.AddProgress("juega_3_partidas", 1);
         }
 
         if (DailyMissionManager.Instance != null)
         {
-            DailyMissionManager.Instance.AddProgress("juega_8_partida", 1);
+            DailyMissionManager.Instance.AddProgress("juega_8_partidas", 1);
         }
 
         if (DailyMissionManager.Instance != null)
         {
-            DailyMissionManager.Instance.AddProgress("juega_10_partida", 1);
+            DailyMissionManager.Instance.AddProgress("juega_10_partidas", 1);
         }
 
         if (DailyMissionManager.Instance != null && score >= 10)
