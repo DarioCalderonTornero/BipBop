@@ -24,6 +24,7 @@ public class MusicManager : MonoBehaviour
     [SerializeField] private AudioClip menuSceneMusicClip;
     [SerializeField] private AudioClip bipbopSceneMusicClip;
     [SerializeField] private AudioClip colorSceneMusicClip;
+    [SerializeField] private AudioClip geometricSceneMusicClip;
     [SerializeField] private AudioClip dodgeSceneMusicClip;
     [SerializeField] private AudioClip gridSceneMusicClip;
 
@@ -96,7 +97,7 @@ public class MusicManager : MonoBehaviour
                 PlayMusic(colorSceneMusicClip);
                 break;
             case "GeometricScene":
-                // PlayMusic(colorSceneMusicClip);
+                PlayMusic(geometricSceneMusicClip);
                 break;
             case "DodgeScene":
                 PlayMusic(dodgeSceneMusicClip);

@@ -13,11 +13,11 @@ public class GeometricGameOverUI : MonoBehaviour
 
     [Header("Texts")]
     [SerializeField] private TextMeshProUGUI coinText;
-    [SerializeField] private TextMeshProUGUI scoreText; // ✅ NUEVO: solo número
+    [SerializeField] private TextMeshProUGUI scoreText; 
     [SerializeField] private TextMeshProUGUI gameOverText;
 
     [Header("Localization")]
-    [SerializeField] private LocalizedString coinsObtainedLocalized; // "Monedas obtenidas: {0}"
+    [SerializeField] private LocalizedString coinsObtainedLocalized;
 
     [SerializeField] private Animator myanimator;
 

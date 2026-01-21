@@ -24,6 +24,8 @@ public class SoundManager : MonoBehaviour
     [Header("DodgeGameSounds")]
     [SerializeField] private AudioClip dodgeEnemyCollideSound;
 
+    [SerializeField] private AudioClip flyingCoinsAudioClip;
+
     [Header("AudioSources")]
     [SerializeField] private AudioSource soundAudioSource; 
 
@@ -77,12 +79,17 @@ public class SoundManager : MonoBehaviour
     {
         if (audioClip == null || soundAudioSource == null) return;
 
-        soundAudioSource.PlayOneShot(audioClip, soundVolumeNormalized);
+        soundAudioSource.PlayOneShot(audioClip, volume);
     }
 
     public void PlayDodgeSound()
     {
         PlaySound(dodgeEnemyCollideSound, 1f);
+    }
+
+    public void PlayFlyingCoinSound()
+    {
+        PlaySound(flyingCoinsAudioClip, 1f);
     }
 
     public void ChangeSoundVolume()

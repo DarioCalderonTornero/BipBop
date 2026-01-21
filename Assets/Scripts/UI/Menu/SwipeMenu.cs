@@ -26,16 +26,10 @@ public class SwipeMenu : MonoBehaviour, IEndDragHandler
 
     [Header("Buttons (Variants)")]
     [SerializeField] private Button page1ButtonNormal;
-    [SerializeField] private Button page1ButtonExpanded;
-    [SerializeField] private Button page1ButtonRecortado;
 
     [SerializeField] private Button page2ButtonExpanded;
-    [SerializeField] private Button page2ButtonRecortedLeft;
-    [SerializeField] private Button page2ButtonRecortedRight;
 
     [SerializeField] private Button page3ButtonNormal;
-    [SerializeField] private Button page3ButtonExpanded;
-    [SerializeField] private Button page3ButtonRecorted;
 
     private void Awake()
     {
@@ -43,59 +37,48 @@ public class SwipeMenu : MonoBehaviour, IEndDragHandler
         targetPos = swipeContainerRect.localPosition;
         dragThresold = Screen.width / 15f;
 
-        HideAllPageButtons();
+        //HideAllPageButtons();
         BindAllButtonListeners();
 
-        // Estado inicial: página 1 seleccionada
-        ShowStateForSelectedPage(1);
+        //ShowStateForSelectedPage(1);
 
         UpdateButtons();
         UpdateBar();
     }
 
-    // =========================
-    // LISTENERS
-    // =========================
+
     private void BindAllButtonListeners()
     {
         // Página 1 (todas las variantes llevan a seleccionar 1)
         page1ButtonNormal.onClick.AddListener(() => SelectPage(1));
-        page1ButtonExpanded.onClick.AddListener(() => SelectPage(1));
-        page1ButtonRecortado.onClick.AddListener(() => SelectPage(1));
+
 
         // Página 2
         page2ButtonExpanded.onClick.AddListener(() => SelectPage(2));
-        page2ButtonRecortedLeft.onClick.AddListener(() => SelectPage(2));
-        page2ButtonRecortedRight.onClick.AddListener(() => SelectPage(2));
+
 
         // Página 3
         page3ButtonNormal.onClick.AddListener(() => SelectPage(3));
-        page3ButtonExpanded.onClick.AddListener(() => SelectPage(3));
-        page3ButtonRecorted.onClick.AddListener(() => SelectPage(3));
     }
 
-    // =========================
-    // STATE (activar solo 3 botones)
-    // =========================
+    /*
     private void HideAllPageButtons()
     {
         page1ButtonNormal.gameObject.SetActive(false);
-        page1ButtonExpanded.gameObject.SetActive(false);
-        page1ButtonRecortado.gameObject.SetActive(false);
 
         page2ButtonExpanded.gameObject.SetActive(false);
-        page2ButtonRecortedLeft.gameObject.SetActive(false);
-        page2ButtonRecortedRight.gameObject.SetActive(false);
 
         page3ButtonNormal.gameObject.SetActive(false);
-        page3ButtonExpanded.gameObject.SetActive(false);
-        page3ButtonRecorted.gameObject.SetActive(false);
     }
+
+    */
 
     /// <summary>
     /// Activa exactamente 3 botones (uno por página), según cuál esté seleccionada.
     /// Esto evita solapes/taps raros y asegura que siempre hay listener.
     /// </summary>
+   
+    /*
     private void ShowStateForSelectedPage(int selectedPage)
     {
         HideAllPageButtons();
@@ -124,6 +107,7 @@ public class SwipeMenu : MonoBehaviour, IEndDragHandler
                 break;
         }
     }
+    */
 
     // =========================
     // PAGE SELECT / MOVE
@@ -141,7 +125,7 @@ public class SwipeMenu : MonoBehaviour, IEndDragHandler
         targetPos += pageStep * delta;
 
         MovePage();
-        ShowStateForSelectedPage(currentPage);
+        //ShowStateForSelectedPage(currentPage);
         UpdateButtons();
         UpdateBar();
     }

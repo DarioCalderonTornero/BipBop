@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Localization;
 using UnityEngine.Localization.Settings;
@@ -54,9 +55,12 @@ public class GeometricModeManager : MonoBehaviour
     [Header("Sounds")]
     [SerializeField] private AudioClip correctHitAudioClip;
     [SerializeField] private AudioClip incorrectHitAudioClip;
+    [SerializeField] private AudioClip playerAudioClip;
 
     private bool introAnimDone = false;
     private bool movementStarted = false;
+
+    private Coroutine playerSoundCoroutine;
 
     private void Awake()
     {
@@ -66,11 +70,15 @@ public class GeometricModeManager : MonoBehaviour
     private void OnEnable()
     {
         LocalizationSettings.SelectedLocaleChanged += OnLocaleChanged;
+        playerSoundCoroutine = StartCoroutine(LoopCoroutine());
     }
 
     private void OnDisable()
     {
         LocalizationSettings.SelectedLocaleChanged -= OnLocaleChanged;
+
+        if (playerSoundCoroutine != null)
+            StopCoroutine(LoopCoroutine());
     }
 
     private void Start()
@@ -102,10 +110,28 @@ public class GeometricModeManager : MonoBehaviour
 
     private IEnumerator StartGameDelayed()
     {
-        // Un frame para que el panel desaparecido no cause picos visuales
         yield return null;
 
-        StartGame(); // si ya empezó, no hará nada
+        StartGame();
+    }
+
+    private IEnumerator LoopCoroutine()
+    {
+        while (true)
+        {
+            PlayerSounds();
+            yield return new WaitForSeconds(GetRandomCoroutineWait());
+        }
+    }
+
+    private int GetRandomCoroutineWait()
+    {
+        return UnityEngine.Random.Range(4, 8); 
+    }
+
+    private void PlayerSounds()
+    {
+        SoundManager.Instance.PlaySound(playerAudioClip, 1f);
     }
 
     private void StartGame()

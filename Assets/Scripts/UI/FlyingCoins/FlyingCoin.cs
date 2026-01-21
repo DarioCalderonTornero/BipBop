@@ -91,6 +91,7 @@ public class FlyingCoin : MonoBehaviour
         rectTransform.position = targetPos;
 
         onArrive?.Invoke();
+        SoundManager.Instance.PlayFlyingCoinSound();
         Destroy(gameObject);
     }
 

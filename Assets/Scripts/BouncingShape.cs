@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Localization;
+using UnityEngine.U2D.IK;
 
 public class BouncingShape : MonoBehaviour
 {
@@ -33,6 +34,9 @@ public class BouncingShape : MonoBehaviour
     private float lastScaredTime = -999f;
 
     private Coroutine scaredRoutine;
+
+    [SerializeField] private AudioClip[] clips;
+
 
     private void Awake()
     {
@@ -149,10 +153,28 @@ public class BouncingShape : MonoBehaviour
             wobble.Impact(normal, strength);
         }
 
-        // tu random angle si quieres mantenerlo (opcional)
         float randomAngle = Random.Range(-40f, 40f);
         Vector2 newVelocity = Quaternion.Euler(0, 0, randomAngle) * rb.linearVelocity;
         rb.linearVelocity = newVelocity;
+
+        bool hitWall = collision.collider.CompareTag("GeometricWall");
+        bool hitOtherShape = collision.collider.GetComponentInParent<BouncingShape>() != null;
+
+        if (hitWall)
+        {
+            //PlayRandomSounds(); 
+        }
+        else if (hitOtherShape)
+        {
+            PlayRandomSounds(); 
+        }
+    }
+
+
+    private void PlayRandomSounds()
+    {
+        int audiogroup = UnityEngine.Random.Range(0, clips.Length);
+        SoundManager.Instance.PlaySound(clips[audiogroup], 0.1f);
     }
 
     public void RandomizeDirection()
