@@ -13,8 +13,22 @@ MonoBehaviour:
   m_Name: DailyLuckPool
   m_EditorClassIdentifier: 
   possibleBackgrounds:
-  - {fileID: 11400000, guid: 1bc7c38e33816b840971818a776362b5, type: 2}
-  - {fileID: 11400000, guid: cb2ef859cc58daa4a9f0c08b63698896, type: 2}
-  - {fileID: 11400000, guid: 73eefed49a7f23a43a49f359ac7f5b80, type: 2}
-  - {fileID: 11400000, guid: c18e61f178c078146b8e921d27b9b0aa, type: 2}
+  - {fileID: 11400000, guid: a96705c5dd4a79847942012960e62bdb, type: 2}
+  - {fileID: 11400000, guid: 8a96740658277ff45994327fbdb45a24, type: 2}
+  - {fileID: 11400000, guid: e52e362d127532d4ebd3837f768eab3d, type: 2}
+  - {fileID: 11400000, guid: 02cc6d0f5110557498f0afa0a95e650a, type: 2}
+  - {fileID: 11400000, guid: 071a4c5924a8a164cbc3cbdb45a380c1, type: 2}
+  - {fileID: 11400000, guid: add0d9a784aa8f34ea486853bf882341, type: 2}
+  - {fileID: 11400000, guid: b5318cc0f94797f48b227169ef79d4e1, type: 2}
+  - {fileID: 11400000, guid: 8313c83675644a548b652cd4eb51f43c, type: 2}
+  - {fileID: 11400000, guid: 63a5006f0ad43104a8f79f1df287bc69, type: 2}
+  - {fileID: 11400000, guid: ab1e16667c9b0d1469aa06af1addfac4, type: 2}
+  - {fileID: 11400000, guid: 48962826c759d714d80802986c272e7a, type: 2}
+  - {fileID: 11400000, guid: d126704e3676fab4b8a01f339092b235, type: 2}
+  - {fileID: 11400000, guid: 277c309a318fcfa408063fb7a8fc731a, type: 2}
+  - {fileID: 11400000, guid: 8a3c5121603aca746ad9f8aac4c85a4d, type: 2}
+  - {fileID: 11400000, guid: decb904299764a1469b6805408594d69, type: 2}
+  - {fileID: 11400000, guid: 879cac4d7964ffe479fc4006ba1ef869, type: 2}
+  - {fileID: 11400000, guid: 3672de28f1836bf49a389bc6717a997e, type: 2}
+  - {fileID: 11400000, guid: 50d58c48c45ac694a8248ec4a217284d, type: 2}
   allowDuplicatesInSpin: 1

@@ -59,7 +59,7 @@ public class ColorGamePuntos : MonoBehaviour
         OnColorAddScore?.Invoke(this, EventArgs.Empty);
         score++;
 
-        PlayerLevelManager.Instance.AddXP(5);
+        PlayerLevelManager.Instance.AddXP(10);
         UpdateScoreText();
 
         PlayScoreEffect(); // ✅ Actívalo si quieres el pop
