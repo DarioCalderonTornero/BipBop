@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64bbdcf6e9b415645b5b152490a9f8af, type: 3}
+  m_Name: "Animaci\xF3nMonstruoFiesta"
+  m_EditorClassIdentifier: 
+  offsetUvXProp: _OffsetUvX
+  offsetUvYProp: _OffsetUvY
+  shakeUvSpeedProp: _ShakeUvSpeed
+  startDelaySeconds: 3
+  offsetOutSeconds: 1
+  offsetBackSeconds: 1
+  waitWithShakeOnSeconds: 1
+  waitWithShakeOffSeconds: 1
+  shakeFadeOutSeconds: 0
+  offsetMagnitude: 1
+  shakeOnSpeed: 7
+  shakeOffSpeed: 0
+  randomAxis: 1
+  randomSign: 1
+  fixedAxis: 0
+  fixedSign: 1
+  smooth: 1

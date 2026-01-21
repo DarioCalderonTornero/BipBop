@@ -28,8 +28,9 @@ MonoBehaviour:
   unlockByScore: 0
   requiredScoreKey: 
   requiredScoreValue: 0
-  unlockByOwningAvatars: 0
-  requiredOwnedAvatarIds: []
+  unlockByOwningAvatars: 1
+  requiredOwnedAvatarIds:
+  - NormalAvatar
   unlockDescriptionLS:
     m_TableReference:
       m_TableCollectionName: 
@@ -60,10 +61,10 @@ MonoBehaviour:
     m_WaitForCompletion: 0
     m_LocalVariables: []
   ownedMessageFallback: 
-  hasShaderEffect: 0
+  hasShaderEffect: 1
   effectType: 0
-  effectMaterial: {fileID: 0}
-  fxPreset: {fileID: 0}
+  effectMaterial: {fileID: 2100000, guid: fad5d73df7d702f44bf65169152c29dc, type: 2}
+  fxPreset: {fileID: 11400000, guid: 6b9d36a2882850643aa195ffb3f50fc5, type: 2}
   references:
     version: 2
     RefIds: []
