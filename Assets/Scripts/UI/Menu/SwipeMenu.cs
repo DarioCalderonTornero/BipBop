@@ -26,10 +26,23 @@ public class SwipeMenu : MonoBehaviour, IEndDragHandler
 
     [Header("Buttons (Variants)")]
     [SerializeField] private Button page1ButtonNormal;
-
     [SerializeField] private Button page2ButtonExpanded;
-
     [SerializeField] private Button page3ButtonNormal;
+
+    [Header("Page Buttons - Visual")]
+    [SerializeField] private Color selectedColor = new Color(1f, 0.7f, 0.2f, 1f); // el que quieras
+    [SerializeField] private Color unselectedColor = Color.white;
+
+    [Header("Pop")]
+    [SerializeField] private float popScale = 1.08f;
+    [SerializeField] private float popUpTime = 0.06f;
+    [SerializeField] private float popDownTime = 0.08f;
+    [SerializeField] private LeanTweenType popEaseUp = LeanTweenType.easeOutBack;
+    [SerializeField] private LeanTweenType popEaseDown = LeanTweenType.easeOutQuad;
+
+    private Vector3 page1BaseScale;
+    private Vector3 page2BaseScale;
+    private Vector3 page3BaseScale;
 
     private void Awake()
     {
@@ -37,77 +50,54 @@ public class SwipeMenu : MonoBehaviour, IEndDragHandler
         targetPos = swipeContainerRect.localPosition;
         dragThresold = Screen.width / 15f;
 
-        //HideAllPageButtons();
+        CacheBaseScales();
         BindAllButtonListeners();
-
-        //ShowStateForSelectedPage(1);
 
         UpdateButtons();
         UpdateBar();
+        UpdatePageButtonsVisuals(); // <-- importante
     }
 
+    private void CacheBaseScales()
+    {
+        if (page1ButtonNormal) page1BaseScale = page1ButtonNormal.transform.localScale;
+        if (page2ButtonExpanded) page2BaseScale = page2ButtonExpanded.transform.localScale;
+        if (page3ButtonNormal) page3BaseScale = page3ButtonNormal.transform.localScale;
+    }
 
     private void BindAllButtonListeners()
     {
-        // Página 1 (todas las variantes llevan a seleccionar 1)
-        page1ButtonNormal.onClick.AddListener(() => SelectPage(1));
+        if (page1ButtonNormal)
+            page1ButtonNormal.onClick.AddListener(() => OnPageButtonPressed(1, page1ButtonNormal.transform, page1BaseScale));
 
+        if (page2ButtonExpanded)
+            page2ButtonExpanded.onClick.AddListener(() => OnPageButtonPressed(2, page2ButtonExpanded.transform, page2BaseScale));
 
-        // Página 2
-        page2ButtonExpanded.onClick.AddListener(() => SelectPage(2));
-
-
-        // Página 3
-        page3ButtonNormal.onClick.AddListener(() => SelectPage(3));
+        if (page3ButtonNormal)
+            page3ButtonNormal.onClick.AddListener(() => OnPageButtonPressed(3, page3ButtonNormal.transform, page3BaseScale));
     }
 
-    /*
-    private void HideAllPageButtons()
+    private void OnPageButtonPressed(int page, Transform buttonTf, Vector3 baseScale)
     {
-        page1ButtonNormal.gameObject.SetActive(false);
-
-        page2ButtonExpanded.gameObject.SetActive(false);
-
-        page3ButtonNormal.gameObject.SetActive(false);
+        Pop(buttonTf, baseScale);
+        SelectPage(page);
     }
 
-    */
-
-    /// <summary>
-    /// Activa exactamente 3 botones (uno por página), según cuál esté seleccionada.
-    /// Esto evita solapes/taps raros y asegura que siempre hay listener.
-    /// </summary>
-   
-    /*
-    private void ShowStateForSelectedPage(int selectedPage)
+    private void Pop(Transform t, Vector3 baseScale)
     {
-        HideAllPageButtons();
+        if (t == null) return;
 
-        switch (selectedPage)
+        // Cancela tweens previos para que no se acumulen
+        LeanTween.cancel(t.gameObject);
+
+        t.localScale = baseScale;
+
+        Vector3 up = baseScale * popScale;
+        LeanTween.scale(t.gameObject, up, popUpTime).setEase(popEaseUp).setOnComplete(() =>
         {
-            case 1:
-                // 1 seleccionado: 1 expanded, 2 recorte left, 3 normal
-                page1ButtonExpanded.gameObject.SetActive(true);
-                page2ButtonRecortedLeft.gameObject.SetActive(true);
-                page3ButtonNormal.gameObject.SetActive(true);
-                break;
-
-            case 2:
-                // 2 seleccionado: 1 recortado, 2 expanded, 3 recortado
-                page1ButtonRecortado.gameObject.SetActive(true);
-                page2ButtonExpanded.gameObject.SetActive(true);
-                page3ButtonRecorted.gameObject.SetActive(true);
-                break;
-
-            case 3:
-                // 3 seleccionado: 1 normal, 2 recorte right, 3 expanded
-                page1ButtonNormal.gameObject.SetActive(true);
-                page2ButtonRecortedRight.gameObject.SetActive(true);
-                page3ButtonExpanded.gameObject.SetActive(true);
-                break;
-        }
+            LeanTween.scale(t.gameObject, baseScale, popDownTime).setEase(popEaseDown);
+        });
     }
-    */
 
     // =========================
     // PAGE SELECT / MOVE
@@ -125,9 +115,9 @@ public class SwipeMenu : MonoBehaviour, IEndDragHandler
         targetPos += pageStep * delta;
 
         MovePage();
-        //ShowStateForSelectedPage(currentPage);
         UpdateButtons();
         UpdateBar();
+        UpdatePageButtonsVisuals(); // <-- importante
     }
 
     public void Next()
@@ -186,5 +176,21 @@ public class SwipeMenu : MonoBehaviour, IEndDragHandler
 
         if (nextButton != null)
             nextButton.interactable = currentPage != maxPage;
+    }
+
+    private void UpdatePageButtonsVisuals()
+    {
+        SetButtonColor(page1ButtonNormal, currentPage == 1 ? selectedColor : unselectedColor);
+        SetButtonColor(page2ButtonExpanded, currentPage == 2 ? selectedColor : unselectedColor);
+        SetButtonColor(page3ButtonNormal, currentPage == 3 ? selectedColor : unselectedColor);
+    }
+
+    private void SetButtonColor(Button btn, Color c)
+    {
+        if (btn == null) return;
+
+        // Ideal: cambia el Image del propio botón
+        var img = btn.GetComponent<Image>();
+        if (img != null) img.color = c;
     }
 }

@@ -289,7 +289,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1144528112156672
-    m_Localized: Score {0} points in Geometric Mode
+    m_Localized: Score 10 points in Geometric Mode
     m_Metadata:
       m_Items: []
   - m_Id: 1156087655923712
@@ -783,6 +783,10 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 24931677479337984
     m_Localized: Cow
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24986470138740736
+    m_Localized: "Earn 50 points in a game in \u201CGeometric\u201D mode"
     m_Metadata:
       m_Items: []
   references:

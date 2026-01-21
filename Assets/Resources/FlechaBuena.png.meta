@@ -3,8 +3,14 @@ guid: ddb4a8e1ddcb94c4a80849ce97b3dbea
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 7768978775519715543
-    second: ChatGPT Image 9 ene 2026, 13_08_52_0
+      213: -2252065544924978326
+    second: FlechaBuena_0
+  - first:
+      213: 5150340881246066431
+    second: FlechaBuena_1
+  - first:
+      213: -7596520346619053390
+    second: FlechaBuena_2
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -109,30 +115,17 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: WindowsStoreApps
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: ChatGPT Image 9 ene 2026, 13_08_52_0
+      name: FlechaBuena_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 1529
-        height: 1024
+        width: 524
+        height: 853
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +134,52 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 7d0e666d805f0db60800000000000000
-      internalID: 7768978775519715543
+      spriteID: a63a9df915e0fb0e0800000000000000
+      internalID: -2252065544924978326
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FlechaBuena_1
+      rect:
+        serializedVersion: 2
+        x: 42
+        y: 0
+        width: 29
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ff618da6ebfa97740800000000000000
+      internalID: 5150340881246066431
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FlechaBuena_2
+      rect:
+        serializedVersion: 2
+        x: 451
+        y: 0
+        width: 52
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2ba7eba2efcb39690800000000000000
+      internalID: -7596520346619053390
       vertices: []
       indices: 
       edges: []
@@ -160,8 +197,7 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable:
-      ChatGPT Image 9 ene 2026, 13_08_52_0: 7768978775519715543
+    nameFileIdTable: {}
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

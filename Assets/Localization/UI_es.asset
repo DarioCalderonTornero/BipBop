@@ -289,7 +289,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1144528112156672
-    m_Localized: "Consigue {0} puntos en el modo Geom\xE9trico"
+    m_Localized: "Consigue 10 puntos en el modo Geom\xE9trico"
     m_Metadata:
       m_Items: []
   - m_Id: 1156087655923712
@@ -783,6 +783,10 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 24931677479337984
     m_Localized: Vaca
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24986470138740736
+    m_Localized: "Consigue en una partida 50 puntos en modo \"Geom\xE9trico\""
     m_Metadata:
       m_Items: []
   references:
