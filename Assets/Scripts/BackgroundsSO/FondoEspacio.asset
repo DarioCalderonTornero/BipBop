@@ -13,6 +13,35 @@ MonoBehaviour:
   m_Name: FondoEspacio
   m_EditorClassIdentifier: 
   id: FondoEspacio
-  displayName: Espacio
   sprite: {fileID: 5546807388540669781, guid: a4fc18c3053fcf741b8dda8b3b7a19d9, type: 3}
   price: 0
+  displayNameLS:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 24930428927311872
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  unlockDescriptionLS:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 24629567479054336
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  ownedDescriptionLS:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 24629831455965184
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  references:
+    version: 2
+    RefIds: []

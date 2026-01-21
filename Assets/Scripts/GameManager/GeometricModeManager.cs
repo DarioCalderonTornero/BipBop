@@ -469,7 +469,7 @@ public class GeometricModeManager : MonoBehaviour
         UpdateDifficulty();
         UpdateScoreText();
         Haptics.TryVibrate();
-        PlayerLevelManager.Instance.AddXP(50);
+        PlayerLevelManager.Instance.AddXP(15);
         PlayScoreEffect();
 
         if (FallingShapesManager.Instance != null)

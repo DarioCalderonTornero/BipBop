@@ -304,21 +304,18 @@ public class BackgroundInventoryManager : MonoBehaviour
         selectedItem.Select();
 
         if (selectedNameText != null)
-            selectedNameText.text = data.displayName;
+            selectedNameText.text = data.GetDisplayName("");
 
         if (selectedDescriptionText != null)
         {
             if (item.IsOwned)
             {
-                selectedDescriptionText.text = defaultOwnedText;
+                selectedDescriptionText.text = data.GetOwnedDescription(defaultOwnedText);
             }
             else
             {
-                // ✅ personalizada si existe
-                if (!string.IsNullOrEmpty(data.unlockDescription))
-                    selectedDescriptionText.text = data.unlockDescription;
-                else
-                    selectedDescriptionText.text = defaultStoreText;
+                string d = data.GetUnlockDescription("");
+                selectedDescriptionText.text = string.IsNullOrEmpty(d) ? defaultStoreText : d;
             }
         }
 

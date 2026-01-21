@@ -30,6 +30,9 @@ public class DailyStoreManager : MonoBehaviour
     private const string DEFAULT_BACKGROUND_ID = "DefaultBackground";
     private const string DEFAULT_AVATAR_ID = "NormalAvatar";
 
+    [Tooltip("Pool SOLO de fondos que se pueden comprar en tienda.")]
+    [SerializeField] private DailyStoreBackgroundPoolSO backgroundStorePool;
+
 
     private void OnEnable()
     {
@@ -93,16 +96,26 @@ public class DailyStoreManager : MonoBehaviour
         System.Random rng = new System.Random(seed);
 
         // -------- Fondos --------
-        if (backgroundCatalog != null && backgroundCatalog.backgroundDataSO != null && backgroundCatalog.backgroundDataSO.Count > 0)
+        if (backgroundStorePool != null && backgroundStorePool.possibleBackgrounds != null && backgroundStorePool.possibleBackgrounds.Count > 0)
         {
-            var pickedBG = PickUniqueBackgrounds(backgroundCatalog.backgroundDataSO, 3, rng);
+            List<BackgroundDataSO> storeBGs = backgroundStorePool.possibleBackgrounds.FindAll(b => b != null);
 
-            for (int i = 0; i < 3; i++)
-                PlayerPrefs.SetString(PREF_BG_OFFER_PREFIX + i, (i < pickedBG.Count && pickedBG[i] != null) ? pickedBG[i].id : "");
+            if (storeBGs.Count == 0)
+            {
+                Debug.LogWarning("[DailyStore] Pool de fondos de tienda vacía (o filtrada).");
+                for (int i = 0; i < 3; i++) PlayerPrefs.SetString(PREF_BG_OFFER_PREFIX + i, "");
+            }
+            else
+            {
+                var pickedBG = PickUniqueBackgrounds(storeBGs, 3, rng);
+
+                for (int i = 0; i < 3; i++)
+                    PlayerPrefs.SetString(PREF_BG_OFFER_PREFIX + i, (i < pickedBG.Count && pickedBG[i] != null) ? pickedBG[i].id : "");
+            }
         }
         else
         {
-            Debug.LogWarning("[DailyStore] backgroundCatalog vacío o no asignado.");
+            Debug.LogWarning("[DailyStore] backgroundStorePool vacío o no asignado.");
             for (int i = 0; i < 3; i++) PlayerPrefs.SetString(PREF_BG_OFFER_PREFIX + i, "");
         }
 
@@ -159,7 +172,7 @@ public class DailyStoreManager : MonoBehaviour
             }
             else
             {
-                string title = string.IsNullOrEmpty(data.name) ? "Fondo" : data.name;
+                string title = data.GetDisplayName("Fondo");
                 int price = data.price;
 
                 int slotIndex = i; // capturar índice en variable local
@@ -270,10 +283,10 @@ public class DailyStoreManager : MonoBehaviour
 
     private BackgroundDataSO FindBackground(string id)
     {
-        if (backgroundCatalog == null || backgroundCatalog.backgroundDataSO == null || string.IsNullOrEmpty(id))
+        if (backgroundStorePool == null || backgroundStorePool.possibleBackgrounds == null || string.IsNullOrEmpty(id))
             return null;
 
-        return backgroundCatalog.backgroundDataSO.Find(b => b != null && b.id == id);
+        return backgroundStorePool.possibleBackgrounds.Find(b => b != null && b.id == id);
     }
 
     private AvatarDataSO FindAvatar(string id)

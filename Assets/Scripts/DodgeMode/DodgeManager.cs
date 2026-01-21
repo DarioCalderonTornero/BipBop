@@ -92,6 +92,8 @@ public class DodgeManager : MonoBehaviour
         if (scoreText != null)
             scoreText.text = $"{score}";
 
+        PlayerLevelManager.Instance.AddXP(15);
+
 #if UNITY_ANDROID || UNITY_IOS
         Haptics.TryVibrate();
 #endif

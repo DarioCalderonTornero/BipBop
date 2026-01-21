@@ -13,6 +13,35 @@ MonoBehaviour:
   m_Name: FondoPatioCastillo
   m_EditorClassIdentifier: 
   id: FondoPatioCastillo
-  displayName: Castillo
   sprite: {fileID: 1786317784773522842, guid: d008ee9e597c5124195258bd0d6e0e36, type: 3}
   price: 0
+  displayNameLS:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 24931254005628928
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  unlockDescriptionLS:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 24629567479054336
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  ownedDescriptionLS:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 24629831455965184
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  references:
+    version: 2
+    RefIds: []

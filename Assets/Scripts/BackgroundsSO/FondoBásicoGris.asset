@@ -13,6 +13,35 @@ MonoBehaviour:
   m_Name: "FondoB\xE1sicoGris"
   m_EditorClassIdentifier: 
   id: "FondoB\xE1sicoGris"
-  displayName: "B\xE1sico gris"
   sprite: {fileID: -8895070377966608123, guid: a3e9fa4b8ad12df4eb5fa7be6c92ace9, type: 3}
-  price: 0
+  price: 100
+  displayNameLS:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 24929503848398848
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  unlockDescriptionLS:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 24629463204462592
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  ownedDescriptionLS:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 24629831455965184
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  references:
+    version: 2
+    RefIds: []

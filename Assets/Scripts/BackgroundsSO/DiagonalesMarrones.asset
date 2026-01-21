@@ -13,6 +13,35 @@ MonoBehaviour:
   m_Name: DiagonalesMarrones
   m_EditorClassIdentifier: 
   id: DiagonalesMarrones
-  displayName: Diagonales marrones
   sprite: {fileID: 2728068671124222264, guid: 6c7870449e46b2d4b931af93c0b7cf91, type: 3}
-  price: 0
+  price: 200
+  displayNameLS:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 24928600131076096
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  unlockDescriptionLS:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 24629463204462592
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  ownedDescriptionLS:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 24629831455965184
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  references:
+    version: 2
+    RefIds: []

@@ -641,6 +641,150 @@ MonoBehaviour:
     m_Localized: Consigue en una partida 30 puntos en modo "Plataformas"
     m_Metadata:
       m_Items: []
+  - m_Id: 24928358841155584
+    m_Localized: Diag. Amarillas
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24928454353846272
+    m_Localized: Diag. Azules
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24928528815325184
+    m_Localized: Diag. Grises
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24928600131076096
+    m_Localized: Diag. Marrones
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24928704082706432
+    m_Localized: Diag. Moradas
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24928774509264896
+    m_Localized: Diag. Rosas
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24928844508004352
+    m_Localized: Diag. verdes
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24928927379062784
+    m_Localized: Ondas de agua
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24929039530557440
+    m_Localized: Arena romana
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24929377201389568
+    m_Localized: "B\xE1sico azul"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24929503848398848
+    m_Localized: "B\xE1sico gris"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24929576778956800
+    m_Localized: "B\xE1sico marr\xF3n"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24929652700053504
+    m_Localized: "B\xE1sico morado"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24929718273802240
+    m_Localized: "B\xE1sico negro"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24929794115207168
+    m_Localized: "B\xE1sico rojo"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24929855930859520
+    m_Localized: "B\xE1sico verde"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24929922213445632
+    m_Localized: Calle nocturna
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24930020309827584
+    m_Localized: Cielo estrellado
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24930109694640128
+    m_Localized: Circuito
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24930273947779072
+    m_Localized: "Circuito el\xE9ctrico"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24930360199446528
+    m_Localized: Corral
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24930428927311872
+    m_Localized: Espacio
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24930518698000384
+    m_Localized: "Geom\xE9trico azul"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24930625560477696
+    m_Localized: "Geom\xE9trico marr\xF3n"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24930694670024704
+    m_Localized: "Geom\xE9trico morado"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24930821174427648
+    m_Localized: Isla
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24930875343863808
+    m_Localized: Madera
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24930948245061632
+    m_Localized: Especial gris
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24931045779406848
+    m_Localized: "Especial marr\xF3n"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24931131695529984
+    m_Localized: Nieve
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24931208501624832
+    m_Localized: Nubes
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24931254005628928
+    m_Localized: Castillo
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24931310221885440
+    m_Localized: Piedra
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24931526081740800
+    m_Localized: Pueblo
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24931592532099072
+    m_Localized: Relax
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24931677479337984
+    m_Localized: Vaca
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

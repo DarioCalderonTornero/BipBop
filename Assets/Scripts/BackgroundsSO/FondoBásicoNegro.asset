@@ -13,7 +13,35 @@ MonoBehaviour:
   m_Name: "FondoB\xE1sicoNegro"
   m_EditorClassIdentifier: 
   id: DefaultBackground
-  displayName: "B\xE1sico negro"
   sprite: {fileID: 4994934043875202373, guid: 7f8c4565d54a26549a4edd4e55a8fafc, type: 3}
-  price: 0
-  unlockDescription: 
+  price: 100
+  displayNameLS:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 24929718273802240
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  unlockDescriptionLS:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 24629463204462592
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  ownedDescriptionLS:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 24629831455965184
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  references:
+    version: 2
+    RefIds: []

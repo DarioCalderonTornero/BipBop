@@ -641,6 +641,150 @@ MonoBehaviour:
     m_Localized: "Earn 30 points in a game in \u201CPlatforms\u201D mode"
     m_Metadata:
       m_Items: []
+  - m_Id: 24928358841155584
+    m_Localized: Yellow diag.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24928454353846272
+    m_Localized: Blue diag.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24928528815325184
+    m_Localized: Grey diag.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24928600131076096
+    m_Localized: Brown diag.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24928704082706432
+    m_Localized: Purple diag.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24928774509264896
+    m_Localized: Pink diag.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24928844508004352
+    m_Localized: Green diag.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24928927379062784
+    m_Localized: Water waves
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24929039530557440
+    m_Localized: Roman sand
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24929377201389568
+    m_Localized: Blue basic
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24929503848398848
+    m_Localized: Grey basic
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24929576778956800
+    m_Localized: Brown basic
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24929652700053504
+    m_Localized: Purple basic
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24929718273802240
+    m_Localized: Black basic
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24929794115207168
+    m_Localized: Red basic
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24929855930859520
+    m_Localized: Green basic
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24929922213445632
+    m_Localized: Night street
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24930020309827584
+    m_Localized: Starry sky
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24930109694640128
+    m_Localized: Racing Circuit
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24930273947779072
+    m_Localized: Electrical circuit
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24930360199446528
+    m_Localized: Corral
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24930428927311872
+    m_Localized: Space
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24930518698000384
+    m_Localized: Blue geometric
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24930625560477696
+    m_Localized: Brown geometric
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24930694670024704
+    m_Localized: Purple geometric
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24930821174427648
+    m_Localized: Isle
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24930875343863808
+    m_Localized: Wood
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24930948245061632
+    m_Localized: Special grey
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24931045779406848
+    m_Localized: Special brown
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24931131695529984
+    m_Localized: Snow
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24931208501624832
+    m_Localized: Clouds
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24931254005628928
+    m_Localized: Castle
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24931310221885440
+    m_Localized: Rocks
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24931526081740800
+    m_Localized: Village
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24931592532099072
+    m_Localized: Relax
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24931677479337984
+    m_Localized: Cow
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:
