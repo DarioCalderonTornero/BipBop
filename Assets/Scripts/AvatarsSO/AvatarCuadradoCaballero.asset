@@ -25,9 +25,9 @@ MonoBehaviour:
   displayNameFallback: Avatar
   sprite: {fileID: -459901446134407597, guid: 5cb5f69af1da1b74da56a04562f20160, type: 3}
   price: 120
-  unlockByScore: 0
-  requiredScoreKey: 
-  requiredScoreValue: 0
+  unlockByScore: 1
+  requiredScoreKey: GridScore
+  requiredScoreValue: 60
   unlockByOwningAvatars: 0
   requiredOwnedAvatarIds: []
   unlockDescriptionLS:
@@ -42,9 +42,9 @@ MonoBehaviour:
   unlockDescriptionFallback: 
   lockedMessageLS:
     m_TableReference:
-      m_TableCollectionName: 
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
     m_TableEntryReference:
-      m_KeyId: 0
+      m_KeyId: 25343307073683456
       m_Key: 
     m_FallbackState: 0
     m_WaitForCompletion: 0

@@ -789,6 +789,10 @@ MonoBehaviour:
     m_Localized: "Earn 50 points in a game in \u201CGeometric\u201D mode"
     m_Metadata:
       m_Items: []
+  - m_Id: 25343307073683456
+    m_Localized: "Achieve a score of 60 or higher in \u201CPlatforms\u201D mode."
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

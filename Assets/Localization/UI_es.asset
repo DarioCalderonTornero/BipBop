@@ -789,6 +789,10 @@ MonoBehaviour:
     m_Localized: "Consigue en una partida 50 puntos en modo \"Geom\xE9trico\""
     m_Metadata:
       m_Items: []
+  - m_Id: 25343307073683456
+    m_Localized: "Consigue una puntuaci\xF3n de 60 o m\xE1s en el modo \"Plataformas\""
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

@@ -750,6 +750,9 @@ public class GridGameManager : MonoBehaviour
 
         OnGridGameOver?.Invoke(this, EventArgs.Empty);
 
+        if (score > 59)
+            AvatarUnlockHelper.UnlockAvatar("AvatarCaballero");
+
         SaveRecordIfNeeded();
 
         PlayFabScoreManager.Instance.SubmitScore("GridScore", score);

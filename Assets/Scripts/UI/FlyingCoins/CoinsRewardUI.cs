@@ -91,11 +91,18 @@ public class CoinsRewardUI : MonoBehaviour
         // Spawn todas a la vez
         visualCount = Mathf.Clamp(coinsEarned, 1, Mathf.Max(1, maxVisualCoins));
 
-        // Reparto de monedas reales entre monedas visuales:
-        // Ej: 53 monedas, 30 visuales => base=1, remainder=23
-        // Las primeras 23 suman 2, el resto suman 1.
+        // Reparto de monedas reales entre monedas visuales
         basePerCoin = coinsEarned / visualCount;
         remainder = coinsEarned % visualCount;
+
+        // Obtener la posición en el mundo de coinSpawnCenter
+        Vector3 spawnPosInWorld = coinSpawnCenter.position;
+
+        // Convertimos la posición de 'coinSpawnCenter' del mundo a la pantalla
+        Vector3 spawnPosInScreen = RectTransformUtility.WorldToScreenPoint(Camera.main, spawnPosInWorld);
+
+        // Asegurarnos de que las monedas se generen correctamente dentro del canvas
+        Vector2 canvasCenter = spawnPosInScreen;
 
         for (int i = 0; i < visualCount; i++)
         {
@@ -107,7 +114,16 @@ public class CoinsRewardUI : MonoBehaviour
             Vector2 offset = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * r;
             offset += Random.insideUnitCircle * 12f;
 
-            // Dirección de impulso (más lateral)
+            // Convertimos la posición dispersa en coordenadas de pantalla (añadiendo el offset)
+            Vector3 finalPositionInScreen = spawnPosInScreen + new Vector3(offset.x, offset.y, 0f);  // Aplicamos dispersión sobre la posición en pantalla
+
+            // Convertimos las coordenadas de pantalla de vuelta a coordenadas del canvas
+            Vector2 canvasPosition = coinSpawnCenter.InverseTransformPoint(finalPositionInScreen);  // Convertimos de nuevo a coordenadas de UI
+
+            // Configuramos el rectTransform de la moneda (su posición final en el canvas)
+            coin.GetComponent<RectTransform>().localPosition = canvasPosition;
+
+            // Dirección de impulso
             Vector2 dir = Random.insideUnitCircle;
             dir.y *= (1f - lateralBias);
             if (dir.sqrMagnitude < 0.0001f) dir = Vector2.right;
@@ -143,6 +159,8 @@ public class CoinsRewardUI : MonoBehaviour
 
         gameObject.SetActive(false);
     }
+
+
 
     private IEnumerator FadeCanvas(CanvasGroup cg, float from, float to, float duration)
     {

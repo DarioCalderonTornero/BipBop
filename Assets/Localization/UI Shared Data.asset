@@ -779,6 +779,10 @@ MonoBehaviour:
     m_Key: "dailymissions_consigue50puntosgeom\xE9trico"
     m_Metadata:
       m_Items: []
+  - m_Id: 25343307073683456
+    m_Key: "AvatarCaballero_Descripci\xF3n"
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
