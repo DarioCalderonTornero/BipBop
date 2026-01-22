@@ -204,7 +204,7 @@ public class DodgeManager : MonoBehaviour
         }
 
         float p = UnityEngine.Random.Range(0, 10);
-        if (p >= 1)
+        if (p < 0)
         {
             hasUsedReviveOffer = true;
             SetDeathType(DeathType.Video);

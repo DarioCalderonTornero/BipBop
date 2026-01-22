@@ -247,7 +247,7 @@ public class ColorManager : MonoBehaviour
 
         float videoProbability = UnityEngine.Random.Range(0, 10);
 
-        if (videoProbability >= 5)
+        if (videoProbability < 0)
         {
             hasUsedReviveOffer = true;
             SetDeathType(DeathType.Video);

@@ -42,9 +42,9 @@ MonoBehaviour:
   unlockDescriptionFallback: 
   lockedMessageLS:
     m_TableReference:
-      m_TableCollectionName: 
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
     m_TableEntryReference:
-      m_KeyId: 0
+      m_KeyId: 24629567479054336
       m_Key: 
     m_FallbackState: 0
     m_WaitForCompletion: 0
