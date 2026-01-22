@@ -28,6 +28,9 @@ public class LogicaJuego : MonoBehaviour
     private TaskType lastTaskType;
     public TaskInfo[] tasks;
 
+    [SerializeField] private AudioClip successAudioClip;
+    [SerializeField] private AudioClip failAudioClip;
+
     private bool hasEnded = false;
 
     public enum TaskType
@@ -109,6 +112,7 @@ public class LogicaJuego : MonoBehaviour
 
         if (currentTime <= 0f)
         {
+            SoundManager.Instance.PlaySound(failAudioClip, 1f);
             OnGameOver?.Invoke(this, EventArgs.Empty);
             EndGame();
         }
@@ -124,6 +128,8 @@ public class LogicaJuego : MonoBehaviour
             {
                 ClassicModeUIEffects.Instance.PlayEffectForTask(actionType);
             }
+
+            SoundManager.Instance.PlaySound(successAudioClip, 1f);
 
             isTaskCompleted = true;
             StartNewTask();

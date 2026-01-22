@@ -5030,6 +5030,8 @@ MonoBehaviour:
       m_WaitForCompletion: 0
       m_LocalVariables: []
     icon: {fileID: -7693613771748757494, guid: ccca7ec16bb967d4caef3bfc82f6bb23, type: 3}
+  successAudioClip: {fileID: 8300000, guid: 9dbcbf831293b1d4aa7ece21ae667ed1, type: 3}
+  failAudioClip: {fileID: 8300000, guid: 266aea29fb5caef4880d647ab5977035, type: 3}
   readyText:
     m_TableReference:
       m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
