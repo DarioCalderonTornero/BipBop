@@ -67,6 +67,8 @@ public class DailyLuckManager : MonoBehaviour
     // -------------------- ADS (auto-find) --------------------
     private MediationAds mediationAdsCached;
 
+    [SerializeField] private bool adsEnabled = false;
+
     private MediationAds Mediation
     {
         get
@@ -188,27 +190,28 @@ public class DailyLuckManager : MonoBehaviour
         int todayRollIndex = maxAttemptsPerDay - remaining + 1;
         bool isAdRoll = (todayRollIndex == 5 || todayRollIndex == 10);
 
-        if (isAdRoll)
+        // Si los anuncios están desactivados, todas las tiradas van con monedas
+        if (!adsEnabled || !isAdRoll)
         {
-            var ads = Mediation;
-            if (ads != null && ads.IsAdReady())
-            {
-                LockButtons(true);
-                SetFeedback("");
+            _ = DoBackgroundRollInternal(remaining, isFreeRoll: false);
+            return;
+        }
 
-                ads.ShowRewardedAd(() =>
-                {
-                    _ = DoBackgroundRollInternal(remaining, isFreeRoll: true);
-                });
-            }
-            else
+        // Rama de anuncio sólo si adsEnabled == true
+        var ads = Mediation;
+        if (ads != null && ads.IsAdReady())
+        {
+            LockButtons(true);
+            SetFeedback("");
+
+            ads.ShowRewardedAd(() =>
             {
-                SetFeedback("Anuncio no disponible ahora mismo.");
-            }
+                _ = DoBackgroundRollInternal(remaining, isFreeRoll: true);
+            });
         }
         else
         {
-            _ = DoBackgroundRollInternal(remaining, isFreeRoll: false);
+            SetFeedback("Anuncio no disponible ahora mismo.");
         }
     }
 
@@ -249,27 +252,28 @@ public class DailyLuckManager : MonoBehaviour
         int todayRollIndex = maxAttemptsPerDay - remaining + 1;
         bool isAdRoll = (todayRollIndex == 5 || todayRollIndex == 10);
 
-        if (isAdRoll)
+        // Si los anuncios están desactivados o no toca tirada con anuncio, siempre va con monedas
+        if (!adsEnabled || !isAdRoll)
         {
-            var ads = Mediation;
-            if (ads != null && ads.IsAdReady())
-            {
-                LockButtons(true);
-                SetFeedback("");
+            _ = DoAvatarRollInternal(remaining, isFreeRoll: false);
+            return;
+        }
 
-                ads.ShowRewardedAd(() =>
-                {
-                    _ = DoAvatarRollInternal(remaining, isFreeRoll: true);
-                });
-            }
-            else
+        // Rama de anuncio sólo si adsEnabled == true y es una tirada marcada de anuncio
+        var ads = Mediation;
+        if (ads != null && ads.IsAdReady())
+        {
+            LockButtons(true);
+            SetFeedback("");
+
+            ads.ShowRewardedAd(() =>
             {
-                SetFeedback("Anuncio no disponible ahora mismo.");
-            }
+                _ = DoAvatarRollInternal(remaining, isFreeRoll: true);
+            });
         }
         else
         {
-            _ = DoAvatarRollInternal(remaining, isFreeRoll: false);
+            SetFeedback("Anuncio no disponible ahora mismo.");
         }
     }
 
@@ -456,8 +460,9 @@ public class DailyLuckManager : MonoBehaviour
         int nextBgRollIndex = maxAttemptsPerDay - remainingBG + 1;
         int nextAvRollIndex = maxAttemptsPerDay - remainingAV + 1;
 
-        bool nextBgIsAdRoll = (nextBgRollIndex == 5 || nextBgRollIndex == 10);
-        bool nextAvIsAdRoll = (nextAvRollIndex == 5 || nextAvRollIndex == 10);
+        // Sólo mostramos la UI de anuncio si adsEnabled está activo
+        bool nextBgIsAdRoll = adsEnabled && (nextBgRollIndex == 5 || nextBgRollIndex == 10);
+        bool nextAvIsAdRoll = adsEnabled && (nextAvRollIndex == 5 || nextAvRollIndex == 10);
 
         if (nextBgIsAdRoll)
         {
