@@ -30,6 +30,12 @@ public class TouchInputs : MonoBehaviour
 
     private float previousZRotation = 0f; // Almacena el ángulo previo
     private const float rotationSensitivity = 10f; // Sensibilidad para rotación
+
+    [SerializeField] private float rotateRateThreshold = 1.2f; // rad/s (ajusta)
+    [SerializeField] private float rotateCooldown = 0.25f;     // segundos
+
+    private float lastRotateTime = -999f;
+
     private bool hasRotatedRight = false;
     private bool hasRotatedLeft = false;
 
@@ -152,45 +158,32 @@ public class TouchInputs : MonoBehaviour
             LogicaJuego.Instance.OnTaskAction(TaskType.LookDown);
         }
 
-        // Detecta rotación hacia la derecha o izquierda
-        float zRotation = Input.gyro.attitude.eulerAngles.z;
+        // Detecta rotación hacia la derecha o izquierda (por velocidad angular: dirección real)
+        float zRate = Input.gyro.rotationRateUnbiased.z; // rad/s
 
-        // Corrige el salto entre 0° y 360°
-        if (zRotation - previousZRotation > 180f)
-        {
-            zRotation -= 360f;
-        }
-        else if (zRotation - previousZRotation < -180f)
-        {
-            zRotation += 360f;
-        }
+        const float rotateRateThreshold = 1.2f; // ajusta: 0.9-1.8 típico
+        const float rotateCooldown = 0.25f;     // evita dobles triggers
 
-        // Rotación hacia la derecha
-        if (!hasRotatedRight && (zRotation - previousZRotation) > rotationSensitivity)
-        {
-            hasRotatedRight = true;
-            OnRotateRight?.Invoke(this, EventArgs.Empty);
-            LogicaJuego.Instance.OnTaskAction(TaskType.RotateRight);
-        }
-        else if (hasRotatedRight && (zRotation - previousZRotation) < -rotationSensitivity / 2f)
-        {
-            hasRotatedRight = false; // Permite volver a detectar la rotación
-        }
+        // necesitas estas vars arriba en la clase:
+        // private float lastRotateTime = -999f;
 
-        // Rotación hacia la izquierda
-        if (!hasRotatedLeft && (zRotation - previousZRotation) < -rotationSensitivity)
-        {
-            hasRotatedLeft = true;
-            OnRotateLeft?.Invoke(this, EventArgs.Empty);
-            LogicaJuego.Instance.OnTaskAction(TaskType.RotateLeft);
-        }
-        else if (hasRotatedLeft && (zRotation - previousZRotation) > rotationSensitivity / 2f)
-        {
-            hasRotatedLeft = false; // Permite volver a detectar la rotación
-        }
+        bool cooldownReady = (Time.time - lastRotateTime) >= rotateCooldown;
 
-        // Actualiza el valor previo de zRotation
-        previousZRotation = zRotation;
+        if (cooldownReady)
+        {
+            if (zRate > rotateRateThreshold)
+            {
+                lastRotateTime = Time.time;
+                OnRotateRight?.Invoke(this, EventArgs.Empty);
+                LogicaJuego.Instance.OnTaskAction(TaskType.RotateRight);
+            }
+            else if (zRate < -rotateRateThreshold)
+            {
+                lastRotateTime = Time.time;
+                OnRotateLeft?.Invoke(this, EventArgs.Empty);
+                LogicaJuego.Instance.OnTaskAction(TaskType.RotateLeft);
+            }
+        }
     }
 
 }
