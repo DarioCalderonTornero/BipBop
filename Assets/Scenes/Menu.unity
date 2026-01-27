@@ -14304,6 +14304,7 @@ MonoBehaviour:
   popDownTime: 0.08
   popEaseUp: 27
   popEaseDown: 2
+  coinsPanel: {fileID: 875629968}
 --- !u!1 &591662692
 GameObject:
   m_ObjectHideFlags: 0

@@ -44,6 +44,9 @@ public class SwipeMenu : MonoBehaviour, IEndDragHandler
     private Vector3 page2BaseScale;
     private Vector3 page3BaseScale;
 
+    [Header("HUD")]
+    [SerializeField] private GameObject coinsPanel;
+
     private void Awake()
     {
         currentPage = 1;
@@ -52,6 +55,7 @@ public class SwipeMenu : MonoBehaviour, IEndDragHandler
 
         CacheBaseScales();
         BindAllButtonListeners();
+        UpdateHudVisibility();
 
         UpdateButtons();
         UpdateBar();
@@ -118,6 +122,7 @@ public class SwipeMenu : MonoBehaviour, IEndDragHandler
         UpdateButtons();
         UpdateBar();
         UpdatePageButtonsVisuals(); // <-- importante
+        UpdateHudVisibility();
     }
 
     public void Next()
@@ -192,5 +197,12 @@ public class SwipeMenu : MonoBehaviour, IEndDragHandler
         // Ideal: cambia el Image del propio botón
         var img = btn.GetComponent<Image>();
         if (img != null) img.color = c;
+    }
+
+    private void UpdateHudVisibility()
+    {
+        // Visible en páginas 1 y 2, oculto en 3
+        if (coinsPanel != null)
+            coinsPanel.SetActive(currentPage != 3);
     }
 }
