@@ -127,21 +127,36 @@ public class PlayerLevelManager : MonoBehaviour
         if (PlayFabLoginManager.Instance == null || !PlayFabLoginManager.Instance.IsLoggedIn)
             return;
 
-        var request = new UpdateUserDataRequest
+        // 1) Nivel PRIVADO (opcional mantenerlo privado)
+        var privateReq = new UpdateUserDataRequest
         {
             Data = new Dictionary<string, string>
-            {
-                { "PlayerLevel", currentLevel.ToString() },
-                { "PlayerXP", currentXP.ToString() },
-                { "PlayerXPNext", xpToNextLevel.ToString() }
-            },
-            Permission = UserDataPermission.Private // mejor que Public para progreso
+        {
+            { "PlayerLevel", currentLevel.ToString() }
+        },
+            Permission = UserDataPermission.Private
         };
 
-        PlayFabClientAPI.UpdateUserData(request,
-            _ => Debug.Log("Nivel y XP guardados en PlayFab (privados)."),
-            error => Debug.LogWarning("Error al guardar nivel/XP: " + error.GenerateErrorReport()));
+        PlayFabClientAPI.UpdateUserData(privateReq,
+            _ => Debug.Log("PlayerLevel guardado en PlayFab (privado)."),
+            error => Debug.LogWarning("Error guardando PlayerLevel: " + error.GenerateErrorReport()));
+
+        // 2) XP PÚBLICA (esto es lo que necesitas para el perfil remoto)
+        var publicReq = new UpdateUserDataRequest
+        {
+            Data = new Dictionary<string, string>
+        {
+            { "PlayerXP", currentXP.ToString() },
+            { "PlayerXPNext", xpToNextLevel.ToString() }
+        },
+            Permission = UserDataPermission.Public
+        };
+
+        PlayFabClientAPI.UpdateUserData(publicReq,
+            _ => Debug.Log("PlayerXP y PlayerXPNext guardados en PlayFab (públicos)."),
+            error => Debug.LogWarning("Error guardando XP pública: " + error.GenerateErrorReport()));
     }
+
 
     public void LoadLevelFromPlayFab()
     {
@@ -158,6 +173,7 @@ public class PlayerLevelManager : MonoBehaviour
                 {
                     Debug.Log("No hay datos de nivel en PlayFab -> subiendo los locales como iniciales.");
                     SaveLevelToPlayFab();
+                    UpdateLevelStatistic();
                     UpdateUI();
                     return;
                 }
@@ -174,8 +190,6 @@ public class PlayerLevelManager : MonoBehaviour
                 // PlayFab manda -> actualizamos local
                 SaveLocalData();
                 UpdateUI();
-
-                // (opcional) asegurar statistic al entrar
                 UpdateLevelStatistic();
             },
             error => Debug.LogWarning("Error al cargar nivel: " + error.GenerateErrorReport()));
@@ -205,4 +219,25 @@ public class PlayerLevelManager : MonoBehaviour
             error => Debug.LogWarning("Error al actualizar estadística: " + error.GenerateErrorReport()));
     }
     #endregion
+
+    public void ForceUploadLevelStatistic()
+    {
+        var request = new UpdatePlayerStatisticsRequest
+        {
+            Statistics = new List<StatisticUpdate>
+        {
+            new StatisticUpdate
+            {
+                StatisticName = "PlayerLevel",
+                Value = currentLevel   // aunque sea 1
+            }
+        }
+        };
+
+        PlayFabClientAPI.UpdatePlayerStatistics(request,
+            res => Debug.Log("[PlayFab] PlayerLevel stat asegurada: " + currentLevel),
+            err => Debug.LogWarning("[PlayFab] Error subiendo PlayerLevel: " + err.GenerateErrorReport())
+        );
+    }
+
 }

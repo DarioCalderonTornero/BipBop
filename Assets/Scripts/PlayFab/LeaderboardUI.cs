@@ -5,7 +5,6 @@ using PlayFab;
 using PlayFab.ClientModels;
 using TMPro;
 using UnityEngine;
-using UnityEngine.SocialPlatforms.Impl;
 using UnityEngine.UI;
 using UnityEngine.Localization;
 using UnityEngine.Localization.Settings;
@@ -18,7 +17,7 @@ public class TopPlayerSlot
     public Image avatarImage;         // círculo / avatar
     public TextMeshProUGUI nameText;  // nombre del jugador
     public TextMeshProUGUI scoreText; // puntos
-    public GameObject levelIcon;     // Icono de nivel
+    public GameObject levelIcon;      // Icono de nivel
     public TextMeshProUGUI levelText; // Texto del nivel
     public Sprite defaultAvatarSprite;
 
@@ -65,7 +64,7 @@ public class LeaderboardUI : MonoBehaviour
 
     [Header("Avatares")]
     [SerializeField] private AvatarCatalogSO avatarCatalog;
-    
+
     [Header("Perfil jugador")]
     [SerializeField] private XPUIAnimation profilePanel;
 
@@ -75,6 +74,12 @@ public class LeaderboardUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI noConnectionText;
     [SerializeField] private Sprite noConnectionSprite;
     [SerializeField] private LocalizedString noConnectionLocalizedText; // "Sin conexión" / "No connection"
+
+    [Header("Player Level Leaderboard")]
+    [SerializeField] private string playerLevelStatisticName = "PlayerLevel"; // leaderboard de nivel
+
+    // Cache niveles (por carga)
+    private Dictionary<string, int> levelsByPlayFabId = new Dictionary<string, int>();
 
     public enum MyPosState
     {
@@ -303,6 +308,9 @@ public class LeaderboardUI : MonoBehaviour
         ShowNoConnectionUI(false);
         currentRequestedStat = statisticName;
 
+        // limpia cache de niveles por carga
+        levelsByPlayFabId.Clear();
+
         if (Application.internetReachability == NetworkReachability.NotReachable)
         {
             isLoading = false;
@@ -327,23 +335,59 @@ public class LeaderboardUI : MonoBehaviour
 
             isLoading = false;
 
-            // Texto de abajo (tu posición) opcional: puedes dejarlo como quieras
             myPosState = MyPosState.NoScores;
             if (myPositionText != null)
                 myPositionText.text = noScoresText.GetLocalizedString();
 
-            // ✅ SOLO icono + texto, y nada de slots
             ShowNoConnectionUI(true);
             return;
         }
 
+        // 1) Pedimos leaderboard principal (puntos)
+        bool gotMain = false;
+        bool gotLevels = false;
+        List<PlayerLeaderboardEntry> mainLeaderboard = null;
+
+        void TryFinalize()
+        {
+            if (token != requestToken) return;
+            if (!gotMain || !gotLevels) return;
+            if (statisticName != currentRequestedStat) return;
+
+            // Limpia lista y top3
+            foreach (Transform child in contentParent)
+                Destroy(child.gameObject);
+            ClearTop3Slots();
+
+            if (mainLeaderboard == null || mainLeaderboard.Count == 0)
+            {
+                myPosState = MyPosState.NoScores;
+                myPositionText.text = noScoresText.GetLocalizedString();
+
+                FillTop3(null);
+                foreach (Transform child in contentParent)
+                    Destroy(child.gameObject);
+            }
+            else
+            {
+                FillTop3(mainLeaderboard);
+                FillListFromFourth(mainLeaderboard, top);
+            }
+
+            Canvas.ForceUpdateCanvases();
+            if (contentParent is RectTransform rt)
+                LayoutRebuilder.ForceRebuildLayoutImmediate(rt);
+
+            isLoading = false;
+        }
+
+        // Leaderboard principal (puntos)
         PlayFabScoreManager.Instance.GetLeaderboard(statisticName, top, leaderboard =>
         {
             if (token != requestToken) return;
 
             if (leaderboard == null)
             {
-                // ✅ fallo de carga: icono + texto, sin slots
                 ShowNoConnectionUI(true);
 
                 isLoading = false;
@@ -354,50 +398,25 @@ public class LeaderboardUI : MonoBehaviour
                 return;
             }
 
-            if (statisticName != currentRequestedStat)
-                return;
-
-            // Limpia lista y top3
-            foreach (Transform child in contentParent)
-                Destroy(child.gameObject);
-            ClearTop3Slots();
-
-            if (leaderboard == null || leaderboard.Count == 0)
-            {
-                myPosState = MyPosState.NoScores;
-                myPositionText.text = noScoresText.GetLocalizedString();
-
-                // Rellena top3 sólo con placeholders
-                FillTop3(null);
-
-                // Limpia la lista de 4–10 (no hay nadie aún)
-                foreach (Transform child in contentParent)
-                    Destroy(child.gameObject);
-            }
-            else
-            {
-                // Top 3 (con reales + placeholders si faltan)
-                FillTop3(leaderboard);
-
-                // Del 4 en adelante
-                FillListFromFourth(leaderboard, top);
-            }
-
-            Canvas.ForceUpdateCanvases();
-            if (contentParent is RectTransform rt)
-                LayoutRebuilder.ForceRebuildLayoutImmediate(rt);
-
-            isLoading = false;
+            mainLeaderboard = leaderboard;
+            gotMain = true;
+            TryFinalize();
         });
 
-        // Mostrar posición del jugador
+        // 2) Pedimos leaderboard de niveles (Top N) y montamos diccionario PlayFabId->Level
+        LoadLevelsLeaderboard(top, token, () =>
+        {
+            gotLevels = true;
+            TryFinalize();
+        });
+
+        // Mostrar posición del jugador (del leaderboard principal)
         if (PlayFabScoreManager.Instance != null)
         {
             PlayFabScoreManager.Instance.GetPlayerRank(statisticName, myEntry =>
             {
                 if (token != requestToken) return;
-
-                if (statisticName != currentRequestedStat) return; // Evita resultados antiguos
+                if (statisticName != currentRequestedStat) return;
 
                 if (myEntry != null)
                 {
@@ -405,7 +424,6 @@ public class LeaderboardUI : MonoBehaviour
                     lastRank = myEntry.Position + 1;
                     lastScore = myEntry.StatValue;
 
-                    // Smart String: una sola entrada localizada que recibe {0} (rank) y {1} (score)
                     myPositionText.text = leaderboardHasScore.GetLocalizedString(lastRank, lastScore);
                 }
                 else
@@ -417,27 +435,54 @@ public class LeaderboardUI : MonoBehaviour
         }
     }
 
-    private void GetPlayerLevel(string playFabId, Action<int> onLevelFound)
+    private void LoadLevelsLeaderboard(int top, int token, Action onDone)
     {
-        var request = new GetUserDataRequest
+        // Si no hay nombre de stat, termina
+        if (string.IsNullOrEmpty(playerLevelStatisticName))
         {
-            PlayFabId = playFabId,
-            Keys = new List<string> { "PlayerLevel" }
+            onDone?.Invoke();
+            return;
+        }
+
+        var req = new GetLeaderboardRequest
+        {
+            StatisticName = playerLevelStatisticName,
+            StartPosition = 0,
+            MaxResultsCount = top
         };
 
-        PlayFabClientAPI.GetUserData(request,
-            result =>
+        PlayFabClientAPI.GetLeaderboard(req,
+            res =>
             {
-                int level = 1;
-                if (result.Data != null && result.Data.ContainsKey("PlayerLevel"))
-                    int.TryParse(result.Data["PlayerLevel"].Value, out level);
-                onLevelFound?.Invoke(level);
+                if (token != requestToken) return;
+
+                levelsByPlayFabId.Clear();
+
+                if (res != null && res.Leaderboard != null)
+                {
+                    foreach (var e in res.Leaderboard)
+                    {
+                        if (string.IsNullOrEmpty(e.PlayFabId)) continue;
+                        levelsByPlayFabId[e.PlayFabId] = e.StatValue; // StatValue = nivel
+                    }
+                }
+
+                onDone?.Invoke();
             },
-            error =>
+            err =>
             {
-                onLevelFound?.Invoke(1);
+                if (token != requestToken) return;
+                // Si falla, seguimos (nivel fallback a 1)
+                levelsByPlayFabId.Clear();
+                onDone?.Invoke();
             }
         );
+    }
+
+    private int GetCachedLevel(string playFabId)
+    {
+        if (string.IsNullOrEmpty(playFabId)) return 1;
+        return levelsByPlayFabId.TryGetValue(playFabId, out int lvl) ? Mathf.Max(1, lvl) : 1;
     }
 
     private void ClearTop3Slots()
@@ -480,11 +525,9 @@ public class LeaderboardUI : MonoBehaviour
 
             if (!string.IsNullOrEmpty(entry.PlayFabId))
             {
-                GetPlayerLevel(entry.PlayFabId, level =>
-                {
-                    if (levelText != null)
-                        levelText.text = level.ToString();
-                });
+                // ✅ Nivel desde leaderboard cache (no UserData)
+                if (levelText != null)
+                    levelText.text = GetCachedLevel(entry.PlayFabId).ToString();
 
                 if (avatarImg != null)
                 {
@@ -545,7 +588,6 @@ public class LeaderboardUI : MonoBehaviour
 
                 if (string.IsNullOrEmpty(avatarId))
                 {
-                    // Si no tiene avatar guardado, podrías poner uno por defecto
                     if (defaultSprite != null)
                     {
                         targetImage.sprite = defaultSprite;
@@ -616,13 +658,10 @@ public class LeaderboardUI : MonoBehaviour
                     SetAvatarForPlayFabId(entry.PlayFabId, slot.avatarImage, null);
                 }
 
-                // Nivel
+                // ✅ Nivel desde cache de leaderboard PlayerLevel
                 if (slot.levelText != null)
                 {
-                    GetPlayerLevel(entry.PlayFabId, level =>
-                    {
-                        slot.levelText.text = level.ToString();
-                    });
+                    slot.levelText.text = GetCachedLevel(entry.PlayFabId).ToString();
                 }
 
                 // 🔹 CLICK PARA ABRIR PERFIL REMOTO
@@ -674,10 +713,9 @@ public class LeaderboardUI : MonoBehaviour
 
     private IEnumerator PopRoutine(RectTransform rt)
     {
-        Vector3 baseScale = rt.localScale;                 // 🔴 escala real del botón
-        Vector3 upScale = baseScale * popUpScale;          // 🔴 pop relativo
+        Vector3 baseScale = rt.localScale;
+        Vector3 upScale = baseScale * popUpScale;
 
-        // Subir
         float t = 0f;
         while (t < popUpDuration)
         {
@@ -687,7 +725,6 @@ public class LeaderboardUI : MonoBehaviour
             yield return null;
         }
 
-        // Bajar
         t = 0f;
         while (t < popDownDuration)
         {
@@ -697,7 +734,7 @@ public class LeaderboardUI : MonoBehaviour
             yield return null;
         }
 
-        rt.localScale = baseScale;                          // 🔴 vuelve EXACTAMENTE a su escala original
+        rt.localScale = baseScale;
         popRoutine = null;
     }
 
@@ -708,14 +745,11 @@ public class LeaderboardUI : MonoBehaviour
 
         if (show)
         {
-            // Oculta TOP 3
             ClearTop3Slots();
 
-            // Limpia 4-10
             foreach (Transform child in contentParent)
                 Destroy(child.gameObject);
 
-            // Set icon + text
             if (noConnectionImage != null && noConnectionSprite != null)
                 noConnectionImage.sprite = noConnectionSprite;
 
@@ -728,33 +762,26 @@ public class LeaderboardUI : MonoBehaviour
 
     private void SetButtonActiveAsDisabled(Button activeButton)
     {
-        // Rehabilita todos primero
         if (classicButton != null) classicButton.interactable = true;
         if (colorButton != null) colorButton.interactable = true;
         if (geometricButton != null) geometricButton.interactable = true;
         if (gridButton != null) gridButton.interactable = true;
         if (dodgeButton != null) dodgeButton.interactable = true;
 
-        // Deshabilita el activo (feedback visual)
         if (activeButton != null)
             activeButton.interactable = false;
     }
 
-
     public void RefreshCurrentLeaderboard()
     {
-        // Si aún no se ha mostrado ningún modo, no hacemos nada
         if (string.IsNullOrEmpty(currentRequestedStat))
             return;
 
-        // Si ya está cargando, mejor no pisar la petición
         if (isLoading)
             return;
 
-        // Volvemos a pedir el mismo leaderboard que está activo ahora
         ShowLeaderboard(currentRequestedStat, 10);
     }
-
 
     private void OnEnable()
     {
@@ -797,12 +824,11 @@ public class LeaderboardUI : MonoBehaviour
 
         if (data != null && data.sprite != null)
         {
-            binder.ApplyAvatar(data);  // ✅ sprite + shader (como XPUIAnimation)
+            binder.ApplyAvatar(data);
         }
         else
         {
-            binder.Clear(null);        // o pásale un fallback si quieres
+            binder.Clear(null);
         }
     }
-
 }

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
 
 public class DailyMissionsUI : MonoBehaviour
@@ -25,6 +27,9 @@ public class DailyMissionsUI : MonoBehaviour
 
     [SerializeField] private TextMeshProUGUI extraDailyMissionsText;
 
+    [Header("Localization")]
+    [SerializeField] private LocalizedString extraDailyMissionsLocalized;
+
     private void Awake()
     {
         dailyMissionsButton.onClick.AddListener(OnDailyMissionsButtonClicked);
@@ -46,7 +51,10 @@ public class DailyMissionsUI : MonoBehaviour
         timerDailyMissionsText.gameObject.SetActive(false);
 
         if (extraDailyMissionsText != null)
+        {
             extraDailyMissionsText.gameObject.SetActive(false);
+            RefreshExtraText();
+        }
 
         if (DailyMissionManager.Instance != null)
             DailyMissionManager.Instance.RegisterTimerText(timerDailyMissionsText);
@@ -70,7 +78,10 @@ public class DailyMissionsUI : MonoBehaviour
         timerDailyMissionsText.gameObject.SetActive(true);
 
         if (extraDailyMissionsText != null)
+        {
             extraDailyMissionsText.gameObject.SetActive(true);
+            RefreshExtraText();
+        }
 
         if (slideCoroutine != null) StopCoroutine(slideCoroutine);
         slideCoroutine = StartCoroutine(SlideBoth(
@@ -141,6 +152,30 @@ public class DailyMissionsUI : MonoBehaviour
             }
         }
     }
+
+    private void RefreshExtraText()
+    {
+        if (extraDailyMissionsText != null && !extraDailyMissionsLocalized.IsEmpty)
+        {
+            extraDailyMissionsText.text = extraDailyMissionsLocalized.GetLocalizedString();
+        }
+    }
+
+    private void OnEnable()
+    {
+        LocalizationSettings.SelectedLocaleChanged += OnLocaleChanged;
+    }
+
+    private void OnDisable()
+    {
+        LocalizationSettings.SelectedLocaleChanged -= OnLocaleChanged;
+    }
+
+    private void OnLocaleChanged(Locale newLocale)
+    {
+        RefreshExtraText();
+    }
+
 
     private GameObject GetClickedUIObject()
     {

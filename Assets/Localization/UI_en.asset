@@ -793,6 +793,10 @@ MonoBehaviour:
     m_Localized: "Achieve a score of 60 or higher in \u201CPlatforms\u201D mode."
     m_Metadata:
       m_Items: []
+  - m_Id: 27228116683292672
+    m_Localized: Daily missions
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

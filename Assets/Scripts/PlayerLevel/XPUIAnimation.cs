@@ -524,17 +524,20 @@ public class XPUIAnimation : MonoBehaviour
     {
         if (levelText == null && xpText == null && xpFillImage == null) return;
 
-        BeginRemoteLoad();
+        // Vamos a hacer 2 cargas async (nivel + xp)
+        BeginRemoteLoad(); // carga 1
+        BeginRemoteLoad(); // carga 2
 
-        var request = new GetUserDataRequest
+        // 1) NIVEL: desde Statistic (leaderboard)
+        var reqLevel = new GetLeaderboardAroundPlayerRequest
         {
             PlayFabId = playFabId,
-            Keys = new List<string> { "PlayerLevel", "PlayerXP", "PlayerXPNext" }
+            StatisticName = "PlayerLevel",
+            MaxResultsCount = 1
         };
 
-        PlayFabClientAPI.GetUserData(
-            request,
-            result =>
+        PlayFabClientAPI.GetLeaderboardAroundPlayer(reqLevel,
+            res =>
             {
                 if (!isRemoteProfile || playFabId != remotePlayFabId)
                 {
@@ -543,41 +546,77 @@ public class XPUIAnimation : MonoBehaviour
                 }
 
                 int level = 1;
-                int xp = 0;
-                int xpNext = 1;
+                if (res.Leaderboard != null && res.Leaderboard.Count > 0)
+                    level = Mathf.Max(1, res.Leaderboard[0].StatValue);
 
-                if (result.Data != null)
-                {
-                    if (result.Data.ContainsKey("PlayerLevel"))
-                        int.TryParse(result.Data["PlayerLevel"].Value, out level);
-
-                    if (result.Data.ContainsKey("PlayerXP"))
-                        int.TryParse(result.Data["PlayerXP"].Value, out xp);
-
-                    if (result.Data.ContainsKey("PlayerXPNext"))
-                        int.TryParse(result.Data["PlayerXPNext"].Value, out xpNext);
-                }
-
-                xpNext = Mathf.Max(1, xpNext);
-
-                if (levelText != null)
-                    levelText.text = level.ToString();
-
-                if (xpText != null)
-                    xpText.text = $"{xp} / {xpNext}";
-
-                if (xpFillImage != null)
-                    xpFillImage.fillAmount = (float)xp / xpNext;
+                if (levelText != null) levelText.text = level.ToString();
 
                 OnRemoteLoadFinished(playFabId);
             },
-            error =>
+            err =>
             {
-                Debug.LogWarning("Error al cargar nivel remoto: " + error.GenerateErrorReport());
+                if (!isRemoteProfile || playFabId != remotePlayFabId)
+                {
+                    OnRemoteLoadFinished(playFabId);
+                    return;
+                }
+
+                if (levelText != null) levelText.text = "1";
+                OnRemoteLoadFinished(playFabId);
+            }
+        );
+
+        // 2) XP: ahora es pública -> leer UserData remoto
+        var reqXP = new GetUserDataRequest
+        {
+            PlayFabId = playFabId,
+            Keys = new List<string> { "PlayerXP", "PlayerXPNext" }
+        };
+
+        PlayFabClientAPI.GetUserData(reqXP,
+            xpRes =>
+            {
+                if (!isRemoteProfile || playFabId != remotePlayFabId)
+                {
+                    OnRemoteLoadFinished(playFabId);
+                    return;
+                }
+
+                int xpVal = 0;
+                int xpNextVal = 1;
+
+                if (xpRes.Data != null)
+                {
+                    if (xpRes.Data.TryGetValue("PlayerXP", out var xpData))
+                        int.TryParse(xpData.Value, out xpVal);
+
+                    if (xpRes.Data.TryGetValue("PlayerXPNext", out var nxData))
+                        int.TryParse(nxData.Value, out xpNextVal);
+                }
+
+                xpNextVal = Mathf.Max(1, xpNextVal);
+
+                if (xpText != null) xpText.text = $"{xpVal} / {xpNextVal}";
+                if (xpFillImage != null) xpFillImage.fillAmount = (float)xpVal / xpNextVal;
+
+                OnRemoteLoadFinished(playFabId);
+            },
+            err =>
+            {
+                if (!isRemoteProfile || playFabId != remotePlayFabId)
+                {
+                    OnRemoteLoadFinished(playFabId);
+                    return;
+                }
+
+                if (xpText != null) xpText.text = "- / -";
+                if (xpFillImage != null) xpFillImage.fillAmount = 0f;
+
                 OnRemoteLoadFinished(playFabId);
             }
         );
     }
+
 
     private void LoadRemoteRecords(string playFabId)
     {
