@@ -39,6 +39,7 @@ public class LeaderboardUI : MonoBehaviour
     public Button geometricButton;
     public Button gridButton;
     public Button dodgeButton;
+    public Button differentButton;
 
     [Header("Localization")]
     public LocalizedString touchButtonPrompt;      // "¡Toca un botón..."
@@ -103,6 +104,7 @@ public class LeaderboardUI : MonoBehaviour
         geometricButton.onClick.AddListener(() => OnModeButtonClicked("GeometricScore", geometricButton));
         gridButton.onClick.AddListener(() => OnModeButtonClicked("GridScore", gridButton));
         dodgeButton.onClick.AddListener(() => OnModeButtonClicked("DodgeScore", dodgeButton));
+        differentButton.onClick.AddListener(() => OnModeButtonClicked("DifferentScore", differentButton));
 
         // ✅ Cache binders top3
         if (top3Slots != null)
@@ -269,6 +271,9 @@ public class LeaderboardUI : MonoBehaviour
                 break;
             case "DodgeScore":
                 OnModeButtonClicked("DodgeScore", dodgeButton);
+                break;
+            case "DifferentScore":
+                OnModeButtonClicked("DifferentScore", differentButton);
                 break;
             default:
                 OnModeButtonClicked("HighScore", classicButton);
@@ -767,6 +772,7 @@ public class LeaderboardUI : MonoBehaviour
         if (geometricButton != null) geometricButton.interactable = true;
         if (gridButton != null) gridButton.interactable = true;
         if (dodgeButton != null) dodgeButton.interactable = true;
+        if (differentButton != null) differentButton.interactable = true;
 
         if (activeButton != null)
             activeButton.interactable = false;

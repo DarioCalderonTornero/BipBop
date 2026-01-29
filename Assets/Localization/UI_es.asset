@@ -807,6 +807,14 @@ MonoBehaviour:
       pierdes."
     m_Metadata:
       m_Items: []
+  - m_Id: 27933720804556800
+    m_Localized: "Consigue 50 puntos en una partida del modo \"B\xFAsqueda\""
+    m_Metadata:
+      m_Items: []
+  - m_Id: 27933915827109888
+    m_Localized: "Consigue 10 puntos en una partida del modo \"B\xFAsqueda\""
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

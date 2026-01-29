@@ -806,6 +806,14 @@ MonoBehaviour:
       all the other objects in the grid. If you fail or run out of time, you lose.
     m_Metadata:
       m_Items: []
+  - m_Id: 27933720804556800
+    m_Localized: "Earn 50 points in a game of \u201CSearch\u201D mode."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 27933915827109888
+    m_Localized: "Earn 10 points in a game of \u201CSearch\u201D mode."
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:
