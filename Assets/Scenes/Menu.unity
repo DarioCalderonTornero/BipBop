@@ -46849,7 +46849,7 @@ MonoBehaviour:
     recordKey: MaxRecordGrid
     sceneName: GridScene
     showMotionTasksToggle: 0
-  - image: {fileID: 8960588234837975079, guid: cadb4a6df514af4439f1fc7a18ae54fa, type: 3}
+  - image: {fileID: -2164333432033229659, guid: eac4e88efdf70654b8f149d65ba32da9, type: 3}
     name:
       m_TableReference:
         m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
