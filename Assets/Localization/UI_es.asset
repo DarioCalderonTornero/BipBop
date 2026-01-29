@@ -797,6 +797,16 @@ MonoBehaviour:
     m_Localized: Misiones diarias
     m_Metadata:
       m_Items: []
+  - m_Id: 27918337389330432
+    m_Localized: "B\xFAsqueda"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 27918508231720960
+    m_Localized: "Encuenta el objeto diferente (tama\xF1o, color, forma...) de entre
+      todos los objetos presentes en la cuadr\xEDcula. Si fallas, o se acaba el tiempo,
+      pierdes."
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

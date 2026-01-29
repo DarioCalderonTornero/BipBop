@@ -106,6 +106,12 @@ public class DifferentManager : MonoBehaviour
 
     private RoundMode currentMode = RoundMode.FindDifferent;
 
+    [Header("Economy / Meta")]
+    [SerializeField] private string playFabStatName = "DifferentScore";
+    [SerializeField] private string recordPlayerPrefsKey = "MaxRecordDifferent";
+    [SerializeField] private int xpPerPoint = 10;
+    [SerializeField] private int coinsDivisor = 3; // monedas = score / 3 (como otros)
+
     private void Awake()
     {
         Instance = this;
@@ -727,18 +733,84 @@ public class DifferentManager : MonoBehaviour
         return x * x * (3f - 2f * x);
     }
 
+    private bool hasEnded = false;
+
     private void Finish()
     {
-        if (!isRunning) return;
+        if (!isRunning || hasEnded) return;
+
         isRunning = false;
+        hasEnded = true;
 
         if (oddSwapRoutine != null)
         {
             StopCoroutine(oddSwapRoutine);
             oddSwapRoutine = null;
         }
+        if (transitionRoutine != null)
+        {
+            StopCoroutine(transitionRoutine);
+            transitionRoutine = null;
+        }
 
+        EndGame();
         OnFinished?.Invoke();
+    }
+
+    private void EndGame()
+    {
+        // 1) Récord local
+        SaveRecordIfNeeded();
+
+        // 2) Subir PlayFab
+        /* if (PlayFabLoginManager.Instance != null &&
+            PlayFabLoginManager.Instance.IsLoggedIn &&
+            PlayFabScoreManager.Instance != null)
+        {
+            PlayFabScoreManager.Instance.SubmitScore(playFabStatName, score);
+        }*/
+
+        // 3) Monedas
+        int coinsEarned = Mathf.Max(0, score / Mathf.Max(1, coinsDivisor));
+
+        CoinsRewardUI rewardUI = FindObjectOfType<CoinsRewardUI>(true);
+        if (rewardUI != null)
+            rewardUI.ShowReward(coinsEarned);
+        else if (CurrencyManager.Instance != null)
+            CurrencyManager.Instance.AddCoins(coinsEarned);
+
+        // 4) XP
+        if (PlayerLevelManager.Instance != null)
+            PlayerLevelManager.Instance.AddXP(score * Mathf.Max(0, xpPerPoint));
+
+        // 5) Misiones diarias (mínimo igual que otros minijuegos)
+        if (DailyMissionManager.Instance != null)
+        {
+            DailyMissionManager.Instance.AddProgress("juega_1_partida", 1);
+            DailyMissionManager.Instance.AddProgress("juega_3_partidas", 1);
+            DailyMissionManager.Instance.AddProgress("juega_8_partidas", 1);
+            DailyMissionManager.Instance.AddProgress("juega_10_partidas", 1);
+
+            // específicas (si quieres)
+            // DailyMissionManager.Instance.AddProgress("juega_3_partidas_diferente", 1);
+
+            if (score >= 10) DailyMissionManager.Instance.AddProgress("consigue_10_puntos_diferente", 1);
+            if (score >= 50) DailyMissionManager.Instance.AddProgress("consigue_50_puntos_diferente", 1);
+        }
+
+#if UNITY_ANDROID || UNITY_IOS
+        Haptics.TryVibrate();
+#endif
+    }
+
+    private void SaveRecordIfNeeded()
+    {
+        int currentRecord = PlayerPrefs.GetInt(recordPlayerPrefsKey, 0);
+        if (score > currentRecord)
+        {
+            PlayerPrefs.SetInt(recordPlayerPrefsKey, score);
+            PlayerPrefs.Save();
+        }
     }
 
     private void UpdateUI()

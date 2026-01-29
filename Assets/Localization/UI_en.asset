@@ -797,6 +797,15 @@ MonoBehaviour:
     m_Localized: Daily missions
     m_Metadata:
       m_Items: []
+  - m_Id: 27918337389330432
+    m_Localized: Search
+    m_Metadata:
+      m_Items: []
+  - m_Id: 27918508231720960
+    m_Localized: Find the object that is different (size, color, shape, etc.) from
+      all the other objects in the grid. If you fail or run out of time, you lose.
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:
