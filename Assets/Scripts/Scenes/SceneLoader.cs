@@ -13,7 +13,8 @@ public static class SceneLoader
         ColorScene,
         GeometricScene,
         DodgeScene,
-        GridScene
+        GridScene,
+        DifferentScene
     }
     public static void LoadScene(Scene scene)
     {

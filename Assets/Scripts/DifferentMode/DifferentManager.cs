@@ -9,9 +9,10 @@ public class DifferentManager : MonoBehaviour
 {
     public static DifferentManager Instance { get; private set; }
 
+    public event EventHandler OnDifferentGameOver;
+
     public event Action OnRoundChanged;
     public event Action<int> OnScoreChanged;
-    public event Action OnFinished;
 
     [Header("UI (Opcional)")]
     [SerializeField] private TextMeshProUGUI scoreText;
@@ -126,11 +127,22 @@ public class DifferentManager : MonoBehaviour
     {
         score = 0;
         currentTime = startTime;
-        isRunning = true;
+        isRunning = false; 
 
         BuildGrid();
         UpdateUI();
         SetupRound();
+    }
+
+    public void ResumeGameplay()
+    {
+        if (hasEnded) return;
+        isRunning = true;
+    }
+
+    public void PauseGameplay()
+    {
+        isRunning = false;
     }
 
     private void Update()
@@ -171,7 +183,7 @@ public class DifferentManager : MonoBehaviour
 
     private void SetupRound()
     {
-        if (!isRunning) return;
+        if (hasEnded) return;
         if (tiles.Count == 0) return;
 
         bool doSingleton = allowSingletonMode
@@ -754,11 +766,11 @@ public class DifferentManager : MonoBehaviour
         }
 
         EndGame();
-        OnFinished?.Invoke();
     }
 
     private void EndGame()
     {
+        OnDifferentGameOver?.Invoke(this, EventArgs.Empty);
         // 1) Récord local
         SaveRecordIfNeeded();
 

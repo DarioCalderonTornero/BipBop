@@ -31,49 +31,30 @@ public class DifferentState : MonoBehaviour
 
     private void Start()
     {
+        // Estado inicial
         differentGameState = DifferentGameStateEnum.Countdown;
         countDownTimer = 3f;
 
-        if (GridCountDownUI.Instance != null)
-        {
-            GridCountDownUI.Instance.Show();
-        }
+        // Asegurar que el minijuego NO empieza aún
+        if (DifferentManager.Instance != null)
+            DifferentManager.Instance.PauseGameplay();
 
-        // Empezar la caída del personaje durante la cuenta atrás
-        if (GridGameManager.Instance != null)
-        {
-            GridGameManager.Instance.StartIntroDropDuringCountdown();
-        }
+        // Mostrar cuenta atrás
+        if (DifferentCountDownUI.Instance != null)
+            DifferentCountDownUI.Instance.Show();
     }
 
     private void Update()
     {
-        GridGameState();
+        UpdateState();
     }
 
-    private void GridGameState()
+    private void UpdateState()
     {
         switch (differentGameState)
         {
             case DifferentGameStateEnum.Countdown:
-                countDownTimer -= Time.deltaTime;
-                timer = timerMax;
-
-                if (countDownTimer <= 0f)
-                {
-                    differentGameState = DifferentGameStateEnum.Go;
-
-                    if (GridCountDownUI.Instance != null)
-                    {
-                        GridCountDownUI.Instance.ShowGo(0.7f);
-                    }
-
-                    // Cuando termina la cuenta atrás: primera gema + flechas
-                    if (GridGameManager.Instance != null)
-                    {
-                        GridGameManager.Instance.StartGameplayAfterCountdown();
-                    }
-                }
+                HandleCountdown();
                 break;
 
             case DifferentGameStateEnum.Go:
@@ -89,12 +70,37 @@ public class DifferentState : MonoBehaviour
         }
     }
 
+    private void HandleCountdown()
+    {
+        countDownTimer -= Time.deltaTime;
+        timer = timerMax;
+
+        if (countDownTimer <= 0f)
+        {
+            countDownTimer = 0f;
+            differentGameState = DifferentGameStateEnum.Go;
+
+            if (DifferentCountDownUI.Instance != null)
+                DifferentCountDownUI.Instance.ShowGo(0.7f);
+        }
+    }
+
+    public void StartGameAfterGo()
+    {
+        differentGameState = DifferentGameStateEnum.Playing;
+
+        if (DifferentManager.Instance != null)
+            DifferentManager.Instance.ResumeGameplay();
+    }
+
     public float GetCountDownTimer()
     {
         return countDownTimer;
     }
-    public void StartGameAfterGo()
+
+    // Por si quieres forzar GameOver desde fuera
+    public void SetGameOver()
     {
-        differentGameState = DifferentGameStateEnum.Playing;
+        differentGameState = DifferentGameStateEnum.GameOver;
     }
 }
