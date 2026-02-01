@@ -775,12 +775,12 @@ public class DifferentManager : MonoBehaviour
         SaveRecordIfNeeded();
 
         // 2) Subir PlayFab
-        /* if (PlayFabLoginManager.Instance != null &&
+        if (PlayFabLoginManager.Instance != null &&
             PlayFabLoginManager.Instance.IsLoggedIn &&
             PlayFabScoreManager.Instance != null)
         {
             PlayFabScoreManager.Instance.SubmitScore(playFabStatName, score);
-        }*/
+        }
 
         // 3) Monedas
         int coinsEarned = Mathf.Max(0, score / Mathf.Max(1, coinsDivisor));
