@@ -126,6 +126,15 @@ public class DifferentManager : MonoBehaviour
     private Coroutine countdownRoutine;
     private Coroutine previewRoutine;
 
+    [Header("Tutorial Panel")]
+    [SerializeField] private bool showTutorialOnStart = true;
+    [SerializeField] private TutorialPanelUI tutorialPrefab; // el prefab del panel
+    [SerializeField] private Transform tutorialParent; // opcional (Canvas/PanelRoot)
+
+    private TutorialPanelUI tutorialInstance;
+
+    private const string ShowTutorialKey = "ShowTutorialOnStart";
+
     private void Awake()
     {
         Instance = this;
@@ -133,7 +142,76 @@ public class DifferentManager : MonoBehaviour
 
     private void Start()
     {
+        isRunning = false;
+        hasEnded = false;
+
+        // Sobrescribe con la preferencia del jugador (default ON)
+        showTutorialOnStart = PlayerPrefs.GetInt(ShowTutorialKey, 1) == 1;
+
+        if (showTutorialOnStart && tutorialPrefab != null)
+        {
+            ShowTutorial();
+        }
+        else
+        {
+            //IMPORTANTE: si hay un TutorialPanelUI en escena, lo apagamos
+            HideAnyExistingTutorialPanel();
+            BeginGameAfterTutorial();
+        }
+    }
+
+    private void HideAnyExistingTutorialPanel()
+    {
+        // Si el tutorial está puesto en escena (no instanciado), apágalo
+        var existing = FindObjectOfType<TutorialPanelUI>(true);
+        if (existing != null)
+            existing.gameObject.SetActive(false);
+    }
+
+    private void HandleTutorialClosed()
+    {
+        if (tutorialInstance != null)
+            tutorialInstance.OnClosed -= HandleTutorialClosed;
+
+        tutorialInstance = null;
         StartGame();
+    }
+
+    private void BeginGameAfterTutorial()
+    {
+        StartGame(); // aquí dentro arrancas tu countdown (si lo tienes)
+    }
+
+    private void ShowTutorial()
+    {
+        // Si ya tengo uno instanciado, no creo otro
+        if (tutorialInstance != null) return;
+
+        // Si hay uno en escena (aunque esté desactivado), úsalo
+        var existing = FindObjectOfType<TutorialPanelUI>(true);
+        if (existing != null)
+        {
+            tutorialInstance = existing;
+            tutorialInstance.gameObject.SetActive(true);
+        }
+        else
+        {
+            Transform parent = tutorialParent;
+
+            if (parent == null)
+            {
+                Canvas c = (gridRoot != null) ? gridRoot.GetComponentInParent<Canvas>() : FindObjectOfType<Canvas>();
+                parent = (c != null) ? c.transform : transform;
+            }
+
+            tutorialInstance = Instantiate(tutorialPrefab, parent);
+        }
+
+        tutorialInstance.OnClosed -= HandleTutorialClosed; // por si acaso
+        tutorialInstance.OnClosed += HandleTutorialClosed;
+
+        // Asegurar que no corre el juego
+        PauseGameplay();
     }
 
     public void StartGame()
@@ -141,26 +219,50 @@ public class DifferentManager : MonoBehaviour
         score = 0;
         currentTime = startTime;
         isRunning = false;
-        hasEnded = false;   // IMPORTANTE: lo estabas dejando true si rejuegas
+        hasEnded = false;
 
         BuildGrid();
         UpdateUI();
         SetupRound();
 
-        if (useCountdown)
+        // IMPORTANTE: que no arranque el timer todavía
+        PauseGameplay();
+
+        // Empieza cuenta atrás (controlada por DifferentState)
+        if (useCountdown && DifferentState.Instance != null)
         {
-            if (countdownRoutine != null) StopCoroutine(countdownRoutine);
-            countdownRoutine = StartCoroutine(CountdownAndPreviewRoutine());
+            // preview shuffle mientras cuenta atrás (opcional)
+            if (previewRoutine != null) StopCoroutine(previewRoutine);
+            previewRoutine = StartCoroutine(PreviewShuffleRoutine());
+
+            DifferentState.Instance.StartCountdown();
         }
         else
         {
-            isRunning = true;
+            // si no usas DifferentState, usa tu coroutine local:
+            if (useCountdown)
+            {
+                if (countdownRoutine != null) StopCoroutine(countdownRoutine);
+                countdownRoutine = StartCoroutine(CountdownAndPreviewRoutine());
+            }
+            else
+            {
+                ResumeGameplay();
+            }
         }
     }
 
     public void ResumeGameplay()
     {
         if (hasEnded) return;
+
+        // Si veníamos de preview
+        if (previewRoutine != null)
+        {
+            StopCoroutine(previewRoutine);
+            previewRoutine = null;
+        }
+
         isRunning = true;
     }
 
@@ -639,6 +741,35 @@ public class DifferentManager : MonoBehaviour
                     break;
                 }
         }
+    }
+
+    public void OnCountdownFinishedStartPlaying()
+    {
+        if (hasEnded) return;
+
+        // 1) parar preview
+        if (previewRoutine != null)
+        {
+            StopCoroutine(previewRoutine);
+            previewRoutine = null;
+        }
+
+        // 2) limpiar visuales por si quedaron flips/rotaciones/escala raras
+        for (int i = 0; i < tiles.Count; i++)
+        {
+            if (tiles[i] == null) continue;
+            tiles[i].ResetVisualToBase(stopCurrentAnim: true);
+            tiles[i].ApplyBase(currentBaseSprite, currentBaseColor);
+            // Nota: ApplyBase resetea rot/scale y pone sprite/color.
+            // Si currentBaseSprite/color todavía no están bien, no pasa nada,
+            // porque el paso 3 los recalcula.
+        }
+
+        // 3) asegurar primera ronda real NUEVA
+        SetupRound();
+
+        // 4) ahora sí: empieza el juego (timer)
+        ResumeGameplay();
     }
 
     private void AnimateToBase(int index)

@@ -49,6 +49,10 @@ public class MiniGameSelector : MonoBehaviour
     [Header("Mode Options")]
     [SerializeField] private Toggle motionTasksToggle;
 
+    [Header("Tutorial Option")]
+    [SerializeField] private Toggle showTutorialToggle;
+    private const string ShowTutorialKey = "ShowTutorialOnStart";
+
     void Start()
     {
         // --- Restaurar el último minijuego guardado ---
@@ -68,10 +72,24 @@ public class MiniGameSelector : MonoBehaviour
         currentImage.color = Color.white;
         nextImage.color = new Color(1, 1, 1, 0);
 
+        // --- Tutorial toggle: cargar + escuchar cambios ---
+        if (showTutorialToggle != null)
+        {
+            bool saved = PlayerPrefs.GetInt(ShowTutorialKey, 1) == 1; // por defecto ON
+            showTutorialToggle.SetIsOnWithoutNotify(saved);
+            showTutorialToggle.onValueChanged.AddListener(OnShowTutorialToggleChanged);
+        }
+
         // Listeners
         playButton.onClick.AddListener(OnPlayButton);
         leftArrowButton.onClick.AddListener(() => OnArrowClicked(false));
         rightArrowButton.onClick.AddListener(() => OnArrowClicked(true));
+    }
+
+    private void OnShowTutorialToggleChanged(bool value)
+    {
+        PlayerPrefs.SetInt(ShowTutorialKey, value ? 1 : 0);
+        PlayerPrefs.Save();
     }
 
     private void OnArrowClicked(bool toRight)
@@ -114,7 +132,6 @@ public class MiniGameSelector : MonoBehaviour
             currentIndex = nextIndex;
             UpdateTextUI(currentIndex);
 
-            // --- Guardar el último índice ---
             PlayerPrefs.SetInt(LastMiniGameIndexKey, currentIndex);
             PlayerPrefs.Save();
 
@@ -149,7 +166,6 @@ public class MiniGameSelector : MonoBehaviour
 
     public void OnPlayButton()
     {
-        // Guardar por seguridad también al jugar
         PlayerPrefs.SetInt(LastMiniGameIndexKey, currentIndex);
         PlayerPrefs.Save();
 

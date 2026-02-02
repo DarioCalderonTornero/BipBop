@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 public class DifferentState : MonoBehaviour
@@ -27,21 +28,25 @@ public class DifferentState : MonoBehaviour
     private void Awake()
     {
         Instance = this;
+        differentGameState = DifferentGameStateEnum.None;
+        countDownTimer = 3f;
     }
 
     private void Start()
     {
-        // Estado inicial
-        differentGameState = DifferentGameStateEnum.Countdown;
+        // Si alguien ya arrancó el countdown (por ejemplo, DifferentManager.StartGame),
+        // NO lo pises.
+        if (differentGameState != DifferentGameStateEnum.None)
+            return;
+
+        differentGameState = DifferentGameStateEnum.None;
         countDownTimer = 3f;
 
-        // Asegurar que el minijuego NO empieza aún
         if (DifferentManager.Instance != null)
             DifferentManager.Instance.PauseGameplay();
 
-        // Mostrar cuenta atrás
         if (DifferentCountDownUI.Instance != null)
-            DifferentCountDownUI.Instance.Show();
+            DifferentCountDownUI.Instance.Hide();
     }
 
     private void Update()
@@ -73,7 +78,6 @@ public class DifferentState : MonoBehaviour
     private void HandleCountdown()
     {
         countDownTimer -= Time.deltaTime;
-        timer = timerMax;
 
         if (countDownTimer <= 0f)
         {
@@ -82,7 +86,15 @@ public class DifferentState : MonoBehaviour
 
             if (DifferentCountDownUI.Instance != null)
                 DifferentCountDownUI.Instance.ShowGo(0.7f);
+
+            StartCoroutine(StartAfterGoRoutine(0.7f));
         }
+    }
+
+    private IEnumerator StartAfterGoRoutine(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        StartGameAfterGo();
     }
 
     public void StartGameAfterGo()
@@ -90,7 +102,7 @@ public class DifferentState : MonoBehaviour
         differentGameState = DifferentGameStateEnum.Playing;
 
         if (DifferentManager.Instance != null)
-            DifferentManager.Instance.ResumeGameplay();
+            DifferentManager.Instance.OnCountdownFinishedStartPlaying();
     }
 
     public float GetCountDownTimer()
@@ -102,5 +114,17 @@ public class DifferentState : MonoBehaviour
     public void SetGameOver()
     {
         differentGameState = DifferentGameStateEnum.GameOver;
+    }
+
+    public void StartCountdown()
+    {
+        differentGameState = DifferentGameStateEnum.Countdown;
+        countDownTimer = 3f;
+
+        if (DifferentManager.Instance != null)
+            DifferentManager.Instance.PauseGameplay();
+
+        if (DifferentCountDownUI.Instance != null)
+            DifferentCountDownUI.Instance.Show();
     }
 }
