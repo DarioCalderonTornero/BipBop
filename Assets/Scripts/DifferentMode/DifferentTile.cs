@@ -263,4 +263,37 @@ public class DifferentTile : MonoBehaviour
     public void SetRotation(Quaternion rot) { if (imageRt != null) imageRt.localRotation = rot; }
     public void SetRotationZ(float z) { if (imageRt != null) imageRt.localRotation = Quaternion.Euler(0f, 0f, z); }
     public void SetScale(Vector3 s) { if (imageRt != null) imageRt.localScale = s; }
+
+    public void ApplyPreview(
+    Sprite sprite,
+    Color color,
+    float rotationZDeg,
+    bool flipX,
+    bool flipY,
+    float scaleMul = 1f,
+    bool stopCurrentAnim = true)
+    {
+        if (stopCurrentAnim) StopAnim();
+
+        // Sprite + color
+        SetSprite(sprite);
+        SetColor(color);
+
+        // Rotación
+        SetRotationZ(rotationZDeg);
+
+        // Escala + Flip (solo en el sprite)
+        // Flip = escala negativa en X/Y
+        Vector3 s = baseScale * scaleMul;
+        if (flipX) s.x *= -1f;
+        if (flipY) s.y *= -1f;
+        SetScale(s);
+    }
+
+    public void ResetVisualToBase(bool stopCurrentAnim = true)
+    {
+        if (stopCurrentAnim) StopAnim();
+        SetRotation(baseRotation);
+        SetScale(baseScale);
+    }
 }

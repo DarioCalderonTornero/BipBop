@@ -113,6 +113,19 @@ public class DifferentManager : MonoBehaviour
     [SerializeField] private int xpPerPoint = 10;
     [SerializeField] private int coinsDivisor = 3; // monedas = score / 3 (como otros)
 
+    [Header("Countdown + Preview Shuffle")]
+    [SerializeField] private bool useCountdown = true;
+    [SerializeField] private float countdownSeconds = 3f;
+    [SerializeField] private float previewSwapInterval = 0.5f;
+
+    [SerializeField] private Vector2 previewScaleMulRange = new Vector2(0.85f, 1.10f);
+    [SerializeField] private bool previewAllowRotation = true;
+    [SerializeField] private bool previewAllowFlip = true;
+    [SerializeField] private bool previewAllowTint = true;
+
+    private Coroutine countdownRoutine;
+    private Coroutine previewRoutine;
+
     private void Awake()
     {
         Instance = this;
@@ -127,11 +140,22 @@ public class DifferentManager : MonoBehaviour
     {
         score = 0;
         currentTime = startTime;
-        isRunning = false; 
+        isRunning = false;
+        hasEnded = false;   // IMPORTANTE: lo estabas dejando true si rejuegas
 
         BuildGrid();
         UpdateUI();
         SetupRound();
+
+        if (useCountdown)
+        {
+            if (countdownRoutine != null) StopCoroutine(countdownRoutine);
+            countdownRoutine = StartCoroutine(CountdownAndPreviewRoutine());
+        }
+        else
+        {
+            isRunning = true;
+        }
     }
 
     public void ResumeGameplay()
@@ -225,6 +249,102 @@ public class DifferentManager : MonoBehaviour
 
         RestartOddSwapRoutine(); // seguirá respetando score>=50
         OnRoundChanged?.Invoke();
+    }
+
+    private IEnumerator CountdownAndPreviewRoutine()
+    {
+        // Arranca “barajado” visual
+        if (previewRoutine != null) StopCoroutine(previewRoutine);
+        previewRoutine = StartCoroutine(PreviewShuffleRoutine());
+
+        float t = countdownSeconds;
+
+        while (t > 0f)
+        {
+            if (instructionText != null)
+                instructionText.text = Mathf.CeilToInt(t).ToString();
+
+            t -= Time.deltaTime;
+            yield return null;
+        }
+
+        // Para preview
+        if (previewRoutine != null)
+        {
+            StopCoroutine(previewRoutine);
+            previewRoutine = null;
+        }
+
+        // Re-aplica la ronda real (por si el preview “ensució” visualmente)
+        // Esto deja todo correcto: base + odd + (y posible singleton)
+        SetupRound();
+
+        // Texto normal
+        if (instructionText != null)
+            instructionText.text = (currentMode == RoundMode.FindSingleton)
+                ? "Busca el sprite solitario"
+                : "¡Toca el diferente!";
+
+        isRunning = true;
+        countdownRoutine = null;
+    }
+
+    private IEnumerator PreviewShuffleRoutine()
+    {
+        var wait = new WaitForSeconds(previewSwapInterval);
+
+        while (true)
+        {
+            ApplyPreviewToAllTiles();
+            yield return wait;
+        }
+    }
+
+    private void ApplyPreviewToAllTiles()
+    {
+        if (tiles.Count == 0) return;
+
+        // Necesitamos sprites; si no hay, no hacemos nada
+        if (patternSprites == null || patternSprites.Length == 0) return;
+
+        for (int i = 0; i < tiles.Count; i++)
+        {
+            DifferentTile t = tiles[i];
+            if (t == null) continue;
+
+            // Sprite random
+            Sprite sp = patternSprites[UnityEngine.Random.Range(0, patternSprites.Length)];
+
+            // Color base random (o blanco si no hay)
+            Color baseCol = (patternColors != null && patternColors.Length > 0)
+                ? patternColors[UnityEngine.Random.Range(0, patternColors.Length)]
+                : Color.white;
+
+            // Tint opcional (como en tu tipo TintColor)
+            Color col = baseCol;
+            if (previewAllowTint)
+            {
+                if (oddTintColors != null && oddTintColors.Length > 0 && UnityEngine.Random.value < 0.55f)
+                    col = oddTintColors[UnityEngine.Random.Range(0, oddTintColors.Length)];
+                else if (UnityEngine.Random.value < 0.55f)
+                    col = GenerateTintedColor(baseCol);
+            }
+
+            // Rotación
+            float rotZ = 0f;
+            if (previewAllowRotation)
+                rotZ = UnityEngine.Random.Range(0f, 360f);
+
+            // Flip
+            bool flipX = previewAllowFlip && (UnityEngine.Random.value < 0.5f);
+            bool flipY = previewAllowFlip && (UnityEngine.Random.value < 0.15f); // Y menos frecuente
+
+            // Escala
+            float scaleMul = UnityEngine.Random.Range(previewScaleMulRange.x, previewScaleMulRange.y);
+
+            // ESTE MÉTODO ES EL QUE AÑADISTE EN DifferentTile (ApplyPreview)
+            t.ApplyPreview(sp, col, rotZ, flipX, flipY, scaleMul, stopCurrentAnim: true);
+        }
     }
 
     private void SetupSingletonRound()
@@ -763,6 +883,17 @@ public class DifferentManager : MonoBehaviour
         {
             StopCoroutine(transitionRoutine);
             transitionRoutine = null;
+        }
+
+        if (countdownRoutine != null)
+        {
+            StopCoroutine(countdownRoutine);
+            countdownRoutine = null;
+        }
+        if (previewRoutine != null)
+        {
+            StopCoroutine(previewRoutine);
+            previewRoutine = null;
         }
 
         EndGame();

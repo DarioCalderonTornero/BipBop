@@ -3255,12 +3255,12 @@ MonoBehaviour:
   timeBarImage: {fileID: 1044742320}
   instructionText: {fileID: 2048003040}
   useTimer: 1
-  startTime: 6
+  startTime: 10
   gridRoot: {fileID: 790208311}
   tilePrefab: {fileID: 3454700831322126072, guid: 4057e54f284229a4cb1cb6ce0dd803f1, type: 3}
   itemCount: 20
   failOnWrongClick: 1
-  timeBonusOnCorrect: 1.5
+  timeBonusOnCorrect: 2.5
   patternSprites:
   - {fileID: -1550980054046952417, guid: cdddab9a6aeab4f48ac1e7c14a3d9271, type: 3}
   - {fileID: 8470847437124028456, guid: b880d28c03ef37a4d952702e29ab1c7d, type: 3}
@@ -3292,6 +3292,13 @@ MonoBehaviour:
   recordPlayerPrefsKey: MaxRecordDifferent
   xpPerPoint: 10
   coinsDivisor: 3
+  useCountdown: 1
+  countdownSeconds: 3.5
+  previewSwapInterval: 0.5
+  previewScaleMulRange: {x: 0.85, y: 1.1}
+  previewAllowRotation: 1
+  previewAllowFlip: 1
+  previewAllowTint: 1
 --- !u!4 &1529303107
 Transform:
   m_ObjectHideFlags: 0
