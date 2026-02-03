@@ -5000,7 +5000,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.00383, y: -0.0036316}
+  m_AnchoredPosition: {x: -0.00383, y: -196}
   m_SizeDelta: {x: 963.57, y: 2152}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!225 &1050546000
@@ -5537,8 +5537,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4280585401
-  m_fontColor: {r: 0.7264151, g: 0.54899454, b: 0.14048593, a: 1}
+    rgba: 4278321407
+  m_fontColor: {r: 1, g: 0, b: 0.0077323914, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -8364,10 +8364,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1558285454}
     m_Modifications:
-    - target: {fileID: 1011597880602472387, guid: e3d7c91ec435a8d41a75a45fbf3e38d2, type: 3}
-      propertyPath: m_Alpha
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 3857302625861003977, guid: e3d7c91ec435a8d41a75a45fbf3e38d2, type: 3}
       propertyPath: pauseGameButton
       value: 
@@ -8375,10 +8371,6 @@ PrefabInstance:
     - target: {fileID: 6206122451312572187, guid: e3d7c91ec435a8d41a75a45fbf3e38d2, type: 3}
       propertyPath: m_Name
       value: GamePauseUI
-      objectReference: {fileID: 0}
-    - target: {fileID: 6206122451312572187, guid: e3d7c91ec435a8d41a75a45fbf3e38d2, type: 3}
-      propertyPath: m_IsActive
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6813163647669248191, guid: e3d7c91ec435a8d41a75a45fbf3e38d2, type: 3}
       propertyPath: m_Pivot.x
