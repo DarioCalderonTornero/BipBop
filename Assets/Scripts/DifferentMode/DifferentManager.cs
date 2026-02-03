@@ -64,6 +64,11 @@ public class DifferentManager : MonoBehaviour
     [SerializeField] private float oddSwapInterval = 1.5f;
     [SerializeField] private float oddSwapAnimDuration = 0.12f; // suave pero rápida
 
+    [Header("Sounds")]
+    [SerializeField] private AudioClip correctAudioClip1;
+    [SerializeField] private AudioClip correctAudioClip2;
+    [SerializeField] private AudioClip errorAudioClip;
+
     private readonly List<DifferentTile> tiles = new List<DifferentTile>();
     private int oddIndex = -1;
     private DifferenceType currentType;
@@ -863,6 +868,16 @@ public class DifferentManager : MonoBehaviour
         }
     }
 
+    private AudioClip GetRandomCorrectAudio()
+    {
+        int randomNumber = UnityEngine.Random.Range(0, 10);
+
+        if (randomNumber >= 5)
+            return correctAudioClip1;
+
+        else return correctAudioClip2;
+    }
+
     private void OnTileClicked(int clickedIndex)
     {
         if (!isRunning) return;
@@ -874,6 +889,8 @@ public class DifferentManager : MonoBehaviour
             tiles[clickedIndex].Pop(0.10f, 1.20f);
 
             score += 1;
+
+            SoundManager.Instance.PlaySound(GetRandomCorrectAudio(), 1f);
 
             if (score == scoreToEnableOddSwap)
                 RestartOddSwapRoutine();
@@ -898,7 +915,10 @@ public class DifferentManager : MonoBehaviour
         else
         {
             if (failOnWrongClick)
+            {
                 Finish();
+                SoundManager.Instance.PlaySound(errorAudioClip, 1f);
+            }
         }
     }
 

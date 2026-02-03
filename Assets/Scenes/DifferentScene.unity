@@ -3422,7 +3422,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.9059143, y: -7.1413574}
+  m_AnchoredPosition: {x: 0.9058838, y: -7.1413574}
   m_SizeDelta: {x: 27.1785, y: -255.0171}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &875485766
@@ -5094,6 +5094,9 @@ MonoBehaviour:
   minScaleDeltaFromOne: 0.1
   oddSwapInterval: 1.5
   oddSwapAnimDuration: 0.12
+  correctAudioClip1: {fileID: 8300000, guid: 8f08d3eeb209a6d4096d6bc193635cef, type: 3}
+  correctAudioClip2: {fileID: 8300000, guid: 7470b18984649c64bbcc6717746fdf84, type: 3}
+  errorAudioClip: {fileID: 8300000, guid: a63c4b0d00405df46ac7c8dd542b85ff, type: 3}
   scoreToEnableOddSwap: 50
   playRoundTransitionOnCorrect: 1
   roundTransitionDuration: 0.16
@@ -5241,7 +5244,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.000061035156, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1559619096

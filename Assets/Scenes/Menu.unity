@@ -7662,7 +7662,8 @@ MonoBehaviour:
   geometricSceneMusicClip: {fileID: 8300000, guid: 6b24ce62a7b52bf40a5c8cac17c8b285, type: 3}
   dodgeSceneMusicClip: {fileID: 8300000, guid: fed83560cc7aa994b8415e44bee1e67c, type: 3}
   gridSceneMusicClip: {fileID: 8300000, guid: 3f777968df73d394b8891fc8d473af6e, type: 3}
-  masterMusicMultiplier: 0.2
+  differentSceneMusicClip: {fileID: 8300000, guid: 4480bd55377942748adeb8150efe9691, type: 3}
+  masterMusicMultiplier: 0.5
 --- !u!82 &319449791
 AudioSource:
   m_ObjectHideFlags: 0

@@ -27,6 +27,7 @@ public class MusicManager : MonoBehaviour
     [SerializeField] private AudioClip geometricSceneMusicClip;
     [SerializeField] private AudioClip dodgeSceneMusicClip;
     [SerializeField] private AudioClip gridSceneMusicClip;
+    [SerializeField] private AudioClip differentSceneMusicClip;
 
     [Header("Global Music Multiplier (Design)")]
     [SerializeField, Range(0f, 1f)]
@@ -104,6 +105,9 @@ public class MusicManager : MonoBehaviour
                 break;
             case "GridScene":
                 PlayMusic(gridSceneMusicClip);
+                break;
+            case "DifferentScene":
+                PlayMusic(differentSceneMusicClip);
                 break;
             default:
                 Debug.Log("Music default state");
