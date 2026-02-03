@@ -1,25 +1,24 @@
-﻿using System;
+﻿// LogicaJuego.cs
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.Localization;
-using UnityEngine.Localization.Settings;
 
 public class LogicaJuego : MonoBehaviour
 {
     public static LogicaJuego Instance { get; private set; }
 
     [Header("UI")]
-    public TextMeshProUGUI instructionText;   // Texto para mostrar la instrucción
-    public Image instructionIcon;            // <-- NUEVO: icono de la instrucción
-    public Image timerUI;                    // Imagen radial para mostrar el tiempo restante
-    public float startTime;                  // Tiempo inicial en segundos
+    public TextMeshProUGUI instructionText;
+    public Image instructionIcon;
+    public Image timerUI;
+    public float startTime;
 
     private float currentTime;
-    private bool isGameActive = false; // Se desactiva hasta que pasen los 3 segundos
+    private bool isGameActive = false;
 
     public event EventHandler OnGameOver;
 
@@ -51,9 +50,9 @@ public class LogicaJuego : MonoBehaviour
     [System.Serializable]
     public class TaskInfo
     {
-        public TaskType type;             // Identificador lógico
-        public LocalizedString text;      // Texto localizado
-        public Sprite icon;               // <-- NUEVO: icono para esta tarea
+        public TaskType type;
+        public LocalizedString text;
+        public Sprite icon;
     }
 
     [Header("Localization")]
@@ -62,52 +61,192 @@ public class LogicaJuego : MonoBehaviour
     public LocalizedString gameOverText;
 
     [Header("Countdown Icon Shuffle")]
-    [SerializeField] private float iconShuffleInterval = 0.08f; 
+    [SerializeField] private float iconShuffleInterval = 0.08f;
     [SerializeField] private float iconShuffleDuration = 2f;
+
+    // -------------------------
+    // Tutorial (global toggle)
+    // -------------------------
+    [Header("Tutorial Panel")]
+    [SerializeField] private TutorialPanelUI tutorialPrefab;
+    [SerializeField] private Transform tutorialParent;
+    private TutorialPanelUI tutorialInstance;
+
+    private const string ShowTutorialKey = "ShowTutorialOnStart";
+
+    // -------------------------
+    // Countdown coroutines control
+    // -------------------------
+    private Coroutine countdownRoutine;
+    private Coroutine fillRoutine;
+    private Coroutine shuffleRoutine;
 
     private void Awake()
     {
         Instance = this;
 
         instructionText.text = readyText.GetLocalizedString();
-        SetInstructionIcon(null); // Oculta icono en "Ready"
+        SetInstructionIcon(null);
 
         timerUI.fillAmount = 0f;
     }
 
-    void Start()
+    private void Start()
     {
-        StartCoroutine(StartGameAfterDelay(3.1f));
+        hasEnded = false;
+        isGameActive = false;
+
+        bool showTutorialOnStart = PlayerPrefs.GetInt(ShowTutorialKey, 1) == 1;
+
+        if (showTutorialOnStart && tutorialPrefab != null)
+        {
+            ShowTutorial();
+        }
+        else
+        {
+            HideAnyExistingTutorialPanel();
+            BeginGameAfterTutorial();
+        }
     }
 
-    private IEnumerator StartGameAfterDelay(float delay)
+    private void OnDisable()
     {
-        CountDownUI.Instance.Show();
+        // Por si cambias de escena o desactivas el GO a mitad countdown
+        StopCountdownRoutines();
+    }
 
-        StartCoroutine(FillTimerDuringCountdown(2f));
-        StartCoroutine(ShuffleTaskIcons(iconShuffleDuration));
+    // ================
+    // Tutorial flow
+    // ================
+    private void ShowTutorial()
+    {
+        if (tutorialInstance != null) return;
 
+        var existing = FindObjectOfType<TutorialPanelUI>(true);
+        if (existing != null)
+        {
+            tutorialInstance = existing;
+            tutorialInstance.gameObject.SetActive(true);
+        }
+        else
+        {
+            Transform parent = tutorialParent;
+            if (parent == null)
+            {
+                Canvas c = FindObjectOfType<Canvas>();
+                parent = (c != null) ? c.transform : transform;
+            }
+            tutorialInstance = Instantiate(tutorialPrefab, parent);
+        }
+
+        tutorialInstance.OnClosed -= HandleTutorialClosed;
+        tutorialInstance.OnClosed += HandleTutorialClosed;
+
+        PauseGameplay();
+    }
+
+    private void HandleTutorialClosed()
+    {
+        if (tutorialInstance != null)
+            tutorialInstance.OnClosed -= HandleTutorialClosed;
+
+        tutorialInstance = null;
+        BeginGameAfterTutorial();
+    }
+
+    private void HideAnyExistingTutorialPanel()
+    {
+        var existing = FindObjectOfType<TutorialPanelUI>(true);
+        if (existing != null)
+            existing.gameObject.SetActive(false);
+    }
+
+    private void BeginGameAfterTutorial()
+    {
+        // Arranque limpio del countdown + preview
+        StartCountdownSequence();
+    }
+
+    // ================
+    // Countdown flow
+    // ================
+    private void StartCountdownSequence()
+    {
+        StopCountdownRoutines();
+
+        // Estado inicial visual
+        instructionText.text = readyText.GetLocalizedString();
+        SetInstructionIcon(null);
+        timerUI.fillAmount = 0f;
+
+        if (CountDownUI.Instance != null)
+            CountDownUI.Instance.Show();
+
+        // FX durante countdown
+        fillRoutine = StartCoroutine(FillTimerDuringCountdown(2f));
+        shuffleRoutine = StartCoroutine(ShuffleTaskIcons(iconShuffleDuration));
+
+        // Usa GameStates si existe; si no, fallback local
+        if (GameStates.Instance != null)
+        {
+            GameStates.Instance.StartCountdown(); // método nuevo en GameStates
+        }
+        else
+        {
+            countdownRoutine = StartCoroutine(LocalCountdownRoutine(3.1f));
+        }
+    }
+
+    private IEnumerator LocalCountdownRoutine(float delay)
+    {
         yield return new WaitForSeconds(delay);
 
-        CountDownUI.Instance.ShowMessage(goText.GetLocalizedString());
+        if (CountDownUI.Instance != null)
+            CountDownUI.Instance.ShowMessage(goText.GetLocalizedString());
 
         yield return new WaitForSeconds(0.8f);
 
-        CountDownUI.Instance.Hide();
-        isGameActive = true;
+        OnCountdownFinishedStartPlaying();
+        countdownRoutine = null;
+    }
+
+    public void OnCountdownFinishedStartPlaying()
+    {
+        if (hasEnded) return;
+
+        // Parar preview/FX por seguridad
+        StopCountdownRoutines();
+
+        if (CountDownUI.Instance != null)
+            CountDownUI.Instance.Hide();
 
         instructionText.text = "";
-        SetInstructionIcon(null); // Oculta icono al arrancar
+        SetInstructionIcon(null);
 
+        isGameActive = true;
         StartNewTask();
     }
 
-    void Update()
+    private void StopCountdownRoutines()
+    {
+        if (countdownRoutine != null) { StopCoroutine(countdownRoutine); countdownRoutine = null; }
+        if (fillRoutine != null) { StopCoroutine(fillRoutine); fillRoutine = null; }
+        if (shuffleRoutine != null) { StopCoroutine(shuffleRoutine); shuffleRoutine = null; }
+    }
+
+    public void PauseGameplay()
+    {
+        isGameActive = false;
+    }
+
+    // ================
+    // Game loop
+    // ================
+    private void Update()
     {
         if (!isGameActive || hasEnded) return;
 
         currentTime -= Time.deltaTime;
-
         timerUI.fillAmount = currentTime / startTime;
 
         if (currentTime <= 0f)
@@ -125,9 +264,7 @@ public class LogicaJuego : MonoBehaviour
         if (actionType == currentTask.type)
         {
             if (ClassicModeUIEffects.Instance != null)
-            {
                 ClassicModeUIEffects.Instance.PlayEffectForTask(actionType);
-            }
 
             SoundManager.Instance.PlaySound(successAudioClip, 1f);
 
@@ -159,14 +296,12 @@ public class LogicaJuego : MonoBehaviour
 
         if (availableTasks.Count == 0)
         {
-            // Por seguridad, si el jugador desactiva todo, forzamos TAP
             currentTask = null;
             instructionText.text = "";
             SetInstructionIcon(null);
             return;
         }
 
-        // Elegir nueva tarea distinta de la anterior
         TaskInfo newTask;
         do
         {
@@ -175,17 +310,13 @@ public class LogicaJuego : MonoBehaviour
 
         currentTask = newTask;
 
-        // Texto + Icono
         instructionText.text = currentTask.text.GetLocalizedString();
         SetInstructionIcon(currentTask.icon);
 
-        // Reset tiempo
         currentTime = startTime;
         startTime = Mathf.Max(2f, startTime - 0.05f);
 
-        // Si quieres que al reiniciar el tiempo se vea lleno:
         timerUI.fillAmount = 1f;
-        // (tu versión ponía 0f; eso visualmente parece “vacío” al empezar)
     }
 
     private void SetInstructionIcon(Sprite sprite)
@@ -208,7 +339,7 @@ public class LogicaJuego : MonoBehaviour
             yield return null;
         }
 
-        timerUI.fillAmount = 1f; // asegúralo al final
+        timerUI.fillAmount = 1f;
     }
 
     private IEnumerator ShuffleTaskIcons(float duration)
@@ -217,7 +348,6 @@ public class LogicaJuego : MonoBehaviour
 
         float t = 0f;
 
-        // Lista de iconos disponibles (respetando MotionTasks si quieres)
         List<Sprite> icons = new List<Sprite>();
         bool motionEnabled = PlayerPrefs.GetInt("MotionTasks", 1) == 1;
 
@@ -273,26 +403,18 @@ public class LogicaJuego : MonoBehaviour
         hasEnded = true;
 
         instructionText.text = gameOverText.GetLocalizedString();
-        SetInstructionIcon(null); // Oculta icono en Game Over
+        SetInstructionIcon(null);
 
         int coinsEarned = MainGamePoints.Instance.GetCoinsEarned();
 
         SaveRecordIfNeeded();
 
         CoinsRewardUI rewardUI = FindObjectOfType<CoinsRewardUI>(true);
-        if (rewardUI != null)
-        {
-            rewardUI.ShowReward(coinsEarned);
-        }
-        else
-        {
-            CurrencyManager.Instance.AddCoins(coinsEarned);
-        }
+        if (rewardUI != null) rewardUI.ShowReward(coinsEarned);
+        else CurrencyManager.Instance.AddCoins(coinsEarned);
 
         if (PlayFabLoginManager.Instance != null && PlayFabLoginManager.Instance.IsLoggedIn)
-        {
             PlayFabScoreManager.Instance.SubmitScore("HighScore", MainGamePoints.Instance.GetScore());
-        }
 
         int totalCoins = PlayerPrefs.GetInt("CoinCount", 0);
         totalCoins += coinsEarned;
@@ -302,30 +424,13 @@ public class LogicaJuego : MonoBehaviour
         if (DailyMissionManager.Instance != null)
         {
             DailyMissionManager.Instance.AddProgress("juega_1_partida", 1);
-        }
-
-        if (DailyMissionManager.Instance != null)
-        {
             DailyMissionManager.Instance.AddProgress("juega_3_partidas", 1);
-        }
-
-        if (DailyMissionManager.Instance != null)
-        {
             DailyMissionManager.Instance.AddProgress("juega_8_partidas", 1);
-        }
-
-        if (DailyMissionManager.Instance != null)
-        {
             DailyMissionManager.Instance.AddProgress("juega_10_partidas", 1);
-        }
 
-        if (DailyMissionManager.Instance != null && MainGamePoints.Instance.GetScore() >= 10)
-        {
-            DailyMissionManager.Instance.AddProgress("consigue_10_puntos_clásico", 1);
-        }
+            if (MainGamePoints.Instance.GetScore() >= 10)
+                DailyMissionManager.Instance.AddProgress("consigue_10_puntos_clásico", 1);
 
-        if (DailyMissionManager.Instance != null)
-        {
             DailyMissionManager.Instance.AddProgress("juega_5_partidas_clásico", 1);
         }
     }

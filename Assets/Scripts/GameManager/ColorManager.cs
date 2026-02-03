@@ -100,6 +100,12 @@ public class ColorManager : MonoBehaviour
     [SerializeField] private float candidatesShuffleDuration = 3f;    
     private Coroutine candidatesShuffleRoutine;
 
+    [Header("Tutorial Panel")]
+    [SerializeField] private TutorialPanelUI tutorialPrefab;
+    [SerializeField] private Transform tutorialParent;
+    private TutorialPanelUI tutorialInstance;
+    private const string ShowTutorialKey = "ShowTutorialOnStart";
+
     private void Awake()
     {
         Instance = this;
@@ -112,9 +118,98 @@ public class ColorManager : MonoBehaviour
         if (ColorGameState.Instance != null)
             ColorGameState.Instance.OnPlayingColorGame += HandleOnPlayingColorGame;
 
-        if (GameStates.Instance != null)
-            GameStates.Instance.OnCountDown += GameStates_OnCountDown;
+        bool showTutorialOnStart = PlayerPrefs.GetInt(ShowTutorialKey, 1) == 1;
+
+        if (showTutorialOnStart && tutorialPrefab != null)
+        {
+            ShowTutorial();
+        }
+        else
+        {
+            HideAnyExistingTutorialPanel();
+            BeginGameAfterTutorial();
+        }
     }
+
+    private void ShowTutorial()
+    {
+        if (tutorialInstance != null) return;
+
+        var existing = FindObjectOfType<TutorialPanelUI>(true);
+        if (existing != null)
+        {
+            tutorialInstance = existing;
+            tutorialInstance.gameObject.SetActive(true);
+        }
+        else
+        {
+            Transform parent = tutorialParent;
+            if (parent == null)
+            {
+                Canvas c = FindObjectOfType<Canvas>();
+                parent = (c != null) ? c.transform : transform;
+            }
+            tutorialInstance = Instantiate(tutorialPrefab, parent);
+        }
+
+        tutorialInstance.OnClosed -= HandleTutorialClosed;
+        tutorialInstance.OnClosed += HandleTutorialClosed;
+
+        PauseGameplay();
+    }
+
+    private void HandleTutorialClosed()
+    {
+        if (tutorialInstance != null)
+            tutorialInstance.OnClosed -= HandleTutorialClosed;
+
+        tutorialInstance = null;
+        BeginGameAfterTutorial();
+    }
+
+    private void HideAnyExistingTutorialPanel()
+    {
+        var existing = FindObjectOfType<TutorialPanelUI>(true);
+        if (existing != null)
+            existing.gameObject.SetActive(false);
+    }
+    private void BeginGameAfterTutorial()
+    {
+        // Arrancamos el countdown del minijuego aquí (como en Geométrico)
+        StartCountdownFlow();
+    }
+
+    private void PauseGameplay()
+    {
+        // Congelado antes de empezar
+        hasStarted = false;
+    }
+
+    // ==================
+    // Countdown flow
+    // ==================
+    private void StartCountdownFlow()
+    {
+        hasEnded = false;
+        hasStarted = false;
+        deathType = DeathType.None;
+
+        // UI base
+        if (timeBarImage != null)
+            timeBarImage.fillAmount = 1f;
+
+        if (comboText != null)
+            comboText.gameObject.SetActive(false);
+
+        // shuffle visual durante countdown
+        if (candidatesShuffleRoutine != null) StopCoroutine(candidatesShuffleRoutine);
+        candidatesShuffleRoutine = StartCoroutine(ShuffleCandidatesDuringCountdown());
+
+        // start countdown state + UI numbers
+        if (ColorGameState.Instance != null)
+            ColorGameState.Instance.StartCountdown();
+    }
+
 
     private void GameStates_OnCountDown(object sender, EventArgs e)
     {
@@ -129,32 +224,16 @@ public class ColorManager : MonoBehaviour
         if (candidateButtons == null || candidateButtons.Count == 0 || colorSprites == null || colorSprites.Length == 0)
             yield break;
 
-        float duration = candidatesShuffleDuration;
-
-        // estado inicial (por si acaso)
-        foreach (var btn in candidateButtons)
-        {
-            if (btn == null) continue;
-            var img = btn.image;
-            if (img == null) continue;
-            // se quedan blancos si tú ya lo pones, no lo toco aquí
-        }
-
-        // Sprites actuales por casilla (para rotarlos)
+        float t = 0f;
         Sprite[] current = new Sprite[candidateButtons.Count];
 
-        float t = 0f;
-
-        while (t < duration && GameStates.Instance != null && GameStates.Instance.countDown() && !hasStarted && !hasEnded)
+        while (t < candidatesShuffleDuration && !hasStarted && !hasEnded)
         {
-            // 1) rota: casilla i toma lo que tenía la anterior
             for (int i = current.Length - 1; i > 0; i--)
                 current[i] = current[i - 1];
 
-            // 2) en la casilla 0 metemos un color aleatorio nuevo
             current[0] = colorSprites[UnityEngine.Random.Range(0, colorSprites.Length)];
 
-            // 3) aplicar a botones en orden (1..4)
             for (int i = 0; i < candidateButtons.Count; i++)
             {
                 var btn = candidateButtons[i];
@@ -164,7 +243,7 @@ public class ColorManager : MonoBehaviour
                 if (img == null) continue;
 
                 img.sprite = current[i];
-                img.color = Color.white; // importante: que se vea el sprite tal cual
+                img.color = Color.white;
             }
 
             yield return new WaitForSeconds(candidatesShuffleInterval);
@@ -176,11 +255,8 @@ public class ColorManager : MonoBehaviour
 
     private void Update()
     {
-        if (hasEnded || !hasStarted)
-            return;
-
-        if (deathType != DeathType.None)
-            return;
+        if (hasEnded || !hasStarted) return;
+        if (deathType != DeathType.None) return;
 
         currentTime -= Time.deltaTime;
         timeSinceLastHit += Time.deltaTime;
@@ -188,16 +264,11 @@ public class ColorManager : MonoBehaviour
         if (timeBarImage != null)
             timeBarImage.fillAmount = Mathf.Clamp01(currentTime / startTime);
 
-        // Si estás en combo y te pasas del tiempo, lo rompes
         if (isComboActive && timeSinceLastHit > maxTimeBetweenHits)
-        {
             EndCombo();
-        }
 
         if (currentTime <= 0f)
-        {
             DecideDeathType();
-        }
     }
 
     private void HandleOnPlayingColorGame(object sender, EventArgs e)

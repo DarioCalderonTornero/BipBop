@@ -117,6 +117,16 @@ public class GridGameManager : MonoBehaviour
     [SerializeField] private float introDropHeight = 3f;
     [SerializeField] private float introDropDuration = 0.8f;
 
+    [Header("Tutorial Panel")]
+    [SerializeField] private bool showTutorialOnStart = true;
+    [SerializeField] private TutorialPanelUI tutorialPrefab;
+    [SerializeField] private Transform tutorialParent;
+
+    private const string ShowTutorialKey = "ShowTutorialOnStart";
+    private TutorialPanelUI tutorialInstance;
+
+    private bool hasStarted = false;
+
     // Si tus 3 prefabs de gemas coinciden con azul, verde, morado:
     Color GetGemColorFromPrefab(GameObject prefab)
     {
@@ -130,30 +140,128 @@ public class GridGameManager : MonoBehaviour
     {
         Instance = this;
 
-        // IMPORTANTE: inicializar aquí
+        // Preferencia tutorial
+        showTutorialOnStart = PlayerPrefs.GetInt(ShowTutorialKey, 1) == 1;
+
+        // Init gridCells aquí
         gridCells = new Transform[gridSize, gridSize];
-        ApplyBaseScaleToAllCells();
         int index = 0;
         for (int y = 0; y < gridSize; y++)
         {
             for (int x = 0; x < gridSize; x++)
                 gridCells[x, y] = gridParent.GetChild(index++);
         }
+
+        ApplyBaseScaleToAllCells();
     }
 
     private void Start()
     {
-        // YA NO rellenes gridCells aquí
         upButton.onClick.AddListener(() => TryMove(0, -1));
         downButton.onClick.AddListener(() => TryMove(0, 1));
         leftButton.onClick.AddListener(() => TryMove(-1, 0));
         rightButton.onClick.AddListener(() => TryMove(1, 0));
 
+        coinTimerImage.fillAmount = 1f;
+        coinTimerImage.color = fullColor;
+
+        UpdateScoreText();
+
+        // --- Tutorial flow ---
+        if (showTutorialOnStart && tutorialPrefab != null)
+        {
+            ShowTutorial();
+        }
+        else
+        {
+            HideAnyExistingTutorialPanel();
+            BeginGameAfterTutorial();
+        }
+    }
+
+    private void HideAnyExistingTutorialPanel()
+    {
+        var existing = FindObjectOfType<TutorialPanelUI>(true);
+        if (existing != null)
+            existing.gameObject.SetActive(false);
+    }
+
+    private void ShowTutorial()
+    {
+        if (tutorialInstance != null) return;
+
+        var existing = FindObjectOfType<TutorialPanelUI>(true);
+        if (existing != null)
+        {
+            tutorialInstance = existing;
+            tutorialInstance.gameObject.SetActive(true);
+        }
+        else
+        {
+            Transform parent = tutorialParent;
+            if (parent == null)
+            {
+                Canvas c = FindObjectOfType<Canvas>();
+                parent = (c != null) ? c.transform : transform;
+            }
+
+            tutorialInstance = Instantiate(tutorialPrefab, parent);
+        }
+
+        tutorialInstance.OnClosed -= HandleTutorialClosed;
+        tutorialInstance.OnClosed += HandleTutorialClosed;
+
+        // Mientras hay tutorial, NO dejes empezar nada
+        PauseGameplay();
+    }
+
+    private void HandleTutorialClosed()
+    {
+        if (tutorialInstance != null)
+            tutorialInstance.OnClosed -= HandleTutorialClosed;
+
+        tutorialInstance = null;
+
+        BeginGameAfterTutorial();
+    }
+
+    private void BeginGameAfterTutorial()
+    {
+        StartGame();
+    }
+
+    public void StartGame()
+    {
+        if (hasStarted) return;
+        hasStarted = true;
+
+        score = 0;
+        isGameOver = false;
+        isDyingByArrow = false;
+        isMoving = false;
+
+        coinObj = null;
         coinTimer = coinTimeLimit;
         coinTimerImage.fillAmount = 1f;
         coinTimerImage.color = fullColor;
 
         UpdateScoreText();
+
+        // ✅ IMPORTANTE: arrancamos countdown desde el STATE, no aquí
+        if (GridState.Instance != null)
+            GridState.Instance.StartCountdown();
+        else
+        {
+            // fallback si no hay GridState
+            StartIntroDropDuringCountdown();
+            StartGameplayAfterCountdown();
+        }
+    }
+
+    public void PauseGameplay()
+    {
+        // en Grid basta con NO permitir movimiento y NO correr loops
+        // (tu Update ya mira GridState.Playing)
     }
 
     // ===== NUEVO: caída durante la cuenta atrás =====

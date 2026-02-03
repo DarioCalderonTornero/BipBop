@@ -1,4 +1,4 @@
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
 using System.Collections;
 
@@ -9,30 +9,25 @@ public class ColorCountDownUI : MonoBehaviour
     public TextMeshProUGUI countDownText;
 
     private Animator myAnimator;
-
     private bool isCustomMessage = false;
 
     private void Awake()
     {
         Instance = this;
-    }
 
-    private void Start()
-    {
+        // ✅ disponible antes de Start()
         myAnimator = GetComponent<Animator>();
     }
 
     private void Update()
     {
-        if (!isCustomMessage)
-        {
-            float t = ColorGameState.Instance.GetCountDownTimer();
+        if (isCustomMessage) return;
+        if (ColorGameState.Instance == null) return;
 
-            if (t > 0f)
-            {
-                countDownText.text = Mathf.Ceil(t).ToString();
-            }
-        }
+        float t = ColorGameState.Instance.GetCountDownTimer();
+
+        if (t > 0f)
+            countDownText.text = Mathf.Ceil(t).ToString();
     }
 
     public void Show()
@@ -41,9 +36,7 @@ public class ColorCountDownUI : MonoBehaviour
         countDownText.gameObject.SetActive(true);
 
         if (myAnimator != null)
-        {
             myAnimator.SetBool("IsCountDown", true);
-        }
     }
 
     public void Hide()
@@ -75,15 +68,13 @@ public class ColorCountDownUI : MonoBehaviour
         if (myAnimator != null)
         {
             myAnimator.SetBool("IsCountDown", false);
-            myAnimator.SetBool("CountDownFinish", true); 
+            myAnimator.SetBool("CountDownFinish", true);
         }
 
         countDownText.gameObject.SetActive(false);
         isCustomMessage = false;
 
         if (ColorGameState.Instance != null)
-        {
             ColorGameState.Instance.StartGameAfterGo();
-        }
     }
 }

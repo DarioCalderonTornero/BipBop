@@ -1,4 +1,5 @@
-using System;
+﻿using System;
+using System.Collections;
 using UnityEngine;
 
 public class ColorGameState : MonoBehaviour
@@ -12,62 +13,75 @@ public class ColorGameState : MonoBehaviour
     {
         None,
         Countdown,
-        Go,       
+        Go,
         Playing,
         GameOver,
     }
 
     public ColorGameStateEnum colorGameState;
 
-    [SerializeField] private float timer;
-    [SerializeField] private float timerMax = 10f;
-
     private float countDownTimer = 3f;
+
+    [SerializeField] private float goDuration = 0.7f;
+
+    private Coroutine goRoutine;
+    private Coroutine ensureUiRoutine;
 
     private void Awake()
     {
         Instance = this;
+        colorGameState = ColorGameStateEnum.None;
+        countDownTimer = 3f;
     }
 
     private void Start()
     {
-        colorGameState = ColorGameStateEnum.Countdown;
-        countDownTimer = 3f;
-
-        if (ColorCountDownUI.Instance != null)
-        {
-            ColorCountDownUI.Instance.Show();
-        }
+        // ❌ NO auto StartCountdown aquí (lo arranca el manager después del tutorial)
+        /* if (ColorCountDownUI.Instance != null)
+            ColorCountDownUI.Instance.Hide();*/
     }
 
     private void Update()
     {
-        ColorGameStates();
+        UpdateState();
     }
 
-    private void ColorGameStates()
+    public void StartCountdown()
+    {
+        colorGameState = ColorGameStateEnum.Countdown;
+        countDownTimer = 3f;
+
+        // intento inmediato
+        if (ColorCountDownUI.Instance != null)
+        {
+            ColorCountDownUI.Instance.Show();
+        }
+        else
+        {
+            if (ensureUiRoutine != null) StopCoroutine(ensureUiRoutine);
+            ensureUiRoutine = StartCoroutine(EnsureCountdownUIShown());
+        }
+    }
+
+    private IEnumerator EnsureCountdownUIShown()
+    {
+        yield return null;
+
+        if (colorGameState == ColorGameStateEnum.Countdown &&
+            ColorCountDownUI.Instance != null)
+        {
+            ColorCountDownUI.Instance.Show();
+        }
+
+        ensureUiRoutine = null;
+    }
+
+    private void UpdateState()
     {
         switch (colorGameState)
         {
-            case ColorGameStateEnum.None:
-                break;
-
             case ColorGameStateEnum.Countdown:
-                countDownTimer -= Time.deltaTime;
-                timer = timerMax;
-
-                if (countDownTimer <= 0f)
-                {
-                    colorGameState = ColorGameStateEnum.Go;
-
-                    if (ColorCountDownUI.Instance != null)
-                    {
-                        ColorCountDownUI.Instance.ShowGo(0.7f);
-                    }
-                }
-                break;
-
-            case ColorGameStateEnum.Go:
+                HandleCountdown();
                 break;
 
             case ColorGameStateEnum.Playing:
@@ -80,12 +94,41 @@ public class ColorGameState : MonoBehaviour
         }
     }
 
-    public float GetCountDownTimer()
+    private void HandleCountdown()
     {
-        return countDownTimer;
+        countDownTimer -= Time.deltaTime;
+
+        if (countDownTimer <= 0f)
+        {
+            countDownTimer = 0f;
+            colorGameState = ColorGameStateEnum.Go;
+
+            if (ensureUiRoutine != null) { StopCoroutine(ensureUiRoutine); ensureUiRoutine = null; }
+
+            if (ColorCountDownUI.Instance != null)
+                ColorCountDownUI.Instance.ShowGo(goDuration);
+
+            if (goRoutine != null) StopCoroutine(goRoutine);
+            goRoutine = StartCoroutine(GoThenPlay());
+        }
     }
+
+    private IEnumerator GoThenPlay()
+    {
+        yield return new WaitForSeconds(goDuration);
+        StartGameAfterGo();
+        goRoutine = null;
+    }
+
+    public float GetCountDownTimer() => countDownTimer;
+
     public void StartGameAfterGo()
     {
         colorGameState = ColorGameStateEnum.Playing;
+    }
+
+    public void SetGameOver()
+    {
+        colorGameState = ColorGameStateEnum.GameOver;
     }
 }

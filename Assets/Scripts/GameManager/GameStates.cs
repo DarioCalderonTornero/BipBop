@@ -1,39 +1,44 @@
+// GameStates.cs
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class GameStates : MonoBehaviour
 {
-    public static GameStates Instance {  get; private set; }
+    public static GameStates Instance { get; private set; }
 
     public event EventHandler OnCountDown;
     public event EventHandler OnPlaying;
     public event EventHandler OnGameOver;
 
-    [SerializeField] private float timer;
-    [SerializeField] private float timerMax = 10f;
-
     private float countDownTimer = 3f;
 
-    public enum States { CountDown, Playing, GameOver }
-    private States states;
+    public enum States { None, CountDown, Go, Playing, GameOver }
+    private States states = States.None;
+
+    [SerializeField] private float goDuration = 0.8f;
+
+    private Coroutine goRoutine;
 
     private void Awake()
     {
         Instance = this;
-    }
-
-    private void Start()
-    {
-       //MainMenu.Instance.OnPlayButton += MainMenu_OnPlayButton;
+        states = States.None;
+        countDownTimer = 3f;
     }
 
     private void Update()
     {
         GameState();
-        //CameraShake.Instance.Shake();
+    }
+
+    public void StartCountdown()
+    {
+        states = States.CountDown;
+        countDownTimer = 3f;
+
+        if (LogicaJuego.Instance != null)
+            LogicaJuego.Instance.PauseGameplay();
     }
 
     private void GameState()
@@ -43,10 +48,18 @@ public class GameStates : MonoBehaviour
             case States.CountDown:
                 OnCountDown?.Invoke(this, EventArgs.Empty);
                 countDownTimer -= Time.deltaTime;
-                timer = timerMax;
-                if (countDownTimer < 0)
+
+                if (countDownTimer <= 0f)
                 {
-                    states = States.Playing;
+                    countDownTimer = 0f;
+                    states = States.Go;
+
+                    // Mostrar GO aquí (UI)
+                    if (CountDownUI.Instance != null && LogicaJuego.Instance != null)
+                        CountDownUI.Instance.ShowMessage(LogicaJuego.Instance.goText.GetLocalizedString());
+
+                    if (goRoutine != null) StopCoroutine(goRoutine);
+                    goRoutine = StartCoroutine(GoThenPlay());
                 }
                 break;
 
@@ -57,27 +70,27 @@ public class GameStates : MonoBehaviour
             case States.GameOver:
                 OnGameOver?.Invoke(this, EventArgs.Empty);
                 break;
-
         }
     }
 
-    public float GetGameTimerUI()
+    private IEnumerator GoThenPlay()
     {
-        return 1 - (timer / timerMax);
+        yield return new WaitForSeconds(goDuration);
+        states = States.Playing;
+
+        if (LogicaJuego.Instance != null)
+            LogicaJuego.Instance.OnCountdownFinishedStartPlaying();
+
+        goRoutine = null;
     }
 
-    public bool PlayGame()
-    {
-        return states == States.Playing;
-    }
+    public bool PlayGame() => states == States.Playing;
+    public bool CountDown() => states == States.CountDown || states == States.Go;
+    public float GetCountDownTime() => countDownTimer;
 
-    public bool countDown()
+    // Por si quieres forzar GameOver desde fuera
+    public void SetGameOver()
     {
-        return states == States.CountDown;
-    }
-
-    public float GetCountDownTime()
-    {
-        return countDownTimer;
+        states = States.GameOver;
     }
 }

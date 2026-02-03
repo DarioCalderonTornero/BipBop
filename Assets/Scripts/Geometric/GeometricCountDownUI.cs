@@ -15,23 +15,24 @@ public class GeometricCountDownUI : MonoBehaviour
     private void Awake()
     {
         Instance = this;
-    }
 
-    private void Start()
-    {
-        myAnimator = GetComponent<Animator>();
+        // Importante: disponible antes de Start()
+        if (myAnimator == null)
+            myAnimator = GetComponent<Animator>();
     }
 
     private void Update()
     {
-        if (!isCustomMessage)
-        {
-            float t = GeometricState.Instance.GetCountDownTimer();
+        if (isCustomMessage) return;
 
-            if (t > 0f)
-            {
-                countDownText.text = Mathf.Ceil(t).ToString();
-            }
+        // Importante: evitar null si el State aún no está listo
+        if (GeometricState.Instance == null) return;
+
+        float t = GeometricState.Instance.GetCountDownTimer();
+
+        if (t > 0f)
+        {
+            countDownText.text = Mathf.Ceil(t).ToString();
         }
     }
 
@@ -41,9 +42,7 @@ public class GeometricCountDownUI : MonoBehaviour
         countDownText.gameObject.SetActive(true);
 
         if (myAnimator != null)
-        {
             myAnimator.SetBool("IsCountDown", true);
-        }
     }
 
     public void Hide()
@@ -82,8 +81,6 @@ public class GeometricCountDownUI : MonoBehaviour
         isCustomMessage = false;
 
         if (GeometricState.Instance != null)
-        {
             GeometricState.Instance.StartGameAfterGo();
-        }
     }
 }

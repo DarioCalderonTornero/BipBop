@@ -1,58 +1,92 @@
-using UnityEngine;
+﻿using UnityEngine;
 using static DodgeState;
 
 public class PlayerIntroMover : MonoBehaviour
 {
-    public float targetOffsetY = 6f;    // cu�nto debe subir desde donde la coloques
-    public float introDuration = 1.5f;  // tiempo en subir
+    public float targetOffsetY = 6f;
+    public float introDuration = 1.5f;
 
+    private Vector3 baseStartPos;   // ✅ posición fija (la misma siempre)
     private Vector3 startPos;
     private Vector3 finalPos;
+
     private float introTimer = 0f;
     private bool finishedIntro = false;
+    private bool introBegan = false;
 
     private PlayerController playerController;
 
     private void Awake()
     {
         playerController = GetComponent<PlayerController>();
+
+        // ✅ Guardar base lo antes posible (antes de que tutorial/transición toque nada)
+        baseStartPos = transform.position;
     }
 
-    private void Start()
+    private void BeginIntro()
     {
-        // T� colocas la nave abajo en la escena.
-        startPos = transform.position;
-        // El centro ser� su Y actual + offset
+        introBegan = true;
+        finishedIntro = false;
+        introTimer = 0f;
+
+        // ✅ Fuerza siempre la misma posición inicial
+        transform.position = baseStartPos;
+
+        // ✅ Y calcula desde esa base
+        startPos = baseStartPos;
         finalPos = new Vector3(startPos.x, startPos.y + targetOffsetY, startPos.z);
 
         if (playerController != null)
         {
-            playerController.isIntroMoving = true;      // sprite de movimiento
-            playerController.SetTrailsActive(true);     // trails ON durante la subida
+            playerController.isIntroMoving = true;
+            playerController.SetTrailsActive(true);
             playerController.SetSmokeActive(true);
+
+            // limpiar trails para que se vean bien
+            var trs = GetComponentsInChildren<TrailRenderer>(true);
+            foreach (var tr in trs)
+            {
+                if (!tr) continue;
+                tr.Clear();
+                tr.emitting = true;
+                tr.enabled = true;
+            }
+
+            // si tu humo son ParticleSystem
+            var pss = GetComponentsInChildren<ParticleSystem>(true);
+            foreach (var ps in pss)
+            {
+                if (!ps) continue;
+                ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+                ps.Play(true);
+            }
         }
+    }
+
+    private void EndIntroVFX()
+    {
+        if (playerController == null) return;
+        playerController.isIntroMoving = false;
+        playerController.SetTrailsActive(false);
+        playerController.SetSmokeActive(false);
     }
 
     private void Update()
     {
-        if (DodgeState.Instance == null)
-            return;
+        if (DodgeState.Instance == null) return;
 
-        // Solo animar durante Countdown
         if (DodgeState.Instance.dodgeGameState != DodgeGameStateEnum.Countdown)
         {
-            // Si por lo que sea salimos del estado, apagamos intro
-            if (playerController != null && !finishedIntro)
-            {
-                playerController.isIntroMoving = false;
-                playerController.SetTrailsActive(false);
-                playerController.SetSmokeActive(false);
-            }
+            // solo apagar si ya había empezado
+            if (introBegan && !finishedIntro) EndIntroVFX();
             return;
         }
 
-        if (finishedIntro)
-            return;
+        if (!introBegan)
+            BeginIntro();
+
+        if (finishedIntro) return;
 
         introTimer += Time.deltaTime;
         float t = Mathf.Clamp01(introTimer / introDuration);
@@ -65,12 +99,8 @@ public class PlayerIntroMover : MonoBehaviour
 
             if (playerController != null)
             {
-                // Fijar el target del PlayerController a la posici�n actual
                 playerController.ResetCruiseDirectionToForward();
-
-                // Pasar a sprite quieto y apagar trails
-                playerController.isIntroMoving = false;
-                playerController.SetTrailsActive(false);
+                EndIntroVFX();
             }
         }
     }

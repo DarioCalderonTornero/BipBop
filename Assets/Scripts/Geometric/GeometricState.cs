@@ -1,4 +1,6 @@
+// GeometricState.cs
 using System;
+using System.Collections;
 using UnityEngine;
 
 public class GeometricState : MonoBehaviour
@@ -19,55 +21,45 @@ public class GeometricState : MonoBehaviour
 
     public GeometricGameStateEnum geometricGameState;
 
-    [SerializeField] private float timer;
-    [SerializeField] private float timerMax = 10f;
-
     private float countDownTimer = 3f;
+
+    [SerializeField] private float goDuration = 0.7f;
+    private Coroutine goRoutine;
 
     private void Awake()
     {
         Instance = this;
+        geometricGameState = GeometricGameStateEnum.None;
+        countDownTimer = 3f;
     }
 
     private void Start()
+    {
+        // No auto-arrancar aquí: lo arranca el Manager después del tutorial
+        /* if (GeometricCountDownUI.Instance != null)
+            GeometricCountDownUI.Instance.Hide();*/
+    }
+
+    private void Update()
+    {
+        UpdateState();
+    }
+
+    public void StartCountdown()
     {
         geometricGameState = GeometricGameStateEnum.Countdown;
         countDownTimer = 3f;
 
         if (GeometricCountDownUI.Instance != null)
-        {
             GeometricCountDownUI.Instance.Show();
-        }
     }
 
-    private void Update()
-    {
-        GeometricGameState();
-    }
-
-    private void GeometricGameState()
+    private void UpdateState()
     {
         switch (geometricGameState)
         {
-            case GeometricGameStateEnum.None:
-                break;
-
             case GeometricGameStateEnum.Countdown:
-                countDownTimer -= Time.deltaTime;
-                timer = timerMax;
-
-                if (countDownTimer <= 0f)
-                {
-                    geometricGameState = GeometricGameStateEnum.Go;
-
-                    if (GeometricCountDownUI.Instance != null)
-                    {
-                        GeometricCountDownUI.Instance.ShowGo(0.7f);
-                    }
-                }
-                break;
-
-            case GeometricGameStateEnum.Go:
+                HandleCountdown();
                 break;
 
             case GeometricGameStateEnum.Playing:
@@ -80,12 +72,39 @@ public class GeometricState : MonoBehaviour
         }
     }
 
-    public float GetCountDownTimer()
+    private void HandleCountdown()
     {
-        return countDownTimer;
+        countDownTimer -= Time.deltaTime;
+
+        if (countDownTimer <= 0f)
+        {
+            countDownTimer = 0f;
+            geometricGameState = GeometricGameStateEnum.Go;
+
+            if (GeometricCountDownUI.Instance != null)
+                GeometricCountDownUI.Instance.ShowGo(goDuration);
+
+            if (goRoutine != null) StopCoroutine(goRoutine);
+            goRoutine = StartCoroutine(GoThenPlay());
+        }
     }
+
+    private IEnumerator GoThenPlay()
+    {
+        yield return new WaitForSeconds(goDuration);
+        StartGameAfterGo();
+        goRoutine = null;
+    }
+
     public void StartGameAfterGo()
     {
         geometricGameState = GeometricGameStateEnum.Playing;
+    }
+
+    public float GetCountDownTimer() => countDownTimer;
+
+    public void SetGameOver()
+    {
+        geometricGameState = GeometricGameStateEnum.GameOver;
     }
 }

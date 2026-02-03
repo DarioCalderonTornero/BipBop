@@ -1,12 +1,11 @@
-﻿using System;
+﻿// GeometricModeManager.cs
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
-using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Localization;
 using UnityEngine.Localization.Settings;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class GeometricModeManager : MonoBehaviour
@@ -14,14 +13,14 @@ public class GeometricModeManager : MonoBehaviour
     public static GeometricModeManager Instance { get; private set; }
 
     [Header("UI Elements")]
-    public TextMeshProUGUI instructionText;  // Indica qué figura tocar
-    public Image instructionIcon; 
-    public TextMeshProUGUI scoreText;        // Puntuación actual
-    public Image timeBarImage;               // Barra de tiempo
-    public float startTime = 60f;            // Tiempo inicial (en segundos)
+    public TextMeshProUGUI instructionText;
+    public Image instructionIcon;
+    public TextMeshProUGUI scoreText;
+    public Image timeBarImage;
+    public float startTime = 60f;
 
     [Header("Game Settings")]
-    public float speedMultiplier = 1f;         // Multiplicador de velocidad actual
+    public float speedMultiplier = 1f;
 
     [Header("Difficulty (Option 1)")]
     [SerializeField] private float baseSpeedMult = 1f;
@@ -29,24 +28,24 @@ public class GeometricModeManager : MonoBehaviour
     [SerializeField] private int scoreToReachMaxSpeed = 60;
 
     [Header("Shapes")]
-    public List<BouncingShape> shapes;         // Lista de figuras en escena
+    public List<BouncingShape> shapes;
 
     [Header("Localization")]
-    public LocalizedString scoreLabel;              // Smart String: "Puntos: {0}" / "Points: {0}"
-    public LocalizedString tapShapeInstruction;     // Smart String: "¡Toca {0}!" / "Tap the {0}!"
+    public LocalizedString scoreLabel;
+    public LocalizedString tapShapeInstruction;
 
     private float currentTime;
     private int score = 0;
     private BouncingShape currentTarget;
     private bool hasEnded = false;
     private bool gameOverInvoked = false;
-    private bool hasGameStarted = false; //nuevo guard
+    private bool hasGameStarted = false;
 
     public event EventHandler OnGameOver;
 
     [Header("Intro / Countdown")]
-    [SerializeField] private LocalizedString prepareInstruction; // "Prepárate..."
-    [SerializeField] private Sprite prepareIcon;                 // icono que tú quieras durante la cuenta atrás
+    [SerializeField] private LocalizedString prepareInstruction;
+    [SerializeField] private Sprite prepareIcon;
     [SerializeField] private float introMoveDuration = 0.45f;
     [SerializeField] private float introStagger = 0.08f;
     [SerializeField] private float introOffscreenPadding = 1.2f;
@@ -61,6 +60,15 @@ public class GeometricModeManager : MonoBehaviour
     private bool movementStarted = false;
 
     private Coroutine playerSoundCoroutine;
+
+    // -------------------------
+    // Tutorial (global toggle)
+    // -------------------------
+    [Header("Tutorial Panel")]
+    [SerializeField] private TutorialPanelUI tutorialPrefab;
+    [SerializeField] private Transform tutorialParent;
+    private TutorialPanelUI tutorialInstance;
+    private const string ShowTutorialKey = "ShowTutorialOnStart";
 
     private void Awake()
     {
@@ -78,7 +86,10 @@ public class GeometricModeManager : MonoBehaviour
         LocalizationSettings.SelectedLocaleChanged -= OnLocaleChanged;
 
         if (playerSoundCoroutine != null)
-            StopCoroutine(LoopCoroutine());
+        {
+            StopCoroutine(playerSoundCoroutine);
+            playerSoundCoroutine = null;
+        }
     }
 
     private void Start()
@@ -87,10 +98,18 @@ public class GeometricModeManager : MonoBehaviour
         Time.timeScale = 1f;
         Time.fixedDeltaTime = 0.02f * Time.timeScale;
 
-        // Iniciamos siempre el juego (currentTime, barra, shapes...)
-        StartGame();
+        bool showTutorialOnStart = PlayerPrefs.GetInt(ShowTutorialKey, 1) == 1;
 
-        // Mantenemos la lógica de transición (para efectos visuales si los usas)
+        if (showTutorialOnStart && tutorialPrefab != null)
+        {
+            ShowTutorial();
+        }
+        else
+        {
+            HideAnyExistingTutorialPanel();
+            BeginGameAfterTutorial();
+        }
+
         if (TransitionScript.Instance != null)
         {
             TransitionScript.Instance.OnTransitionOutFinished += HandleTransitionFinished;
@@ -103,18 +122,87 @@ public class GeometricModeManager : MonoBehaviour
             TransitionScript.Instance.OnTransitionOutFinished -= HandleTransitionFinished;
     }
 
+    // ==================
+    // Tutorial flow
+    // ==================
+    private void ShowTutorial()
+    {
+        if (tutorialInstance != null) return;
+
+        var existing = FindObjectOfType<TutorialPanelUI>(true);
+        if (existing != null)
+        {
+            tutorialInstance = existing;
+            tutorialInstance.gameObject.SetActive(true);
+        }
+        else
+        {
+            Transform parent = tutorialParent;
+            if (parent == null)
+            {
+                Canvas c = FindObjectOfType<Canvas>();
+                parent = (c != null) ? c.transform : transform;
+            }
+            tutorialInstance = Instantiate(tutorialPrefab, parent);
+        }
+
+        tutorialInstance.OnClosed -= HandleTutorialClosed;
+        tutorialInstance.OnClosed += HandleTutorialClosed;
+
+        PauseGameplay(); // evita input + timer + arranque movimiento
+    }
+
+    private void HandleTutorialClosed()
+    {
+        if (tutorialInstance != null)
+            tutorialInstance.OnClosed -= HandleTutorialClosed;
+
+        tutorialInstance = null;
+        BeginGameAfterTutorial();
+    }
+
+    private void HideAnyExistingTutorialPanel()
+    {
+        var existing = FindObjectOfType<TutorialPanelUI>(true);
+        if (existing != null)
+            existing.gameObject.SetActive(false);
+    }
+
+    private void BeginGameAfterTutorial()
+    {
+        StartGame(); // aquí dejas TODO como estaba: intro + countdown state
+    }
+
+    // ==================
+    // Transition hook
+    // ==================
     private void HandleTransitionFinished()
     {
+        // Si tu transición dispara “segundo StartGame”, lo evitamos con hasGameStarted
         StartCoroutine(StartGameDelayed());
     }
 
     private IEnumerator StartGameDelayed()
     {
         yield return null;
-
         StartGame();
     }
 
+    // ==================
+    // Pause/Resume
+    // ==================
+    public void PauseGameplay()
+    {
+        // No gastamos tiempo ni arrancamos movimiento
+        movementStarted = false;
+
+        // Deja shapes congeladas si hay alguna activa
+        FreezeActiveShapes(true);
+    }
+
+    // ==================
+    // Sounds loop
+    // ==================
     private IEnumerator LoopCoroutine()
     {
         while (true)
@@ -126,7 +214,7 @@ public class GeometricModeManager : MonoBehaviour
 
     private int GetRandomCoroutineWait()
     {
-        return UnityEngine.Random.Range(4, 8); 
+        return UnityEngine.Random.Range(4, 8);
     }
 
     private void PlayerSounds()
@@ -134,6 +222,9 @@ public class GeometricModeManager : MonoBehaviour
         SoundManager.Instance.PlaySound(playerAudioClip, 1f);
     }
 
+    // ==================
+    // Main start (intro kept)
+    // ==================
     private void StartGame()
     {
         if (hasGameStarted) return;
@@ -142,6 +233,7 @@ public class GeometricModeManager : MonoBehaviour
         hasEnded = false;
         gameOverInvoked = false;
         score = 0;
+
         UpdateDifficulty();
         currentTime = startTime;
 
@@ -173,8 +265,15 @@ public class GeometricModeManager : MonoBehaviour
         movementStarted = false;
 
         SetPrepareUI();
+
+        // Congelamos shapes hasta que se cumpla: introAnimDone && state.Playing
         FreezeActiveShapes(true);
 
+        // Arranca countdown (GeometricState) SOLO aquí
+        if (GeometricState.Instance != null)
+            GeometricState.Instance.StartCountdown();
+
+        // Arranca intro visual (spawn + wobble)
         StartCoroutine(IntroSpawnRoutine());
     }
 
@@ -186,10 +285,9 @@ public class GeometricModeManager : MonoBehaviour
         if (!movementStarted)
         {
             TryStartMovementAfterIntro();
-            return; // no gastamos tiempo ni nada durante intro
+            return;
         }
 
-        // (tu código actual a partir de aquí)
         if (GeometricState.Instance != null &&
             GeometricState.Instance.geometricGameState != GeometricState.GeometricGameStateEnum.Playing)
             return;
@@ -205,20 +303,17 @@ public class GeometricModeManager : MonoBehaviour
 
     private void SetPrepareUI()
     {
-        // Texto localizado de “Prepárate…”
         if (instructionText != null)
         {
             string t = prepareInstruction.IsEmpty ? "Prepárate..." : prepareInstruction.GetLocalizedString();
             instructionText.text = t;
         }
 
-        // Icono que tú quieras
         SetInstructionIcon(prepareIcon);
     }
 
     private void TryStartMovementAfterIntro()
     {
-        // Si no hay GeometricState, arrancamos cuando termine la intro
         bool isPlaying =
             GeometricState.Instance == null ||
             GeometricState.Instance.geometricGameState == GeometricState.GeometricGameStateEnum.Playing;
@@ -231,20 +326,16 @@ public class GeometricModeManager : MonoBehaviour
         foreach (var s in shapes.FindAll(x => x.gameObject.activeSelf))
             PlayShapeParticles(s);
 
-        // Arranca movimiento con velocidad correcta
         var activeShapes = shapes.FindAll(s => s.gameObject.activeSelf);
         foreach (var s in activeShapes)
         {
-            // fuerza nueva dirección/velocidad al arrancar
             s.RandomizeDirection();
             s.UpdateSpeed(speedMultiplier);
 
-            // limpia trail al empezar a moverse
             var tr = s.GetComponentInChildren<TrailRenderer>(true);
             if (tr) tr.Clear();
         }
 
-        // Ya empezamos el juego “real”
         ChooseNewTarget();
     }
 
@@ -255,7 +346,6 @@ public class GeometricModeManager : MonoBehaviour
         instructionIcon.enabled = (s != null);
     }
 
-    // Se llama cuando se toca una figura
     public void OnShapeTapped(BouncingShape shape)
     {
         if (hasEnded) return;
@@ -271,7 +361,6 @@ public class GeometricModeManager : MonoBehaviour
 
         if (shape == currentTarget)
         {
-            
             Animator anim = shape.GetComponent<Animator>();
             if (anim != null)
                 anim.SetTrigger("isHitAnim");
@@ -285,34 +374,28 @@ public class GeometricModeManager : MonoBehaviour
             startTime = Mathf.Max(3.0f, startTime - 0.04f);
             currentTime = startTime;
 
-
             CheckForAdditionalShapes();
-
             ReverseAllActiveShapesDirections();
-
             ChooseNewTarget();
         }
         else
         {
-            SoundManager.Instance.PlaySound(incorrectHitAudioClip, 1f); 
+            SoundManager.Instance.PlaySound(incorrectHitAudioClip, 1f);
             StartCoroutine(SlowMotionAndEnd());
         }
     }
 
     private IEnumerator IntroSpawnRoutine()
     {
-        // Solo las 3 primeras activas
         List<BouncingShape> active = shapes.FindAll(s => s.gameObject.activeSelf);
         int count = Mathf.Min(3, active.Count);
         if (count == 0) { introAnimDone = true; yield break; }
 
         Camera cam = Camera.main;
 
-        // Guardamos posiciones “finales” (las que tienes puestas en escena)
         Vector3[] endPos = new Vector3[count];
         for (int i = 0; i < count; i++) endPos[i] = active[i].transform.position;
 
-        // Calcula start offscreen: 0=izq, 1=dcha, 2=abajo
         Vector3 GetOffscreenFrom(Vector3 target, int slot)
         {
             if (!cam) return target;
@@ -327,7 +410,6 @@ public class GeometricModeManager : MonoBehaviour
             return new Vector3(target.x, bot.y - introOffscreenPadding, target.z);
         }
 
-        // Coloca al inicio offscreen y limpia FX
         for (int i = 0; i < count; i++)
         {
             active[i].transform.position = GetOffscreenFrom(endPos[i], i);
@@ -337,7 +419,6 @@ public class GeometricModeManager : MonoBehaviour
             if (ps) ps.Clear();
         }
 
-        // Mueve + wobble (con pequeño stagger)
         for (int i = 0; i < count; i++)
         {
             PlayShapeParticles(active[i]);
@@ -345,9 +426,7 @@ public class GeometricModeManager : MonoBehaviour
             yield return new WaitForSeconds(introStagger);
         }
 
-        // Espera a que acabe la última
         yield return new WaitForSeconds(introMoveDuration + introWobbleDuration);
-
         introAnimDone = true;
     }
 
@@ -373,21 +452,15 @@ public class GeometricModeManager : MonoBehaviour
         yield return Wobble(vis, baseScale, wobbleDur);
         vis.localScale = baseScale;
 
-        // ✅ ya llegaron y se quedan quietas => partículas OFF
         StopShapeParticles(owner, clear: false);
     }
 
     private IEnumerator Wobble(Transform t, Vector3 baseScale, float dur)
     {
         float part = dur / 4f;
-
-        // 1) impact squash
         yield return ScaleTo(t, baseScale, new Vector3(baseScale.x * 1.25f, baseScale.y * 0.80f, baseScale.z), part);
-        // 2) rebound
         yield return ScaleTo(t, t.localScale, new Vector3(baseScale.x * 0.90f, baseScale.y * 1.10f, baseScale.z), part);
-        // 3) settle
         yield return ScaleTo(t, t.localScale, new Vector3(baseScale.x * 1.05f, baseScale.y * 0.95f, baseScale.z), part);
-        // 4) back to normal
         yield return ScaleTo(t, t.localScale, baseScale, part);
     }
 
@@ -411,7 +484,6 @@ public class GeometricModeManager : MonoBehaviour
 
         foreach (var s in active)
         {
-            // --- Física ---
             var rb = s.GetComponent<Rigidbody2D>();
             if (rb)
             {
@@ -427,20 +499,13 @@ public class GeometricModeManager : MonoBehaviour
                 }
             }
 
-            // --- Partículas (TODAS las que cuelguen de la shape) ---
             var pss = s.GetComponentsInChildren<ParticleSystem>(true);
             foreach (var ps in pss)
             {
                 if (!ps) continue;
 
-                if (freeze)
-                {
-                    ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-                }
-                else
-                {
-                    ps.Play(true);
-                }
+                if (freeze) ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+                else ps.Play(true);
             }
         }
     }
@@ -494,18 +559,16 @@ public class GeometricModeManager : MonoBehaviour
         float halfDuration = duration / 2f;
         float mult = 1.2f;
 
-        // Si no hay targets, salimos limpio
         if (scoreEffectTargets == null || scoreEffectTargets.Length == 0)
         {
             isAnimating = false;
             yield break;
         }
 
-        // Ida
         float time = 0;
         while (time < halfDuration)
         {
-            float t = time / halfDuration;
+            float tt = time / halfDuration;
 
             for (int i = 0; i < scoreEffectTargets.Length; i++)
             {
@@ -514,18 +577,17 @@ public class GeometricModeManager : MonoBehaviour
 
                 Vector3 a = (originalScales != null && i < originalScales.Length) ? originalScales[i] : rt.localScale;
                 Vector3 b = a * mult;
-                rt.localScale = Vector3.Lerp(a, b, t);
+                rt.localScale = Vector3.Lerp(a, b, tt);
             }
 
             time += Time.deltaTime;
             yield return null;
         }
 
-        // Vuelta
         time = 0;
         while (time < halfDuration)
         {
-            float t = time / halfDuration;
+            float tt = time / halfDuration;
 
             for (int i = 0; i < scoreEffectTargets.Length; i++)
             {
@@ -534,14 +596,13 @@ public class GeometricModeManager : MonoBehaviour
 
                 Vector3 a = (originalScales != null && i < originalScales.Length) ? originalScales[i] : rt.localScale;
                 Vector3 b = a * mult;
-                rt.localScale = Vector3.Lerp(b, a, t);
+                rt.localScale = Vector3.Lerp(b, a, tt);
             }
 
             time += Time.deltaTime;
             yield return null;
         }
 
-        // Reset exacto
         for (int i = 0; i < scoreEffectTargets.Length; i++)
         {
             var rt = scoreEffectTargets[i];
@@ -556,25 +617,20 @@ public class GeometricModeManager : MonoBehaviour
 
     private void UpdateScoreText()
     {
-        // Localizado: "Puntos: {0}" / "Points: {0}"
         scoreText.text = scoreLabel.GetLocalizedString(score);
     }
 
-    public int GetScore()
-    {
-        return score;
-    }
+    public int GetScore() => score;
 
     private void UpdateDifficulty()
     {
         float t = Mathf.Clamp01(score / (float)scoreToReachMaxSpeed);
-        t = t * t * (3f - 2f * t); // easing
+        t = t * t * (3f - 2f * t);
 
         speedMultiplier = Mathf.Lerp(baseSpeedMult, maxSpeedMult, t);
         UpdateShapesSpeed();
     }
 
-    // Escoge una nueva figura objetivo entre las activas
     private void ChooseNewTarget()
     {
         List<BouncingShape> activeShapes = shapes.FindAll(s => s.gameObject.activeSelf);
@@ -587,12 +643,10 @@ public class GeometricModeManager : MonoBehaviour
             return;
         }
 
-        // ✅ Primera vez: aleatorio
         if (currentTarget == null)
         {
             currentTarget = activeShapes[UnityEngine.Random.Range(0, activeShapes.Count)];
         }
-        // ✅ Siguientes veces: aleatorio pero distinto
         else if (activeShapes.Count > 1)
         {
             BouncingShape newTarget;
@@ -603,20 +657,16 @@ public class GeometricModeManager : MonoBehaviour
 
             currentTarget = newTarget;
         }
-        // Si solo hay 1 activa, se queda la misma
 
         string shapeNameText = currentTarget.shapeName.GetLocalizedString();
         instructionText.text = tapShapeInstruction.GetLocalizedString(shapeNameText);
-
         SetInstructionIcon(currentTarget.GetUIIcon());
     }
 
     private void UpdateShapesSpeed()
     {
         foreach (BouncingShape s in shapes)
-        {
             s.UpdateSpeed(speedMultiplier);
-        }
     }
 
     private void CheckForAdditionalShapes()
@@ -693,47 +743,19 @@ public class GeometricModeManager : MonoBehaviour
         int coinsEarned = score / 3;
 
         CoinsRewardUI rewardUI = FindObjectOfType<CoinsRewardUI>(true);
-        if (rewardUI != null)
-        {
-            rewardUI.ShowReward(coinsEarned);
-        }
-        else
-        {
-            CurrencyManager.Instance.AddCoins(coinsEarned);
-        }
+        if (rewardUI != null) rewardUI.ShowReward(coinsEarned);
+        else CurrencyManager.Instance.AddCoins(coinsEarned);
 
         if (DailyMissionManager.Instance != null)
         {
             DailyMissionManager.Instance.AddProgress("juega_1_partida", 1);
-        }
+            DailyMissionManager.Instance.AddProgress("juega_3_partida", 1);
+            DailyMissionManager.Instance.AddProgress("juega_8_partida", 1);
+            DailyMissionManager.Instance.AddProgress("juega_10_partida", 1);
 
-        if (DailyMissionManager.Instance != null)
-        {
-            DailyMissionManager.Instance.AddProgress("juega_3_partidas", 1);
-        }
+            if (score >= 10) DailyMissionManager.Instance.AddProgress("consigue_10_puntos_geométrico", 1);
+            if (score >= 50) DailyMissionManager.Instance.AddProgress("consigue_50_puntos_geométrico", 1);
 
-        if (DailyMissionManager.Instance != null)
-        {
-            DailyMissionManager.Instance.AddProgress("juega_8_partidas", 1);
-        }
-
-        if (DailyMissionManager.Instance != null)
-        {
-            DailyMissionManager.Instance.AddProgress("juega_10_partidas", 1);
-        }
-
-        if (DailyMissionManager.Instance != null && score >= 10)
-        {
-            DailyMissionManager.Instance.AddProgress("consigue_10_puntos_geométrico", 1);
-        }
-
-        if (DailyMissionManager.Instance != null && score >= 50)
-        {
-            DailyMissionManager.Instance.AddProgress("consigue_50_puntos_geométrico", 1);
-        }
-
-        if (DailyMissionManager.Instance != null)
-        {
             DailyMissionManager.Instance.AddProgress("juega_5_partidas_geométrico", 1);
         }
     }

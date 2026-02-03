@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 
 public class DodgeState : MonoBehaviour
@@ -27,22 +27,27 @@ public class DodgeState : MonoBehaviour
     private void Awake()
     {
         Instance = this;
+        dodgeGameState = DodgeGameStateEnum.None;
+        countDownTimer = 3f;
     }
 
     private void Start()
     {
-        dodgeGameState = DodgeGameStateEnum.Countdown;
-        countDownTimer = 3f;
-
-        if (DodgeCountDownUI.Instance != null)
-        {
-            DodgeCountDownUI.Instance.Show();
-        }
+        // ✅ NO arrancar aquí. Lo decide DodgeManager según tutorial.
     }
 
     private void Update()
     {
         DodgeGameState();
+    }
+
+    public void StartCountdown()
+    {
+        dodgeGameState = DodgeGameStateEnum.Countdown;
+        countDownTimer = 3f;
+
+        if (DodgeCountDownUI.Instance != null)
+            DodgeCountDownUI.Instance.Show();
     }
 
     private void DodgeGameState()
@@ -58,12 +63,11 @@ public class DodgeState : MonoBehaviour
 
                 if (countDownTimer <= 0f)
                 {
+                    countDownTimer = 0f;
                     dodgeGameState = DodgeGameStateEnum.Go;
 
                     if (DodgeCountDownUI.Instance != null)
-                    {
                         DodgeCountDownUI.Instance.ShowGo(0.7f);
-                    }
                 }
                 break;
 
@@ -80,12 +84,14 @@ public class DodgeState : MonoBehaviour
         }
     }
 
-    public float GetCountDownTimer()
-    {
-        return countDownTimer;
-    }
+    public float GetCountDownTimer() => countDownTimer;
+
     public void StartGameAfterGo()
     {
         dodgeGameState = DodgeGameStateEnum.Playing;
+
+        // ✅ aquí empieza el gameplay real
+        if (DodgeManager.Instance != null)
+            DodgeManager.Instance.EnableGameplayNow();
     }
 }

@@ -38,6 +38,16 @@ public class DodgeManager : MonoBehaviour
     // 1 revive máximo por partida
     private bool hasUsedReviveOffer = false;
 
+    [Header("Tutorial Panel")]
+    [SerializeField] private TutorialPanelUI tutorialPrefab;
+    [SerializeField] private Transform tutorialParent;
+
+    private const string ShowTutorialKey = "ShowTutorialOnStart";
+    private TutorialPanelUI tutorialInstance;
+
+    private bool hasStarted = false;
+    private bool gameplayEnabled = false;
+
     public enum DeathType
     {
         None,
@@ -54,18 +64,126 @@ public class DodgeManager : MonoBehaviour
         if (scoreText != null)
             scoreText.text = $"{score}";
 
-        Enemy.GlobalFreeze = false;
+        Enemy.GlobalFreeze = true;  // ✅ arrancamos congelado hasta Playing
         deathType = DeathType.None;
 
-        // por seguridad
         isGameOver = false;
         hasUsedReviveOffer = false;
+
+        gameplayEnabled = false;
+        hasStarted = false;
     }
 
     private void Start()
     {
         Time.timeScale = 1f;
+
+        bool showTutorial = PlayerPrefs.GetInt(ShowTutorialKey, 1) == 1;
+
+        if (showTutorial && tutorialPrefab != null)
+        {
+            ShowTutorial();
+        }
+        else
+        {
+            HideAnyExistingTutorialPanel();
+            BeginAfterTutorial();
+        }
+    }
+
+    private void HideAnyExistingTutorialPanel()
+    {
+        var existing = FindObjectOfType<TutorialPanelUI>(true);
+        if (existing != null)
+            existing.gameObject.SetActive(false);
+    }
+
+    private void ShowTutorial()
+    {
+        if (tutorialInstance != null) return;
+
+        var existing = FindObjectOfType<TutorialPanelUI>(true);
+        if (existing != null)
+        {
+            tutorialInstance = existing;
+            tutorialInstance.gameObject.SetActive(true);
+        }
+        else
+        {
+            Transform parent = tutorialParent;
+            if (parent == null)
+            {
+                Canvas c = FindObjectOfType<Canvas>();
+                parent = (c != null) ? c.transform : transform;
+            }
+
+            tutorialInstance = Instantiate(tutorialPrefab, parent);
+        }
+
+        tutorialInstance.OnClosed -= HandleTutorialClosed;
+        tutorialInstance.OnClosed += HandleTutorialClosed;
+
+        // Mientras tutorial: no gameplay
+        Enemy.GlobalFreeze = true;
+        gameplayEnabled = false;
+    }
+
+    private void HandleTutorialClosed()
+    {
+        if (tutorialInstance != null)
+            tutorialInstance.OnClosed -= HandleTutorialClosed;
+
+        tutorialInstance = null;
+
+        BeginAfterTutorial();
+    }
+
+    private void BeginAfterTutorial()
+    {
+        StartGame();
+    }
+
+    private void StartGame()
+    {
+        if (hasStarted) return;
+        hasStarted = true;
+
+        // Reset partida
+        score = 0;
+        if (scoreText != null) scoreText.text = $"{score}";
+
+        deathType = DeathType.None;
+        isGameOver = false;
         hasUsedReviveOffer = false;
+
+        gameplayEnabled = false;
+        Enemy.GlobalFreeze = true; // ✅ hasta Playing
+
+        // ✅ Arranca countdown desde State (NO en DodgeState.Start)
+        if (DodgeState.Instance != null)
+            DodgeState.Instance.StartCountdown();
+        else
+            EnableGameplayNow_Fallback();
+    }
+
+    // Lo llama DodgeState cuando acaba el GO y entra en Playing
+    public void EnableGameplayNow()
+    {
+        gameplayEnabled = true;
+        Enemy.GlobalFreeze = false;
+
+        // Si necesitas reset de nave al empezar:
+        EnablePlayerAfterRevive();
+        ResetPlayerToSpawn();
+
+        if (turboController != null)
+            turboController.ResetTurbo();
+    }
+
+    private void EnableGameplayNow_Fallback()
+    {
+        gameplayEnabled = true;
+        Enemy.GlobalFreeze = false;
     }
 
     // =========================

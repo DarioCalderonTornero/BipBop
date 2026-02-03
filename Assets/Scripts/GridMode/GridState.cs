@@ -1,5 +1,6 @@
-using System;
+﻿using System;
 using UnityEngine;
+using System.Collections;
 
 public class GridState : MonoBehaviour
 {
@@ -27,23 +28,14 @@ public class GridState : MonoBehaviour
     private void Awake()
     {
         Instance = this;
+        gridGameState = GridGameStateEnum.None;
+        countDownTimer = 3f;
     }
 
     private void Start()
     {
-        gridGameState = GridGameStateEnum.Countdown;
-        countDownTimer = 3f;
-
-        if (GridCountDownUI.Instance != null)
-        {
-            GridCountDownUI.Instance.Show();
-        }
-
-        // Empezar la ca�da del personaje durante la cuenta atr�s
-        if (GridGameManager.Instance != null)
-        {
-            GridGameManager.Instance.StartIntroDropDuringCountdown();
-        }
+        // ✅ NO arrancar aquí. Espera a que GridGameManager decida (tutorial ON/OFF)
+        // Esto evita el bug de order-of-execution.
     }
 
     private void Update()
@@ -51,28 +43,37 @@ public class GridState : MonoBehaviour
         GridGameState();
     }
 
+    public void StartCountdown()
+    {
+        gridGameState = GridGameStateEnum.Countdown;
+        countDownTimer = 3f;
+
+        if (GridCountDownUI.Instance != null)
+            GridCountDownUI.Instance.Show();
+
+        // ✅ caída durante la cuenta atrás
+        if (GridGameManager.Instance != null)
+            GridGameManager.Instance.StartIntroDropDuringCountdown();
+    }
+
     private void GridGameState()
     {
         switch (gridGameState)
         {
+            case GridGameStateEnum.None:
+                break;
+
             case GridGameStateEnum.Countdown:
                 countDownTimer -= Time.deltaTime;
                 timer = timerMax;
 
                 if (countDownTimer <= 0f)
                 {
+                    countDownTimer = 0f;
                     gridGameState = GridGameStateEnum.Go;
 
                     if (GridCountDownUI.Instance != null)
-                    {
                         GridCountDownUI.Instance.ShowGo(0.7f);
-                    }
-
-                    // Cuando termina la cuenta atr�s: primera gema + flechas
-                    if (GridGameManager.Instance != null)
-                    {
-                        GridGameManager.Instance.StartGameplayAfterCountdown();
-                    }
                 }
                 break;
 
@@ -89,13 +90,14 @@ public class GridState : MonoBehaviour
         }
     }
 
-    public float GetCountDownTimer()
-    {
-        return countDownTimer;
-    }
+    public float GetCountDownTimer() => countDownTimer;
+
     public void StartGameAfterGo()
     {
-        // Llamado desde la UI del "GO" cuando desaparece:
         gridGameState = GridGameStateEnum.Playing;
+
+        // ✅ arrancar gameplay REAL justo al terminar GO
+        if (GridGameManager.Instance != null)
+            GridGameManager.Instance.StartGameplayAfterCountdown();
     }
 }
