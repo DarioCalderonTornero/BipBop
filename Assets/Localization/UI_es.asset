@@ -48,7 +48,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 4282364428288
-    m_Localized: Flecha
+    m_Localized: Plataformas
     m_Metadata:
       m_Items: []
   - m_Id: 15089399726080
@@ -824,7 +824,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 30053725037887488
-    m_Localized: Diferente
+    m_Localized: "B\xFAsqueda"
     m_Metadata:
       m_Items: []
   - m_Id: 30054717112418304

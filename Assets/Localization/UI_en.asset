@@ -48,7 +48,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 4282364428288
-    m_Localized: Arrow
+    m_Localized: Platforms
     m_Metadata:
       m_Items: []
   - m_Id: 15089399726080
@@ -823,7 +823,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 30053725037887488
-    m_Localized: DIfferent
+    m_Localized: Search
     m_Metadata:
       m_Items: []
   - m_Id: 30054717112418304
