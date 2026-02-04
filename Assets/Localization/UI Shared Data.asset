@@ -803,6 +803,30 @@ MonoBehaviour:
     m_Key: DailyMissions_consigue10puntosdiferente
     m_Metadata:
       m_Items: []
+  - m_Id: 30047301008326656
+    m_Key: Settings_ON
+    m_Metadata:
+      m_Items: []
+  - m_Id: 30047358382211072
+    m_Key: Settings_OFF
+    m_Metadata:
+      m_Items: []
+  - m_Id: 30053725037887488
+    m_Key: Different_button
+    m_Metadata:
+      m_Items: []
+  - m_Id: 30054717112418304
+    m_Key: Puntos
+    m_Metadata:
+      m_Items: []
+  - m_Id: 30056330019438592
+    m_Key: Different_TocaElDiferente
+    m_Metadata:
+      m_Items: []
+  - m_Id: 30056580624908288
+    m_Key: Differente_TocaElSolitario
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

@@ -42,7 +42,7 @@ rule CXX_SHARED_LIBRARY_LINKER__swappywrapper_Debug
 # Rule for re-running cmake.
 
 rule RERUN_CMAKE
-  command = "C:\Program Files\Unity\Hub\Editor\6000.0.58f2\Editor\Data\PlaybackEngines\AndroidPlayer\SDK\cmake\3.22.1\bin\cmake.exe" --regenerate-during-build -SC:\Users\ammar\Documents\GitHub\BipBop\Library\PramData\AndroidApplicationController\Cache\com.twotapsstudio.bipbop\gradle-project\unityLibrary\src\main\cpp -BC:\Users\ammar\Documents\GitHub\BipBop\.utmp\Debug\5x2a4i5j\arm64-v8a
+  command = C:\Users\ammar\AppData\Local\Android\Sdk\cmake\3.22.1\bin\cmake.exe --regenerate-during-build -SC:\Users\ammar\Documents\GitHub\BipBop\Library\PramData\AndroidApplicationController\Cache\com.twotapsstudio.bipbop\gradle-project\unityLibrary\src\main\cpp -BC:\Users\ammar\Documents\GitHub\BipBop\.utmp\Debug\5x2a4i5j\arm64-v8a
   description = Re-running CMake...
   generator = 1
 
@@ -51,7 +51,7 @@ rule RERUN_CMAKE
 # Rule for cleaning all built files.
 
 rule CLEAN
-  command = "C:\Program Files\Unity\Hub\Editor\6000.0.58f2\Editor\Data\PlaybackEngines\AndroidPlayer\SDK\cmake\3.22.1\bin\ninja.exe" $FILE_ARG -t clean $TARGETS
+  command = C:\Users\ammar\AppData\Local\Android\Sdk\cmake\3.22.1\bin\ninja.exe $FILE_ARG -t clean $TARGETS
   description = Cleaning all built files...
 
 
@@ -59,6 +59,6 @@ rule CLEAN
 # Rule for printing all primary targets available.
 
 rule HELP
-  command = "C:\Program Files\Unity\Hub\Editor\6000.0.58f2\Editor\Data\PlaybackEngines\AndroidPlayer\SDK\cmake\3.22.1\bin\ninja.exe" -t targets
+  command = C:\Users\ammar\AppData\Local\Android\Sdk\cmake\3.22.1\bin\ninja.exe -t targets
   description = All primary targets available:
 

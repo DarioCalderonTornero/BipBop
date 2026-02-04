@@ -814,6 +814,30 @@ MonoBehaviour:
     m_Localized: "Earn 10 points in a game of \u201CSearch\u201D mode."
     m_Metadata:
       m_Items: []
+  - m_Id: 30047301008326656
+    m_Localized: ON
+    m_Metadata:
+      m_Items: []
+  - m_Id: 30047358382211072
+    m_Localized: OFF
+    m_Metadata:
+      m_Items: []
+  - m_Id: 30053725037887488
+    m_Localized: DIfferent
+    m_Metadata:
+      m_Items: []
+  - m_Id: 30054717112418304
+    m_Localized: points
+    m_Metadata:
+      m_Items: []
+  - m_Id: 30056330019438592
+    m_Localized: Touch the different one!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 30056580624908288
+    m_Localized: Touch the lone object!
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

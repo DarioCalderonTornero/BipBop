@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization;
 using UnityEngine.UI;
 
 public class DifferentManager : MonoBehaviour
@@ -139,6 +140,10 @@ public class DifferentManager : MonoBehaviour
     private TutorialPanelUI tutorialInstance;
 
     private const string ShowTutorialKey = "ShowTutorialOnStart";
+
+    [Header("Instruction Localization")]
+    [SerializeField] private LocalizedString lsInstructionFindDifferent;
+    [SerializeField] private LocalizedString lsInstructionFindSingleton;
 
     private void Awake()
     {
@@ -332,8 +337,7 @@ public class DifferentManager : MonoBehaviour
 
         currentMode = RoundMode.FindDifferent;
 
-        if (instructionText != null)
-            instructionText.text = "¡Toca el diferente!";
+        RefreshInstructionText();
 
         currentType = PickAllowedType();
 
@@ -387,10 +391,7 @@ public class DifferentManager : MonoBehaviour
         SetupRound();
 
         // Texto normal
-        if (instructionText != null)
-            instructionText.text = (currentMode == RoundMode.FindSingleton)
-                ? "Busca el sprite solitario"
-                : "¡Toca el diferente!";
+        RefreshInstructionText();
 
         isRunning = true;
         countdownRoutine = null;
@@ -456,8 +457,7 @@ public class DifferentManager : MonoBehaviour
 
     private void SetupSingletonRound()
     {
-        if (instructionText != null)
-            instructionText.text = "Busca el sprite solitario";
+        RefreshInstructionText();
 
         // Color base (si quieres, o siempre blanco)
         currentBaseColor = (patternColors != null && patternColors.Length > 0)
@@ -920,6 +920,15 @@ public class DifferentManager : MonoBehaviour
                 SoundManager.Instance.PlaySound(errorAudioClip, 1f);
             }
         }
+    }
+
+    private void RefreshInstructionText()
+    {
+        if (instructionText == null) return;
+
+        instructionText.text = (currentMode == RoundMode.FindSingleton)
+            ? lsInstructionFindSingleton.GetLocalizedString()
+            : lsInstructionFindDifferent.GetLocalizedString();
     }
 
     private IEnumerator RoundTransitionRoutine()

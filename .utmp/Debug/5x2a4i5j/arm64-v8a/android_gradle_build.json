@@ -5,14 +5,14 @@
   ],
   "cleanCommandsComponents": [
     [
-      "C:\\Program Files\\Unity\\Hub\\Editor\\6000.0.58f2\\Editor\\Data\\PlaybackEngines\\AndroidPlayer\\SDK\\cmake\\3.22.1\\bin\\ninja.exe",
+      "C:\\Users\\ammar\\AppData\\Local\\Android\\Sdk\\cmake\\3.22.1\\bin\\ninja.exe",
       "-C",
       "C:\\Users\\ammar\\Documents\\GitHub\\BipBop\\.utmp\\Debug\\5x2a4i5j\\arm64-v8a",
       "clean"
     ]
   ],
   "buildTargetsCommandComponents": [
-    "C:\\Program Files\\Unity\\Hub\\Editor\\6000.0.58f2\\Editor\\Data\\PlaybackEngines\\AndroidPlayer\\SDK\\cmake\\3.22.1\\bin\\ninja.exe",
+    "C:\\Users\\ammar\\AppData\\Local\\Android\\Sdk\\cmake\\3.22.1\\bin\\ninja.exe",
     "-C",
     "C:\\Users\\ammar\\Documents\\GitHub\\BipBop\\.utmp\\Debug\\5x2a4i5j\\arm64-v8a",
     "{LIST_OF_TARGETS_TO_BUILD}"

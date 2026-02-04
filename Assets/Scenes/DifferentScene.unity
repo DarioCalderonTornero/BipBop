@@ -1375,6 +1375,7 @@ GameObject:
   - component: {fileID: 416744218}
   - component: {fileID: 416744220}
   - component: {fileID: 416744219}
+  - component: {fileID: 416744221}
   m_Layer: 5
   m_Name: PuntosText
   m_TagString: Untagged
@@ -1500,6 +1501,34 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 416744217}
   m_CullTransparentMesh: 1
+--- !u!114 &416744221
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 416744217}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 56eb0353ae6e5124bb35b17aff880f16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_StringReference:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 30054717112418304
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  m_FormatArguments: []
+  m_UpdateString:
+    m_PersistentCalls:
+      m_Calls: []
+  references:
+    version: 2
+    RefIds: []
 --- !u!1 &461094330
 GameObject:
   m_ObjectHideFlags: 0
@@ -3784,7 +3813,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1134839137
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5117,6 +5146,27 @@ MonoBehaviour:
   showTutorialOnStart: 1
   tutorialPrefab: {fileID: 1134839138}
   tutorialParent: {fileID: 1134839137}
+  lsInstructionFindDifferent:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 30056330019438592
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  lsInstructionFindSingleton:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 30056580624908288
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  references:
+    version: 2
+    RefIds: []
 --- !u!4 &1529303107
 Transform:
   m_ObjectHideFlags: 0
@@ -5870,8 +5920,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "A veces la instrucci\xF3n ser\xE1 tocar el sprite solitario. Tendr\xE1s
-    que pulsar el sprite que no est\xE1 repetido ni una sola vez."
+  m_text: "A veces la instrucci\xF3n ser\xE1 tocar el objeto solitario. Tendr\xE1s
+    que pulsar el objeto que no est\xE1 repetido ni una sola vez."
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 1b4a1f76817a44c4a886ba5c35919310, type: 2}
   m_sharedMaterial: {fileID: -1839985413152155028, guid: 1b4a1f76817a44c4a886ba5c35919310, type: 2}

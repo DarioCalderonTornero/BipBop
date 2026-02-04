@@ -54,12 +54,19 @@ public class SettingsUI : MonoBehaviour
 
     [SerializeField] private TextMeshProUGUI viewText;
 
-    [Header("Sound Logic Images")]
+    /* [Header("Sound Logic Images")]
     [SerializeField] private Image soundVolumeOnImage;
     [SerializeField] private Image soundVolumeOffImage;
 
     [SerializeField] private Image musicVolumeOnImage;
-    [SerializeField] private Image musicVolumeOffImage;
+    [SerializeField] private Image musicVolumeOffImage;*/
+
+    [Header("Sound Logic Texts (ON/OFF)")]
+    [SerializeField] private TextMeshProUGUI soundStateText;
+    [SerializeField] private TextMeshProUGUI musicStateText;
+
+    [SerializeField] private LocalizedString lsOn;
+    [SerializeField] private LocalizedString lsOff;
 
     [Header("Sprite Images")]
     [SerializeField] private Image settingsImage;
@@ -191,12 +198,6 @@ public class SettingsUI : MonoBehaviour
         // RefreshLenguage(LocalizationSettings.SelectedLocale);   
         
         //Update sound in start
-        
-
-        //Update music in start
-        bool isMusicMuted = MusicManager.Instance.GetMusicVolumeNormalized() == 0; ;
-        musicVolumeOffImage.gameObject.SetActive(isMusicMuted);
-        musicVolumeOnImage.gameObject.SetActive(!isMusicMuted);
 
         RefreshSoundSwitch(true);
         RefreshMusicSwitch(true);
@@ -209,23 +210,28 @@ public class SettingsUI : MonoBehaviour
 
     private void HandleCancelSoundImage()
     {
-        bool isSoundMuted = SoundManager.Instance.GetSoundVolumeNormalized() == 0;
-        soundVolumeOffImage.gameObject.SetActive(isSoundMuted);
-        soundVolumeOnImage.gameObject.SetActive(!isSoundMuted);
+        bool soundOn = SoundManager.Instance.GetSoundVolumeNormalized() > 0f;
+
+        if (soundStateText != null)
+            soundStateText.text = (soundOn ? lsOn : lsOff).GetLocalizedString();
     }
 
     private void HandleCancelMusicImage()
     {
-        bool isMusicMuted = MusicManager.Instance.GetMusicVolumeNormalized() == 0; ;
-        musicVolumeOffImage.gameObject.SetActive(isMusicMuted);
-        musicVolumeOnImage.gameObject.SetActive(!isMusicMuted);
+        bool musicOn = MusicManager.Instance.GetMusicVolumeNormalized() > 0f;
+
+        if (musicStateText != null)
+            musicStateText.text = (musicOn ? lsOn : lsOff).GetLocalizedString();
     }
 
     private void LocalizationSettings_SelectedLocaleChanged(Locale newLocale)
     {
-        ApplyLocalizedTexts();          
-        RefreshLenguage(newLocale);     
+        ApplyLocalizedTexts();
+        RefreshLenguage(newLocale);
         RefreshIdiomaSwitch(false);
+
+        HandleCancelSoundImage(); // <- para recalcular ON/OFF traducido
+        HandleCancelMusicImage();
     }
 
     private void RefreshLenguage(Locale locale)
@@ -342,6 +348,9 @@ public class SettingsUI : MonoBehaviour
 
         idiomaYellowImage.gameObject.SetActive(true);
         idiomaPurpleImage.gameObject.SetActive(true);
+
+        if (soundStateText != null) soundStateText.gameObject.SetActive(true);
+        if (musicStateText != null) musicStateText.gameObject.SetActive(true);
     }
 
     public void Hide()
@@ -405,6 +414,9 @@ public class SettingsUI : MonoBehaviour
 
         idiomaYellowImage.gameObject.SetActive(false);
         idiomaPurpleImage.gameObject.SetActive(false);
+
+        if (soundStateText != null) soundStateText.gameObject.SetActive(false);
+        if (musicStateText != null) musicStateText.gameObject.SetActive(false);
     }
 
     private Coroutine _soundMoveCo, _musicMoveCo, _idiomaMoveCo;
