@@ -24,7 +24,7 @@ MonoBehaviour:
     m_LocalVariables: []
   displayNameFallback: Avatar
   sprite: {fileID: -3937619873368031545, guid: cfd2f2d89181177458ed6bca7e6694fc, type: 3}
-  price: 0
+  price: 8000
   unlockByScore: 0
   requiredScoreKey: 
   requiredScoreValue: 0
