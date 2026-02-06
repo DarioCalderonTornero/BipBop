@@ -5,61 +5,64 @@ using UnityEngine.Localization;
 using UnityEngine.Localization.Settings;
 
 [RequireComponent(typeof(TMP_Text))]
-
 public class LocaleFontSize : MonoBehaviour
 {
     [Header("Tamaños por idioma")]
     public float spanishSize = 40f;
     public float englishSize = 32f;
 
-    TMP_Text tmp;
+    private TMP_Text tmp;
+    private Coroutine initCo;
+    private bool subscribed;
 
-    void Awake()
+    private void Awake()
     {
         tmp = GetComponent<TMP_Text>();
     }
 
-    IEnumerator Start()
+    private void OnEnable()
     {
-        // Esperar a que el sistema de Localization esté listo
+        if (initCo != null) StopCoroutine(initCo);
+        initCo = StartCoroutine(InitAndApply());
+    }
+
+    private IEnumerator InitAndApply()
+    {
         yield return LocalizationSettings.InitializationOperation;
 
-        // Aplicar tamaño inicial según el idioma actual
         ApplySize(LocalizationSettings.SelectedLocale);
 
-        // Escuchar futuros cambios de idioma
-        LocalizationSettings.SelectedLocaleChanged += OnLocaleChanged;
+        if (!subscribed)
+        {
+            LocalizationSettings.SelectedLocaleChanged += OnLocaleChanged;
+            subscribed = true;
+        }
     }
 
-    void OnDestroy()
+    private void OnDisable()
     {
-        LocalizationSettings.SelectedLocaleChanged -= OnLocaleChanged;
+        if (subscribed)
+        {
+            LocalizationSettings.SelectedLocaleChanged -= OnLocaleChanged;
+            subscribed = false;
+        }
     }
 
-    void OnLocaleChanged(Locale newLocale)
+    private void OnLocaleChanged(Locale newLocale)
     {
         ApplySize(newLocale);
     }
 
-    void ApplySize(Locale locale)
+    private void ApplySize(Locale locale)
     {
         if (locale == null) return;
 
-        // Código del locale: "es", "es-ES", "en", "en-US", etc.
         string code = locale.Identifier.Code;
 
-        if (code.StartsWith("es"))
-        {
-            tmp.fontSize = spanishSize;
-        }
-        else if (code.StartsWith("en"))
-        {
-            tmp.fontSize = englishSize;
-        }
-        else
-        {
-            // Idioma por defecto si añades otros
-            tmp.fontSize = englishSize;
-        }
+        if (code.StartsWith("es")) tmp.fontSize = spanishSize;
+        else if (code.StartsWith("en")) tmp.fontSize = englishSize;
+        else tmp.fontSize = englishSize;
+
+        tmp.ForceMeshUpdate();
     }
 }
