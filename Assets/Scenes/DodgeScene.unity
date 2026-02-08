@@ -2093,17 +2093,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 276349783}
   m_CullTransparentMesh: 1
---- !u!114 &286240236 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 5227562255996293433, guid: 62a4ae7e19720eb4ea5715d33a15a6fa, type: 3}
-  m_PrefabInstance: {fileID: 3533712538436435093}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 59a93e7a27d96d84bb6fb03672032140, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &288788395
 GameObject:
   m_ObjectHideFlags: 0
@@ -2439,15 +2428,15 @@ MonoBehaviour:
       m_Calls: []
   m_text: 3
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: ed1d81ddd34b36744a1179f3a10754e3, type: 2}
-  m_sharedMaterial: {fileID: 2100000, guid: fc59ae03d29dc6b45a9b0274e2c74d43, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 1b4a1f76817a44c4a886ba5c35919310, type: 2}
+  m_sharedMaterial: {fileID: -1839985413152155028, guid: 1b4a1f76817a44c4a886ba5c35919310, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4280811775
-  m_fontColor: {r: 1, g: 0, b: 0.15702915, a: 1}
+    rgba: 4281986559
+  m_fontColor: {r: 1, g: 0.92941177, b: 0.22352941, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -5101,7 +5090,7 @@ MonoBehaviour:
   coinText: {fileID: 1911238842}
   scoreText: {fileID: 184017413}
   gameOverText: {fileID: 201619589}
-  adButtonFillDodge: {fileID: 286240236}
+  adButtonFillDodge: {fileID: 0}
   myanimator: {fileID: 820710223}
   coinsTextTemplate:
     m_TableReference:
@@ -15870,7 +15859,7 @@ MonoBehaviour:
   coinText: {fileID: 1073226536}
   scoreText: {fileID: 0}
   gameOverText: {fileID: 1875762480}
-  adButtonFillDodge: {fileID: 286240236}
+  adButtonFillDodge: {fileID: 0}
   myanimator: {fileID: 1913685058}
   coinsTextTemplate:
     m_TableReference:
