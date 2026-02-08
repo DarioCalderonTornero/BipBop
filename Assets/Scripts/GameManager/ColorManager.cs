@@ -6,15 +6,11 @@ using UnityEngine;
 using UnityEngine.Localization;
 using UnityEngine.UI;
 
-public class ColorManager : MonoBehaviour
+public class ColorManager : MonoBehaviour, IGameOverClient
 {
     public static ColorManager Instance { get; private set; }
 
     public event EventHandler OnGameOver;
-    public event EventHandler OnVideo;
-
-    [Header("Revive Countdown UI")]
-    [SerializeField] private ReviveCountdownUI reviveCountdownUI;
 
     [Header("UI Elements")]
     public TextMeshProUGUI colorWordText;
@@ -43,30 +39,30 @@ public class ColorManager : MonoBehaviour
     private bool hasEnded = false;
     private bool hasStarted = false;
 
-    // 1 revive máximo por partida (opcional, pero recomendado)
+    // --- NUEVO: pausa específica cuando el flow está mostrando oferta ---
+    private bool isPausedByOffer = false;
+
+    // --- NUEVO: limitar a 1 offer por run (lo usa el manager global) ---
     private bool hasUsedReviveOffer = false;
 
-    public enum DeathType
+    public bool HasUsedReviveOffer
     {
-        None,
-        Video,
-        GameOver
+        get => hasUsedReviveOffer;
+        set => hasUsedReviveOffer = value;
     }
-
-    public DeathType deathType { get; private set; } = DeathType.None;
 
     public enum RoundMode
     {
-        BackgroundColor,   // elegir color del fondo
-        WordMeaning,       // elegir el color que indica la palabra
-        TextColor          // elegir el color con el que está escrita
+        BackgroundColor,
+        WordMeaning,
+        TextColor
     }
 
     [Header("Modo desbloqueo ruleta")]
     [SerializeField] private int modeWheelUnlockScore = 20;
 
     [Header("Modo de ronda")]
-    [SerializeField] private Image[] modeIcons;   // 0=fondo, 1=palabra, 2=texto
+    [SerializeField] private Image[] modeIcons;
     [SerializeField] private float modeActiveScale = 1.15f;
     [SerializeField] private float modeInactiveScale = 1f;
     [SerializeField] private Color modeActiveColor = Color.white;
@@ -90,14 +86,14 @@ public class ColorManager : MonoBehaviour
     private bool isComboActive = false;
     private Coroutine comboAnimRoutine;
 
-    [SerializeField] private float comboShakeAmount = 0.05f;   // 5% de escala
+    [SerializeField] private float comboShakeAmount = 0.05f;
     [SerializeField] private float comboShakeSpeed = 15f;
 
     private Coroutine comboShakeRoutine;
 
     [Header("Countdown Candidates Shuffle")]
-    [SerializeField] private float candidatesShuffleInterval = 0.06f; 
-    [SerializeField] private float candidatesShuffleDuration = 3f;    
+    [SerializeField] private float candidatesShuffleInterval = 0.06f;
+    [SerializeField] private float candidatesShuffleDuration = 3f;
     private Coroutine candidatesShuffleRoutine;
 
     [Header("Tutorial Panel")]
@@ -109,8 +105,11 @@ public class ColorManager : MonoBehaviour
     private void Awake()
     {
         Instance = this;
-        deathType = DeathType.None;
         currentMode = RoundMode.WordMeaning;
+
+        // Estado limpio
+        isPausedByOffer = false;
+        hasUsedReviveOffer = false;
     }
 
     private void Start()
@@ -173,15 +172,14 @@ public class ColorManager : MonoBehaviour
         if (existing != null)
             existing.gameObject.SetActive(false);
     }
+
     private void BeginGameAfterTutorial()
     {
-        // Arrancamos el countdown del minijuego aquí (como en Geométrico)
         StartCountdownFlow();
     }
 
     private void PauseGameplay()
     {
-        // Congelado antes de empezar
         hasStarted = false;
     }
 
@@ -192,31 +190,22 @@ public class ColorManager : MonoBehaviour
     {
         hasEnded = false;
         hasStarted = false;
-        deathType = DeathType.None;
 
-        // UI base
+        // Reset run state
+        isPausedByOffer = false;
+        hasUsedReviveOffer = false;
+
         if (timeBarImage != null)
             timeBarImage.fillAmount = 1f;
 
         if (comboText != null)
             comboText.gameObject.SetActive(false);
 
-        // shuffle visual durante countdown
         if (candidatesShuffleRoutine != null) StopCoroutine(candidatesShuffleRoutine);
         candidatesShuffleRoutine = StartCoroutine(ShuffleCandidatesDuringCountdown());
 
-        // start countdown state + UI numbers
         if (ColorGameState.Instance != null)
             ColorGameState.Instance.StartCountdown();
-    }
-
-
-    private void GameStates_OnCountDown(object sender, EventArgs e)
-    {
-        if (hasStarted) return; // aún no ha empezado el juego real
-
-        if (candidatesShuffleRoutine == null)
-            candidatesShuffleRoutine = StartCoroutine(ShuffleCandidatesDuringCountdown());
     }
 
     private IEnumerator ShuffleCandidatesDuringCountdown()
@@ -256,7 +245,7 @@ public class ColorManager : MonoBehaviour
     private void Update()
     {
         if (hasEnded || !hasStarted) return;
-        if (deathType != DeathType.None) return;
+        if (isPausedByOffer) return; // ✅ equivalente al "deathType != None" que querías
 
         currentTime -= Time.deltaTime;
         timeSinceLastHit += Time.deltaTime;
@@ -268,7 +257,7 @@ public class ColorManager : MonoBehaviour
             EndCombo();
 
         if (currentTime <= 0f)
-            DecideDeathType();
+            TriggerFail();
     }
 
     private void HandleOnPlayingColorGame(object sender, EventArgs e)
@@ -287,8 +276,9 @@ public class ColorManager : MonoBehaviour
 
         hasEnded = false;
         hasStarted = true;
-        deathType = DeathType.None;
 
+        // Reset run state
+        isPausedByOffer = false;
         hasUsedReviveOffer = false;
 
         currentTime = startTime;
@@ -304,89 +294,60 @@ public class ColorManager : MonoBehaviour
         SetupRound();
     }
 
-    private void DecideDeathType()
+    /// <summary>
+    /// Punto único de fallo: lo llamamos desde timeout y desde click incorrecto.
+    /// </summary>
+    private void TriggerFail()
     {
-        if (deathType != DeathType.None)
-            return;
+        if (hasEnded) return;
+        if (!hasStarted) return;
+        if (isPausedByOffer) return; // ya en flow
 
-        // Si ya tuvo revive en esta partida, no vuelve a salir
-        if (hasUsedReviveOffer)
+        // Sonido de error como antes (tú lo ponías al cambiar DeathType)
+        if (SoundManager.Instance != null && errorAudioClip != null)
+            SoundManager.Instance.PlaySound(errorAudioClip, 1f);
+
+        // Delegamos al sistema central
+        if (GameOverFlowManager.Instance != null)
         {
-            SetDeathType(DeathType.GameOver);
-            return;
-        }
-
-        float videoProbability = UnityEngine.Random.Range(0, 10);
-
-        if (videoProbability < 0)
-        {
-            hasUsedReviveOffer = true;
-            SetDeathType(DeathType.Video);
+            GameOverFlowManager.Instance.NotifyFail(this);
         }
         else
         {
-            SetDeathType(DeathType.GameOver);
+            // Fallback: si por lo que sea no está el manager global, gameover directo
+            FinalGameOver();
         }
     }
 
-    public void SetDeathType(DeathType newType)
+    // =========================
+    // IGameOverClient (Flow API)
+    // =========================
+    public void PauseOnFail()
     {
-        if (deathType == newType)
-            return;
-
-        deathType = newType;
-
-        switch (deathType)
-        {
-            case DeathType.Video:
-                SoundManager.Instance.PlaySound(errorAudioClip, 1f);
-                OnVideo?.Invoke(this, EventArgs.Empty);
-                break;
-
-            case DeathType.GameOver:
-                SoundManager.Instance.PlaySound(errorAudioClip, 1f);
-                EndGame();
-                break;
-        }
+        // Esto es lo que pedías: parar Update sin tocar timeScale.
+        isPausedByOffer = true;
     }
 
-    // Llamado desde VideoGameOver cuando el rewarded termina
-    public void StartReviveCountdown()
+    public void FinalGameOver()
     {
-        // Solo tiene sentido si estamos en el estado Video
-        if (deathType != DeathType.Video)
-            return;
-
-        // Si no hay UI asignada, revive directo (fallback)
-        if (reviveCountdownUI == null)
-        {
-            Revive();
-            return;
-        }
-
-        // Sigue congelado durante la cuenta atrás.
-        reviveCountdownUI.Play(() =>
-        {
-            Revive();
-        });
+        // Al llegar aquí, ya es fin definitivo
+        isPausedByOffer = false;
+        EndGame();
     }
 
     public void Revive()
     {
-        if (deathType != DeathType.Video)
-            return;
+        // EXACTAMENTE tu revive anterior
+        isPausedByOffer = false;
 
-        // Reanudar
-        deathType = DeathType.None;
-
-        // margen de tiempo para seguir jugando (ajústalo a tu gusto)
+        // margen de tiempo para seguir jugando
         currentTime = Mathf.Max(currentTime, startTime * 0.5f);
 
-        // opcional: podrías regenerar ronda para evitar edge cases
+        // Si quisieras regenerar ronda opcional:
         // SetupRound();
     }
 
-    // --- TU SetupRound (con shuffle corregido) ---
+    // --- TU SetupRound (tal cual lo tenías) ---
     private void SetupRound()
     {
         if (hasEnded || !hasStarted)
@@ -397,12 +358,9 @@ public class ColorManager : MonoBehaviour
         if (ColorGamePuntos.Instance.GetScore() >= 20) availableCount = 8;
         if (ColorGamePuntos.Instance.GetScore() >= 30) availableCount = 9;
 
-        // --- (MINI safety) no dejes que availableCount supere tus arrays ---
         if (colorValues != null) availableCount = Mathf.Min(availableCount, colorValues.Length);
         if (colorNames != null) availableCount = Mathf.Min(availableCount, colorNames.Length);
-        // backgroundSprites puede ser más corto o igual, lo controlamos abajo
 
-        // 1) Elegir colores base
         int backgroundColorIndex, textColorIndex, wordColorIndex;
 
         wordColorIndex = UnityEngine.Random.Range(0, availableCount);
@@ -413,7 +371,6 @@ public class ColorManager : MonoBehaviour
             textColorIndex = UnityEngine.Random.Range(0, availableCount);
         } while (textColorIndex == wordColorIndex);
 
-        // ✅ CAMBIO MINIMO CLAVE: el fondo también sale del mismo pool (availableCount)
         do
         {
             backgroundColorIndex = UnityEngine.Random.Range(0, availableCount);
@@ -422,7 +379,6 @@ public class ColorManager : MonoBehaviour
         colorWordText.text = correctColorName;
         colorWordText.color = colorValues[textColorIndex];
 
-        // Fondo: se queda EXACTAMENTE como lo tenías (backgroundSprites independiente)
         if (backgroundSprites != null &&
             backgroundColorIndex < backgroundSprites.Length &&
             backgroundSprites[backgroundColorIndex] != null)
@@ -436,7 +392,6 @@ public class ColorManager : MonoBehaviour
             colorWordBackground.color = colorValues[backgroundColorIndex];
         }
 
-        // 2) Elegir modo en orden según puntuación
         int score = ColorGamePuntos.Instance.GetScore();
 
         if (score < 15)
@@ -469,7 +424,6 @@ public class ColorManager : MonoBehaviour
 
         UpdateModeIconsUI();
 
-        // 3) Índice correcto según modo
         switch (currentMode)
         {
             case RoundMode.BackgroundColor:
@@ -485,7 +439,6 @@ public class ColorManager : MonoBehaviour
 
         lastCorrectIndex = correctIndex;
 
-        // 4) Construir candidatos
         List<int> candidateIndices = new List<int> { correctIndex };
         List<int> remaining = new List<int>();
 
@@ -500,19 +453,16 @@ public class ColorManager : MonoBehaviour
             remaining.RemoveAt(r);
         }
 
-        // 5) Shuffle
         for (int i = 0; i < candidateIndices.Count; i++)
         {
             int r = UnityEngine.Random.Range(i, candidateIndices.Count);
             (candidateIndices[i], candidateIndices[r]) = (candidateIndices[r], candidateIndices[i]);
         }
 
-        // 6) Pintar botones y listeners
         for (int i = 0; i < candidateButtons.Count; i++)
         {
             Button btn = candidateButtons[i];
 
-            // (mini safety) si hay más botones que candidatos posibles, no rompas el juego
             if (i >= candidateIndices.Count)
             {
                 btn.gameObject.SetActive(false);
@@ -548,8 +498,6 @@ public class ColorManager : MonoBehaviour
         }
     }
 
-
-
     private void UpdateModeIconsUI()
     {
         if (modeIcons == null || modeIcons.Length < 3)
@@ -565,7 +513,6 @@ public class ColorManager : MonoBehaviour
             float targetScale = isActive ? modeActiveScale : modeInactiveScale;
             Color targetColor = isActive ? modeActiveColor : modeInactiveColor;
 
-            // arrancamos una pequeña animación hacia el nuevo estado
             StartCoroutine(AnimateModeIcon(img.rectTransform, img, targetScale, targetColor));
         }
     }
@@ -579,7 +526,6 @@ public class ColorManager : MonoBehaviour
         while (t < modeAnimDuration)
         {
             float k = t / modeAnimDuration;
-            // easing suave
             float eased = k * k * (3f - 2f * k);
 
             rt.localScale = Vector3.Lerp(startScale, Vector3.one * targetScale, eased);
@@ -595,31 +541,22 @@ public class ColorManager : MonoBehaviour
 
     public void OnCandidateSelected(int selectedIndex)
     {
-        if (hasEnded || !hasStarted || deathType != DeathType.None)
-            return;
+        if (hasEnded || !hasStarted) return;
+        if (isPausedByOffer) return;
 
         if (selectedIndex == correctIndex)
         {
-            // Shake de todas las opciones
             foreach (var btn in candidateButtons)
             {
                 var fx = btn.GetComponent<ColorOptionButtonFX>();
                 if (fx != null) fx.PlayShake();
             }
 
-            // ------ COMBO ------
-            if (timeSinceLastHit <= maxTimeBetweenHits)
-            {
-                comboCount++;
-            }
-            else
-            {
-                comboCount = 1;
-            }
+            if (timeSinceLastHit <= maxTimeBetweenHits) comboCount++;
+            else comboCount = 1;
 
             timeSinceLastHit = 0f;
 
-            // Activar combo a partir de 3
             if (comboCount >= 3)
             {
                 if (!isComboActive)
@@ -628,7 +565,6 @@ public class ColorManager : MonoBehaviour
                     UpdateComboText();
                     PlayComboPop();
 
-                    // empezar shake continuo
                     if (comboShakeRoutine != null)
                         StopCoroutine(comboShakeRoutine);
                     comboShakeRoutine = StartCoroutine(ComboShakeLoop());
@@ -644,12 +580,9 @@ public class ColorManager : MonoBehaviour
                 EndCombo(instant: true);
             }
 
-            // Puntuación (x2 si combo activo)
             if (isComboActive)
             {
-                // 1 punto con sonido/monedas/XP
                 ColorGamePuntos.Instance.AddScore();
-                // +1 punto silencioso → total x2
                 ColorGamePuntos.Instance.AddScoreRaw(1);
             }
             else
@@ -666,10 +599,9 @@ public class ColorManager : MonoBehaviour
         else
         {
             EndCombo();
-            DecideDeathType();
+            TriggerFail();
         }
     }
-
 
     private void UpdateComboText()
     {
@@ -766,7 +698,6 @@ public class ColorManager : MonoBehaviour
             return;
         }
 
-        // pop inverso: escala un poco hacia abajo y desaparece
         if (comboAnimRoutine != null)
             StopCoroutine(comboAnimRoutine);
         comboAnimRoutine = StartCoroutine(ComboEndRoutine());
@@ -826,25 +757,9 @@ public class ColorManager : MonoBehaviour
         if (DailyMissionManager.Instance != null)
         {
             DailyMissionManager.Instance.AddProgress("juega_1_partida", 1);
-        }
-
-        if (DailyMissionManager.Instance != null)
-        {
             DailyMissionManager.Instance.AddProgress("juega_3_partidas", 1);
-        }
-
-        if (DailyMissionManager.Instance != null)
-        {
             DailyMissionManager.Instance.AddProgress("juega_8_partidas", 1);
-        }
-
-        if (DailyMissionManager.Instance != null)
-        {
             DailyMissionManager.Instance.AddProgress("juega_10_partidas", 1);
-        }
-
-        if (DailyMissionManager.Instance != null)
-        {
             DailyMissionManager.Instance.AddProgress("juega_3_partidas_colores", 1);
         }
     }

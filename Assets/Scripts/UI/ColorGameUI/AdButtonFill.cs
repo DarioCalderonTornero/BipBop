@@ -4,6 +4,7 @@ using UnityEngine.UI;
 
 public class AdButtonFill : MonoBehaviour
 {
+    /*
     public event EventHandler OnHideOffer;
 
     [SerializeField] private Image fillImage;
@@ -32,4 +33,5 @@ public class AdButtonFill : MonoBehaviour
             videoGameOver.HideAdOffer();   
         }
     }
+    */
 }

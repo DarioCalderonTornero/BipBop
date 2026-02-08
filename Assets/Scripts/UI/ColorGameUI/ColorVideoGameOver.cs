@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class ColorVideoGameOver : MonoBehaviour
 {
+    /*
     [SerializeField] private Image videoGameOverBackgroundImage;
     [SerializeField] private Button playVideoButton;
     [SerializeField] private TextMeshProUGUI playVideoText;
@@ -79,4 +80,5 @@ public class ColorVideoGameOver : MonoBehaviour
         if (ColorManager.Instance != null)
             ColorManager.Instance.OnVideo -= ColorManager_OnVideo;
     }
+    */
 }
