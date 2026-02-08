@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
@@ -279,7 +279,7 @@ public class DifferentTile : MonoBehaviour
         SetSprite(sprite);
         SetColor(color);
 
-        // Rotaci�n
+        // Rotación
         SetRotationZ(rotationZDeg);
 
         // Escala + Flip (solo en el sprite)
@@ -295,5 +295,83 @@ public class DifferentTile : MonoBehaviour
         if (stopCurrentAnim) StopAnim();
         SetRotation(baseRotation);
         SetScale(baseScale);
+    }
+
+    // =========================
+    // Fail Reveal (Before GameOver)
+    // =========================
+    private Coroutine failRevealRoutine;
+
+    public void StopFailReveal()
+    {
+        if (failRevealRoutine != null)
+        {
+            StopCoroutine(failRevealRoutine);
+            failRevealRoutine = null;
+        }
+    }
+
+    public IEnumerator PlayFailReveal(
+        float duration,
+        float scaleMul,
+        Color blinkColor,
+        int blinks,
+        bool stopOtherAnim = true)
+    {
+        if (stopOtherAnim) StopAnim();
+        StopFailReveal();
+
+        failRevealRoutine = StartCoroutine(FailRevealRoutine(duration, scaleMul, blinkColor, blinks));
+        yield return failRevealRoutine;
+        failRevealRoutine = null;
+    }
+
+    private IEnumerator FailRevealRoutine(float duration, float scaleMul, Color blinkColor, int blinks)
+    {
+        if (imageRt == null || image == null)
+        {
+            float w = duration;
+            while (w > 0f) { w -= Time.unscaledDeltaTime; yield return null; }
+            yield break;
+        }
+
+        Vector3 startScale = imageRt.localScale;
+        Color originalColor = image.color;
+
+        blinks = Mathf.Max(1, blinks);
+        duration = Mathf.Max(0.05f, duration);
+
+        float t = 0f;
+
+        float blinkStep = duration / (blinks * 2f);
+        float blinkTimer = 0f;
+        bool blinkOn = false;
+
+        while (t < duration)
+        {
+            float dt = Time.unscaledDeltaTime;
+            t += dt;
+
+            // Escala suave hacia grande
+            float u = Mathf.Clamp01(t / duration);
+            float eased = u * (2f - u); // easeOut
+            imageRt.localScale = Vector3.Lerp(startScale, startScale * scaleMul, eased);
+
+            // Parpadeo SOLO durante el reveal
+            blinkTimer += dt;
+            if (blinkTimer >= blinkStep)
+            {
+                blinkTimer = 0f;
+                blinkOn = !blinkOn;
+                image.color = blinkOn ? blinkColor : originalColor;
+            }
+
+            yield return null;
+        }
+
+        // 🔴 CLAVE:
+        // Se queda GRANDE y con color normal (sin parpadeo final)
+        imageRt.localScale = startScale * scaleMul;
+        image.color = originalColor;
     }
 }

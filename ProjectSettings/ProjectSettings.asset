@@ -178,7 +178,7 @@ PlayerSettings:
   overrideDefaultApplicationIdentifier: 1
   AndroidBundleVersionCode: 5
   AndroidMinSdkVersion: 24
-  AndroidTargetSdkVersion: 28
+  AndroidTargetSdkVersion: 0
   AndroidPreferredInstallLocation: 1
   aotOptions: 
   stripEngineCode: 1
@@ -265,7 +265,7 @@ PlayerSettings:
   useCustomLauncherGradleManifest: 0
   useCustomBaseGradleTemplate: 0
   useCustomGradlePropertiesTemplate: 1
-  useCustomGradleSettingsTemplate: 1
+  useCustomGradleSettingsTemplate: 0
   useCustomProguardFile: 0
   AndroidTargetArchitectures: 2
   AndroidSplashScreenScale: 0
@@ -309,70 +309,66 @@ PlayerSettings:
     - m_Textures: []
       m_Width: 192
       m_Height: 192
-      m_Kind: 1
+      m_Kind: 0
       m_SubKind: 
     - m_Textures: []
       m_Width: 144
       m_Height: 144
-      m_Kind: 1
+      m_Kind: 0
       m_SubKind: 
     - m_Textures: []
       m_Width: 96
       m_Height: 96
-      m_Kind: 1
+      m_Kind: 0
       m_SubKind: 
     - m_Textures: []
       m_Width: 72
       m_Height: 72
-      m_Kind: 1
+      m_Kind: 0
       m_SubKind: 
     - m_Textures: []
       m_Width: 48
       m_Height: 48
-      m_Kind: 1
+      m_Kind: 0
       m_SubKind: 
     - m_Textures: []
       m_Width: 36
       m_Height: 36
-      m_Kind: 1
+      m_Kind: 0
       m_SubKind: 
-    - m_Textures:
-      - {fileID: 0}
+    - m_Textures: []
       m_Width: 192
       m_Height: 192
-      m_Kind: 0
-      m_SubKind: 
-    - m_Textures:
-      - {fileID: 0}
-      m_Width: 144
-      m_Height: 144
-      m_Kind: 0
-      m_SubKind: 
-    - m_Textures:
-      - {fileID: 0}
-      m_Width: 96
-      m_Height: 96
-      m_Kind: 0
-      m_SubKind: 
-    - m_Textures:
-      - {fileID: 0}
-      m_Width: 72
-      m_Height: 72
-      m_Kind: 0
-      m_SubKind: 
-    - m_Textures:
-      - {fileID: 0}
-      m_Width: 48
-      m_Height: 48
-      m_Kind: 0
-      m_SubKind: 
-    - m_Textures:
-      - {fileID: 0}
-      m_Width: 36
-      m_Height: 36
-      m_Kind: 0
+      m_Kind: 1
       m_SubKind: 
     - m_Textures: []
+      m_Width: 144
+      m_Height: 144
+      m_Kind: 1
+      m_SubKind: 
+    - m_Textures: []
+      m_Width: 96
+      m_Height: 96
+      m_Kind: 1
+      m_SubKind: 
+    - m_Textures: []
+      m_Width: 72
+      m_Height: 72
+      m_Kind: 1
+      m_SubKind: 
+    - m_Textures: []
+      m_Width: 48
+      m_Height: 48
+      m_Kind: 1
+      m_SubKind: 
+    - m_Textures: []
+      m_Width: 36
+      m_Height: 36
+      m_Kind: 1
+      m_SubKind: 
+    - m_Textures:
+      - {fileID: 2800000, guid: 83298690b1b720748bb7a78b1b1c7836, type: 3}
+      - {fileID: 2800000, guid: 6736cf8a6dd9a784b9a06acec93ba6ac, type: 3}
       m_Width: 432
       m_Height: 432
       m_Kind: 2
@@ -955,7 +951,7 @@ PlayerSettings:
   qnxGraphicConfPath: 
   apiCompatibilityLevel: 6
   captureStartupLogs: {}
-  activeInputHandler: 2
+  activeInputHandler: 0
   windowsGamepadBackendHint: 0
   cloudProjectId: 6d16dbd9-48dd-41f5-9274-4a694badae31
   framebufferDepthMemorylessMode: 0

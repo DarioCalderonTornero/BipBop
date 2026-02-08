@@ -5119,7 +5119,7 @@ MonoBehaviour:
   allowScale: 1
   allowSprite: 1
   rotationDeltaRange: {x: 12, y: 30}
-  oddScaleMultiplierRange: {x: 0.78, y: 1.28}
+  oddScaleMultiplierRange: {x: 0.5, y: 1.5}
   minScaleDeltaFromOne: 0.1
   oddSwapInterval: 1.5
   oddSwapAnimDuration: 0.12
@@ -5164,6 +5164,12 @@ MonoBehaviour:
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
+  playFailReveal: 1
+  failRevealDuration: 2
+  failRevealScaleMul: 1.65
+  failRevealBlinks: 6
+  failRevealTimeScale: 0.15
+  failRevealBlinkColor: {r: 1, g: 0.3726415, b: 0.3726415, a: 1}
   references:
     version: 2
     RefIds: []

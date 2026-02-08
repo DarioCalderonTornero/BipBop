@@ -145,6 +145,14 @@ public class DifferentManager : MonoBehaviour
     [SerializeField] private LocalizedString lsInstructionFindDifferent;
     [SerializeField] private LocalizedString lsInstructionFindSingleton;
 
+    [Header("Fail Reveal (Before GameOver)")]
+    [SerializeField] private bool playFailReveal = true;
+    [SerializeField] private float failRevealDuration = 0.9f;     // duración total del reveal
+    [SerializeField] private float failRevealScaleMul = 1.65f;    // cuánto crece el objetivo
+    [SerializeField] private int failRevealBlinks = 6;            // parpadeos rojos
+    [SerializeField] private float failRevealTimeScale = 0.15f;   // slow motion
+    [SerializeField] private Color failRevealBlinkColor = new Color(1f, 0.15f, 0.15f, 1f);
+
     private void Awake()
     {
         Instance = this;
@@ -1025,6 +1033,47 @@ public class DifferentManager : MonoBehaviour
         return x * x * (3f - 2f * x);
     }
 
+    private IEnumerator FailRevealThenEndGameRoutine(int revealIndex)
+    {
+        // Guardar timeScale actual (por si vienes de otras cosas)
+        float prevTimeScale = Time.timeScale;
+        float prevFixedDelta = Time.fixedDeltaTime;
+
+        // Slow motion global
+        Time.timeScale = Mathf.Clamp(failRevealTimeScale, 0.01f, 1f);
+        Time.fixedDeltaTime = prevFixedDelta * Time.timeScale;
+
+        // Aseguramos que no se pueda clicar nada durante el reveal
+        isTransitioning = true;
+
+        // Ejecuta el reveal en el tile (usa UNscaledTime para que la duración sea consistente)
+        DifferentTile t = tiles[revealIndex];
+        if (t != null)
+        {
+            yield return t.PlayFailReveal(
+                duration: failRevealDuration,
+                scaleMul: failRevealScaleMul,
+                blinkColor: failRevealBlinkColor,
+                blinks: failRevealBlinks
+            );
+        }
+        else
+        {
+            // Si algo raro pasa, esperamos igual un pelín
+            float wait = failRevealDuration;
+            while (wait > 0f) { wait -= Time.unscaledDeltaTime; yield return null; }
+        }
+
+        // Restaurar timeScale
+        Time.timeScale = prevTimeScale;
+        Time.fixedDeltaTime = prevFixedDelta;
+
+        isTransitioning = false;
+
+        // Y ahora sí, GameOver normal
+        EndGame();
+    }
+
     private bool hasEnded = false;
 
     private void Finish()
@@ -1034,29 +1083,19 @@ public class DifferentManager : MonoBehaviour
         isRunning = false;
         hasEnded = true;
 
-        if (oddSwapRoutine != null)
-        {
-            StopCoroutine(oddSwapRoutine);
-            oddSwapRoutine = null;
-        }
-        if (transitionRoutine != null)
-        {
-            StopCoroutine(transitionRoutine);
-            transitionRoutine = null;
-        }
+        if (oddSwapRoutine != null) { StopCoroutine(oddSwapRoutine); oddSwapRoutine = null; }
+        if (transitionRoutine != null) { StopCoroutine(transitionRoutine); transitionRoutine = null; }
+        if (countdownRoutine != null) { StopCoroutine(countdownRoutine); countdownRoutine = null; }
+        if (previewRoutine != null) { StopCoroutine(previewRoutine); previewRoutine = null; }
 
-        if (countdownRoutine != null)
+        if (playFailReveal && oddIndex >= 0 && oddIndex < tiles.Count && tiles[oddIndex] != null)
         {
-            StopCoroutine(countdownRoutine);
-            countdownRoutine = null;
+            StartCoroutine(FailRevealThenEndGameRoutine(oddIndex));
         }
-        if (previewRoutine != null)
+        else
         {
-            StopCoroutine(previewRoutine);
-            previewRoutine = null;
+            EndGame(); // fallback
         }
-
-        EndGame();
     }
 
     private void EndGame()
