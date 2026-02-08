@@ -8,9 +8,54 @@ using UnityEngine.Localization;
 using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
 
-public class GeometricModeManager : MonoBehaviour
+public class GeometricModeManager : MonoBehaviour, IGameOverClient
 {
     public static GeometricModeManager Instance { get; private set; }
+
+    // =========================
+    // ADS / GameOverFlow (NEW)
+    // =========================
+    public bool HasUsedReviveOffer { get; set; } = false;
+    private bool isPausedByOffer = false;
+
+    public void PauseOnFail()
+    {
+        isPausedByOffer = true;
+        FreezeActiveShapes(true);
+    }
+
+    public void Revive()
+    {
+        // Reanudar gameplay y restaurar tiempo al máximo posible en ese momento.
+        // En este modo, lo más limpio es devolverlo al startTime actual (que baja con la dificultad).
+        isPausedByOffer = false;
+        hasEnded = false;
+
+        currentTime = startTime;
+
+        if (timeBarImage != null)
+            timeBarImage.fillAmount = 1f;
+
+        FreezeActiveShapes(false);
+    }
+
+    public void FinalGameOver()
+    {
+        StartCoroutine(SlowMotionAndEnd());
+    }
+
+    private void TriggerFail()
+    {
+        // Evita dobles entradas
+        if (hasEnded || gameOverInvoked) return;
+
+        hasEnded = true;
+
+        if (GameOverFlowManager.Instance != null)
+            GameOverFlowManager.Instance.NotifyFail(this);
+        else
+            FinalGameOver();
+    }
 
     [Header("UI Elements")]
     public TextMeshProUGUI instructionText;
@@ -230,6 +275,10 @@ public class GeometricModeManager : MonoBehaviour
         if (hasGameStarted) return;
         hasGameStarted = true;
 
+        // ADS reset (NEW, minimal)
+        HasUsedReviveOffer = false;
+        isPausedByOffer = false;
+
         hasEnded = false;
         gameOverInvoked = false;
         score = 0;
@@ -280,6 +329,7 @@ public class GeometricModeManager : MonoBehaviour
     private void Update()
     {
         if (hasEnded) return;
+        if (isPausedByOffer) return; // NEW: pausa durante offer
 
         // Espera a terminar la intro + que el estado sea Playing para arrancar el movimiento
         if (!movementStarted)
@@ -298,7 +348,7 @@ public class GeometricModeManager : MonoBehaviour
             timeBarImage.fillAmount = Mathf.Clamp01(currentTime / startTime);
 
         if (currentTime <= 0f)
-            StartCoroutine(SlowMotionAndEnd());
+            TriggerFail(); // CHANGED: antes SlowMotionAndEnd
     }
 
     private void SetPrepareUI()
@@ -349,6 +399,7 @@ public class GeometricModeManager : MonoBehaviour
     public void OnShapeTapped(BouncingShape shape)
     {
         if (hasEnded) return;
+        if (isPausedByOffer) return; // NEW: bloquea input durante offer
 
         if (GeometricState.Instance != null &&
             GeometricState.Instance.geometricGameState != GeometricState.GeometricGameStateEnum.Playing)
@@ -381,7 +432,7 @@ public class GeometricModeManager : MonoBehaviour
         else
         {
             SoundManager.Instance.PlaySound(incorrectHitAudioClip, 1f);
-            StartCoroutine(SlowMotionAndEnd());
+            TriggerFail(); // CHANGED: antes SlowMotionAndEnd
         }
     }
 
@@ -702,7 +753,7 @@ public class GeometricModeManager : MonoBehaviour
 
     private IEnumerator SlowMotionAndEnd()
     {
-        if (hasEnded) yield break;
+        if (gameOverInvoked) yield break;  
         hasEnded = true;
 
         float previousTimeScale = Time.timeScale;
@@ -736,6 +787,7 @@ public class GeometricModeManager : MonoBehaviour
 
         OnGameOver?.Invoke(this, EventArgs.Empty);
         SaveRecordIfNeeded();
+        Debug.Log("Engame CALLED");
 
         if (PlayFabLoginManager.Instance != null && PlayFabLoginManager.Instance.IsLoggedIn)
             PlayFabScoreManager.Instance.SubmitScore("GeometricScore", score);

@@ -45,6 +45,8 @@ public class GeometricGameOverUI : MonoBehaviour
     {
         Debug.Log("OnGeometricGameOver");
 
+        gameObject.SetActive(true);
+
         int score = GeometricModeManager.Instance.GetScore();
         int coinsEarned = score / 3;
 
@@ -57,6 +59,7 @@ public class GeometricGameOverUI : MonoBehaviour
             coinText.text = coinsObtainedLocalized.GetLocalizedString(coinsEarned);
 
         myanimator.SetBool("IsGameOver", true);
+        Debug.Log("GeometricGameIver True");
     }
 
     private void OnDestroy()
