@@ -33771,6 +33771,11 @@ MonoBehaviour:
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
+  popupRoot: {fileID: 1464133900}
+  popupGroup: {fileID: 1464133902}
+  popInTime: 0.18
+  popOutTime: 0.12
+  startScale: 0.85
   references:
     version: 2
     RefIds: []
@@ -33794,7 +33799,7 @@ Animator:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1464133899}
-  m_Enabled: 1
+  m_Enabled: 0
   m_Avatar: {fileID: 0}
   m_Controller: {fileID: 9100000, guid: e3e78328e8c55464480e061a0ae80cc5, type: 2}
   m_CullingMode: 0

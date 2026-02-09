@@ -131,17 +131,33 @@ public class SettingsUI : MonoBehaviour
     [SerializeField] private LocalizedString lsReset;
     [SerializeField] private LocalizedString lsView;
 
+    [Header("Popup (No Animator)")]
+    [SerializeField] private RectTransform popupRoot;   // el root del panel (SettingsBackground o un padre)
+    [SerializeField] private CanvasGroup popupGroup;    // opcional pero recomendado (alpha + bloquear clicks)
+    [SerializeField] private float popInTime = 0.18f;
+    [SerializeField] private float popOutTime = 0.12f;
+    [SerializeField] private float startScale = 0.85f;
+
+    private Coroutine _popCo;
+
     private void Awake()
     {
-        openSettingsButton.onClick.AddListener(Show);
+        openSettingsButton.onClick.AddListener(() =>
+        {
+            FadeBlackBg(true);
+            PopOpen();
+        });
+
         closeSettingsButton.onClick.AddListener(() =>
         {
-            settingsAnimator.SetBool("IsSettingsOpen", false);
-            settingsAnimator.SetBool("IsSettingsClose", true);
-
-            FadeBlackBg(false); // <- fade out del fondo
-                                // El resto del panel puede seguir con su animación normal
+            FadeBlackBg(false);
+            PopClose();
         });
+
+        if (settingsAnimator != null)
+        {
+            settingsAnimator.enabled = false; // o directamente quítalo del GO en la escena
+        }
 
         vibrationButton.onClick.AddListener(() =>
         {
@@ -187,17 +203,33 @@ public class SettingsUI : MonoBehaviour
         });
     }
 
+    private void ShowWithPop()
+    {
+        Show();               // tu lógica de activar textos, imágenes, botones, etc.
+        FadeBlackBg(true);
+
+        if (_popCo != null) StopCoroutine(_popCo);
+        _popCo = StartCoroutine(PopRoutine(true));
+    }
+
+    private void HideWithPop()
+    {
+        if (_popCo != null) StopCoroutine(_popCo);
+        _popCo = StartCoroutine(PopRoutine(false));
+    }
+
     private void Start()
     {
-        Hide();
+        Show(); // deja TODO activo 1 vez
+
+        // deja el panel invisible de inicio sin desactivar nada
+        SetSettingsVisibleInstant(false);
+
         RefreshVibrationUI();
         HandleCancelSoundImage();
         HandleCancelMusicImage();
 
         LocalizationSettings.SelectedLocaleChanged += LocalizationSettings_SelectedLocaleChanged;
-        // RefreshLenguage(LocalizationSettings.SelectedLocale);   
-        
-        //Update sound in start
 
         RefreshSoundSwitch(true);
         RefreshMusicSwitch(true);
@@ -205,7 +237,6 @@ public class SettingsUI : MonoBehaviour
 
         ApplyLocalizedTexts();
         RefreshLenguage(LocalizationSettings.SelectedLocale);
-
     }
 
     private void HandleCancelSoundImage()
@@ -448,6 +479,18 @@ public class SettingsUI : MonoBehaviour
         }
     }
 
+    private void SetSettingsVisibleInstant(bool show)
+    {
+        if (popupRoot != null) popupRoot.localScale = show ? Vector3.one : Vector3.one * startScale;
+
+        if (popupGroup != null)
+        {
+            popupGroup.alpha = show ? 1f : 0f;
+            popupGroup.blocksRaycasts = show;
+            popupGroup.interactable = show;
+        }
+    }
+
     private IEnumerator MoveX(RectTransform rt, float targetX, float t)
     {
         Vector2 start = rt.anchoredPosition;
@@ -562,6 +605,68 @@ public class SettingsUI : MonoBehaviour
 
         cg.alpha = target;
         onDone?.Invoke();
+    }
+
+    private void PopOpen()
+    {
+        if (_popCo != null) StopCoroutine(_popCo);
+        _popCo = StartCoroutine(PopRoutine(true));
+    }
+
+    private void PopClose()
+    {
+        if (_popCo != null) StopCoroutine(_popCo);
+        _popCo = StartCoroutine(PopRoutine(false));
+    }
+
+    private IEnumerator PopRoutine(bool opening)
+    {
+        if (popupRoot == null || popupGroup == null) yield break;
+
+        // mostrar y permitir pop aunque estaba "invisible"
+        popupGroup.alpha = 1f;
+        popupGroup.blocksRaycasts = opening;
+        popupGroup.interactable = opening;
+
+        float time = opening ? popInTime : popOutTime;
+        float t = 0f;
+
+        Vector3 from = opening ? Vector3.one * startScale : Vector3.one;
+        Vector3 to = opening ? Vector3.one : Vector3.one * startScale;
+
+        popupRoot.localScale = from;
+
+        while (t < time)
+        {
+            t += Time.unscaledDeltaTime;
+            float a = time <= 0f ? 1f : Mathf.Clamp01(t / time);
+            float eased = opening ? EaseOutBack(a) : EaseInBack(a);
+            popupRoot.localScale = Vector3.LerpUnclamped(from, to, eased);
+            yield return null;
+        }
+
+        popupRoot.localScale = to;
+
+        if (!opening)
+        {
+            popupGroup.alpha = 0f;            // “invisible”
+            popupGroup.blocksRaycasts = false;
+            popupGroup.interactable = false;
+        }
+    }
+
+    private float EaseOutBack(float x)
+    {
+        const float c1 = 1.70158f;
+        const float c3 = c1 + 1f;
+        return 1f + c3 * Mathf.Pow(x - 1f, 3f) + c1 * Mathf.Pow(x - 1f, 2f);
+    }
+
+    private float EaseInBack(float x)
+    {
+        const float c1 = 1.70158f;
+        const float c3 = c1 + 1f;
+        return c3 * x * x * x - c1 * x * x;
     }
 
     void OnDestroy()
