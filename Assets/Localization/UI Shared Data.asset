@@ -827,6 +827,22 @@ MonoBehaviour:
     m_Key: Differente_TocaElSolitario
     m_Metadata:
       m_Items: []
+  - m_Id: 32276451567828992
+    m_Key: ClassicTutorial_1
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32276578558771200
+    m_Key: 'ClassicTutorial_2
+
+'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32276718136819712
+    m_Key: 'ClassicTutorial_3
+
+'
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

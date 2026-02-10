@@ -838,6 +838,20 @@ MonoBehaviour:
     m_Localized: Touch the lone object!
     m_Metadata:
       m_Items: []
+  - m_Id: 32276451567828992
+    m_Localized: Follow the instructions that appear in the instruction panel, accompanied
+      by images
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32276578558771200
+    m_Localized: The images show how such orders can be completed.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32276718136819712
+    m_Localized: Making a wrong move costs you time. When you reach 0, the game is
+      over.
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

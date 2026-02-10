@@ -62,6 +62,8 @@ public class TutorialPanelUI : MonoBehaviour
         for (int i = 0; i < segments.Count; i++)
         {
             RectTransform rt = segments[i];
+            if (rt == null) continue;
+
             CanvasGroup cg = canvasGroups[i];
 
             rt.anchoredPosition = originalPositions[i] + new Vector2(slideFromX, 0f);
@@ -69,7 +71,7 @@ public class TutorialPanelUI : MonoBehaviour
         }
 
         if (startButton != null && disableButtonUntilEnd)
-            startButton.interactable = false;
+            startButton.interactable = !disableButtonUntilEnd;
     }
 
     public void Show()
@@ -85,12 +87,10 @@ public class TutorialPanelUI : MonoBehaviour
     {
         for (int i = 0; i < segments.Count; i++)
         {
-            yield return AnimateIn(
-                segments[i],
-                canvasGroups[i],
-                originalPositions[i]
-            );
+            RectTransform rt = segments[i];
+            if (rt == null) continue;
 
+            yield return AnimateIn(rt, canvasGroups[i], originalPositions[i]);
             yield return new WaitForSecondsRealtime(segmentStagger);
         }
 
@@ -115,7 +115,6 @@ public class TutorialPanelUI : MonoBehaviour
 
             rt.anchoredPosition = Vector2.LerpUnclamped(startPos, endPos, eased);
             cg.alpha = eased;
-
             yield return null;
         }
 

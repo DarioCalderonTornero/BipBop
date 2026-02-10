@@ -840,6 +840,20 @@ MonoBehaviour:
     m_Localized: "\xA1Toca el objeto solitario!"
     m_Metadata:
       m_Items: []
+  - m_Id: 32276451567828992
+    m_Localized: "Realiza las \xF3rdenes que aparecen en el panel de instrucciones,
+      acompa\xF1adas con im\xE1genes"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32276578558771200
+    m_Localized: "Las im\xE1genes muestran c\xF3mo se pueden completar dichas \xF3rdenes"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32276718136819712
+    m_Localized: "Equivocarte de acci\xF3n penaliza el tiempo. Al llegar a 0, acaba
+      la partida"
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

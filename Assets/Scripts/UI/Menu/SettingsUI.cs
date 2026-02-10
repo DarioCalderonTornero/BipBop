@@ -1,4 +1,4 @@
-using System;
+Ôªøusing System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -107,7 +107,7 @@ public class SettingsUI : MonoBehaviour
         public Sprite rightSprite;            // Morado
         public float leftX = -45f;            // Ajusta a tu UI
         public float rightX = 45f;            // Ajusta a tu UI
-        public float moveTime = 0.12f;        // AnimaciÛn
+        public float moveTime = 0.12f;        // Animaci√≥n
     }
 
     [Header("Switch Visuals (Yellow Left / Purple Right)")]
@@ -140,6 +140,8 @@ public class SettingsUI : MonoBehaviour
 
     private Coroutine _popCo;
 
+    private const string LanguageKey = "SelectedLocale";
+
     private void Awake()
     {
         openSettingsButton.onClick.AddListener(() =>
@@ -156,7 +158,7 @@ public class SettingsUI : MonoBehaviour
 
         if (settingsAnimator != null)
         {
-            settingsAnimator.enabled = false; // o directamente quÌtalo del GO en la escena
+            settingsAnimator.enabled = false; // o directamente qu√≠talo del GO en la escena
         }
 
         vibrationButton.onClick.AddListener(() =>
@@ -205,7 +207,7 @@ public class SettingsUI : MonoBehaviour
 
     private void ShowWithPop()
     {
-        Show();               // tu lÛgica de activar textos, im·genes, botones, etc.
+        Show();               // tu l√≥gica de activar textos, im√°genes, botones, etc.
         FadeBlackBg(true);
 
         if (_popCo != null) StopCoroutine(_popCo);
@@ -218,11 +220,9 @@ public class SettingsUI : MonoBehaviour
         _popCo = StartCoroutine(PopRoutine(false));
     }
 
-    private void Start()
+    private IEnumerator Start()
     {
-        Show(); // deja TODO activo 1 vez
-
-        // deja el panel invisible de inicio sin desactivar nada
+        Show();
         SetSettingsVisibleInstant(false);
 
         RefreshVibrationUI();
@@ -231,12 +231,36 @@ public class SettingsUI : MonoBehaviour
 
         LocalizationSettings.SelectedLocaleChanged += LocalizationSettings_SelectedLocaleChanged;
 
+        yield return LocalizationSettings.InitializationOperation;
+
+        // ‚úÖ Aplicar idioma guardado aqu√≠ (SIEMPRE)
+        string saved = PlayerPrefs.GetString(LanguageKey, "");
+        if (!string.IsNullOrEmpty(saved) && LocalizationSettings.AvailableLocales != null)
+        {
+            Locale target = null;
+            foreach (var l in LocalizationSettings.AvailableLocales.Locales)
+            {
+                if (l.Identifier.Code == saved || l.Identifier.Code.StartsWith(saved))
+                {
+                    target = l;
+                    break;
+                }
+            }
+
+            if (target != null)
+                LocalizationSettings.SelectedLocale = target;
+        }
+
+        // ‚úÖ Pintar UI con el locale ya aplicado
+        ApplyLocalizedTexts();
+        RefreshLenguage(LocalizationSettings.SelectedLocale);
+
         RefreshSoundSwitch(true);
         RefreshMusicSwitch(true);
         RefreshIdiomaSwitch(true);
 
-        ApplyLocalizedTexts();
-        RefreshLenguage(LocalizationSettings.SelectedLocale);
+        HandleCancelSoundImage();
+        HandleCancelMusicImage();
     }
 
     private void HandleCancelSoundImage()
@@ -267,17 +291,11 @@ public class SettingsUI : MonoBehaviour
 
     private void RefreshLenguage(Locale locale)
     {
+        if (locale == null) return;
+
         string code = locale.Identifier.Code;
-
-        if (code.StartsWith("es"))
-        {
-            idiomaButtonText.text = "ESP";
-        }
-
-        if (code.StartsWith("en"))
-        {
-            idiomaButtonText.text = "ENG";
-        }
+        if (code.StartsWith("es")) idiomaButtonText.text = "ESP";
+        else if (code.StartsWith("en")) idiomaButtonText.text = "ENG";
     }
 
 
@@ -290,7 +308,7 @@ public class SettingsUI : MonoBehaviour
 
         bool enabled = Haptics.enabled;
 
-        // Colores del botÛn
+        // Colores del bot√≥n
         var cb = vibrationButton.colors;
         Color baseCol = enabled ? on : off;
         cb.normalColor = baseCol;
@@ -304,7 +322,7 @@ public class SettingsUI : MonoBehaviour
         if (vibrationButton.image != null)
             vibrationButton.image.color = baseCol;
 
-        // Mostrar/ocultar im·genes seg˙n el estado
+        // Mostrar/ocultar im√°genes seg√∫n el estado
         if (vibrationOnImage != null)
             vibrationOnImage.gameObject.SetActive(enabled);
 
@@ -534,8 +552,15 @@ public class SettingsUI : MonoBehaviour
         var loc = LocalizationSettings.SelectedLocale;
         string code = loc != null ? loc.Identifier.Code : "es";
         bool isSpanish = code.StartsWith("es");
-        // ESP = izquierda (amarillo), ENG = derecha (morado)
-        ApplySwitch(idiomaSwitch, isSpanish, instant, ref _idiomaMoveCo);
+
+        // ‚úÖ Ajusta esto seg√∫n tu UI real:
+        // Si tu switch tiene ESP a la izquierda y ENG a la derecha:
+        bool left = isSpanish;
+
+        // Si en tu UI es al rev√©s (ENG izquierda, ESP derecha), usa:
+        // bool left = !isSpanish;
+
+        ApplySwitch(idiomaSwitch, left, instant, ref _idiomaMoveCo);
     }
 
     private void ToggleLanguage()
@@ -546,19 +571,20 @@ public class SettingsUI : MonoBehaviour
         string code = current != null ? current.Identifier.Code : "es";
         bool isSpanish = code.StartsWith("es");
 
-        // Busca la otra locale (es <-> en)
         Locale target = null;
         foreach (var l in LocalizationSettings.AvailableLocales.Locales)
         {
-            if (!isSpanish && l.Identifier.Code.StartsWith("es")) { target = l; break; }
             if (isSpanish && l.Identifier.Code.StartsWith("en")) { target = l; break; }
+            if (!isSpanish && l.Identifier.Code.StartsWith("es")) { target = l; break; }
         }
 
-        if (target != null)
-            LocalizationSettings.SelectedLocale = target;
+        if (target == null) return;
 
-        // Tu texto ya se actualiza por el evento SelectedLocaleChanged
-        RefreshIdiomaSwitch(false);
+        LocalizationSettings.SelectedLocale = target;
+
+        // ‚úÖ Guarda EXACTO lo que has puesto
+        PlayerPrefs.SetString(LanguageKey, target.Identifier.Code);
+        PlayerPrefs.Save();
     }
 
     private void ApplyLocalizedTexts()
@@ -591,7 +617,7 @@ public class SettingsUI : MonoBehaviour
         float start = cg.alpha;
         float t = 0f;
 
-        // si vamos a mostrar, actÌvalo antes
+        // si vamos a mostrar, act√≠valo antes
         if (target > 0f && !cg.gameObject.activeSelf)
             cg.gameObject.SetActive(true);
 
@@ -649,7 +675,7 @@ public class SettingsUI : MonoBehaviour
 
         if (!opening)
         {
-            popupGroup.alpha = 0f;            // ìinvisibleî
+            popupGroup.alpha = 0f;            // ‚Äúinvisible‚Äù
             popupGroup.blocksRaycasts = false;
             popupGroup.interactable = false;
         }
