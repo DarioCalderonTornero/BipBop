@@ -56,8 +56,9 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 15237534154752
-    m_Localized: Sigue las instrucciones que se indican en la pantalla para conseguir
-      puntos. Si no las haces a tiempo, pierdes.
+    m_Localized: "Cumple las tareas que aparecen antes de que se acabe el tiempo.
+      Si \"Tareas f\xEDsicas\" est\xE1n desactivadas, no contar\xE1 para ranking
+      ni r\xE9cord."
     m_Metadata:
       m_Items: []
   - m_Id: 15467910496256

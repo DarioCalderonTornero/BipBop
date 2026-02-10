@@ -81,6 +81,8 @@ public class LogicaJuego : MonoBehaviour
     private Coroutine fillRoutine;
     private Coroutine shuffleRoutine;
 
+    private const string MotionTasksKey = "MotionTasks";
+
     private void Awake()
     {
         Instance = this;
@@ -407,14 +409,19 @@ public class LogicaJuego : MonoBehaviour
 
         int coinsEarned = MainGamePoints.Instance.GetCoinsEarned();
 
-        SaveRecordIfNeeded();
-
         CoinsRewardUI rewardUI = FindObjectOfType<CoinsRewardUI>(true);
         if (rewardUI != null) rewardUI.ShowReward(coinsEarned);
         else CurrencyManager.Instance.AddCoins(coinsEarned);
 
-        if (PlayFabLoginManager.Instance != null && PlayFabLoginManager.Instance.IsLoggedIn)
-            PlayFabScoreManager.Instance.SubmitScore("HighScore", MainGamePoints.Instance.GetScore());
+        bool motionEnabled = PlayerPrefs.GetInt(MotionTasksKey, 1) == 1;
+
+        if (motionEnabled)
+        {
+            SaveRecordIfNeeded();
+
+            if (PlayFabLoginManager.Instance != null && PlayFabLoginManager.Instance.IsLoggedIn)
+                PlayFabScoreManager.Instance.SubmitScore("HighScore", MainGamePoints.Instance.GetScore());
+        }
 
         int totalCoins = PlayerPrefs.GetInt("CoinCount", 0);
         totalCoins += coinsEarned;

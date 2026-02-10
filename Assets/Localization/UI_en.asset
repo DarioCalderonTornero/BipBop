@@ -56,8 +56,8 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 15237534154752
-    m_Localized: Follow the instructions on the screen to earn points. If you don't
-      do them in time, you lose.
+    m_Localized: "Complete the tasks that appear before time runs out. If \u201CPhysical
+      Tasks\u201D are disabled, it will not count towards ranking or record."
     m_Metadata:
       m_Items: []
   - m_Id: 15467910496256

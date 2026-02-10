@@ -53,6 +53,8 @@ public class MiniGameSelector : MonoBehaviour
     [SerializeField] private Toggle showTutorialToggle;
     private const string ShowTutorialKey = "ShowTutorialOnStart";
 
+    private const string MotionTasksKey = "MotionTasks";
+
     void Start()
     {
         // --- Restaurar el último minijuego guardado ---
@@ -84,6 +86,19 @@ public class MiniGameSelector : MonoBehaviour
         playButton.onClick.AddListener(OnPlayButton);
         leftArrowButton.onClick.AddListener(() => OnArrowClicked(false));
         rightArrowButton.onClick.AddListener(() => OnArrowClicked(true));
+
+        if (motionTasksToggle != null)
+        {
+            bool savedMotion = PlayerPrefs.GetInt(MotionTasksKey, 1) == 1; // por defecto ON
+            motionTasksToggle.SetIsOnWithoutNotify(savedMotion);
+            motionTasksToggle.onValueChanged.AddListener(OnMotionTasksToggleChanged);
+        }
+    }
+
+    private void OnMotionTasksToggleChanged(bool value)
+    {
+        PlayerPrefs.SetInt(MotionTasksKey, value ? 1 : 0);
+        PlayerPrefs.Save();
     }
 
     private void OnShowTutorialToggleChanged(bool value)
@@ -162,6 +177,18 @@ public class MiniGameSelector : MonoBehaviour
 
         if (motionTasksToggle != null)
             motionTasksToggle.gameObject.SetActive(game.showMotionTasksToggle);
+
+        if (motionTasksToggle != null)
+        {
+            motionTasksToggle.gameObject.SetActive(game.showMotionTasksToggle);
+
+            if (!game.showMotionTasksToggle)
+            {
+                motionTasksToggle.SetIsOnWithoutNotify(true);
+                PlayerPrefs.SetInt(MotionTasksKey, 1);
+                PlayerPrefs.Save();
+            }
+        }
     }
 
     public void OnPlayButton()
