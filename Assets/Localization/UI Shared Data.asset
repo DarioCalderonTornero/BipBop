@@ -851,6 +851,30 @@ MonoBehaviour:
     m_Key: Tutorial_jugar
     m_Metadata:
       m_Items: []
+  - m_Id: 32641249560199168
+    m_Key: ColorTutorial_slot1
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32641390400733184
+    m_Key: ColorTutorial_slot2
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32641733331222528
+    m_Key: ColorTutorial_slot3
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32641901577338880
+    m_Key: ColorTutorial_slot4
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32642055994834944
+    m_Key: ColorTutorial_slot5
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32642184428617728
+    m_Key: ColorTutorial_slot6
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

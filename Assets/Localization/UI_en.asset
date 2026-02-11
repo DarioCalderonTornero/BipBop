@@ -860,6 +860,31 @@ MonoBehaviour:
     m_Localized: Play
     m_Metadata:
       m_Items: []
+  - m_Id: 32641249560199168
+    m_Localized: Press the panel with the correct color according to the round
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32641390400733184
+    m_Localized: Starting at 25 and 50 points, the rounds change targets, marked
+      with panels in the center of the screen.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32641733331222528
+    m_Localized: Tap the bg color of the panel
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32641901577338880
+    m_Localized: Touch the color that the word refers to
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32642055994834944
+    m_Localized: Tap the color in which the word is written
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32642184428617728
+    m_Localized: If you choose the wrong color, or run out of time, you lose.
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

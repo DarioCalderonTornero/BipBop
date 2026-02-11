@@ -862,6 +862,31 @@ MonoBehaviour:
     m_Localized: Jugar
     m_Metadata:
       m_Items: []
+  - m_Id: 32641249560199168
+    m_Localized: "Pulsa el el panel con el color correcto seg\xFAn la ronda"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32641390400733184
+    m_Localized: A partir de 25, y 50 puntos, las rondas cambian de objetivo, marcado
+      con paneles en el centro de la pantalla.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32641733331222528
+    m_Localized: Toca el color del fondo del panel
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32641901577338880
+    m_Localized: Toca el color a la que se refiere la palabra
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32642055994834944
+    m_Localized: "Toca el color con el que est\xE1 escrita la palabra"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32642184428617728
+    m_Localized: Si te equivocas de color, o se agota el tiempo, pierdes.
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

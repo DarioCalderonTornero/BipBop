@@ -12378,10 +12378,31 @@ MonoBehaviour:
   - {fileID: 2114619634}
   startButton: {fileID: 851412287}
   startButtonText: {fileID: 1077095038}
-  nextLabel: Siguiente
-  playLabel: Jugar
   slideFromX: -900
   segmentDuration: 0.35
+  lsNext:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 32638260179075072
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  lsPlay:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 32638329095684096
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  nextFontSize: 16.5
+  playFontSize: 22.5
+  references:
+    version: 2
+    RefIds: []
 --- !u!225 &1995358366
 CanvasGroup:
   m_ObjectHideFlags: 0
