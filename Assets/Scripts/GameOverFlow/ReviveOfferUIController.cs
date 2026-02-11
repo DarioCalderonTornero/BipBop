@@ -6,8 +6,10 @@ using UnityEngine.UI;
 public class ReviveOfferUIController : MonoBehaviour
 {
     [Header("Offer UI")]
-    [SerializeField] private GameObject offerRoot; // Panel completo de la oferta
+    [SerializeField] private GameObject offerRoot;
+    [SerializeField] private CanvasGroup offerCanvasGroup; // NUEVO (recomendado)
     [SerializeField] private Button watchAdButton;
+    [SerializeField] private Image backgroundImage;
     [SerializeField] private TextMeshProUGUI watchAdText;
     [SerializeField] private Animator offerAnimator;
     [SerializeField] private string offerAnimatorBool = "PlayVideoGameOver";
@@ -20,11 +22,14 @@ public class ReviveOfferUIController : MonoBehaviour
 
     private Action onTimeoutOrDecline;
     private Action onRewardedCompleted;
-
     private bool isOpen;
 
     private void Awake()
     {
+        // Importante: si el juego baja timeScale, que el animator no se quede congelado
+        if (offerAnimator != null)
+            offerAnimator.updateMode = AnimatorUpdateMode.UnscaledTime;
+
         CloseImmediate();
 
         if (watchAdButton != null)
@@ -40,19 +45,19 @@ public class ReviveOfferUIController : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Abre la oferta. Si expira o se rechaza => onTimeoutOrDecline.
-    /// Si rewarded completado => countdown => onRewardedCompleted.
-    /// </summary>
     public void Open(Action onTimeoutOrDecline, Action onRewardedCompleted)
     {
         this.onTimeoutOrDecline = onTimeoutOrDecline;
         this.onRewardedCompleted = onRewardedCompleted;
 
         isOpen = true;
-        gameObject.SetActive(true);
 
+        // Activamos el GO por si estaba apagado
+        gameObject.SetActive(true);
         if (offerRoot != null) offerRoot.SetActive(true);
+
+        // Mostrar INSTANT (da igual timeScale)
+        SetOfferVisible(true);
 
         if (offerAnimator != null && !string.IsNullOrEmpty(offerAnimatorBool))
             offerAnimator.SetBool(offerAnimatorBool, true);
@@ -71,6 +76,9 @@ public class ReviveOfferUIController : MonoBehaviour
         if (offerAnimator != null && !string.IsNullOrEmpty(offerAnimatorBool))
             offerAnimator.SetBool(offerAnimatorBool, false);
 
+        // Oculta instantáneo y corta interacción
+        SetOfferVisible(false);
+
         if (offerRoot != null)
             offerRoot.SetActive(false);
 
@@ -83,13 +91,19 @@ public class ReviveOfferUIController : MonoBehaviour
     private void HandleOfferExpired()
     {
         if (!isOpen) return;
-        // Oferta expira => Final
+
+        // Oculta ya
+        HideOfferVisuals();
+
         onTimeoutOrDecline?.Invoke();
     }
 
     private void OnClickWatchAd()
     {
         if (!isOpen) return;
+
+        // Oculta YA al click (antes de cualquier cosa)
+        HideOfferVisuals();
 
         // Si no hay ads manager, caemos a final
         if (MediationAds.Instance == null)
@@ -106,17 +120,14 @@ public class ReviveOfferUIController : MonoBehaviour
             return;
         }
 
-        // Acepta ver anuncio: paramos el timer y ocultamos offer
-        if (offerTimer != null) offerTimer.Stop();
-        if (offerRoot != null) offerRoot.SetActive(false);
-
-        // Mostramos rewarded
         MediationAds.Instance.ShowRewardedAd(OnRewardedSuccess);
     }
 
     private void OnRewardedSuccess()
     {
-        // Countdown 3-2-1-GO (unscaled), luego revive
+        // Seguridad extra: oculta otra vez por si algo lo reactivó
+        HideOfferVisuals();
+
         if (reviveCountdownUI == null)
         {
             onRewardedCompleted?.Invoke();
@@ -127,5 +138,50 @@ public class ReviveOfferUIController : MonoBehaviour
         {
             onRewardedCompleted?.Invoke();
         });
+    }
+
+    private void HideOfferVisuals()
+    {
+        if (offerTimer != null)
+            offerTimer.Stop();
+
+        if (offerAnimator != null && !string.IsNullOrEmpty(offerAnimatorBool))
+            offerAnimator.SetBool(offerAnimatorBool, false);
+
+        SetOfferVisible(false);
+    }
+
+    /// <summary>
+    /// Visible/invisible instantáneo (no depende de timeScale),
+    /// y además corta raycasts/interacción.
+    /// </summary>
+    private void SetOfferVisible(bool visible)
+    {
+        // 1) CanvasGroup manda (recomendado)
+        if (offerCanvasGroup != null)
+        {
+            offerCanvasGroup.alpha = visible ? 1f : 0f;
+            offerCanvasGroup.interactable = visible;
+            offerCanvasGroup.blocksRaycasts = visible;
+        }
+
+        // 2) Por si no usas CanvasGroup, apagamos objetos explícitos también
+        if (watchAdButton != null)
+        {
+            watchAdButton.interactable = visible;
+            watchAdButton.gameObject.SetActive(visible);
+        }
+
+        if (backgroundImage != null)
+        {
+            backgroundImage.gameObject.SetActive(visible);
+        }
+
+        if (watchAdText != null)
+            watchAdText.gameObject.SetActive(visible);
+
+        // Si tienes root y quieres que desaparezca sí o sí:
+        if (offerRoot != null)
+            offerRoot.SetActive(visible);
     }
 }

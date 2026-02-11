@@ -7,9 +7,80 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Localization;
 
-public class LogicaJuego : MonoBehaviour
+public class LogicaJuego : MonoBehaviour, IGameOverClient
 {
     public static LogicaJuego Instance { get; private set; }
+
+    // =========================
+    // ADS / GameOverFlow (NEW)
+    // =========================
+    public bool HasUsedReviveOffer { get; set; } = false;
+
+    // Cuando el offer está abierto: bloquea Update + input.
+    private bool isPausedByOffer = false;
+
+    // IGameOverClient
+    public void PauseOnFail()
+    {
+        isPausedByOffer = true;
+
+        // Para el juego (Update no corre por el guard) y cortamos cualquier “preview” de countdown.
+        isGameActive = false;
+        StopCountdownRoutines();
+
+        // Si quieres mantener el overlay del CountDownUI/otros, NO lo toco aquí.
+        // (En tu flow real ya lo controla el offer prefab)
+    }
+
+    // IGameOverClient
+    public void Revive()
+    {
+        // Vuelve a permitir el juego
+        isPausedByOffer = false;
+        hasEnded = false;
+        isGameActive = true;
+
+        // “Al máximo posible en ese momento”:
+        // En este modo el máximo del ciclo actual es el startTime ACTUAL (va bajando con dificultad),
+        // así que dejamos currentTime = startTime.
+        currentTime = startTime;
+
+        if (timerUI != null)
+            timerUI.fillAmount = 1f;
+
+        // No cambiamos task / score / nada más. Simplemente retoma.
+        // Si estabas en medio de una tarea, sigue siendo la misma.
+    }
+
+    // IGameOverClient
+    public void FinalGameOver()
+    {
+        // Mantén tu lógica actual: evento + EndGame()
+        SoundManager.Instance.PlaySound(failAudioClip, 1f);
+        OnGameOver?.Invoke(this, EventArgs.Empty);
+        EndGame();
+    }
+
+    private void TriggerFail()
+    {
+        // Evita dobles entradas
+        if (hasEnded) return;
+
+        // Marcamos “ended” para cortar Update e inputs mientras decide el flow
+        hasEnded = true;
+        isGameActive = false;
+
+        // Delegamos al flow centralizado
+        if (GameOverFlowManager.Instance != null)
+        {
+            GameOverFlowManager.Instance.NotifyFail(this);
+        }
+        else
+        {
+            // Fallback si por lo que sea no existe el manager global
+            FinalGameOver();
+        }
+    }
 
     [Header("UI")]
     public TextMeshProUGUI instructionText;
@@ -95,7 +166,11 @@ public class LogicaJuego : MonoBehaviour
 
     private void Start()
     {
+        // Reset partida
         hasEnded = false;
+        isPausedByOffer = false;
+        HasUsedReviveOffer = false;
+
         isGameActive = false;
 
         bool showTutorialOnStart = PlayerPrefs.GetInt(ShowTutorialKey, 1) == 1;
@@ -214,7 +289,8 @@ public class LogicaJuego : MonoBehaviour
 
     public void OnCountdownFinishedStartPlaying()
     {
-        if (hasEnded) return;
+        if (hasEnded) return;              // si estaba “fallado” no arrancamos
+        if (isPausedByOffer) return;       // NEW: si hay offer abierto, tampoco
 
         // Parar preview/FX por seguridad
         StopCountdownRoutines();
@@ -246,6 +322,7 @@ public class LogicaJuego : MonoBehaviour
     // ================
     private void Update()
     {
+        if (isPausedByOffer) return;   // NEW
         if (!isGameActive || hasEnded) return;
 
         currentTime -= Time.deltaTime;
@@ -253,14 +330,15 @@ public class LogicaJuego : MonoBehaviour
 
         if (currentTime <= 0f)
         {
-            SoundManager.Instance.PlaySound(failAudioClip, 1f);
-            OnGameOver?.Invoke(this, EventArgs.Empty);
-            EndGame();
+            // CHANGED: antes era GameOver directo
+            TriggerFail();
         }
     }
 
     public void OnTaskAction(TaskType actionType)
     {
+        if (isPausedByOffer) return; // NEW
+
         if (!isGameActive || isTaskCompleted || hasEnded || currentTask == null) return;
 
         if (actionType == currentTask.type)
@@ -403,6 +481,7 @@ public class LogicaJuego : MonoBehaviour
 
         isGameActive = false;
         hasEnded = true;
+        isPausedByOffer = false; // por si acaso
 
         instructionText.text = gameOverText.GetLocalizedString();
         SetInstructionIcon(null);

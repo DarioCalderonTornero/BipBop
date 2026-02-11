@@ -690,7 +690,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   offerRoot: {fileID: 2335766129719053113}
+  offerCanvasGroup: {fileID: 7103470135295833352}
   watchAdButton: {fileID: 4411292910082976712}
+  backgroundImage: {fileID: 8413732769251503435}
   watchAdText: {fileID: 4761911269971528805}
   offerAnimator: {fileID: 9159586491532803804}
   offerAnimatorBool: PlayVideoGameOver
