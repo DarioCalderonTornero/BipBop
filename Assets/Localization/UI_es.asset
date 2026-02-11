@@ -957,6 +957,18 @@ MonoBehaviour:
     m_Localized: Color texto
     m_Metadata:
       m_Items: []
+  - m_Id: 32708265570697216
+    m_Localized: Guardar
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32708880929619968
+    m_Localized: "Tareas f\xEDsicas"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32708993857060864
+    m_Localized: Mostrar tutorial
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

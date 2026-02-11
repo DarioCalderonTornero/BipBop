@@ -943,6 +943,18 @@ MonoBehaviour:
     m_Key: Color_colorTexto
     m_Metadata:
       m_Items: []
+  - m_Id: 32708265570697216
+    m_Key: Guardar
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32708880929619968
+    m_Key: "TareasF\xEDsicas"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32708993857060864
+    m_Key: MostrarTutorial
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

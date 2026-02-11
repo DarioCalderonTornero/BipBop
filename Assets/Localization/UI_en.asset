@@ -954,6 +954,18 @@ MonoBehaviour:
     m_Localized: Text color
     m_Metadata:
       m_Items: []
+  - m_Id: 32708265570697216
+    m_Localized: Save
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32708880929619968
+    m_Localized: Motion tasks
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32708993857060864
+    m_Localized: Show tutorial
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:
