@@ -33732,6 +33732,7 @@ MonoBehaviour:
   popInTime: 0.18
   popOutTime: 0.12
   startScale: 0.85
+  fpsValueText: {fileID: 496414609}
   references:
     version: 2
     RefIds: []

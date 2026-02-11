@@ -142,6 +142,11 @@ public class SettingsUI : MonoBehaviour
 
     private const string LanguageKey = "SelectedLocale";
 
+    private readonly int[] fpsOptions = { 60, 90, 120, -1 }; // -1 = AUTO
+
+    [Header("FPS UI")]
+    [SerializeField] private TextMeshProUGUI fpsValueText;
+
     private void Awake()
     {
         openSettingsButton.onClick.AddListener(() =>
@@ -203,6 +208,8 @@ public class SettingsUI : MonoBehaviour
             //Change music UI
             HandleCancelMusicImage();
         });
+
+        FPSSettingsButton.onClick.AddListener(CycleFPS);
     }
 
     private void ShowWithPop()
@@ -261,6 +268,8 @@ public class SettingsUI : MonoBehaviour
 
         HandleCancelSoundImage();
         HandleCancelMusicImage();
+
+        RefreshFPSValue();
     }
 
     private void HandleCancelSoundImage()
@@ -277,6 +286,25 @@ public class SettingsUI : MonoBehaviour
 
         if (musicStateText != null)
             musicStateText.text = (musicOn ? lsOn : lsOff).GetLocalizedString();
+    }
+
+    private void CycleFPS()
+    {
+        int current = FPSManager.GetSavedFPS();
+
+        int idx = System.Array.IndexOf(fpsOptions, current);
+        if (idx < 0) idx = 0;
+
+        int next = fpsOptions[(idx + 1) % fpsOptions.Length];
+
+        FPSManager.SetFPS(next);
+        RefreshFPSValue();
+    }
+
+    private void RefreshFPSValue()
+    {
+        if (fpsValueText == null) return;
+        fpsValueText.text = FPSManager.GetFPSDisplay(); // "60" o "90" o "120" o "AUTO"
     }
 
     private void LocalizationSettings_SelectedLocaleChanged(Locale newLocale)

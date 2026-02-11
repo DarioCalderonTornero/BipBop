@@ -8,30 +8,27 @@ public class FPSButtonController : MonoBehaviour
     [SerializeField] private Button fpsButton;
     [SerializeField] private TextMeshProUGUI fpsText;
 
-    // Valores permitidos
-    private readonly int[] fpsValues = new int[] { 30, 45, 60 };
+    // -1 = AUTO
+    private readonly int[] fpsValues = new int[] { 60, 90, 120, -1 };
 
     private int currentIndex = 0;
-    private const string PREF_KEY = "FPS_LIMIT";
 
     private void Awake()
     {
-        // Cargar FPS guardado
-        int savedFPS = PlayerPrefs.GetInt(PREF_KEY, 60); // 60 por defecto
+        int saved = FPSManager.GetSavedFPS();
 
-        // Buscar su índice en la lista
+        // Buscar índice guardado
         for (int i = 0; i < fpsValues.Length; i++)
         {
-            if (fpsValues[i] == savedFPS)
+            if (fpsValues[i] == saved)
             {
                 currentIndex = i;
                 break;
             }
         }
 
-        ApplyFPS();
+        ApplyFPS(false); // solo refresca texto
 
-        // Listener del botón
         fpsButton.onClick.AddListener(ChangeFPS);
     }
 
@@ -42,21 +39,20 @@ public class FPSButtonController : MonoBehaviour
         if (currentIndex >= fpsValues.Length)
             currentIndex = 0;
 
-        ApplyFPS();
+        ApplyFPS(true);
     }
 
-    private void ApplyFPS()
+    private void ApplyFPS(bool applyToSystem)
     {
-        int newFPS = fpsValues[currentIndex];
+        int value = fpsValues[currentIndex];
 
-        // Cambiar en Unity
-        Application.targetFrameRate = newFPS;
+        if (applyToSystem)
+            FPSManager.SetFPS(value);
 
-        // Actualizar UI
-        fpsText.text = "" + newFPS;
-
-        // Guardar
-        PlayerPrefs.SetInt(PREF_KEY, newFPS);
-        PlayerPrefs.Save();
+        // Actualizar texto
+        if (value == -1)
+            fpsText.text = "AUTO";
+        else
+            fpsText.text = value.ToString();
     }
 }

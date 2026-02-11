@@ -854,6 +854,14 @@ MonoBehaviour:
       la partida"
     m_Metadata:
       m_Items: []
+  - m_Id: 32638260179075072
+    m_Localized: Siguiente
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32638329095684096
+    m_Localized: Jugar
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

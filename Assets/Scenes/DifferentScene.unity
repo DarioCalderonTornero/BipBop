@@ -3856,10 +3856,11 @@ MonoBehaviour:
   - {fileID: 1487859914}
   - {fileID: 1983290267}
   startButton: {fileID: 1683894648}
+  startButtonText: {fileID: 1473653788}
+  nextLabel: Siguiente
+  playLabel: Jugar
   slideFromX: -900
   segmentDuration: 0.35
-  segmentStagger: 0.5
-  disableButtonUntilEnd: 1
 --- !u!225 &1134839139
 CanvasGroup:
   m_ObjectHideFlags: 0

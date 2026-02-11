@@ -197,7 +197,6 @@ MonoBehaviour:
   playerTransform: {fileID: 1509769155}
   playerSpawnPoint: {fileID: 0}
   reviveInvulSeconds: 2
-  reviveCountdownUI: {fileID: 0}
   gameOverAudioClip: {fileID: 8300000, guid: 5e2193e20a27767448a71e687f834b18, type: 3}
   tutorialPrefab: {fileID: 1138142867}
   tutorialParent: {fileID: 1138142866}
@@ -5049,7 +5048,6 @@ MonoBehaviour:
   coinText: {fileID: 1911238842}
   scoreText: {fileID: 184017413}
   gameOverText: {fileID: 201619589}
-  adButtonFillDodge: {fileID: 0}
   myanimator: {fileID: 820710223}
   coinsTextTemplate:
     m_TableReference:
@@ -6562,10 +6560,11 @@ MonoBehaviour:
   - {fileID: 264343585}
   - {fileID: 1811865030}
   startButton: {fileID: 1909204671}
+  startButtonText: {fileID: 184880084}
+  nextLabel: Siguiente
+  playLabel: Jugar
   slideFromX: -900
   segmentDuration: 0.35
-  segmentStagger: 0.5
-  disableButtonUntilEnd: 1
 --- !u!225 &1138142868
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -15517,7 +15516,6 @@ MonoBehaviour:
   coinText: {fileID: 1073226536}
   scoreText: {fileID: 0}
   gameOverText: {fileID: 1875762480}
-  adButtonFillDodge: {fileID: 0}
   myanimator: {fileID: 1913685058}
   coinsTextTemplate:
     m_TableReference:

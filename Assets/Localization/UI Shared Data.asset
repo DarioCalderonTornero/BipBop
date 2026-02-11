@@ -843,6 +843,14 @@ MonoBehaviour:
 '
     m_Metadata:
       m_Items: []
+  - m_Id: 32638260179075072
+    m_Key: Tutorial_siguiente
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32638329095684096
+    m_Key: Tutorial_jugar
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
