@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class DodgeVideoGameOver : MonoBehaviour
 {
+    /*
     [SerializeField] private Image videoGameOverBackgroundImage;
     [SerializeField] private Button playVideoButton;
     [SerializeField] private TextMeshProUGUI playVideoText;
@@ -89,4 +90,5 @@ public class DodgeVideoGameOver : MonoBehaviour
         if (DodgeManager.Instance != null)
             DodgeManager.Instance.OnVideo -= DodgeManager_OnVideo;
     }
+    */
 }

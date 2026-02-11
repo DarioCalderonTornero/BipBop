@@ -1,9 +1,10 @@
-﻿using System;
+﻿// DodgeManager.cs
+using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
 
-public class DodgeManager : MonoBehaviour
+public class DodgeManager : MonoBehaviour, IGameOverClient
 {
     public static DodgeManager Instance;
 
@@ -15,28 +16,26 @@ public class DodgeManager : MonoBehaviour
     [SerializeField] private TurboController turboController;
 
     public event EventHandler OnGameOver;
-    public event EventHandler OnVideo;
 
     [Header("FX")]
     public GameObject[] asteroidExplosionPrefabs;
     public GameObject playerExplosionPrefab;
 
     [Header("Player")]
-    [SerializeField] private Transform playerTransform;          
-    [SerializeField] private Transform playerSpawnPoint;        
-    [SerializeField] private float reviveInvulSeconds = 2f;      
-
-    [Header("Revive Countdown UI")]
-    [SerializeField] private ReviveCountdownUI reviveCountdownUI;
+    [SerializeField] private Transform playerTransform;
+    [SerializeField] private Transform playerSpawnPoint;
+    [SerializeField] private float reviveInvulSeconds = 2f;
 
     [Header("Sounds")]
     [SerializeField] private AudioClip gameOverAudioClip;
 
-
     private bool isGameOver = false;
 
-    // 1 revive máximo por partida
-    private bool hasUsedReviveOffer = false;
+    // =========================
+    // ADS / GameOverFlow (NEW)
+    // =========================
+    public bool HasUsedReviveOffer { get; set; } = false;
+    private bool isPausedByOffer = false;
 
     [Header("Tutorial Panel")]
     [SerializeField] private TutorialPanelUI tutorialPrefab;
@@ -48,15 +47,6 @@ public class DodgeManager : MonoBehaviour
     private bool hasStarted = false;
     private bool gameplayEnabled = false;
 
-    public enum DeathType
-    {
-        None,
-        Video,
-        GameOver
-    }
-
-    public DeathType deathType { get; private set; } = DeathType.None;
-
     private void Awake()
     {
         Instance = this;
@@ -64,11 +54,11 @@ public class DodgeManager : MonoBehaviour
         if (scoreText != null)
             scoreText.text = $"{score}";
 
-        Enemy.GlobalFreeze = true;  // ✅ arrancamos congelado hasta Playing
-        deathType = DeathType.None;
+        Enemy.GlobalFreeze = true; // arrancamos congelado hasta Playing
 
         isGameOver = false;
-        hasUsedReviveOffer = false;
+        HasUsedReviveOffer = false;
+        isPausedByOffer = false;
 
         gameplayEnabled = false;
         hasStarted = false;
@@ -152,27 +142,29 @@ public class DodgeManager : MonoBehaviour
         score = 0;
         if (scoreText != null) scoreText.text = $"{score}";
 
-        deathType = DeathType.None;
         isGameOver = false;
-        hasUsedReviveOffer = false;
+
+        // NEW: reset revive per run
+        HasUsedReviveOffer = false;
+        isPausedByOffer = false;
 
         gameplayEnabled = false;
-        Enemy.GlobalFreeze = true; // ✅ hasta Playing
+        Enemy.GlobalFreeze = true; // hasta Playing
 
-        // ✅ Arranca countdown desde State (NO en DodgeState.Start)
+        // Arranca countdown desde State (NO en DodgeState.Start)
         if (DodgeState.Instance != null)
             DodgeState.Instance.StartCountdown();
         else
             EnableGameplayNow_Fallback();
     }
 
-    // Lo llama DodgeState cuando acaba el GO y entra en Playing
+    // Lo llama DodgeState cuando acaba el countdown y entra en Playing
     public void EnableGameplayNow()
     {
         gameplayEnabled = true;
         Enemy.GlobalFreeze = false;
 
-        // Si necesitas reset de nave al empezar:
+        // Reset player al empezar
         EnablePlayerAfterRevive();
         ResetPlayerToSpawn();
 
@@ -192,7 +184,9 @@ public class DodgeManager : MonoBehaviour
     public void EnemiesCollided(GameObject e1, GameObject e2)
     {
         if (isGameOver) return;
-        if (deathType != DeathType.None) return; // si estás en Video/GameOver, no sumar
+
+        // NEW: si offer está abierto, no sumar ni procesar
+        if (isPausedByOffer) return;
 
         Enemy enemy1 = e1.GetComponent<Enemy>();
         Enemy enemy2 = e2.GetComponent<Enemy>();
@@ -236,28 +230,25 @@ public class DodgeManager : MonoBehaviour
     // =========================
     public void PlayerHit(Enemy killer)
     {
-        // Si ya estamos en "muerte intermedia" o gameover, no repetir
         if (isGameOver) return;
-        if (deathType != DeathType.None) return;
+        if (isPausedByOffer) return;
 
-        StartCoroutine(SlowMotionAndThenDecide(killer));
+        StartCoroutine(SlowMotionAndThenFail(killer));
     }
 
-    private IEnumerator SlowMotionAndThenDecide(Enemy killer)
+    private IEnumerator SlowMotionAndThenFail(Enemy killer)
     {
         isGameOver = true;
 
         float prevTimeScale = Time.timeScale;
         float prevFixedDelta = Time.fixedDeltaTime;
 
-        
         // Cámara lenta
         Time.timeScale = 0.1f;
         Time.fixedDeltaTime = 0.01f * Time.timeScale;
 
         // Congelar enemigos
         Enemy.GlobalFreeze = true;
-        
 
         // 1) Flash killer
         if (killer != null)
@@ -286,18 +277,27 @@ public class DodgeManager : MonoBehaviour
 
         yield return new WaitForSecondsRealtime(0.6f);
 
+        // Restaurar time (antes de abrir offer)
         Time.timeScale = prevTimeScale;
         Time.fixedDeltaTime = prevFixedDelta;
 
-        DecideDeathType();
+        TriggerFail(); // NEW: centralizado
+    }
+
+    private void TriggerFail()
+    {
+        // Evitar dobles entradas
+        if (isPausedByOffer) return;
+
+        if (GameOverFlowManager.Instance != null)
+            GameOverFlowManager.Instance.NotifyFail(this);
+        else
+            FinalGameOver(); // fallback
     }
 
     private void DisablePlayerForDeath()
     {
         if (playerTransform == null) return;
-
-        // opción simple y robusta:
-        // - desactiva el GO entero (se deja de mover, de colisionar, de renderizar)
         playerTransform.gameObject.SetActive(false);
     }
 
@@ -307,94 +307,6 @@ public class DodgeManager : MonoBehaviour
         playerTransform.gameObject.SetActive(true);
     }
 
-    // =========================
-    //  Decide muerte (Video/GameOver)
-    // =========================
-    private void DecideDeathType()
-    {
-        if (deathType != DeathType.None) return;
-
-        // Si ya salió un revive en esta partida -> GameOver directo
-        if (hasUsedReviveOffer)
-        {
-            SetDeathType(DeathType.GameOver);
-            return;
-        }
-
-        float p = UnityEngine.Random.Range(0, 10);
-        if (p < 0)
-        {
-            hasUsedReviveOffer = true;
-            SetDeathType(DeathType.Video);
-        }
-        else
-        {
-            SetDeathType(DeathType.GameOver);
-        }
-    }
-
-    public void SetDeathType(DeathType newType)
-    {
-        if (deathType == newType) return;
-
-        deathType = newType;
-
-        SoundManager.Instance.PlaySound(gameOverAudioClip, 1f);
-
-        switch (deathType)
-        {
-            case DeathType.Video:
-                OnVideo?.Invoke(this, EventArgs.Empty);
-                break;
-
-            case DeathType.GameOver:
-                DestroyPlayerIfExists();
-                DoGameOverLogic();
-                break;
-        }
-    }
-
-    private void DestroyPlayerIfExists()
-    {
-        if (playerTransform == null) return;
-
-        Destroy(playerTransform.gameObject);
-        playerTransform = null;
-    }
-
-    // Llamado por DodgeVideoGameOver cuando el rewarded termina
-    public void StartReviveCountdown()
-    {
-        if (deathType != DeathType.Video) return;
-
-        if (reviveCountdownUI == null)
-        {
-            ReviveNow();
-            return;
-        }
-
-        reviveCountdownUI.Play(ReviveNow);
-    }
-
-    private void ReviveNow()
-    {
-        if (deathType != DeathType.Video) return;
-
-        // Volvemos a jugar
-        deathType = DeathType.None;
-        isGameOver = false;
-
-        // Reactivar gameplay
-        Enemy.GlobalFreeze = false;
-
-        EnablePlayerAfterRevive();
-        ResetPlayerToSpawn();
-        turboController.ResetTurbo();
-
-        StartCoroutine(TemporaryInvulnerability());
-    }
-
-
     private void ResetPlayerToSpawn()
     {
         if (playerTransform == null || playerSpawnPoint == null) return;
@@ -402,7 +314,6 @@ public class DodgeManager : MonoBehaviour
         playerTransform.position = playerSpawnPoint.position;
         playerTransform.rotation = playerSpawnPoint.rotation;
 
-        // si tu PlayerController guarda target interno, resetealo para que no “salte”
         var pc = playerTransform.GetComponent<PlayerController>();
         if (pc != null)
             pc.ResetCruiseDirectionToForward();
@@ -411,19 +322,51 @@ public class DodgeManager : MonoBehaviour
     private IEnumerator TemporaryInvulnerability()
     {
         if (reviveInvulSeconds <= 0f) yield break;
-
-        // Placeholder: aquí activarías invulnerabilidad real si tu player la tiene
         yield return new WaitForSeconds(reviveInvulSeconds);
     }
 
-    public void GameOver()
+    // =========================
+    // IGameOverClient (NEW)
+    // =========================
+    public void PauseOnFail()
     {
-        if (isGameOver) return;
+        // Esto lo llamará el flow cuando decida mostrar Offer
+        isPausedByOffer = true;
 
-        isGameOver = true;
-        SetDeathType(DeathType.GameOver);
+        // Congelamos enemigos
+        Enemy.GlobalFreeze = true;
+
+        // OJO: aquí NO toques Time.timeScale (lo gestiona tu slowmo y el flow)
     }
 
+    public void Revive()
+    {
+        // Revive centralizado: reactivamos gameplay
+        isPausedByOffer = false;
+        isGameOver = false;
+
+        // Reanudar enemigos
+        Enemy.GlobalFreeze = false;
+
+        EnablePlayerAfterRevive();
+        ResetPlayerToSpawn();
+
+        if (turboController != null)
+            turboController.ResetTurbo();
+
+        StartCoroutine(TemporaryInvulnerability());
+    }
+
+    public void FinalGameOver()
+    {
+        // Aquí hacemos exactamente tu GameOver real
+        SoundManager.Instance.PlaySound(gameOverAudioClip, 1f);
+        DoGameOverLogic();
+    }
+
+    // =========================
+    // GameOver real (sin anuncio)
+    // =========================
     private void DoGameOverLogic()
     {
         Debug.Log("GAME OVER!");
@@ -431,7 +374,9 @@ public class DodgeManager : MonoBehaviour
         if (score > 20)
             AvatarUnlockHelper.UnlockAvatar("Desbloqueable");
 
-        DodgeState.Instance.dodgeGameState = DodgeState.DodgeGameStateEnum.GameOver;
+        if (DodgeState.Instance != null)
+            DodgeState.Instance.dodgeGameState = DodgeState.DodgeGameStateEnum.GameOver;
+
         OnGameOver?.Invoke(this, EventArgs.Empty);
 
         SaveRecordIfNeeded();
@@ -439,7 +384,7 @@ public class DodgeManager : MonoBehaviour
         if (PlayFabLoginManager.Instance != null && PlayFabLoginManager.Instance.IsLoggedIn)
             PlayFabScoreManager.Instance.SubmitScore("DodgeScore", score);
 
-        int coinsEarned = score/3;
+        int coinsEarned = score / 3;
 
         CoinsRewardUI rewardUI = FindObjectOfType<CoinsRewardUI>(true);
         if (rewardUI != null)
@@ -454,25 +399,9 @@ public class DodgeManager : MonoBehaviour
         if (DailyMissionManager.Instance != null)
         {
             DailyMissionManager.Instance.AddProgress("juega_1_partida", 1);
-        }
-
-        if (DailyMissionManager.Instance != null)
-        {
             DailyMissionManager.Instance.AddProgress("juega_3_partidas", 1);
-        }
-
-        if (DailyMissionManager.Instance != null)
-        {
             DailyMissionManager.Instance.AddProgress("juega_8_partidas", 1);
-        }
-
-        if (DailyMissionManager.Instance != null)
-        {
             DailyMissionManager.Instance.AddProgress("juega_10_partidas", 1);
-        }
-
-        if (DailyMissionManager.Instance != null)
-        {
             DailyMissionManager.Instance.AddProgress("juega_1_partida_nave", 1);
         }
     }

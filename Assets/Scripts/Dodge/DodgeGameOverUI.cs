@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿// DodgeGameOverUI.cs
+using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Localization;
@@ -13,10 +14,9 @@ public class DodgeGameOverUI : MonoBehaviour
 
     [Header("Texts")]
     [SerializeField] private TextMeshProUGUI coinText;   // "Monedas obtenidas: {0}"
-    [SerializeField] private TextMeshProUGUI scoreText;  // ✅ SOLO NÚMERO
+    [SerializeField] private TextMeshProUGUI scoreText;  // SOLO NÚMERO
     [SerializeField] private TextMeshProUGUI gameOverText;
 
-    [SerializeField] private AdButtonFillDodge adButtonFillDodge;
     [SerializeField] private Animator myanimator;
 
     [Header("Localization")]
@@ -45,9 +45,6 @@ public class DodgeGameOverUI : MonoBehaviour
 
         if (DodgeManager.Instance != null)
             DodgeManager.Instance.OnGameOver += DodgeManager_OnGameOver;
-
-        if (adButtonFillDodge != null)
-            adButtonFillDodge.OnDodgeHideOffer += AdButtonFillDodge_OnDodgeHideOffer;
     }
 
     private void OnEnable()
@@ -60,24 +57,16 @@ public class DodgeGameOverUI : MonoBehaviour
         LocalizationSettings.SelectedLocaleChanged -= OnLocaleChanged;
     }
 
-    private void AdButtonFillDodge_OnDodgeHideOffer(object sender, System.EventArgs e)
-    {
-        if (DodgeManager.Instance != null)
-            DodgeManager.Instance.SetDeathType(DodgeManager.DeathType.GameOver);
-    }
-
     private async void DodgeManager_OnGameOver(object sender, System.EventArgs e)
     {
         if (DodgeManager.Instance == null) return;
 
         lastScore = DodgeManager.Instance.GetScore();
-        lastCoins = lastScore / 3; // ✅ 1 moneda cada 3 puntos (como en DoGameOverLogic)
+        lastCoins = lastScore / 3;
 
-        // ✅ SCORE: solo número
         if (scoreText != null)
             scoreText.text = lastScore.ToString();
 
-        // ✅ COINS: localizado
         await RefreshCoinsText();
 
         if (myanimator != null)
@@ -86,11 +75,8 @@ public class DodgeGameOverUI : MonoBehaviour
 
     private async void OnLocaleChanged(Locale _)
     {
-        // Si cambia el idioma estando en Game Over, refrescamos solo el texto localizado
         if (myanimator != null && myanimator.GetBool("IsGameOver"))
-        {
             await RefreshCoinsText();
-        }
     }
 
     private async Task RefreshCoinsText()
@@ -99,7 +85,7 @@ public class DodgeGameOverUI : MonoBehaviour
 
         if (coinsTextTemplate.IsEmpty)
         {
-            coinText.text = "Coins: " + lastCoins; // fallback
+            coinText.text = "Coins: " + lastCoins;
             return;
         }
 
@@ -116,8 +102,5 @@ public class DodgeGameOverUI : MonoBehaviour
     {
         if (DodgeManager.Instance != null)
             DodgeManager.Instance.OnGameOver -= DodgeManager_OnGameOver;
-
-        if (adButtonFillDodge != null)
-            adButtonFillDodge.OnDodgeHideOffer -= AdButtonFillDodge_OnDodgeHideOffer;
     }
 }

@@ -160,15 +160,13 @@ public class GamePause : MonoBehaviour
         settingsButton.interactable = false;
         mainMenuButton.interactable = false;
 
+        resumeCountdownUI.Play(OnResumeCountdownFinished);
 
         Time.timeScale = 0f;
-
-        resumeCountdownUI.Play(OnResumeCountdownFinished);
     }
 
     private void OnResumeCountdownFinished()
     {
-        // AHORA sí cerramos el GamePause
         gamePauseAnimator.SetBool("IsGamePaused", false);
 
         Time.timeScale = 1f;
