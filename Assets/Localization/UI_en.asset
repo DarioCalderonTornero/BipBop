@@ -885,6 +885,75 @@ MonoBehaviour:
     m_Localized: If you choose the wrong color, or run out of time, you lose.
     m_Metadata:
       m_Items: []
+  - m_Id: 32664587129028608
+    m_Localized: Click on the image that is different from the rest!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32664690002722816
+    m_Localized: Sometimes the instruction will be to touch the lone object. You
+      will have to tap the object that is not repeated even once.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32664791500685312
+    m_Localized: If you tap the wrong image, or the time runs out, you lose!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32665591484481536
+    m_Localized: Use the joystick to move the ship across the screen and dodge asteroids.
+      Tap the screen with another finger to activate the turbo.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32665679103492096
+    m_Localized: The ateriodes are constantly chasing the ship. You have to make
+      them collide with each other to score points.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32665752096964608
+    m_Localized: If you overuse turbo or collide with an asteroid, you lose.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32666185095938048
+    m_Localized: Touch the correct figure indicated on the panel
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32666266972946432
+    m_Localized: The figures will be in constant motion, so aim carefully before
+      tapping the screen
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32666321154965504
+    m_Localized: New characters will appear!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32666370840690688
+    m_Localized: If you click on the wrong figure, or the time runs out, you lose.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32666806834397184
+    m_Localized: Use the arrow keys to move between platforms and reach the gems
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32667052633194496
+    m_Localized: Eventually, arrows are shot in a straight line at them, marked with
+      lighting on the platforms
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32667123802144768
+    m_Localized: If you are hit by an arrow, or time runs out, you lose
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32669176272224256
+    m_Localized: BG
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32669254525353984
+    m_Localized: Meaning
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32669307679768576
+    m_Localized: Text color
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

@@ -875,6 +875,74 @@ MonoBehaviour:
     m_Key: ColorTutorial_slot6
     m_Metadata:
       m_Items: []
+  - m_Id: 32664587129028608
+    m_Key: DifferentTutorial_slot1
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32664690002722816
+    m_Key: DifferentTutorial_slot2
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32664791500685312
+    m_Key: 'DifferentTutorial_slot3
+
+'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32665591484481536
+    m_Key: DodgeTutorial_slot1
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32665679103492096
+    m_Key: DodgeTutorial_slot2
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32665752096964608
+    m_Key: 'DodgeTutorial_slot3
+
+'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32666185095938048
+    m_Key: GeometricTutorial_slot1
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32666266972946432
+    m_Key: GeometricTutorial_slot2
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32666321154965504
+    m_Key: GeometricTutorial_slot3
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32666370840690688
+    m_Key: GeometricTutorial_slot4
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32666806834397184
+    m_Key: GridTutorial_slot1
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32667052633194496
+    m_Key: GridTutorial_slot2
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32667123802144768
+    m_Key: GridTutorial_slot3
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32669176272224256
+    m_Key: Color_fondo
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32669254525353984
+    m_Key: Color_significado
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32669307679768576
+    m_Key: Color_colorTexto
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

@@ -887,6 +887,76 @@ MonoBehaviour:
     m_Localized: Si te equivocas de color, o se agota el tiempo, pierdes.
     m_Metadata:
       m_Items: []
+  - m_Id: 32664587129028608
+    m_Localized: "\xA1Pulsa la imagen que es diferente al resto!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32664690002722816
+    m_Localized: "A veces la instrucci\xF3n ser\xE1 tocar el objeto solitario. Tendr\xE1s
+      que pulsar el objeto que no est\xE1 repetido ni una sola vez."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32664791500685312
+    m_Localized: "Si tocas la imagen incorrecta, o se acaba el tiempo, \xA1pierdes!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32665591484481536
+    m_Localized: Usa el joystick para mover la nave por la pantalla y esquivar asteroides.
+      Al pulsar la pantalla con otro dedo, activas el turbo
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32665679103492096
+    m_Localized: Los ateriodes persiguen la nave continuamente. Tienes que hacer
+      que choquen entre ellos para conseguir puntos
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32665752096964608
+    m_Localized: Si te pasas de turbo, o chocas con un asteroide, pierdes.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32666185095938048
+    m_Localized: Toca la figura correcta indicada en el panel
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32666266972946432
+    m_Localized: "Las figuras estar\xE1n en continuo movimiento, apunta bien antes
+      de pulsar la pantalla"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32666321154965504
+    m_Localized: "\xA1Aparaecer\xE1n figuras nuevas!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32666370840690688
+    m_Localized: Si pulsas la figura incorrecta, o se acaba el tiempo, pierdes.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32666806834397184
+    m_Localized: Utiliza las flechas para moverte entre las plataformas y llegar
+      a las gemas
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32667052633194496
+    m_Localized: "Eventualmente, se lanzan flechas en l\xEDnea recta sobre ellas,
+      marcadas con una iluminaci\xF3n en las plataformas"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32667123802144768
+    m_Localized: Si te golpea una flecha, o se acaba el tiempo, pierdes
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32669176272224256
+    m_Localized: Fondo
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32669254525353984
+    m_Localized: Significado
+    m_Metadata:
+      m_Items: []
+  - m_Id: 32669307679768576
+    m_Localized: Color texto
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:
