@@ -786,19 +786,29 @@ public class GridGameManager : MonoBehaviour, IGameOverClient
     {
         isPausedByOffer = false;
 
-        // Volver a estado “jugable”
         isGameOver = false;
         isDyingByArrow = false;
         isMoving = false;
 
-        // Soltar player si estaba parented a flecha
-        if (playerObj != null)
+        if (playerObj == null)
+        {
+            RespawnPlayerAtCurrentCell();
+        }
+        else
         {
             playerObj.transform.SetParent(gridParent, true);
             playerObj.SetActive(true);
 
-            if (gridCells[playerX, playerY] != null)
-                playerObj.transform.position = gridCells[playerX, playerY].position + playerCellOffset;
+            Transform cell = gridCells[playerX, playerY];
+            if (cell != null)
+                playerObj.transform.position = cell.position + playerCellOffset;
+
+            playerVisual = playerObj.GetComponent<GridPlayerVisual>();
+            if (playerVisual == null)
+                playerVisual = playerObj.GetComponentInChildren<GridPlayerVisual>(true);
+
+            playerVisual?.SetOnCell();
+            ForceCellScale(gridCells[playerX, playerY]);
         }
 
         // reset timer
@@ -809,12 +819,32 @@ public class GridGameManager : MonoBehaviour, IGameOverClient
             coinTimerImage.color = fullColor;
         }
 
-        // asegurar coin
         if (coinObj == null) SpawnCoin();
 
-        // asegurar flechas (por si se cortó)
         StartCoroutine(ArrowRoutine());
     }
+
+    private void RespawnPlayerAtCurrentCell()
+    {
+        if (playerPrefab == null) return;
+
+        Transform cell = gridCells[playerX, playerY];
+        if (cell == null) return;
+
+        Vector3 pos = cell.position + playerCellOffset;
+
+        playerObj = Instantiate(playerPrefab, pos, Quaternion.identity, gridParent);
+        originalScale = playerObj.transform.localScale;
+
+        playerVisual = playerObj.GetComponent<GridPlayerVisual>();
+        if (playerVisual == null)
+            playerVisual = playerObj.GetComponentInChildren<GridPlayerVisual>(true);
+
+        playerVisual?.SetOnCell();
+        ForceCellScale(cell);
+    }
+
+
 
     public void FinalGameOver()
     {

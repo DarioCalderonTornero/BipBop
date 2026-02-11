@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.Localization;
 using UnityEngine.UI;
 
-public class DifferentManager : MonoBehaviour
+public class DifferentManager : MonoBehaviour, IGameOverClient
 {
     public static DifferentManager Instance { get; private set; }
 
@@ -35,12 +35,12 @@ public class DifferentManager : MonoBehaviour
 
     public enum DifferenceType
     {
-        TintColor,       // más oscuro + hue shift
-        Rotation,        // delta Z random (max-min)
-        Scale,           // multiplicador (max-min)
-        MirrorX,         // mirando al lado contrario (Y 180º)
-        UpsideDown,      // boca abajo (Z +180)
-        Sprite           // opcional (si quieres mantenerlo)
+        TintColor,
+        Rotation,
+        Scale,
+        MirrorX,
+        UpsideDown,
+        Sprite
     }
 
     [Header("Patterns (Opcional)")]
@@ -63,7 +63,7 @@ public class DifferentManager : MonoBehaviour
 
     [Header("Different moves")]
     [SerializeField] private float oddSwapInterval = 1.5f;
-    [SerializeField] private float oddSwapAnimDuration = 0.12f; // suave pero rápida
+    [SerializeField] private float oddSwapAnimDuration = 0.12f;
 
     [Header("Sounds")]
     [SerializeField] private AudioClip correctAudioClip1;
@@ -78,7 +78,7 @@ public class DifferentManager : MonoBehaviour
     private float currentTime;
     private bool isRunning;
 
-    // estado del patrón actual (para re-aplicar odd al cambiar de índice)
+    // estado del patrón actual
     private Sprite currentBaseSprite;
     private Color currentBaseColor;
 
@@ -89,14 +89,14 @@ public class DifferentManager : MonoBehaviour
 
     private Coroutine oddSwapRoutine;
 
-    private Color currentOddTintColor; // para TintColor
+    private Color currentOddTintColor;
 
     [SerializeField] private int scoreToEnableOddSwap = 50;
 
     [Header("Round Transition FX")]
     [SerializeField] private bool playRoundTransitionOnCorrect = true;
     [SerializeField] private float roundTransitionDuration = 0.16f;
-    [SerializeField] private float roundTransitionMinScaleMul = 0.08f; // hacia dentro
+    [SerializeField] private float roundTransitionMinScaleMul = 0.08f;
 
     private bool isTransitioning;
     private Coroutine transitionRoutine;
@@ -117,7 +117,7 @@ public class DifferentManager : MonoBehaviour
     [SerializeField] private string playFabStatName = "DifferentScore";
     [SerializeField] private string recordPlayerPrefsKey = "MaxRecordDifferent";
     [SerializeField] private int xpPerPoint = 10;
-    [SerializeField] private int coinsDivisor = 3; // monedas = score / 3 (como otros)
+    [SerializeField] private int coinsDivisor = 3;
 
     [Header("Countdown + Preview Shuffle")]
     [SerializeField] private bool useCountdown = true;
@@ -134,8 +134,8 @@ public class DifferentManager : MonoBehaviour
 
     [Header("Tutorial Panel")]
     [SerializeField] private bool showTutorialOnStart = true;
-    [SerializeField] private TutorialPanelUI tutorialPrefab; // el prefab del panel
-    [SerializeField] private Transform tutorialParent; // opcional (Canvas/PanelRoot)
+    [SerializeField] private TutorialPanelUI tutorialPrefab;
+    [SerializeField] private Transform tutorialParent;
 
     private TutorialPanelUI tutorialInstance;
 
@@ -147,11 +147,20 @@ public class DifferentManager : MonoBehaviour
 
     [Header("Fail Reveal (Before GameOver)")]
     [SerializeField] private bool playFailReveal = true;
-    [SerializeField] private float failRevealDuration = 0.9f;     // duración total del reveal
-    [SerializeField] private float failRevealScaleMul = 1.65f;    // cuánto crece el objetivo
-    [SerializeField] private int failRevealBlinks = 6;            // parpadeos rojos
-    [SerializeField] private float failRevealTimeScale = 0.15f;   // slow motion
+    [SerializeField] private float failRevealDuration = 0.9f;
+    [SerializeField] private float failRevealScaleMul = 1.65f;
+    [SerializeField] private int failRevealBlinks = 6;
+    [SerializeField] private float failRevealTimeScale = 0.15f;
     [SerializeField] private Color failRevealBlinkColor = new Color(1f, 0.15f, 0.15f, 1f);
+
+    // =========================
+    // ADS / GameOverFlow (NEW)
+    // =========================
+    public bool HasUsedReviveOffer { get; set; } = false;
+    private bool isPausedByOffer = false;
+    private bool gameOverInvoked = false;
+
+    private bool hasEnded = false;
 
     private void Awake()
     {
@@ -162,8 +171,12 @@ public class DifferentManager : MonoBehaviour
     {
         isRunning = false;
         hasEnded = false;
+        gameOverInvoked = false;
 
-        // Sobrescribe con la preferencia del jugador (default ON)
+        // Reset de flow por partida
+        HasUsedReviveOffer = false;
+        isPausedByOffer = false;
+
         showTutorialOnStart = PlayerPrefs.GetInt(ShowTutorialKey, 1) == 1;
 
         if (showTutorialOnStart && tutorialPrefab != null)
@@ -172,7 +185,6 @@ public class DifferentManager : MonoBehaviour
         }
         else
         {
-            //IMPORTANTE: si hay un TutorialPanelUI en escena, lo apagamos
             HideAnyExistingTutorialPanel();
             BeginGameAfterTutorial();
         }
@@ -180,7 +192,6 @@ public class DifferentManager : MonoBehaviour
 
     private void HideAnyExistingTutorialPanel()
     {
-        // Si el tutorial está puesto en escena (no instanciado), apágalo
         var existing = FindObjectOfType<TutorialPanelUI>(true);
         if (existing != null)
             existing.gameObject.SetActive(false);
@@ -197,15 +208,13 @@ public class DifferentManager : MonoBehaviour
 
     private void BeginGameAfterTutorial()
     {
-        StartGame(); // aquí dentro arrancas tu countdown (si lo tienes)
+        StartGame();
     }
 
     private void ShowTutorial()
     {
-        // Si ya tengo uno instanciado, no creo otro
         if (tutorialInstance != null) return;
 
-        // Si hay uno en escena (aunque esté desactivado), úsalo
         var existing = FindObjectOfType<TutorialPanelUI>(true);
         if (existing != null)
         {
@@ -225,31 +234,33 @@ public class DifferentManager : MonoBehaviour
             tutorialInstance = Instantiate(tutorialPrefab, parent);
         }
 
-        tutorialInstance.OnClosed -= HandleTutorialClosed; // por si acaso
+        tutorialInstance.OnClosed -= HandleTutorialClosed;
         tutorialInstance.OnClosed += HandleTutorialClosed;
 
-        // Asegurar que no corre el juego
         PauseGameplay();
     }
 
     public void StartGame()
     {
+        // Reset run
         score = 0;
         currentTime = startTime;
         isRunning = false;
+
         hasEnded = false;
+        gameOverInvoked = false;
+
+        HasUsedReviveOffer = false;
+        isPausedByOffer = false;
 
         BuildGrid();
         UpdateUI();
         SetupRound();
 
-        // IMPORTANTE: que no arranque el timer todavía
         PauseGameplay();
 
-        // Empieza cuenta atrás (controlada por DifferentState)
         if (useCountdown && DifferentState.Instance != null)
         {
-            // preview shuffle mientras cuenta atrás (opcional)
             if (previewRoutine != null) StopCoroutine(previewRoutine);
             previewRoutine = StartCoroutine(PreviewShuffleRoutine());
 
@@ -257,7 +268,6 @@ public class DifferentManager : MonoBehaviour
         }
         else
         {
-            // si no usas DifferentState, usa tu coroutine local:
             if (useCountdown)
             {
                 if (countdownRoutine != null) StopCoroutine(countdownRoutine);
@@ -274,7 +284,6 @@ public class DifferentManager : MonoBehaviour
     {
         if (hasEnded) return;
 
-        // Si veníamos de preview
         if (previewRoutine != null)
         {
             StopCoroutine(previewRoutine);
@@ -292,6 +301,7 @@ public class DifferentManager : MonoBehaviour
     private void Update()
     {
         if (!isRunning) return;
+        if (isPausedByOffer) return;
 
         if (useTimer)
         {
@@ -299,7 +309,7 @@ public class DifferentManager : MonoBehaviour
             if (currentTime <= 0f)
             {
                 currentTime = 0f;
-                Finish();
+                TriggerFail();
                 return;
             }
             UpdateUI();
@@ -349,7 +359,6 @@ public class DifferentManager : MonoBehaviour
 
         currentType = PickAllowedType();
 
-        // Base pattern
         currentBaseSprite = (patternSprites != null && patternSprites.Length > 0)
             ? patternSprites[UnityEngine.Random.Range(0, patternSprites.Length)]
             : null;
@@ -358,7 +367,6 @@ public class DifferentManager : MonoBehaviour
             ? patternColors[UnityEngine.Random.Range(0, patternColors.Length)]
             : Color.white;
 
-        // Aplica base a todos
         for (int i = 0; i < tiles.Count; i++)
             tiles[i].ApplyBase(currentBaseSprite, currentBaseColor);
 
@@ -366,13 +374,12 @@ public class DifferentManager : MonoBehaviour
         PrepareOddDelta();
         ApplyOddInstant(oddIndex);
 
-        RestartOddSwapRoutine(); // seguirá respetando score>=50
+        RestartOddSwapRoutine();
         OnRoundChanged?.Invoke();
     }
 
     private IEnumerator CountdownAndPreviewRoutine()
     {
-        // Arranca “barajado” visual
         if (previewRoutine != null) StopCoroutine(previewRoutine);
         previewRoutine = StartCoroutine(PreviewShuffleRoutine());
 
@@ -387,18 +394,13 @@ public class DifferentManager : MonoBehaviour
             yield return null;
         }
 
-        // Para preview
         if (previewRoutine != null)
         {
             StopCoroutine(previewRoutine);
             previewRoutine = null;
         }
 
-        // Re-aplica la ronda real (por si el preview “ensució” visualmente)
-        // Esto deja todo correcto: base + odd + (y posible singleton)
         SetupRound();
-
-        // Texto normal
         RefreshInstructionText();
 
         isRunning = true;
@@ -419,8 +421,6 @@ public class DifferentManager : MonoBehaviour
     private void ApplyPreviewToAllTiles()
     {
         if (tiles.Count == 0) return;
-
-        // Necesitamos sprites; si no hay, no hacemos nada
         if (patternSprites == null || patternSprites.Length == 0) return;
 
         for (int i = 0; i < tiles.Count; i++)
@@ -428,15 +428,12 @@ public class DifferentManager : MonoBehaviour
             DifferentTile t = tiles[i];
             if (t == null) continue;
 
-            // Sprite random
             Sprite sp = patternSprites[UnityEngine.Random.Range(0, patternSprites.Length)];
 
-            // Color base random (o blanco si no hay)
             Color baseCol = (patternColors != null && patternColors.Length > 0)
                 ? patternColors[UnityEngine.Random.Range(0, patternColors.Length)]
                 : Color.white;
 
-            // Tint opcional (como en tu tipo TintColor)
             Color col = baseCol;
             if (previewAllowTint)
             {
@@ -446,19 +443,15 @@ public class DifferentManager : MonoBehaviour
                     col = GenerateTintedColor(baseCol);
             }
 
-            // Rotación
             float rotZ = 0f;
             if (previewAllowRotation)
                 rotZ = UnityEngine.Random.Range(0f, 360f);
 
-            // Flip
             bool flipX = previewAllowFlip && (UnityEngine.Random.value < 0.5f);
-            bool flipY = previewAllowFlip && (UnityEngine.Random.value < 0.15f); // Y menos frecuente
+            bool flipY = previewAllowFlip && (UnityEngine.Random.value < 0.15f);
 
-            // Escala
             float scaleMul = UnityEngine.Random.Range(previewScaleMulRange.x, previewScaleMulRange.y);
 
-            // ESTE MÉTODO ES EL QUE AÑADISTE EN DifferentTile (ApplyPreview)
             t.ApplyPreview(sp, col, rotZ, flipX, flipY, scaleMul, stopCurrentAnim: true);
         }
     }
@@ -467,29 +460,21 @@ public class DifferentManager : MonoBehaviour
     {
         RefreshInstructionText();
 
-        // Color base (si quieres, o siempre blanco)
         currentBaseColor = (patternColors != null && patternColors.Length > 0)
             ? patternColors[UnityEngine.Random.Range(0, patternColors.Length)]
             : Color.white;
 
-        // Elegir sprite único
         Sprite unique = patternSprites[UnityEngine.Random.Range(0, patternSprites.Length)];
 
-        // Elegir dónde va el único
         oddIndex = UnityEngine.Random.Range(0, tiles.Count);
 
-        // Generar lista de sprites para todos los tiles cumpliendo:
-        // - oddIndex: unique (1 vez)
-        // - el resto: cada sprite aparece al menos 2 veces
         Sprite[] assigned = GenerateSingletonDistribution(unique, tiles.Count);
 
-        // Aplicar
         for (int i = 0; i < tiles.Count; i++)
         {
             tiles[i].ApplyBase(assigned[i], currentBaseColor);
         }
 
-        // En singleton no tiene sentido el swap (a menos que regeneres distribución)
         if (oddSwapRoutine != null)
         {
             StopCoroutine(oddSwapRoutine);
@@ -500,25 +485,19 @@ public class DifferentManager : MonoBehaviour
     private Sprite[] GenerateSingletonDistribution(Sprite unique, int count)
     {
         Sprite[] result = new Sprite[count];
-
-        // Colocamos el único
         result[oddIndex] = unique;
 
-        // índices libres
         List<int> free = new List<int>(count - 1);
         for (int i = 0; i < count; i++)
             if (i != oddIndex) free.Add(i);
 
-        // Escoger cuántos sprites “repetidos” tendremos
         int repeatedTypes = Mathf.Clamp(UnityEngine.Random.Range(3, 7), 3, Mathf.Min(7, free.Count / 2));
 
-        // pool sin el unique
         List<Sprite> pool = new List<Sprite>(patternSprites.Length);
         for (int i = 0; i < patternSprites.Length; i++)
             if (patternSprites[i] != null && patternSprites[i] != unique)
                 pool.Add(patternSprites[i]);
 
-        // Barajar pool
         for (int i = 0; i < pool.Count; i++)
         {
             int j = UnityEngine.Random.Range(i, pool.Count);
@@ -527,10 +506,8 @@ public class DifferentManager : MonoBehaviour
 
         repeatedTypes = Mathf.Min(repeatedTypes, pool.Count);
 
-        // Cada tipo al menos 2
         List<Sprite> chosen = pool.GetRange(0, repeatedTypes);
 
-        // Primero metemos 2 de cada
         List<Sprite> bag = new List<Sprite>(free.Count);
         for (int i = 0; i < chosen.Count; i++)
         {
@@ -538,18 +515,15 @@ public class DifferentManager : MonoBehaviour
             bag.Add(chosen[i]);
         }
 
-        // Rellenar el resto con repeticiones de esos mismos
         while (bag.Count < free.Count)
             bag.Add(chosen[UnityEngine.Random.Range(0, chosen.Count)]);
 
-        // Barajar bag
         for (int i = 0; i < bag.Count; i++)
         {
             int j = UnityEngine.Random.Range(i, bag.Count);
             (bag[i], bag[j]) = (bag[j], bag[i]);
         }
 
-        // Asignar
         for (int k = 0; k < free.Count; k++)
             result[free[k]] = bag[k];
 
@@ -558,7 +532,6 @@ public class DifferentManager : MonoBehaviour
 
     private void RestartOddSwapRoutine()
     {
-        // En singleton no movemos el objetivo (si quieres moverlo, habría que regenerar distribución)
         if (currentMode == RoundMode.FindSingleton)
         {
             if (oddSwapRoutine != null)
@@ -587,11 +560,11 @@ public class DifferentManager : MonoBehaviour
 
     private IEnumerator OddSwapLoop()
     {
-        while (isRunning)
+        while (isRunning && !isPausedByOffer && !hasEnded)
         {
             yield return new WaitForSeconds(oddSwapInterval);
 
-            if (!isRunning) yield break;
+            if (!isRunning || isPausedByOffer || hasEnded) yield break;
             if (tiles.Count <= 1) continue;
 
             int newIndex = oddIndex;
@@ -610,10 +583,7 @@ public class DifferentManager : MonoBehaviour
         int oldIndex = oddIndex;
         oddIndex = newIndex;
 
-        // 1) El viejo odd vuelve a base, animado
         AnimateToBase(oldIndex);
-
-        // 2) El nuevo índice se convierte en odd, animado (con MISMA diferencia)
         AnimateToOdd(newIndex);
     }
 
@@ -621,13 +591,11 @@ public class DifferentManager : MonoBehaviour
     {
         var allowed = new List<DifferenceType>(6);
 
-        // Tint siempre es posible aunque no tengas patternColors
         if (allowColor) allowed.Add(DifferenceType.TintColor);
 
         if (allowRotation) allowed.Add(DifferenceType.Rotation);
         if (allowScale) allowed.Add(DifferenceType.Scale);
 
-        // Reutilizo flags existentes para no crear nuevos, si quieres lo separamos luego:
         if (allowRotation) allowed.Add(DifferenceType.MirrorX);
         if (allowRotation) allowed.Add(DifferenceType.UpsideDown);
 
@@ -680,11 +648,9 @@ public class DifferentManager : MonoBehaviour
                 }
 
             case DifferenceType.UpsideDown:
-                // No hace falta delta, es 180 fijo
                 break;
 
             case DifferenceType.MirrorX:
-                // No hace falta delta, es Y 180 fijo
                 break;
 
             case DifferenceType.Rotation:
@@ -702,14 +668,11 @@ public class DifferentManager : MonoBehaviour
     {
         Color.RGBToHSV(baseColor, out float h, out float s, out float v);
 
-        // oscurecer un poco
         v = Mathf.Clamp01(v - UnityEngine.Random.Range(0.10f, 0.20f));
 
-        // hue shift: rojizo / verdoso / azulado
         float[] shifts = { -0.06f, -0.03f, 0.03f, 0.06f };
         h = Mathf.Repeat(h + shifts[UnityEngine.Random.Range(0, shifts.Length)], 1f);
 
-        // un pelín más saturado para que se note
         s = Mathf.Clamp01(s + UnityEngine.Random.Range(0.05f, 0.15f));
 
         return Color.HSVToRGB(h, s, v);
@@ -736,13 +699,12 @@ public class DifferentManager : MonoBehaviour
             case DifferenceType.MirrorX:
                 {
                     Vector3 s = t.GetBaseScale();
-                    s.x = -Mathf.Abs(s.x);   // fuerza flip horizontal
+                    s.x = -Mathf.Abs(s.x);
                     t.SetScale(s);
                     break;
                 }
 
             case DifferenceType.UpsideDown:
-                // Z + 180 (respeta la rotación base del prefab)
                 t.SetRotation(t.GetBaseRotation() * Quaternion.Euler(0f, 0f, 180f));
                 break;
 
@@ -760,28 +722,20 @@ public class DifferentManager : MonoBehaviour
     {
         if (hasEnded) return;
 
-        // 1) parar preview
         if (previewRoutine != null)
         {
             StopCoroutine(previewRoutine);
             previewRoutine = null;
         }
 
-        // 2) limpiar visuales por si quedaron flips/rotaciones/escala raras
         for (int i = 0; i < tiles.Count; i++)
         {
             if (tiles[i] == null) continue;
             tiles[i].ResetVisualToBase(stopCurrentAnim: true);
             tiles[i].ApplyBase(currentBaseSprite, currentBaseColor);
-            // Nota: ApplyBase resetea rot/scale y pone sprite/color.
-            // Si currentBaseSprite/color todavía no están bien, no pasa nada,
-            // porque el paso 3 los recalcula.
         }
 
-        // 3) asegurar primera ronda real NUEVA
         SetupRound();
-
-        // 4) ahora sí: empieza el juego (timer)
         ResumeGameplay();
     }
 
@@ -791,25 +745,21 @@ public class DifferentManager : MonoBehaviour
 
         var t = tiles[index];
 
-        // SPRITE (solo animamos si el tipo actual es Sprite)
         if (currentType == DifferenceType.Sprite)
             t.AnimateToSprite(currentBaseSprite, oddSwapAnimDuration);
         else
             t.SetSprite(currentBaseSprite);
 
-        // COLOR (solo animamos si el tipo actual es TintColor)
         if (currentType == DifferenceType.TintColor)
             t.AnimateToColor(currentBaseColor, oddSwapAnimDuration);
         else
             t.SetColor(currentBaseColor);
 
-        // SCALE (solo animamos si el tipo actual es Scale)
         if (currentType == DifferenceType.Scale)
             t.AnimateToScale(t.GetBaseScale(), oddSwapAnimDuration);
         else
             t.SetScale(t.GetBaseScale());
 
-        // ROTACIÓN
         if (currentType == DifferenceType.Rotation)
         {
             float baseZ = t.GetBaseRotation().eulerAngles.z;
@@ -850,10 +800,7 @@ public class DifferentManager : MonoBehaviour
 
             case DifferenceType.MirrorX:
                 {
-                    // partir de base
                     t.SetScale(t.GetBaseScale());
-
-                    // animar al flip
                     Vector3 target = t.GetBaseScale();
                     target.x = -Mathf.Abs(target.x);
                     t.AnimateToScale(target, oddSwapAnimDuration);
@@ -879,21 +826,18 @@ public class DifferentManager : MonoBehaviour
     private AudioClip GetRandomCorrectAudio()
     {
         int randomNumber = UnityEngine.Random.Range(0, 10);
-
-        if (randomNumber >= 5)
-            return correctAudioClip1;
-
-        else return correctAudioClip2;
+        return (randomNumber >= 5) ? correctAudioClip1 : correctAudioClip2;
     }
 
     private void OnTileClicked(int clickedIndex)
     {
         if (!isRunning) return;
-        if (isTransitioning) return; // evita clicks durante el efecto
+        if (isPausedByOffer) return;
+        if (hasEnded) return;
+        if (isTransitioning) return;
 
         if (clickedIndex == oddIndex)
         {
-            // POP del correcto
             tiles[clickedIndex].Pop(0.10f, 1.20f);
 
             score += 1;
@@ -909,7 +853,6 @@ public class DifferentManager : MonoBehaviour
             UpdateUI();
             OnScoreChanged?.Invoke(score);
 
-            // En vez de SetupRound directo, hacemos la transición
             if (playRoundTransitionOnCorrect)
             {
                 if (transitionRoutine != null) StopCoroutine(transitionRoutine);
@@ -924,8 +867,8 @@ public class DifferentManager : MonoBehaviour
         {
             if (failOnWrongClick)
             {
-                Finish();
                 SoundManager.Instance.PlaySound(errorAudioClip, 1f);
+                TriggerFail();
             }
         }
     }
@@ -943,7 +886,6 @@ public class DifferentManager : MonoBehaviour
     {
         isTransitioning = true;
 
-        // Guardar escala actual del SPRITE (no del tile)
         Vector3[] startSpriteScales = new Vector3[tiles.Count];
         for (int i = 0; i < tiles.Count; i++)
         {
@@ -953,10 +895,11 @@ public class DifferentManager : MonoBehaviour
 
         float half = Mathf.Max(0.01f, roundTransitionDuration * 0.5f);
 
-        // 1) shrink sprites
         float t = 0f;
         while (t < half)
         {
+            if (hasEnded || isPausedByOffer) yield break;
+
             t += Time.deltaTime;
             float u = Smooth01(t / half);
             float m = Mathf.Lerp(1f, roundTransitionMinScaleMul, u);
@@ -971,7 +914,6 @@ public class DifferentManager : MonoBehaviour
             yield return null;
         }
 
-        // fijar mínimo
         for (int i = 0; i < tiles.Count; i++)
         {
             RectTransform imgRt = tiles[i].GetImageRect();
@@ -979,10 +921,8 @@ public class DifferentManager : MonoBehaviour
             imgRt.localScale = startSpriteScales[i] * roundTransitionMinScaleMul;
         }
 
-        // 2) cambiar patrón aquí
         SetupRound();
 
-        // Capturar escalas del nuevo patrón (ya correctas) y arrancar desde pequeño
         Vector3[] targetSpriteScales = new Vector3[tiles.Count];
         for (int i = 0; i < tiles.Count; i++)
         {
@@ -993,14 +933,15 @@ public class DifferentManager : MonoBehaviour
                 continue;
             }
 
-            targetSpriteScales[i] = imgRt.localScale; // debería ser baseScale o baseScale con odd
+            targetSpriteScales[i] = imgRt.localScale;
             imgRt.localScale = targetSpriteScales[i] * roundTransitionMinScaleMul;
         }
 
-        // 3) expand sprites
         t = 0f;
         while (t < half)
         {
+            if (hasEnded || isPausedByOffer) yield break;
+
             t += Time.deltaTime;
             float u = Smooth01(t / half);
             float m = Mathf.Lerp(roundTransitionMinScaleMul, 1f, u);
@@ -1015,7 +956,6 @@ public class DifferentManager : MonoBehaviour
             yield return null;
         }
 
-        // fijar final exacto
         for (int i = 0; i < tiles.Count; i++)
         {
             RectTransform imgRt = tiles[i].GetImageRect();
@@ -1033,21 +973,17 @@ public class DifferentManager : MonoBehaviour
         return x * x * (3f - 2f * x);
     }
 
-    private IEnumerator FailRevealThenEndGameRoutine(int revealIndex)
+    private IEnumerator FailRevealThenTriggerFailRoutine(int revealIndex)
     {
-        // Guardar timeScale actual (por si vienes de otras cosas)
         float prevTimeScale = Time.timeScale;
         float prevFixedDelta = Time.fixedDeltaTime;
 
-        // Slow motion global
         Time.timeScale = Mathf.Clamp(failRevealTimeScale, 0.01f, 1f);
         Time.fixedDeltaTime = prevFixedDelta * Time.timeScale;
 
-        // Aseguramos que no se pueda clicar nada durante el reveal
         isTransitioning = true;
 
-        // Ejecuta el reveal en el tile (usa UNscaledTime para que la duración sea consistente)
-        DifferentTile t = tiles[revealIndex];
+        DifferentTile t = (revealIndex >= 0 && revealIndex < tiles.Count) ? tiles[revealIndex] : null;
         if (t != null)
         {
             yield return t.PlayFailReveal(
@@ -1059,27 +995,31 @@ public class DifferentManager : MonoBehaviour
         }
         else
         {
-            // Si algo raro pasa, esperamos igual un pelín
             float wait = failRevealDuration;
             while (wait > 0f) { wait -= Time.unscaledDeltaTime; yield return null; }
         }
 
-        // Restaurar timeScale
         Time.timeScale = prevTimeScale;
         Time.fixedDeltaTime = prevFixedDelta;
 
         isTransitioning = false;
 
-        // Y ahora sí, GameOver normal
-        EndGame();
+        TriggerFail();
     }
 
-    private bool hasEnded = false;
+    // =========================
+    // =========================
+    private void TriggerFail()
+    {
+        if (hasEnded) return; // hasEnded se marca en Finish/TriggerFail flow
+        Finish();
+    }
 
     private void Finish()
     {
-        if (!isRunning || hasEnded) return;
+        if (hasEnded) return;
 
+        // Cortar gameplay ya
         isRunning = false;
         hasEnded = true;
 
@@ -1088,23 +1028,87 @@ public class DifferentManager : MonoBehaviour
         if (countdownRoutine != null) { StopCoroutine(countdownRoutine); countdownRoutine = null; }
         if (previewRoutine != null) { StopCoroutine(previewRoutine); previewRoutine = null; }
 
+        // Si quieres reveal, lo hacemos y al terminar notificamos al flow
         if (playFailReveal && oddIndex >= 0 && oddIndex < tiles.Count && tiles[oddIndex] != null)
         {
-            StartCoroutine(FailRevealThenEndGameRoutine(oddIndex));
+            StartCoroutine(FailRevealThenNotifyFlowRoutine(oddIndex));
         }
         else
         {
-            EndGame(); // fallback
+            NotifyFlowFail();
         }
     }
 
+    private IEnumerator FailRevealThenNotifyFlowRoutine(int revealIndex)
+    {
+        // Reveal
+        yield return FailRevealThenTriggerFailRoutine(revealIndex);
+
+        // OJO: FailRevealThenTriggerFailRoutine ya llama TriggerFail() -> Finish()
+        // pero Finish() ya está hecho, así que aquí solo aseguramos flow:
+        NotifyFlowFail();
+    }
+
+    private void NotifyFlowFail()
+    {
+        if (gameOverInvoked) return; // evita doble notify
+        gameOverInvoked = true;
+
+        if (GameOverFlowManager.Instance != null)
+        {
+            GameOverFlowManager.Instance.NotifyFail(this);
+        }
+        else
+        {
+            // fallback: final directo
+            FinalGameOver();
+        }
+    }
+
+    // =========================
+    // IGameOverClient (NEW)
+    // =========================
+    public void PauseOnFail()
+    {
+        isPausedByOffer = true;
+        PauseGameplay();
+
+        // IMPORTANTE: no tocar timeScale aquí. Tu reveal ya lo tocó y lo restauró.
+    }
+
+    public void Revive()
+    {
+        // Reseteo estado para seguir jugando
+        isPausedByOffer = false;
+        hasEnded = false;
+        gameOverInvoked = false;
+
+        // Reanudar timer a tope (como otros modos)
+        currentTime = startTime;
+        if (timeBarImage != null) timeBarImage.fillAmount = 1f;
+
+        // Reponemos ronda limpia (importante si estabas en reveal/preview)
+        SetupRound();
+        RefreshInstructionText();
+
+        ResumeGameplay();
+    }
+
+    public void FinalGameOver()
+    {
+        // GameOver real
+        EndGame();
+    }
+
+    // =========================
+    // GAME OVER REAL (sin offer)
+    // =========================
     private void EndGame()
     {
         OnDifferentGameOver?.Invoke(this, EventArgs.Empty);
-        // 1) Récord local
+
         SaveRecordIfNeeded();
 
-        // 2) Subir PlayFab
         if (PlayFabLoginManager.Instance != null &&
             PlayFabLoginManager.Instance.IsLoggedIn &&
             PlayFabScoreManager.Instance != null)
@@ -1112,7 +1116,6 @@ public class DifferentManager : MonoBehaviour
             PlayFabScoreManager.Instance.SubmitScore(playFabStatName, score);
         }
 
-        // 3) Monedas
         int coinsEarned = Mathf.Max(0, score / Mathf.Max(1, coinsDivisor));
 
         CoinsRewardUI rewardUI = FindObjectOfType<CoinsRewardUI>(true);
@@ -1121,20 +1124,15 @@ public class DifferentManager : MonoBehaviour
         else if (CurrencyManager.Instance != null)
             CurrencyManager.Instance.AddCoins(coinsEarned);
 
-        // 4) XP
         if (PlayerLevelManager.Instance != null)
             PlayerLevelManager.Instance.AddXP(score * Mathf.Max(0, xpPerPoint));
 
-        // 5) Misiones diarias (mínimo igual que otros minijuegos)
         if (DailyMissionManager.Instance != null)
         {
             DailyMissionManager.Instance.AddProgress("juega_1_partida", 1);
             DailyMissionManager.Instance.AddProgress("juega_3_partidas", 1);
             DailyMissionManager.Instance.AddProgress("juega_8_partidas", 1);
             DailyMissionManager.Instance.AddProgress("juega_10_partidas", 1);
-
-            // específicas (si quieres)
-            // DailyMissionManager.Instance.AddProgress("juega_3_partidas_diferente", 1);
 
             if (score >= 10) DailyMissionManager.Instance.AddProgress("consigue_10_puntos_diferente", 1);
             if (score >= 50) DailyMissionManager.Instance.AddProgress("consigue_50_puntos_diferente", 1);
@@ -1167,14 +1165,6 @@ public class DifferentManager : MonoBehaviour
             else
                 timeBarImage.fillAmount = 1f;
         }
-    }
-
-    private static string FormatSeconds(float seconds)
-    {
-        int s = Mathf.Max(0, Mathf.CeilToInt(seconds));
-        int m = s / 60;
-        int r = s % 60;
-        return $"{m:00}:{r:00}";
     }
 
     public int GetScore() => score;
