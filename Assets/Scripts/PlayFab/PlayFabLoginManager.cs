@@ -86,8 +86,16 @@ public class PlayFabLoginManager : MonoBehaviour
 
     private void OnNameInputChanged(string value)
     {
-        if (feedbackText != null)
-            feedbackText.text = ""; // limpia mensajes anteriores mientras escribe
+        // Solo limpiamos el feedback si el input no está vacío 
+        // y el mensaje actual es el de "ya existe" (opcional)
+        if (feedbackText != null && !string.IsNullOrEmpty(value))
+        {
+            // Si el usuario empieza a escribir tras el error, limpiamos el aviso
+            if (feedbackText.text == "Ese nombre ya existe, elige otro.")
+            {
+                feedbackText.text = "";
+            }
+        }
 
         UpdateNameCounter(value);
     }
@@ -378,12 +386,20 @@ public class PlayFabLoginManager : MonoBehaviour
             if (error.Error == PlayFabErrorCode.NameNotAvailable)
             {
                 Debug.LogWarning("Ese nombre ya existe, elige otro.");
+
                 if (feedbackText != null)
+                {
+                    // Opcional: Cambiar a color rojo para que sea más visible en móvil
+                    feedbackText.color = Color.red;
                     feedbackText.text = "Ese nombre ya existe, elige otro.";
+                }
 
                 if (nameInput != null)
                 {
-                    nameInput.text = "";
+                    // ELIMINADO: nameInput.text = ""; 
+                    // Al no borrar el texto, el usuario puede editarlo fácilmente
+                    // y no se dispara el evento OnNameInputChanged que limpia el feedback.
+
                     nameInput.Select();
                     nameInput.ActivateInputField();
                 }
