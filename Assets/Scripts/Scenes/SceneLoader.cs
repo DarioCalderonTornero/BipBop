@@ -14,7 +14,8 @@ public static class SceneLoader
         GeometricScene,
         DodgeScene,
         GridScene,
-        DifferentScene
+        DifferentScene,
+        ClassificateScene,
     }
     public static void LoadScene(Scene scene)
     {
