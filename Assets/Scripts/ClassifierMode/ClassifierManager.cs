@@ -23,13 +23,16 @@ public class ClassifierManager : MonoBehaviour
     // Referencias a nuestros otros módulos
     private ClassifierInput inputModule;
     private ClassifierTimer timerModule;
+    [SerializeField] private ClassifierScore scoreModule;
 
     private SwipeDirection currentCorrectDirection;
 
-    [SerializeField] ClassifierScore scoreModule;
+    // Cerrojo de seguridad para evitar bugs de resurrección o dobles Game Overs
+    private bool isGameOver = false;
 
     void Awake()
     {
+        // Singleton de Escena (Muere al recargar)
         if (Instance == null) { Instance = this; }
         else { Destroy(gameObject); return; }
 
@@ -42,14 +45,8 @@ public class ClassifierManager : MonoBehaviour
 
     void OnEnable()
     {
-        // Nos suscribimos a los eventos
         inputModule.OnSwipeDetected += HandlePlayerSwipe;
         timerModule.OnTimeOut += TimerModule_OnTimeOut;
-    }
-
-    private void TimerModule_OnTimeOut(object sender, System.EventArgs e)
-    {
-        HandleGameOver();
     }
 
     void OnDisable()
@@ -57,14 +54,43 @@ public class ClassifierManager : MonoBehaviour
         // Nos desuscribimos por seguridad para evitar fugas de memoria
         inputModule.OnSwipeDetected -= HandlePlayerSwipe;
         timerModule.OnTimeOut -= TimerModule_OnTimeOut;
+
+        if (ClassifierState.Instance != null)
+        {
+            ClassifierState.Instance.OnPlayingClassifierGame -= ClassifierState_OnPlayingClassifierGame;
+        }
     }
 
     void Start()
     {
-        SpawnNewItem();
+        isGameOver = false; // Reseteamos el cerrojo al empezar
+
+        // Nos suscribimos aquí en lugar del OnEnable para evitar problemas de orden con el Awake
+        if (ClassifierState.Instance != null)
+        {
+            ClassifierState.Instance.OnPlayingClassifierGame += ClassifierState_OnPlayingClassifierGame;
+        }
+
+        // Spawneamos la imagen congelada al arrancar la escena
+        SpawnNewItem(false);
     }
 
-    private void SpawnNewItem()
+    private void ClassifierState_OnPlayingClassifierGame(object sender, EventArgs e)
+    {
+        // Si el jugador ya ha perdido (bug raro), ignoramos la señal de arrancar
+        if (isGameOver) return;
+
+        timerModule.ResetAndStartTimer();
+        inputModule.isInputActive = true;
+    }
+
+    private void TimerModule_OnTimeOut(object sender, System.EventArgs e)
+    {
+        HandleGameOver();
+    }
+
+    // Le añadimos el parámetro (bool startMechanics = true)
+    private void SpawnNewItem(bool startMechanics = true)
     {
         int randomCategoryIndex = UnityEngine.Random.Range(0, categories.Count);
         CategoryData selectedCategory = categories[randomCategoryIndex];
@@ -78,9 +104,17 @@ public class ClassifierManager : MonoBehaviour
 
         currentCorrectDirection = selectedCategory.correctDirection;
 
-        // Arrancamos todo
-        timerModule.ResetAndStartTimer();
-        inputModule.isInputActive = true;
+        // Arrancamos el reloj y el input SOLO si nos dan permiso
+        if (startMechanics)
+        {
+            timerModule.ResetAndStartTimer();
+            inputModule.isInputActive = true;
+        }
+        else
+        {
+            // Forzamos a que el input esté APAGADO durante la cuenta atrás
+            inputModule.isInputActive = false;
+        }
     }
 
     private void HandlePlayerSwipe(SwipeDirection playerDirection)
@@ -110,9 +144,15 @@ public class ClassifierManager : MonoBehaviour
 
     private void HandleGameOver()
     {
+        // Si ya habíamos ejecutado el Game Over, no lo hacemos dos veces
+        if (isGameOver) return;
+        isGameOver = true;
+
         inputModule.isInputActive = false;
-        OnClassifierGameOver?.Invoke(this, EventArgs.Empty); 
-        Debug.Log("<color=red>¡FIN DEL JUEGO! El tiempo llegó a cero.</color>");
+        timerModule.StopTimer(); // Congelamos el tiempo por si acaso
+
+        OnClassifierGameOver?.Invoke(this, EventArgs.Empty);
+        Debug.Log("<color=red>¡FIN DEL JUEGO! El tiempo llegó a cero o te equivocaste.</color>");
     }
 
     private Vector3 CalculateFlyPosition(SwipeDirection dir)
@@ -138,7 +178,12 @@ public class ClassifierManager : MonoBehaviour
         }
 
         itemTransform.localPosition = Vector3.zero;
-        SpawnNewItem();
+
+        // ¡Mini-seguro extra! Solo spawneamos otro si el juego no se ha acabado mientras volaba
+        if (!isGameOver)
+        {
+            SpawnNewItem(true);
+        }
     }
 
     private void ResizeSpriteToFit()
@@ -153,9 +198,9 @@ public class ClassifierManager : MonoBehaviour
         }
     }
 
-    //GETTERS 
+    // GETTERS 
     public int GetCurrentScore()
     {
         return scoreModule.CurrentScore;
-    }   
+    }
 }
