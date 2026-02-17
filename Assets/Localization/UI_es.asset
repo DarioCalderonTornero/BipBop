@@ -310,11 +310,11 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1390775179902976
-    m_Localized: "Volumen m\xFAsica: {0}"
+    m_Localized: 'Volumen efectos: {0}'
     m_Metadata:
       m_Items: []
   - m_Id: 1390845409329152
-    m_Localized: 'Volumen sonido: {0}'
+    m_Localized: "Volumen m\xFAsica: {0}"
     m_Metadata:
       m_Items: []
   - m_Id: 1902503428849664
@@ -967,6 +967,18 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 32708993857060864
     m_Localized: Mostrar tutorial
+    m_Metadata:
+      m_Items: []
+  - m_Id: 34780203679973376
+    m_Localized: PAUSADO
+    m_Metadata:
+      m_Items: []
+  - m_Id: 34781887261016064
+    m_Localized: Efectos
+    m_Metadata:
+      m_Items: []
+  - m_Id: 34781929883533312
+    m_Localized: "M\xFAsica"
     m_Metadata:
       m_Items: []
   references:

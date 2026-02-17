@@ -26,6 +26,8 @@ public class MissionUI : MonoBehaviour
     [Header("Completed Style")]
     [SerializeField] private Color completedColor = Color.gray;
 
+    [SerializeField] private Color normalColor;
+
     private DailyMission mission;
     private Color defaultColor;
     private bool initialized;
@@ -113,8 +115,8 @@ public class MissionUI : MonoBehaviour
         xpIconImage.color = Color.white;
         coinIconImage.color = Color.white;
 
-        xpRewardText.color = Color.black;
-        coinRewardText.color = Color.black;
+        xpRewardText.color = normalColor;
+        coinRewardText.color = normalColor;
     }
 
     private void OnLocaleChanged(Locale locale)

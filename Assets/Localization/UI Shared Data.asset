@@ -955,6 +955,18 @@ MonoBehaviour:
     m_Key: MostrarTutorial
     m_Metadata:
       m_Items: []
+  - m_Id: 34780203679973376
+    m_Key: Paused
+    m_Metadata:
+      m_Items: []
+  - m_Id: 34781887261016064
+    m_Key: TextoEfectos
+    m_Metadata:
+      m_Items: []
+  - m_Id: 34781929883533312
+    m_Key: "TextoM\xFAsica"
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

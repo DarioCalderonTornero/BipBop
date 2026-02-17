@@ -76,6 +76,8 @@ public class TutorialManager : MonoBehaviour
     [SerializeField] private Vector2 defaultTooltipPos = new Vector2(0f, -350f);
     [SerializeField] private Vector2 tooltipScreenPadding = new Vector2(40f, 60f);
 
+    [SerializeField] private GameObject inputBlockerObject;
+
 
     private void Awake()
     {
@@ -118,78 +120,76 @@ public class TutorialManager : MonoBehaviour
 
     private IEnumerator ShowStepRoutine(int i)
     {
+        // Limpieza previa
         CleanupTargetStep();
-
         var step = steps[i];
 
+        // ==========================================
+        // 1. BLOQUEO ABSOLUTO (Antes de cualquier delay)
+        // ==========================================
+        // Activamos el objeto que tapa TODA la pantalla.
+        if (inputBlockerObject != null)
+        {
+            inputBlockerObject.SetActive(true);
+        }
 
-        // =========================
-        // DELAY (invisible)
-        // =========================
+        // Ocultamos el contenido visual del tutorial (el texto y flechas)
+        // pero el InputBlocker de arriba sigue vivo porque es independiente.
         SetTutorialVisible(false);
         tooltipPanel.gameObject.SetActive(false);
+        tapCatcherButton.gameObject.SetActive(false);
 
-        // durante delay, NO avanzar
-        tapCatcherButton.gameObject.SetActive(true);
-        tapCatcherButton.interactable = false;
-
+        // Esperamos el tiempo que hayas definido
         float d = Mathf.Max(0f, step.delayBeforeStep);
         if (d > 0f)
+        {
             yield return new WaitForSeconds(d);
+        }
 
-        // =========================
-        // STEP (visible)
-        // =========================
+        // ==========================================
+        // 2. FIN DEL DELAY: PASAMOS AL CONTROL SELECTIVO
+        // ==========================================
+        // Desactivamos el bloqueador total para permitir que el Tutorial actúe.
+        if (inputBlockerObject != null)
+        {
+            inputBlockerObject.SetActive(false);
+        }
+
+        // Mostramos el contenido visual
         SetTutorialVisible(true);
         tutorialText.text = step.text;
 
-        // TAP ANYWHERE
+        // --- CAMBIO CLAVE AQUÍ ---
+        // Esperamos al final del frame para que el ContentSizeFitter o el Layout 
+        // calculen el tamaño REAL del panel con el nuevo texto.
+        yield return new WaitForEndOfFrame();
+
+        // Activamos el tapCatcherButton
+        tapCatcherButton.gameObject.SetActive(true);
+
         if (step.type == StepType.TapAnywhere)
         {
-            yield return AnimateOverlayTo(BuildFullDarkState(), holeAnimDuration);
-
-            PositionTooltipDefault();
-            StartCoroutine(FadeInTooltip());
-
-            // ✅ permitir el click SOLO aquí (tapCatcher está encima del blocker)
-            tapCatcherButton.gameObject.SetActive(true);
             tapCatcherButton.interactable = true;
-
-            yield break;
+            yield return AnimateOverlayTo(BuildFullDarkState(), holeAnimDuration);
+            PositionTooltipDefault(); // Posición central
         }
-
-        // REQUIRE TARGET CLICK
-        tapCatcherButton.gameObject.SetActive(false);
-
-        BringTargetToTutorial(step.target);
-
-        savedTargetButton = step.target.GetComponent<Button>();
-        if (savedTargetButton != null)
+        else
         {
-            savedTargetButton.onClick.RemoveListener(Next);
-            savedTargetButton.onClick.AddListener(Next);
+            tapCatcherButton.interactable = false;
+            if (step.target != null)
+            {
+                BringTargetToTutorial(step.target);
+                // ... (Click listener) ...
+                yield return AnimateOverlayTo(BuildHoleState(step.target, step.holePadding), holeAnimDuration);
+
+                // Posicionamos respecto al target
+                PositionTooltipNearTarget(step.target, step.tooltipOffset);
+            }
         }
 
-        BringTargetToTutorial(step.target);
-
-        yield return AnimateOverlayTo(BuildHoleState(step.target, step.holePadding), holeAnimDuration);
-
-        if (highlightBorder != null)
-        {
-            Rect hole = GetTargetRectInOverlaySpace(step.target, step.holePadding);
-            highlightBorder.gameObject.SetActive(true);
-            SetRect(highlightBorder, hole.xMin, hole.yMin, hole.width, hole.height);
-        }
-
-        PositionTooltipNearTarget(step.target, step.tooltipOffset);
+        // El Clamp siempre al final, después de haber decidido la posición inicial
         ClampTooltipToCanvas();
         StartCoroutine(FadeInTooltip());
-
-        savedTargetButton = step.target.GetComponent<Button>();
-        if (savedTargetButton != null)
-            savedTargetButton.onClick.AddListener(Next);
-        else
-            Debug.LogWarning("El target no tiene Button.");
     }
 
     private void BlockAllInput(bool blocked)
@@ -479,11 +479,21 @@ public class TutorialManager : MonoBehaviour
     {
         RectTransform root = (RectTransform)tutorialCanvas.transform;
 
-        Vector3 worldPos = target.TransformPoint(target.rect.center);
-        Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(null, worldPos);
+        // 1. Forzamos que el panel tenga el pivot y anchors en el centro para que PosX/PosY sean lógicos
+        tooltipPanel.anchorMin = new Vector2(0.5f, 0.5f);
+        tooltipPanel.anchorMax = new Vector2(0.5f, 0.5f);
+        tooltipPanel.pivot = new Vector2(0.5f, 0.5f);
 
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(root, screenPos, null, out var local);
-        tooltipPanel.anchoredPosition = local + offset;
+        // 2. Localizamos el centro del botón en el espacio del Canvas del tutorial
+        Vector3 targetWorldCenter = target.TransformPoint(target.rect.center);
+        Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(null, targetWorldCenter);
+
+        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(root, screenPos, null, out var localPoint))
+        {
+            // 3. ASIGNACIÓN DIRECTA: Posición del botón + tu Offset
+            // Esto es lo que verás en el Inspector como Pos X y Pos Y
+            tooltipPanel.anchoredPosition = localPoint + offset;
+        }
     }
 
     private void PositionTooltipDefault()
@@ -494,37 +504,34 @@ public class TutorialManager : MonoBehaviour
 
     private void ClampTooltipToCanvas()
     {
-        var root = (RectTransform)tutorialCanvas.transform;
-        if (root == null) return;
+        RectTransform root = (RectTransform)tutorialCanvas.transform;
 
+        // Forzamos actualización por si acaso
         Canvas.ForceUpdateCanvases();
 
-        // Rect del tooltip en espacio del root
+        // Obtenemos las esquinas del panel en espacio local del Canvas
         Vector3[] corners = new Vector3[4];
-        tooltipPanel.GetWorldCorners(corners);
+        tooltipPanel.GetLocalCorners(corners);
 
-        Vector2 min = RectTransformUtility.WorldToScreenPoint(null, corners[0]);
-        Vector2 max = RectTransformUtility.WorldToScreenPoint(null, corners[2]);
+        // Convertimos las esquinas a la posición actual en el canvas
+        float width = tooltipPanel.rect.width;
+        float height = tooltipPanel.rect.height;
+        Vector2 pos = tooltipPanel.anchoredPosition;
 
-        // límites de pantalla con padding
-        float leftLimit = tooltipScreenPadding.x;
-        float rightLimit = Screen.width - tooltipScreenPadding.x;
-        float bottomLimit = tooltipScreenPadding.y;
-        float topLimit = Screen.height - tooltipScreenPadding.y;
+        // Límites del Canvas (considerando que el pivot es 0.5, 0.5)
+        float canvasW = root.rect.width;
+        float canvasH = root.rect.height;
 
-        Vector2 delta = Vector2.zero;
+        float minX = -canvasW / 2 + (width / 2) + tooltipScreenPadding.x;
+        float maxX = canvasW / 2 - (width / 2) - tooltipScreenPadding.x;
+        float minY = -canvasH / 2 + (height / 2) + tooltipScreenPadding.y;
+        float maxY = canvasH / 2 - (height / 2) - tooltipScreenPadding.y;
 
-        if (min.x < leftLimit) delta.x += (leftLimit - min.x);
-        if (max.x > rightLimit) delta.x -= (max.x - rightLimit);
-        if (min.y < bottomLimit) delta.y += (bottomLimit - min.y);
-        if (max.y > topLimit) delta.y -= (max.y - topLimit);
+        // Aplicamos el "candado"
+        pos.x = Mathf.Clamp(pos.x, minX, maxX);
+        pos.y = Mathf.Clamp(pos.y, minY, maxY);
 
-        if (delta != Vector2.zero)
-        {
-            // convertir delta screen -> local
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(root, delta, null, out var localDelta);
-            tooltipPanel.anchoredPosition += localDelta;
-        }
+        tooltipPanel.anchoredPosition = pos;
     }
 
     // ---------- Rect utils ----------

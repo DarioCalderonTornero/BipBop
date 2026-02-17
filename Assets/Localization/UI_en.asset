@@ -309,11 +309,11 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1390775179902976
-    m_Localized: 'Music Volume: {0}'
+    m_Localized: 'Effects Volume: {0}'
     m_Metadata:
       m_Items: []
   - m_Id: 1390845409329152
-    m_Localized: 'Sound Volume: {0}'
+    m_Localized: 'Music Volume: {0}'
     m_Metadata:
       m_Items: []
   - m_Id: 1902503428849664
@@ -964,6 +964,18 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 32708993857060864
     m_Localized: Show tutorial
+    m_Metadata:
+      m_Items: []
+  - m_Id: 34780203679973376
+    m_Localized: PAUSED
+    m_Metadata:
+      m_Items: []
+  - m_Id: 34781887261016064
+    m_Localized: Effects
+    m_Metadata:
+      m_Items: []
+  - m_Id: 34781929883533312
+    m_Localized: Music
     m_Metadata:
       m_Items: []
   references:
