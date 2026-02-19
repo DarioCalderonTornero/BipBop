@@ -20835,6 +20835,67 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 803332059}
   m_CullTransparentMesh: 1
+--- !u!1 &823274337
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 823274338}
+  - component: {fileID: 823274339}
+  - component: {fileID: 823274340}
+  m_Layer: 5
+  m_Name: Image
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &823274338
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 823274337}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1835387737}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &823274339
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 823274337}
+  m_CullTransparentMesh: 1
+--- !u!114 &823274340
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 823274337}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a313d95068110354eaf890af5381c9f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  m_Color: {r: 0, g: 0, b: 0, a: 0.4745098}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
 --- !u!1 &828146647
 GameObject:
   m_ObjectHideFlags: 0
@@ -26501,7 +26562,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreLayout: 0
-  m_MinWidth: 200
+  m_MinWidth: 300
   m_MinHeight: -1
   m_PreferredWidth: -1
   m_PreferredHeight: 160
@@ -26643,7 +26704,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreLayout: 0
-  m_MinWidth: 200
+  m_MinWidth: 300
   m_MinHeight: -1
   m_PreferredWidth: -1
   m_PreferredHeight: 160
@@ -28312,7 +28373,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1196850154}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 330d9d290b58e674f81d9fde8ec9eed3, type: 3}
   m_Name: 
@@ -28325,20 +28386,38 @@ MonoBehaviour:
     target: {fileID: 0}
     holePadding: {x: 0, y: 0}
     tooltipOffset: {x: 0, y: 0}
-  - text: Esto es una prueba 2
+  - text: "Pulsando aqu\xED podr\xE1s ver tu perfil, donde tambi\xE9n podr\xE1s cambiar
+      tu avatar y tu fondo seleccionado para jugar a los minijuegos."
+    type: 1
+    delayBeforeStep: 0
+    target: {fileID: 756040099}
+    holePadding: {x: 0, y: 0}
+    tooltipOffset: {x: 0, y: -400}
+  - text: "Pulsa aqu\xED para cerrar este panel."
+    type: 1
+    delayBeforeStep: 4
+    target: {fileID: 1483027224}
+    holePadding: {x: 0, y: 0}
+    tooltipOffset: {x: 0, y: -400}
+  - text: "Con los botones inferiores podr\xE1s moverte porel men\xFA. Pulsa \xE9ste
+      para abrir la tienda."
     type: 1
     delayBeforeStep: 2
-    target: {fileID: 2023754357}
-    holePadding: {x: 200, y: 200}
-    tooltipOffset: {x: 0, y: -200}
+    target: {fileID: 1038452269}
+    holePadding: {x: 0, y: 0}
+    tooltipOffset: {x: 0, y: 400}
+  - text: "Por \xFAltimo pulsa este bot\xF3n para acceder a los r\xE9cords globales
+      de cada minijuego. \xA1Si consigues una buena puntuaci\xF3n podr\xEDasaparecer
+      t\xFA!"
+    type: 1
+    delayBeforeStep: 2
+    target: {fileID: 1040062978}
+    holePadding: {x: 0, y: 0}
+    tooltipOffset: {x: 0, y: 400}
   tutorialCanvas: {fileID: 1932854597}
   tutorialText: {fileID: 863013784}
   tooltipPanel: {fileID: 1726934745}
-  darkTop: {fileID: 2135316425}
-  darkBottom: {fileID: 1010463773}
-  darkLeft: {fileID: 785342620}
-  darkRight: {fileID: 1521670413}
-  highlightBorder: {fileID: 0}
+  holeOverlay: {fileID: 823274340}
   tapCatcherButton: {fileID: 601241129}
   gameUiCanvasGroup: {fileID: 1932854595}
   overscanPixels: 30
@@ -43343,6 +43422,7 @@ RectTransform:
   - {fileID: 1010463773}
   - {fileID: 785342620}
   - {fileID: 1521670413}
+  - {fileID: 823274338}
   - {fileID: 1726934745}
   - {fileID: 601241132}
   m_Father: {fileID: 1932854596}
@@ -45668,7 +45748,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreLayout: 0
-  m_MinWidth: 200
+  m_MinWidth: 300
   m_MinHeight: -1
   m_PreferredWidth: -1
   m_PreferredHeight: 160

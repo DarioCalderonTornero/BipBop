@@ -36,11 +36,7 @@ public class TutorialManager : MonoBehaviour
     [SerializeField] private RectTransform tooltipPanel;
 
     [Header("Overlay parts")]
-    [SerializeField] private RectTransform darkTop;
-    [SerializeField] private RectTransform darkBottom;
-    [SerializeField] private RectTransform darkLeft;
-    [SerializeField] private RectTransform darkRight;
-    [SerializeField] private RectTransform highlightBorder;
+    [SerializeField] private HoleOverlay holeOverlay;
 
     [Header("Tap Anywhere")]
     [SerializeField] private Button tapCatcherButton;
@@ -50,11 +46,12 @@ public class TutorialManager : MonoBehaviour
 
     private int index = 0;
 
-    // reparent control
+    // Reparent + placeholder (el placeholder ocupa el hueco en el Layout)
     private Transform savedParent;
     private int savedSiblingIndex;
     private RectTransform savedTarget;
     private Button savedTargetButton;
+    private GameObject layoutPlaceholder; // invisible, mantiene el hueco en el Layout
 
     private Coroutine stepRoutine;
 
@@ -170,7 +167,7 @@ public class TutorialManager : MonoBehaviour
         if (step.type == StepType.TapAnywhere)
         {
             tapCatcherButton.interactable = true;
-            yield return AnimateOverlayTo(BuildFullDarkState(), holeAnimDuration);
+            yield return AnimateOverlayTo(Rect.zero, holeAnimDuration); // sin agujero = overlay completo
             PositionTooltipDefault(); // Posición central
         }
         else
@@ -178,11 +175,17 @@ public class TutorialManager : MonoBehaviour
             tapCatcherButton.interactable = false;
             if (step.target != null)
             {
+                // Mueve el target al TutorialCanvas y deja un placeholder en su sitio.
                 BringTargetToTutorial(step.target);
-                // ... (Click listener) ...
-                yield return AnimateOverlayTo(BuildHoleState(step.target, step.holePadding), holeAnimDuration);
 
-                // Posicionamos respecto al target
+                // Registrar listener en el botón original para avanzar al pulsar.
+                savedTargetButton = step.target.GetComponent<Button>();
+                if (savedTargetButton != null)
+                    savedTargetButton.onClick.AddListener(Next);
+
+                yield return AnimateOverlayTo(GetHoleRectLocal(step.target, step.holePadding), holeAnimDuration);
+
+                // Posicionamos respecto al target original (que no se ha movido)
                 PositionTooltipNearTarget(step.target, step.tooltipOffset);
             }
         }
@@ -243,28 +246,80 @@ public class TutorialManager : MonoBehaviour
         tutorialCanvas.gameObject.SetActive(false);
     }
 
-    // ---------- Reparent target ----------
+    // ---------- Reparent con placeholder ----------
+
+    /// <summary>
+    /// Mueve el target al TutorialCanvas (para que quede encima del overlay)
+    /// y deja un placeholder invisible en su lugar dentro del Layout original,
+    /// con el mismo tamaño, para que los hermanos no se redistribuyan.
+    /// </summary>
     private void BringTargetToTutorial(RectTransform target)
     {
         savedTarget = target;
         savedParent = target.parent;
         savedSiblingIndex = target.GetSiblingIndex();
 
-        // Mantener posición visual: SetParent con worldPositionStays=true
-        target.SetParent(tutorialCanvas.transform, true);
-        target.SetAsLastSibling(); // por encima del overlay
+        // --- Crear placeholder que ocupa el hueco en el Layout ---
+        layoutPlaceholder = new GameObject("__TutorialPlaceholder__", typeof(RectTransform));
+        layoutPlaceholder.transform.SetParent(savedParent, false);
+        layoutPlaceholder.transform.SetSiblingIndex(savedSiblingIndex);
+
+        // Copiar el LayoutElement si existe, o forzar el mismo sizeDelta/preferredSize
+        RectTransform placeholderRT = (RectTransform)layoutPlaceholder.transform;
+        placeholderRT.anchorMin = target.anchorMin;
+        placeholderRT.anchorMax = target.anchorMax;
+        placeholderRT.pivot = target.pivot;
+        placeholderRT.sizeDelta = target.sizeDelta;
+        placeholderRT.anchoredPosition = target.anchoredPosition;
+
+        LayoutElement srcLE = target.GetComponent<LayoutElement>();
+        if (srcLE != null)
+        {
+            LayoutElement dstLE = layoutPlaceholder.AddComponent<LayoutElement>();
+            dstLE.minWidth = srcLE.minWidth;
+            dstLE.minHeight = srcLE.minHeight;
+            dstLE.preferredWidth = srcLE.preferredWidth;
+            dstLE.preferredHeight = srcLE.preferredHeight;
+            dstLE.flexibleWidth = srcLE.flexibleWidth;
+            dstLE.flexibleHeight = srcLE.flexibleHeight;
+            dstLE.ignoreLayout = srcLE.ignoreLayout;
+        }
+        else
+        {
+            // Sin LayoutElement explícito: forzamos el tamaño con uno nuevo
+            // para que el HorizontalLayoutGroup lo respete igual que al original.
+            LayoutElement le = layoutPlaceholder.AddComponent<LayoutElement>();
+            le.preferredWidth = target.rect.width;
+            le.preferredHeight = target.rect.height;
+        }
+
+        // Invisble: no tiene Image ni nada que se vea
+        CanvasGroup cg = layoutPlaceholder.AddComponent<CanvasGroup>();
+        cg.alpha = 0f;
+        cg.blocksRaycasts = false;
+        cg.interactable = false;
+
+        // --- Mover el original al TutorialCanvas encima del overlay ---
+        target.SetParent(tutorialCanvas.transform, true); // worldPositionStays=true
+        target.SetAsLastSibling();
     }
 
     private void RestoreTarget()
     {
-        if (savedTarget == null) return;
+        if (savedTarget != null)
+        {
+            savedTarget.SetParent(savedParent, true);
+            savedTarget.SetSiblingIndex(savedSiblingIndex);
+            savedTarget = null;
+            savedParent = null;
+            savedSiblingIndex = 0;
+        }
 
-        savedTarget.SetParent(savedParent, true);
-        savedTarget.SetSiblingIndex(savedSiblingIndex);
-
-        savedTarget = null;
-        savedParent = null;
-        savedSiblingIndex = 0;
+        if (layoutPlaceholder != null)
+        {
+            Destroy(layoutPlaceholder);
+            layoutPlaceholder = null;
+        }
     }
 
     private void CleanupTargetStep()
@@ -278,198 +333,69 @@ public class TutorialManager : MonoBehaviour
         RestoreTarget();
     }
 
-    private void SetByAnchors(RectTransform rt, float axMin, float ayMin, float axMax, float ayMax)
+    // ── Overlay: malla única sin solapamientos ─────────────────────────────────────────────
+
+    // Rect.zero = sin agujero (overlay completo). En espacio LOCAL del HoleOverlay.
+    private Rect _currentHole = Rect.zero;
+
+    /// <summary>Convierte el target a un Rect en espacio local del HoleOverlay.</summary>
+    private Rect GetHoleRectLocal(RectTransform target, Vector2 padding)
     {
-        rt.anchorMin = new Vector2(axMin, ayMin);
-        rt.anchorMax = new Vector2(axMax, ayMax);
-
-        // CLAVE: esto evita que se quede "gigante" o con offsets viejos
-        rt.offsetMin = Vector2.zero;
-        rt.offsetMax = Vector2.zero;
-
-        rt.pivot = new Vector2(0.5f, 0.5f);
-        rt.localScale = Vector3.one;
-        rt.localRotation = Quaternion.identity;
-    }
-
-    private Rect GetTargetRectInOverlaySpace(RectTransform target, Vector2 padding)
-    {
-        RectTransform root = (RectTransform)tutorialCanvas.transform;
+        RectTransform overlayRT = (RectTransform)holeOverlay.transform;
 
         Vector3[] corners = new Vector3[4];
         target.GetWorldCorners(corners);
 
-        Vector2 s0 = RectTransformUtility.WorldToScreenPoint(null, corners[0]);
-        Vector2 s2 = RectTransformUtility.WorldToScreenPoint(null, corners[2]);
+        // corners[0]=BL, corners[2]=TR
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            overlayRT,
+            RectTransformUtility.WorldToScreenPoint(null, corners[0]),
+            null, out var bl);
 
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(root, s0, null, out var p0);
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(root, s2, null, out var p2);
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            overlayRT,
+            RectTransformUtility.WorldToScreenPoint(null, corners[2]),
+            null, out var tr);
 
-        float xMin = Mathf.Min(p0.x, p2.x) - padding.x;
-        float xMax = Mathf.Max(p0.x, p2.x) + padding.x;
-        float yMin = Mathf.Min(p0.y, p2.y) - padding.y;
-        float yMax = Mathf.Max(p0.y, p2.y) + padding.y;
-
-        float W = root.rect.width;
-        float H = root.rect.height;
-
-        xMin += W * 0.5f; xMax += W * 0.5f;
-        yMin += H * 0.5f; yMax += H * 0.5f;
-
-        return Rect.MinMaxRect(xMin, yMin, xMax, yMax);
+        return Rect.MinMaxRect(
+            Mathf.Min(bl.x, tr.x) - padding.x,
+            Mathf.Min(bl.y, tr.y) - padding.y,
+            Mathf.Max(bl.x, tr.x) + padding.x,
+            Mathf.Max(bl.y, tr.y) + padding.y);
     }
 
-    private struct OverlayState
+    /// <summary>Anima el agujero del overlay. Rect.zero = overlay completo (sin agujero).</summary>
+    private IEnumerator AnimateOverlayTo(Rect targetHole, float duration)
     {
-        public Vector2 topMin, topMax;
-        public Vector2 bottomMin, bottomMax;
-        public Vector2 leftMin, leftMax;
-        public Vector2 rightMin, rightMax;
-
-        public bool topActive, bottomActive, leftActive, rightActive;
-    }
-
-    private OverlayState GetCurrentOverlayState()
-    {
-        return new OverlayState
-        {
-            topMin = darkTop.anchorMin,
-            topMax = darkTop.anchorMax,
-            bottomMin = darkBottom.anchorMin,
-            bottomMax = darkBottom.anchorMax,
-            leftMin = darkLeft.anchorMin,
-            leftMax = darkLeft.anchorMax,
-            rightMin = darkRight.anchorMin,
-            rightMax = darkRight.anchorMax,
-
-            topActive = darkTop.gameObject.activeSelf,
-            bottomActive = darkBottom.gameObject.activeSelf,
-            leftActive = darkLeft.gameObject.activeSelf,
-            rightActive = darkRight.gameObject.activeSelf
-        };
-    }
-
-    private void ApplyOverlayState(OverlayState s)
-    {
-        darkTop.gameObject.SetActive(s.topActive);
-        darkBottom.gameObject.SetActive(s.bottomActive);
-        darkLeft.gameObject.SetActive(s.leftActive);
-        darkRight.gameObject.SetActive(s.rightActive);
-
-        SetByAnchors(darkTop, s.topMin.x, s.topMin.y, s.topMax.x, s.topMax.y);
-        SetByAnchors(darkBottom, s.bottomMin.x, s.bottomMin.y, s.bottomMax.x, s.bottomMax.y);
-        SetByAnchors(darkLeft, s.leftMin.x, s.leftMin.y, s.leftMax.x, s.leftMax.y);
-        SetByAnchors(darkRight, s.rightMin.x, s.rightMin.y, s.rightMax.x, s.rightMax.y);
-    }
-
-    private OverlayState BuildHoleState(RectTransform target, Vector2 padding)
-    {
-        // Todos activos en modo agujero
-        OverlayState s = new OverlayState
-        {
-            topActive = true,
-            bottomActive = true,
-            leftActive = true,
-            rightActive = true
-        };
-
-        Rect hole = GetTargetRectInOverlaySpace(target, padding);
-
-        RectTransform root = (RectTransform)tutorialCanvas.transform;
-        float W = root.rect.width;
-        float H = root.rect.height;
-        if (W <= 0f || H <= 0f) return GetCurrentOverlayState();
-
-        float xMin = Mathf.Clamp01(hole.xMin / W);
-        float xMax = Mathf.Clamp01(hole.xMax / W);
-        float yMin = Mathf.Clamp01(hole.yMin / H);
-        float yMax = Mathf.Clamp01(hole.yMax / H);
-
-        // TOP
-        s.topMin = new Vector2(0f, yMax);
-        s.topMax = new Vector2(1f, 1f);
-
-        // BOTTOM
-        s.bottomMin = new Vector2(0f, 0f);
-        s.bottomMax = new Vector2(1f, yMin);
-
-        // LEFT
-        s.leftMin = new Vector2(0f, yMin);
-        s.leftMax = new Vector2(xMin, yMax);
-
-        // RIGHT
-        s.rightMin = new Vector2(xMax, yMin);
-        s.rightMax = new Vector2(1f, yMax);
-
-        return s;
-    }
-
-    private OverlayState BuildFullDarkState()
-    {
-        // Solo darkBottom ocupa todo
-        OverlayState s = GetCurrentOverlayState();
-        s.topActive = false;
-        s.leftActive = false;
-        s.rightActive = false;
-        s.bottomActive = true;
-
-        s.bottomMin = new Vector2(0f, 0f);
-        s.bottomMax = new Vector2(1f, 1f);
-
-        return s;
-    }
-
-    private IEnumerator AnimateOverlayTo(OverlayState targetState, float duration)
-    {
-        // Si duration 0 => aplica sin animar
         if (duration <= 0f)
         {
-            ApplyOverlayState(targetState);
+            _currentHole = targetHole;
+            holeOverlay.SetHole(targetHole);
             yield break;
         }
 
-        // Importante: activar todos los que vayan a participar para ver la animación
-        // (si un panel está desactivado no se ve animar, por eso lo forzamos activo durante la interpolación)
-        darkTop.gameObject.SetActive(true);
-        darkBottom.gameObject.SetActive(true);
-        darkLeft.gameObject.SetActive(true);
-        darkRight.gameObject.SetActive(true);
-
-        OverlayState start = GetCurrentOverlayState();
-
+        Rect startHole = _currentHole;
         float t = 0f;
+
         while (t < duration)
         {
-            t += Time.unscaledDeltaTime; // para que funcione aunque pauses timeScale
-            float u = Mathf.Clamp01(t / duration);
-            float eased = holeAnimCurve != null ? holeAnimCurve.Evaluate(u) : u;
+            t += Time.unscaledDeltaTime;
+            float eased = holeAnimCurve != null
+                ? holeAnimCurve.Evaluate(Mathf.Clamp01(t / duration))
+                : Mathf.Clamp01(t / duration);
 
-            OverlayState s = new OverlayState
-            {
-                topActive = true,
-                bottomActive = true,
-                leftActive = true,
-                rightActive = true,
+            Rect hole = new Rect(
+                Mathf.LerpUnclamped(startHole.x, targetHole.x, eased),
+                Mathf.LerpUnclamped(startHole.y, targetHole.y, eased),
+                Mathf.LerpUnclamped(startHole.width, targetHole.width, eased),
+                Mathf.LerpUnclamped(startHole.height, targetHole.height, eased));
 
-                topMin = Lerp2(start.topMin, targetState.topMin, eased),
-                topMax = Lerp2(start.topMax, targetState.topMax, eased),
-
-                bottomMin = Lerp2(start.bottomMin, targetState.bottomMin, eased),
-                bottomMax = Lerp2(start.bottomMax, targetState.bottomMax, eased),
-
-                leftMin = Lerp2(start.leftMin, targetState.leftMin, eased),
-                leftMax = Lerp2(start.leftMax, targetState.leftMax, eased),
-
-                rightMin = Lerp2(start.rightMin, targetState.rightMin, eased),
-                rightMax = Lerp2(start.rightMax, targetState.rightMax, eased),
-            };
-
-            ApplyOverlayState(s);
+            holeOverlay.SetHole(hole);
             yield return null;
         }
 
-        // Al final, aplicamos el target “real” (incluye activar/desactivar correctos)
-        ApplyOverlayState(targetState);
+        _currentHole = targetHole;
+        holeOverlay.SetHole(targetHole);
     }
 
     private static Vector2 Lerp2(Vector2 a, Vector2 b, float t) => Vector2.LerpUnclamped(a, b, t);
