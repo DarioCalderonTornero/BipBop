@@ -981,6 +981,16 @@ MonoBehaviour:
     m_Localized: "M\xFAsica"
     m_Metadata:
       m_Items: []
+  - m_Id: 36948304932601856
+    m_Localized: Clasificador
+    m_Metadata:
+      m_Items: []
+  - m_Id: 36948368925097984
+    m_Localized: "Desliza el dedo hacia el tema que tiene relaci\xF3n con el objeto
+      que aparece en mitad de la pantalla. Si te equivocas o se acaba el tiempo,
+      pierdes."
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

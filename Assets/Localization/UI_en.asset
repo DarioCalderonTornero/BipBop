@@ -978,6 +978,16 @@ MonoBehaviour:
     m_Localized: Music
     m_Metadata:
       m_Items: []
+  - m_Id: 36948304932601856
+    m_Localized: Classificate
+    m_Metadata:
+      m_Items: []
+  - m_Id: 36948368925097984
+    m_Localized: Swipe your finger toward the topic related to the object that appears
+      in the middle of the screen. If you make a mistake or run out of time, you
+      lose.
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

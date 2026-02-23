@@ -967,6 +967,14 @@ MonoBehaviour:
     m_Key: "TextoM\xFAsica"
     m_Metadata:
       m_Items: []
+  - m_Id: 36948304932601856
+    m_Key: Classificate_name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 36948368925097984
+    m_Key: Classificate_desc
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

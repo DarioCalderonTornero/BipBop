@@ -151,7 +151,7 @@ public class ClassifierManager : MonoBehaviour
         inputModule.isInputActive = false;
         timerModule.StopTimer(); // Congelamos el tiempo por si acaso
 
-        OnClassifierGameOver?.Invoke(this, EventArgs.Empty);
+        EndGame();
         Debug.Log("<color=red>¡FIN DEL JUEGO! El tiempo llegó a cero o te equivocaste.</color>");
     }
 
@@ -197,6 +197,39 @@ public class ClassifierManager : MonoBehaviour
             centerItemRenderer.transform.localScale = new Vector3(scale, scale, 1f);
         }
     }
+    
+    private bool hasEnded = false;
+
+    private void EndGame()
+    {
+        if (hasEnded)
+            return;
+
+        hasEnded = true;
+
+        // 1) Record PlayerPrefs
+        ClassifierScore.Instance.SafeRecordIfNeeded();
+
+        // 2) Notificar UI game over
+        OnClassifierGameOver?.Invoke(this, System.EventArgs.Empty);
+
+        // 3) PlayFab (misma lógica que Colores)
+        if (PlayFabLoginManager.Instance != null && PlayFabLoginManager.Instance.IsLoggedIn)
+        {
+            PlayFabScoreManager.Instance.SubmitScore("ClassifierScore", ClassifierScore.Instance.GetScore());
+            // Si tu stat en PlayFab se llama distinto, cambia "ClassifierScore"
+        }
+
+        // 4) Coins reward (score/3)
+        int coinsEarned = ClassifierScore.Instance.GetCoinsEarned();
+
+        CoinsRewardUI rewardUI = FindObjectOfType<CoinsRewardUI>(true);
+        if (rewardUI != null)
+            rewardUI.ShowReward(coinsEarned);
+        else
+            CurrencyManager.Instance.AddCoins(coinsEarned);
+    }
+
 
     // GETTERS 
     public int GetCurrentScore()
