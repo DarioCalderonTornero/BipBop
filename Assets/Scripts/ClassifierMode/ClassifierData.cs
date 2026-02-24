@@ -13,5 +13,6 @@ public class CategoryData
 {
     public string categoryName;
     public SwipeDirection correctDirection;
+    public Sprite categoryIcon;
     public List<Sprite> validSprites;
 }
