@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f268ba2e27a41894db4318d6b863c788, type: 3}
+  m_Name: "Animaci\xF3nHacker"
+  m_EditorClassIdentifier: 
+  chromAberrAmountProp: _ChromAberrAmount
+  glitchAmountProp: _GlitchAmount
+  glitchSizeProp: _GlitchSize
+  chromCycleSeconds: 6
+  chromTransitionSeconds: 1
+  chromHoldSeconds: 2
+  glitchRandomizeSeconds: 3
+  glitchAmountMin: 0
+  glitchAmountMax: 20
+  glitchSizeMin: 0.25
+  glitchSizeMax: 5
