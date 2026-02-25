@@ -991,6 +991,8 @@ MonoBehaviour:
   bottomCategoryIcon: {fileID: 1110271996}
   leftCategoryIcon: {fileID: 1084571076}
   rightCategoryIcon: {fileID: 1195220640}
+  distX: 2.5
+  distY: 4.5
   scoreModule: {fileID: 374007189}
 --- !u!114 &374007187
 MonoBehaviour:

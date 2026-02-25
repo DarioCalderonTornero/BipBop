@@ -22,10 +22,13 @@ public class ClassifierManager : MonoBehaviour
     public float swipeSpeed = 25f;
 
     [Header("UI de Categorías (Bordes)")]
-    public Image topCategoryIcon;
-    public Image bottomCategoryIcon;
-    public Image leftCategoryIcon;
-    public Image rightCategoryIcon;
+    [SerializeField] private Image topCategoryIcon;
+    [SerializeField] private Image bottomCategoryIcon;
+    [SerializeField] private Image leftCategoryIcon;
+    [SerializeField] private Image rightCategoryIcon;
+
+    [SerializeField] private float distX = 2.8f; // Distancia a la que se traga el objeto en los laterales
+    [SerializeField] private float distY = 5.0f; // Distancia a la que se traga el objeto arriba y abajo
 
     // Referencias a nuestros otros módulos
     private ClassifierInput inputModule;
@@ -222,17 +225,58 @@ public class ClassifierManager : MonoBehaviour
             scoreModule.AddPoint(1);
             timerModule.ApplySuccessReduction();
 
-            // ¡NUEVO! Damos el latigazo visual al icono correspondiente
-            PunchIcon(playerDirection);
-
-            Vector3 targetFlyPosition = CalculateFlyPosition(playerDirection);
-            StartCoroutine(AnimateSwipeAndRespawn(targetFlyPosition));
+            // ¡Magia de LeanTween! Lanzamos la animación sincronizada
+            AnimateSuccessAndRespawn(playerDirection);
         }
         else
         {
             Debug.Log($"<color=red>¡FALLO FATAL!</color> Lo lanzaste hacia {playerDirection} y era {currentCorrectDirection}.");
             HandleGameOver();
         }
+    }
+
+    private void AnimateSuccessAndRespawn(SwipeDirection dir)
+    {
+        // 1. Ajustamos las distancias para que coincidan con los bordes de la cámara del móvil.
+        // En Portrait (vertical), los bordes izquierdo/derecho están mucho más cerca que los de arriba/abajo.
+        
+
+        Vector3 targetFlyPosition = dir switch
+        {
+            SwipeDirection.Up => Vector3.up * distY,
+            SwipeDirection.Down => Vector3.down * distY,
+            SwipeDirection.Left => Vector3.left * distX,
+            SwipeDirection.Right => Vector3.right * distX,
+            _ => Vector3.zero
+        };
+
+        float flyDuration = 0.25f;
+        GameObject item = centerItemRenderer.gameObject;
+
+        LeanTween.cancel(item);
+
+        // 2. MOVIMIENTO: Mantenemos el easeInBack, pero le aplicamos un Overshoot de 0.4.
+        // Esto hace que el "impulso hacia atrás" sea minúsculo y sutil, nada exagerado.
+        LeanTween.moveLocal(item, targetFlyPosition, flyDuration)
+            .setEase(LeanTweenType.easeInBack)
+            .setOvershoot(0.4f);
+
+        // 3. ESCALA: Le quitamos el efecto "Back" a la escala para que no se infle primero.
+        // Usamos easeInCubic: empezará a encogerse suavemente y se hará enano de golpe justo al llegar.
+        LeanTween.scale(item, Vector3.zero, flyDuration)
+            .setEase(LeanTweenType.easeInCubic)
+            .setOnComplete(() =>
+            {
+                // Reseteamos posición
+                item.transform.localPosition = Vector3.zero;
+
+                if (!isGameOver)
+                {
+                    // Sincronización perfecta
+                    PunchIcon(dir);
+                    SpawnNewItem(true);
+                }
+            });
     }
 
     private void HandleGameOver()
@@ -246,35 +290,6 @@ public class ClassifierManager : MonoBehaviour
         EndGame();
     }
 
-    private Vector3 CalculateFlyPosition(SwipeDirection dir)
-    {
-        float dist = 15f;
-        return dir switch
-        {
-            SwipeDirection.Up => Vector3.up * dist,
-            SwipeDirection.Down => Vector3.down * dist,
-            SwipeDirection.Left => Vector3.left * dist,
-            SwipeDirection.Right => Vector3.right * dist,
-            _ => Vector3.zero
-        };
-    }
-
-    private IEnumerator AnimateSwipeAndRespawn(Vector3 targetPosition)
-    {
-        Transform itemTransform = centerItemRenderer.transform;
-        while (Vector3.Distance(itemTransform.localPosition, targetPosition) > 0.1f)
-        {
-            itemTransform.localPosition = Vector3.MoveTowards(itemTransform.localPosition, targetPosition, swipeSpeed * Time.deltaTime);
-            yield return null;
-        }
-
-        itemTransform.localPosition = Vector3.zero;
-
-        if (!isGameOver)
-        {
-            SpawnNewItem(true);
-        }
-    }
 
     private void EndGame()
     {
