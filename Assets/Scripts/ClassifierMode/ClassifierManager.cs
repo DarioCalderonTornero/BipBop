@@ -21,16 +21,22 @@ public class ClassifierManager : MonoBehaviour
     public float targetVisualSize = 2f;
     public float swipeSpeed = 25f;
 
-    [Header("UI de Categorías (Bordes)")]
+    [Header("UI de Categorías (Iconos)")]
     [SerializeField] private Image topCategoryIcon;
     [SerializeField] private Image bottomCategoryIcon;
     [SerializeField] private Image leftCategoryIcon;
     [SerializeField] private Image rightCategoryIcon;
 
-    [SerializeField] private float distX = 2.8f; // Distancia a la que se traga el objeto en los laterales
-    [SerializeField] private float distY = 5.0f; // Distancia a la que se traga el objeto arriba y abajo
+    [Header("UI de Categorías (Fondos)")]
+    [SerializeField] private Image topCategoryBg;
+    [SerializeField] private Image bottomCategoryBg;
+    [SerializeField] private Image leftCategoryBg;
+    [SerializeField] private Image rightCategoryBg;
 
-    // Referencias a nuestros otros módulos
+    [Header("Ajustes de Vuelo")]
+    [SerializeField] private float distX = 2.8f;
+    [SerializeField] private float distY = 5.0f;
+
     private ClassifierInput inputModule;
     private ClassifierTimer timerModule;
     [SerializeField] private ClassifierScore scoreModule;
@@ -38,6 +44,24 @@ public class ClassifierManager : MonoBehaviour
     private SwipeDirection currentCorrectDirection;
     private bool isGameOver = false;
     private bool hasEnded = false;
+
+    // --- VARIABLES DE MUTADORES ---
+    private enum MutatorType { MemoryFlash, Chaos, Inverse }
+
+    private Dictionary<MutatorType, int> activeMutators = new Dictionary<MutatorType, int>();
+
+    // ¡NUEVO! Actualizados a las rondas que pediste
+    [SerializeField] private int memoryFlashRoundBegin = 2;
+    [SerializeField] private int chaosRoundBegin = 8;
+    [SerializeField] private int inverseRoundBegin = 14;
+
+    private int presentationRoundsLeft = 0;
+
+    private Dictionary<CategoryData, SwipeDirection> originalDirections = new Dictionary<CategoryData, SwipeDirection>();
+
+    // Variables ultra-simples para guardar cómo eran los fondos al arrancar
+    private Sprite origTopBgSprite, origBottomBgSprite, origLeftBgSprite, origRightBgSprite;
+    private Color origTopBgColor = Color.white, origBottomBgColor = Color.white, origLeftBgColor = Color.white, origRightBgColor = Color.white;
 
     void Awake()
     {
@@ -69,6 +93,20 @@ public class ClassifierManager : MonoBehaviour
     void Start()
     {
         isGameOver = false;
+        activeMutators.Clear();
+        presentationRoundsLeft = 0;
+
+        // Guardamos las direcciones originales
+        foreach (var cat in categories)
+        {
+            originalDirections[cat] = cat.correctDirection;
+        }
+
+        // Guardamos una copia exacta de los sprites y colores de los fondos al empezar
+        if (topCategoryBg != null) { origTopBgSprite = topCategoryBg.sprite; origTopBgColor = topCategoryBg.color; }
+        if (bottomCategoryBg != null) { origBottomBgSprite = bottomCategoryBg.sprite; origBottomBgColor = bottomCategoryBg.color; }
+        if (leftCategoryBg != null) { origLeftBgSprite = leftCategoryBg.sprite; origLeftBgColor = leftCategoryBg.color; }
+        if (rightCategoryBg != null) { origRightBgSprite = rightCategoryBg.sprite; origRightBgColor = rightCategoryBg.color; }
 
         if (ClassifierState.Instance != null)
         {
@@ -76,7 +114,7 @@ public class ClassifierManager : MonoBehaviour
         }
 
         SetupCategoryUI();
-        StartUIBreathing(); // ¡NUEVO! Arrancamos la respiración de los bordes
+        StartUIBreathing();
         SpawnNewItem(false);
     }
 
@@ -98,29 +136,47 @@ public class ClassifierManager : MonoBehaviour
         {
             if (category.categoryIcon == null) continue;
 
+            // 1. Miramos dónde estaba esta categoría originalmente
+            SwipeDirection origDir = originalDirections[category];
+            Sprite targetBgSprite = null;
+            Color targetBgColor = Color.white;
+
+            // 2. Le asignamos su fondo original, sin importar dónde vaya a ir ahora
+            switch (origDir)
+            {
+                case SwipeDirection.Up: targetBgSprite = origTopBgSprite; targetBgColor = origTopBgColor; break;
+                case SwipeDirection.Down: targetBgSprite = origBottomBgSprite; targetBgColor = origBottomBgColor; break;
+                case SwipeDirection.Left: targetBgSprite = origLeftBgSprite; targetBgColor = origLeftBgColor; break;
+                case SwipeDirection.Right: targetBgSprite = origRightBgSprite; targetBgColor = origRightBgColor; break;
+            }
+
+            // 3. Colocamos el icono y su fondo fiel en la posición que le toque en esta ronda
             switch (category.correctDirection)
             {
                 case SwipeDirection.Up:
                     if (topCategoryIcon != null) topCategoryIcon.sprite = category.categoryIcon;
+                    if (topCategoryBg != null) { topCategoryBg.sprite = targetBgSprite; topCategoryBg.color = targetBgColor; }
                     break;
                 case SwipeDirection.Down:
                     if (bottomCategoryIcon != null) bottomCategoryIcon.sprite = category.categoryIcon;
+                    if (bottomCategoryBg != null) { bottomCategoryBg.sprite = targetBgSprite; bottomCategoryBg.color = targetBgColor; }
                     break;
                 case SwipeDirection.Left:
                     if (leftCategoryIcon != null) leftCategoryIcon.sprite = category.categoryIcon;
+                    if (leftCategoryBg != null) { leftCategoryBg.sprite = targetBgSprite; leftCategoryBg.color = targetBgColor; }
                     break;
                 case SwipeDirection.Right:
                     if (rightCategoryIcon != null) rightCategoryIcon.sprite = category.categoryIcon;
+                    if (rightCategoryBg != null) { rightCategoryBg.sprite = targetBgSprite; rightCategoryBg.color = targetBgColor; }
                     break;
             }
         }
     }
 
-    // --- NUEVA SECCIÓN: ANIMACIONES DE UI (LEANTWEEN) ---
+    // --- ANIMACIONES DE UI (LEANTWEEN) ---
 
     private void StartUIBreathing()
     {
-        // Ponemos a respirar a los 4 iconos
         AnimateBreathing(topCategoryIcon);
         AnimateBreathing(bottomCategoryIcon);
         AnimateBreathing(leftCategoryIcon);
@@ -130,8 +186,6 @@ public class ClassifierManager : MonoBehaviour
     private void AnimateBreathing(Image icon)
     {
         if (icon == null) return;
-
-        // Escala de 1.0 a 1.08 suavemente, y hace ping-pong (va y vuelve) para siempre
         LeanTween.scale(icon.gameObject, Vector3.one * 1.08f, 1.2f)
             .setEase(LeanTweenType.easeInOutSine)
             .setLoopPingPong();
@@ -139,7 +193,6 @@ public class ClassifierManager : MonoBehaviour
 
     private void PunchIcon(SwipeDirection dir)
     {
-        // Buscamos cuál es el icono que ha acertado el jugador
         Image targetIcon = dir switch
         {
             SwipeDirection.Up => topCategoryIcon,
@@ -151,25 +204,175 @@ public class ClassifierManager : MonoBehaviour
 
         if (targetIcon != null)
         {
-            // 1. Cancelamos la respiración actual de este icono específico
             LeanTween.cancel(targetIcon.gameObject);
-
-            // 2. Nos aseguramos de que parte de la escala base
             targetIcon.transform.localScale = Vector3.one;
 
-            // 3. ¡Latigazo! Sube a 1.3 super rápido (0.15s), vuelve a bajar (pingPong 1 vez)
             LeanTween.scale(targetIcon.gameObject, Vector3.one * 1.3f, 0.15f)
                 .setEase(LeanTweenType.easeOutQuad)
                 .setLoopPingPong(1)
                 .setOnComplete(() =>
                 {
-                    // 4. Cuando termina de celebrar el acierto, lo ponemos a respirar de nuevo
                     AnimateBreathing(targetIcon);
                 });
         }
     }
 
-    // ----------------------------------------------------
+    // --- SISTEMA DE MUTADORES (NUEVO CEREBRO) ---
+
+    private void CheckAndApplyMutators()
+    {
+        int currentScore = GetCurrentScore();
+
+        // 1. PRESENTACIONES OBLIGATORIAS (Hitos exactos)
+        // Si el jugador llega exactamente a uno de estos puntos, limpieza nuclear.
+        if (currentScore == memoryFlashRoundBegin || currentScore == chaosRoundBegin || currentScore == inverseRoundBegin)
+        {
+            ClearAllMutators();
+
+            if (currentScore == memoryFlashRoundBegin) ActivateMutator(MutatorType.MemoryFlash, 3);
+            else if (currentScore == chaosRoundBegin) ActivateMutator(MutatorType.Chaos, 3);
+            else if (currentScore == inverseRoundBegin) ActivateMutator(MutatorType.Inverse, 3);
+
+            presentationRoundsLeft = 3; // Activamos escudo
+            return; // ¡Salimos de la función! Nada más puede ocurrir en esta ronda.
+        }
+
+        // Reducimos el escudo de presentación si está activo
+        if (presentationRoundsLeft > 0)
+        {
+            presentationRoundsLeft--;
+        }
+
+        // 2. GESTIÓN DE RONDAS ACTIVAS 
+        List<MutatorType> currentKeys = new List<MutatorType>(activeMutators.Keys);
+        foreach (MutatorType key in currentKeys)
+        {
+            activeMutators[key]--;
+            if (activeMutators[key] <= 0)
+            {
+                DeactivateMutator(key);
+            }
+        }
+
+        // 3. ALEATORIEDAD (Apilar nuevos mutadores)
+        if (currentScore > memoryFlashRoundBegin && presentationRoundsLeft <= 0)
+        {
+            int chance = UnityEngine.Random.Range(0, 100);
+            if (chance < 25)
+            {
+                List<MutatorType> availableMutators = new List<MutatorType>();
+
+                if (currentScore >= memoryFlashRoundBegin && !activeMutators.ContainsKey(MutatorType.MemoryFlash))
+                    availableMutators.Add(MutatorType.MemoryFlash);
+
+                if (currentScore >= chaosRoundBegin && !activeMutators.ContainsKey(MutatorType.Chaos))
+                    availableMutators.Add(MutatorType.Chaos);
+
+                if (currentScore >= inverseRoundBegin && !activeMutators.ContainsKey(MutatorType.Inverse))
+                    availableMutators.Add(MutatorType.Inverse);
+
+                if (availableMutators.Count > 0)
+                {
+                    MutatorType randomChoice = availableMutators[UnityEngine.Random.Range(0, availableMutators.Count)];
+                    int randomRounds = UnityEngine.Random.Range(3, 6);
+                    ActivateMutator(randomChoice, randomRounds);
+                }
+            }
+        }
+    }
+
+    private void ActivateMutator(MutatorType type, int rounds)
+    {
+        activeMutators[type] = rounds;
+        Debug.Log($"<color=orange>¡MUTADOR ACTIVADO!</color> Tipo: {type} por {rounds} rondas.");
+
+        if (type == MutatorType.MemoryFlash)
+        {
+            FadeIconGroup(0f, 0.5f);
+        }
+        else if (type == MutatorType.Chaos)
+        {
+            List<SwipeDirection> dirs = new List<SwipeDirection> {
+                SwipeDirection.Up, SwipeDirection.Down, SwipeDirection.Left, SwipeDirection.Right
+            };
+
+            for (int i = 0; i < dirs.Count; i++)
+            {
+                SwipeDirection temp = dirs[i];
+                int randomIndex = UnityEngine.Random.Range(i, dirs.Count);
+                dirs[i] = dirs[randomIndex];
+                dirs[randomIndex] = temp;
+            }
+
+            for (int i = 0; i < categories.Count; i++)
+            {
+                categories[i].correctDirection = dirs[i];
+            }
+
+            SetupCategoryUI();
+            PunchIcon(SwipeDirection.Up);
+            PunchIcon(SwipeDirection.Down);
+            PunchIcon(SwipeDirection.Left);
+            PunchIcon(SwipeDirection.Right);
+        }
+        else if (type == MutatorType.Inverse)
+        {
+            centerItemRenderer.color = new Color(1f, 0.4f, 0.4f);
+        }
+    }
+
+    private void DeactivateMutator(MutatorType type)
+    {
+        Debug.Log($"<color=cyan>Mutador {type} finalizado. Volviendo a la normalidad.</color>");
+
+        if (type == MutatorType.MemoryFlash)
+        {
+            FadeIconGroup(1f, 0.5f);
+        }
+        else if (type == MutatorType.Chaos)
+        {
+            foreach (var cat in categories)
+            {
+                cat.correctDirection = originalDirections[cat];
+            }
+            SetupCategoryUI();
+        }
+        else if (type == MutatorType.Inverse)
+        {
+            centerItemRenderer.color = Color.white;
+        }
+
+        activeMutators.Remove(type);
+    }
+
+    private void ClearAllMutators()
+    {
+        List<MutatorType> currentKeys = new List<MutatorType>(activeMutators.Keys);
+        foreach (MutatorType key in currentKeys)
+        {
+            DeactivateMutator(key);
+        }
+    }
+
+    private SwipeDirection GetInverseDirection(SwipeDirection dir)
+    {
+        return dir switch
+        {
+            SwipeDirection.Up => SwipeDirection.Down,
+            SwipeDirection.Down => SwipeDirection.Up,
+            SwipeDirection.Left => SwipeDirection.Right,
+            SwipeDirection.Right => SwipeDirection.Left,
+            _ => dir
+        };
+    }
+
+    private void FadeIconGroup(float targetAlpha, float time)
+    {
+        if (topCategoryIcon != null) { LeanTween.cancel(topCategoryIcon.gameObject); LeanTween.alpha(topCategoryIcon.rectTransform, targetAlpha, time); }
+        if (bottomCategoryIcon != null) { LeanTween.cancel(bottomCategoryIcon.gameObject); LeanTween.alpha(bottomCategoryIcon.rectTransform, targetAlpha, time); }
+        if (leftCategoryIcon != null) { LeanTween.cancel(leftCategoryIcon.gameObject); LeanTween.alpha(leftCategoryIcon.rectTransform, targetAlpha, time); }
+        if (rightCategoryIcon != null) { LeanTween.cancel(rightCategoryIcon.gameObject); LeanTween.alpha(rightCategoryIcon.rectTransform, targetAlpha, time); }
+    }
 
     private Vector3 CalculateTargetScale()
     {
@@ -186,6 +389,11 @@ public class ClassifierManager : MonoBehaviour
 
     private void SpawnNewItem(bool startMechanics = true)
     {
+        if (startMechanics)
+        {
+            CheckAndApplyMutators();
+        }
+
         int randomCategoryIndex = UnityEngine.Random.Range(0, categories.Count);
         CategoryData selectedCategory = categories[randomCategoryIndex];
 
@@ -195,7 +403,6 @@ public class ClassifierManager : MonoBehaviour
 
         centerItemRenderer.sprite = selectedSprite;
 
-        // Efecto POP del objeto central
         LeanTween.cancel(centerItemRenderer.gameObject);
         Vector3 finalScale = CalculateTargetScale();
         centerItemRenderer.transform.localScale = Vector3.zero;
@@ -219,28 +426,29 @@ public class ClassifierManager : MonoBehaviour
         inputModule.isInputActive = false;
         timerModule.StopTimer();
 
-        if (playerDirection == currentCorrectDirection)
+        SwipeDirection effectiveDirection = playerDirection;
+        if (activeMutators.ContainsKey(MutatorType.Inverse))
+        {
+            effectiveDirection = GetInverseDirection(playerDirection);
+        }
+
+        if (effectiveDirection == currentCorrectDirection)
         {
             Debug.Log("<color=green>¡ACIERTO!</color>");
             scoreModule.AddPoint(1);
             timerModule.ApplySuccessReduction();
 
-            // ¡Magia de LeanTween! Lanzamos la animación sincronizada
-            AnimateSuccessAndRespawn(playerDirection);
+            AnimateSuccessAndRespawn(currentCorrectDirection);
         }
         else
         {
-            Debug.Log($"<color=red>¡FALLO FATAL!</color> Lo lanzaste hacia {playerDirection} y era {currentCorrectDirection}.");
+            Debug.Log($"<color=red>¡FALLO FATAL!</color> Lo lanzaste de forma efectiva hacia {effectiveDirection} y era {currentCorrectDirection}.");
             HandleGameOver();
         }
     }
 
     private void AnimateSuccessAndRespawn(SwipeDirection dir)
     {
-        // 1. Ajustamos las distancias para que coincidan con los bordes de la cámara del móvil.
-        // En Portrait (vertical), los bordes izquierdo/derecho están mucho más cerca que los de arriba/abajo.
-        
-
         Vector3 targetFlyPosition = dir switch
         {
             SwipeDirection.Up => Vector3.up * distY,
@@ -255,24 +463,18 @@ public class ClassifierManager : MonoBehaviour
 
         LeanTween.cancel(item);
 
-        // 2. MOVIMIENTO: Mantenemos el easeInBack, pero le aplicamos un Overshoot de 0.4.
-        // Esto hace que el "impulso hacia atrás" sea minúsculo y sutil, nada exagerado.
         LeanTween.moveLocal(item, targetFlyPosition, flyDuration)
             .setEase(LeanTweenType.easeInBack)
             .setOvershoot(0.4f);
 
-        // 3. ESCALA: Le quitamos el efecto "Back" a la escala para que no se infle primero.
-        // Usamos easeInCubic: empezará a encogerse suavemente y se hará enano de golpe justo al llegar.
         LeanTween.scale(item, Vector3.zero, flyDuration)
             .setEase(LeanTweenType.easeInCubic)
             .setOnComplete(() =>
             {
-                // Reseteamos posición
                 item.transform.localPosition = Vector3.zero;
 
                 if (!isGameOver)
                 {
-                    // Sincronización perfecta
                     PunchIcon(dir);
                     SpawnNewItem(true);
                 }
@@ -290,7 +492,6 @@ public class ClassifierManager : MonoBehaviour
         EndGame();
     }
 
-
     private void EndGame()
     {
         if (hasEnded) return;
@@ -299,7 +500,6 @@ public class ClassifierManager : MonoBehaviour
         ClassifierScore.Instance.SafeRecordIfNeeded();
         OnClassifierGameOver?.Invoke(this, System.EventArgs.Empty);
 
-        
         if (PlayFabLoginManager.Instance != null && PlayFabLoginManager.Instance.IsLoggedIn)
         {
             PlayFabScoreManager.Instance.SubmitScore("ClassifierScore", ClassifierScore.Instance.GetScore());
@@ -309,7 +509,6 @@ public class ClassifierManager : MonoBehaviour
         CoinsRewardUI rewardUI = FindObjectOfType<CoinsRewardUI>(true);
         if (rewardUI != null) rewardUI.ShowReward(coinsEarned);
         else CurrencyManager.Instance.AddCoins(coinsEarned);
-        
     }
 
     public int GetCurrentScore()
