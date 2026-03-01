@@ -55,10 +55,8 @@ public class ClassifierManager : MonoBehaviour
 
     private int presentationRoundsLeft = 0;
 
-    // Guardar direcciones originales
     private Dictionary<CategoryData, SwipeDirection> originalDirections = new Dictionary<CategoryData, SwipeDirection>();
 
-    // ✅ NUEVO: Enlazamos cada categoría con sus objetos FÍSICOS originales
     private class CategoryUIPack
     {
         public Image icon;
@@ -66,13 +64,24 @@ public class ClassifierManager : MonoBehaviour
     }
     private Dictionary<CategoryData, CategoryUIPack> catUIPacks = new Dictionary<CategoryData, CategoryUIPack>();
 
-    // ✅ NUEVO: Guardamos las coordenadas mundiales exactas de cada "Hueco" (Slot)
     private Dictionary<SwipeDirection, Vector3> slotIconPos = new Dictionary<SwipeDirection, Vector3>();
     private Dictionary<SwipeDirection, Vector3> slotBgPos = new Dictionary<SwipeDirection, Vector3>();
 
-    void Awake()
+    // ==================
+    // Tutorial (igual que Color)
+    // ==================
+    [Header("Tutorial Panel")]
+    [SerializeField] private TutorialPanelUI tutorialPrefab;
+    [SerializeField] private Transform tutorialParent;
+    private TutorialPanelUI tutorialInstance;
+    private const string ShowTutorialKey = "ShowTutorialOnStart";
+
+    private Coroutine bindStateRoutine;
+    private bool boundToState = false;
+
+    private void Awake()
     {
-        if (Instance == null) { Instance = this; }
+        if (Instance == null) Instance = this;
         else { Destroy(gameObject); return; }
 
         inputModule = GetComponent<ClassifierInput>();
@@ -80,47 +89,70 @@ public class ClassifierManager : MonoBehaviour
         if (scoreModule == null) scoreModule = GetComponent<ClassifierScore>();
 
         if (topCategoryBg == null || bottomCategoryBg == null || leftCategoryBg == null || rightCategoryBg == null)
-        {
             Debug.LogError("🚨 ¡FALTAN FONDOS POR ASIGNAR EN EL INSPECTOR! 🚨");
-        }
     }
 
-    void OnEnable()
+    private void OnEnable()
     {
         inputModule.OnSwipeDetected += HandlePlayerSwipe;
         timerModule.OnTimeOut += TimerModule_OnTimeOut;
+
+        // 👇 Binding robusto: si ClassifierState aún no existe, esperamos.
+        if (bindStateRoutine != null) StopCoroutine(bindStateRoutine);
+        bindStateRoutine = StartCoroutine(BindToClassifierStateWhenReady());
     }
 
-    void OnDisable()
+    private void OnDisable()
     {
         inputModule.OnSwipeDetected -= HandlePlayerSwipe;
         timerModule.OnTimeOut -= TimerModule_OnTimeOut;
 
-        if (ClassifierState.Instance != null)
+        UnbindFromClassifierState();
+    }
+
+    private IEnumerator BindToClassifierStateWhenReady()
+    {
+        // Espera hasta que exista el State
+        while (ClassifierState.Instance == null)
+            yield return null;
+
+        // Por seguridad, reenganchar siempre limpio
+        UnbindFromClassifierState();
+
+        ClassifierState.Instance.OnPlayingClassifierGame += ClassifierState_OnPlayingClassifierGame;
+        boundToState = true;
+        bindStateRoutine = null;
+    }
+
+    private void UnbindFromClassifierState()
+    {
+        if (boundToState && ClassifierState.Instance != null)
         {
             ClassifierState.Instance.OnPlayingClassifierGame -= ClassifierState_OnPlayingClassifierGame;
         }
+        boundToState = false;
     }
 
-    void Start()
+    private void Start()
     {
         isGameOver = false;
+        hasEnded = false;
         activeMutators.Clear();
         presentationRoundsLeft = 0;
 
         if (categories == null || categories.Count != 4)
-        {
-            Debug.LogError($"ClassifierManager: 'categories' debe tener EXACTAMENTE 4 elementos.");
-        }
+            Debug.LogError("ClassifierManager: 'categories' debe tener EXACTAMENTE 4 elementos.");
 
-        // 1. Memorizamos dónde está cada hueco físicamente en la pantalla
+        // 1) Guardar slots físicos
         if (topCategoryIcon != null) { slotIconPos[SwipeDirection.Up] = topCategoryIcon.transform.position; slotBgPos[SwipeDirection.Up] = topCategoryBg.transform.position; }
         if (bottomCategoryIcon != null) { slotIconPos[SwipeDirection.Down] = bottomCategoryIcon.transform.position; slotBgPos[SwipeDirection.Down] = bottomCategoryBg.transform.position; }
         if (leftCategoryIcon != null) { slotIconPos[SwipeDirection.Left] = leftCategoryIcon.transform.position; slotBgPos[SwipeDirection.Left] = leftCategoryBg.transform.position; }
         if (rightCategoryIcon != null) { slotIconPos[SwipeDirection.Right] = rightCategoryIcon.transform.position; slotBgPos[SwipeDirection.Right] = rightCategoryBg.transform.position; }
 
-        // 2. Vinculamos cada categoría con sus GameObjects iniciales
+        // 2) Vincular packs iniciales
         originalDirections.Clear();
+        catUIPacks.Clear();
+
         foreach (var cat in categories)
         {
             if (cat == null) continue;
@@ -137,24 +169,134 @@ public class ClassifierManager : MonoBehaviour
             catUIPacks[cat] = pack;
         }
 
-        if (ClassifierState.Instance != null)
-        {
-            ClassifierState.Instance.OnPlayingClassifierGame += ClassifierState_OnPlayingClassifierGame;
-        }
-
         SetupCategoryUI();
         StartUIBreathing();
+
+        // Item inicial, pero SIN mecánicas
         SpawnNewItem(false);
+
+        // 🔒 Pausa real: input/timer off
+        PauseGameplay();
+
+        // Tutorial flow (igual que Color)
+        bool showTutorialOnStart = PlayerPrefs.GetInt(ShowTutorialKey, 1) == 1;
+
+        if (showTutorialOnStart)
+        {
+            ShowTutorial();
+        }
+        else
+        {
+            HideAnyExistingTutorialPanel();
+            BeginGameAfterTutorial();
+        }
     }
 
+    // ==================
+    // Tutorial flow
+    // ==================
+    private void ShowTutorial()
+    {
+        if (tutorialInstance != null)
+        {
+            tutorialInstance.gameObject.SetActive(true);
+        }
+        else
+        {
+            // 1) Primero intenta encontrar uno ya en escena (aunque esté inactivo)
+            var existing = FindObjectOfType<TutorialPanelUI>(true);
+            if (existing != null)
+            {
+                tutorialInstance = existing;
+                tutorialInstance.gameObject.SetActive(true);
+            }
+            else
+            {
+                // 2) Si no hay, intenta instanciar el prefab si está asignado
+                if (tutorialPrefab != null)
+                {
+                    Transform parent = tutorialParent;
+                    if (parent == null)
+                    {
+                        Canvas c = FindObjectOfType<Canvas>();
+                        parent = (c != null) ? c.transform : transform;
+                    }
+                    tutorialInstance = Instantiate(tutorialPrefab, parent);
+                }
+                else
+                {
+                    Debug.LogWarning("ClassifierManager: Tutorial marcado pero 'tutorialPrefab' es null y no hay TutorialPanelUI en escena. Se continúa sin tutorial.");
+                    BeginGameAfterTutorial();
+                    return;
+                }
+            }
+        }
+
+        tutorialInstance.OnClosed -= HandleTutorialClosed;
+        tutorialInstance.OnClosed += HandleTutorialClosed;
+
+        PauseGameplay();
+    }
+
+    private void HandleTutorialClosed()
+    {
+        if (tutorialInstance != null)
+            tutorialInstance.OnClosed -= HandleTutorialClosed;
+
+        tutorialInstance = null;
+        BeginGameAfterTutorial();
+    }
+
+    private void HideAnyExistingTutorialPanel()
+    {
+        var existing = FindObjectOfType<TutorialPanelUI>(true);
+        if (existing != null)
+            existing.gameObject.SetActive(false);
+    }
+
+    private void BeginGameAfterTutorial()
+    {
+        // 👇 Arranque robusto: espera a que exista el state y entonces inicia countdown
+        StartCoroutine(BeginCountdownWhenStateReady());
+    }
+
+    private IEnumerator BeginCountdownWhenStateReady()
+    {
+        while (ClassifierState.Instance == null)
+            yield return null;
+
+        // Reinicio de flags run
+        isGameOver = false;
+        hasEnded = false;
+
+        // Asegurar que gameplay está parado hasta Playing
+        PauseGameplay();
+
+        ClassifierState.Instance.StartCountdown();
+    }
+
+    private void PauseGameplay()
+    {
+        inputModule.isInputActive = false;
+        timerModule.StopTimer();
+    }
+
+    // ==================
+    // Estado: empieza el juego al pasar a Playing
+    // ==================
     private void ClassifierState_OnPlayingClassifierGame(object sender, EventArgs e)
     {
         if (isGameOver) return;
+
+        // ✅ ESTE ERA EL PUNTO CLAVE: si no te suscribes, nunca llega aquí
         timerModule.ResetAndStartTimer();
         inputModule.isInputActive = true;
+
+        // Por si venías del “spawn inicial” sin mecánicas:
+        // Ya hay sprite puesto, no hace falta respawnear aquí.
     }
 
-    private void TimerModule_OnTimeOut(object sender, System.EventArgs e)
+    private void TimerModule_OnTimeOut(object sender, EventArgs e)
     {
         HandleGameOver();
     }
@@ -167,13 +309,9 @@ public class ClassifierManager : MonoBehaviour
 
             CategoryUIPack pack = catUIPacks[category];
 
-            // 1. Cambiamos la pegatina por si toca un sprite diferente esta ronda
             if (pack.icon != null && category.categoryIcon != null)
-            {
                 pack.icon.sprite = category.categoryIcon;
-            }
 
-            // 2. TELETRANSPORTAMOS los GameObjects enteros a la posición que les toque
             SwipeDirection targetSlot = category.correctDirection;
 
             if (pack.icon != null && slotIconPos.ContainsKey(targetSlot))
@@ -184,8 +322,7 @@ public class ClassifierManager : MonoBehaviour
         }
     }
 
-    // --- ANIMACIONES DE UI (LEANTWEEN) ---
-
+    // --- ANIMACIONES UI ---
     private void StartUIBreathing()
     {
         if (topCategoryIcon != null) AnimateBreathing(topCategoryIcon);
@@ -202,39 +339,11 @@ public class ClassifierManager : MonoBehaviour
             .setLoopPingPong();
     }
 
-    private void PunchIcon(SwipeDirection dir)
-    {
-        Image targetIcon = null;
-
-        // Buscamos cuál es el Icono que AHORA MISMO está ocupando el hueco hacia el que se deslizó
-        foreach (var cat in categories)
-        {
-            if (cat.correctDirection == dir)
-            {
-                targetIcon = catUIPacks[cat].icon;
-                break;
-            }
-        }
-
-        if (targetIcon != null)
-        {
-            LeanTween.cancel(targetIcon.gameObject);
-            targetIcon.transform.localScale = Vector3.one;
-
-            LeanTween.scale(targetIcon.gameObject, Vector3.one * 1.3f, 0.15f)
-                .setEase(LeanTweenType.easeOutQuad)
-                .setLoopPingPong(1)
-                .setOnComplete(() => { AnimateBreathing(targetIcon); });
-        }
-    }
-
-    // --- SISTEMA DE MUTADORES ---
-
+    // --- MUTADORES (tu lógica igual) ---
     private void CheckAndApplyMutators()
     {
         int currentScore = GetCurrentScore();
 
-        // Presentación obligatoria en hitos exactos (BLINDADO)
         if (currentScore == memoryFlashRoundBegin || currentScore == chaosRoundBegin || currentScore == inverseRoundBegin)
         {
             ClearAllMutators();
@@ -249,7 +358,6 @@ public class ClassifierManager : MonoBehaviour
 
         if (presentationRoundsLeft > 0) presentationRoundsLeft--;
 
-        // Reducir duración de mutadores activos
         List<MutatorType> currentKeys = new List<MutatorType>(activeMutators.Keys);
         foreach (MutatorType key in currentKeys)
         {
@@ -257,7 +365,6 @@ public class ClassifierManager : MonoBehaviour
             if (activeMutators[key] <= 0) DeactivateMutator(key);
         }
 
-        // Aleatoriedad para apilar mutadores
         if (currentScore > memoryFlashRoundBegin && presentationRoundsLeft <= 0)
         {
             int chance = UnityEngine.Random.Range(0, 100);
@@ -287,7 +394,6 @@ public class ClassifierManager : MonoBehaviour
     private void ActivateMutator(MutatorType type, int rounds)
     {
         activeMutators[type] = rounds;
-        Debug.Log($"<color=orange>¡MUTADOR ACTIVADO!</color> Tipo: {type} por {rounds} rondas.");
 
         if (type == MutatorType.MemoryFlash)
         {
@@ -325,8 +431,6 @@ public class ClassifierManager : MonoBehaviour
 
     private void DeactivateMutator(MutatorType type)
     {
-        Debug.Log($"<color=cyan>Mutador {type} finalizado. Volviendo a la normalidad.</color>");
-
         if (type == MutatorType.MemoryFlash)
         {
             FadeIconGroup(1f, 0.5f);
@@ -376,6 +480,31 @@ public class ClassifierManager : MonoBehaviour
         if (bottomCategoryIcon != null) { LeanTween.cancel(bottomCategoryIcon.gameObject); LeanTween.alpha(bottomCategoryIcon.rectTransform, targetAlpha, time); }
         if (leftCategoryIcon != null) { LeanTween.cancel(leftCategoryIcon.gameObject); LeanTween.alpha(leftCategoryIcon.rectTransform, targetAlpha, time); }
         if (rightCategoryIcon != null) { LeanTween.cancel(rightCategoryIcon.gameObject); LeanTween.alpha(rightCategoryIcon.rectTransform, targetAlpha, time); }
+    }
+
+    private void PunchIcon(SwipeDirection dir)
+    {
+        Image targetIcon = null;
+
+        foreach (var cat in categories)
+        {
+            if (cat.correctDirection == dir)
+            {
+                targetIcon = catUIPacks[cat].icon;
+                break;
+            }
+        }
+
+        if (targetIcon != null)
+        {
+            LeanTween.cancel(targetIcon.gameObject);
+            targetIcon.transform.localScale = Vector3.one;
+
+            LeanTween.scale(targetIcon.gameObject, Vector3.one * 1.3f, 0.15f)
+                .setEase(LeanTweenType.easeOutQuad)
+                .setLoopPingPong(1)
+                .setOnComplete(() => { AnimateBreathing(targetIcon); });
+        }
     }
 
     private Vector3 CalculateTargetScale()
@@ -492,7 +621,7 @@ public class ClassifierManager : MonoBehaviour
         hasEnded = true;
 
         ClassifierScore.Instance.SafeRecordIfNeeded();
-        OnClassifierGameOver?.Invoke(this, System.EventArgs.Empty);
+        OnClassifierGameOver?.Invoke(this, EventArgs.Empty);
 
         if (PlayFabLoginManager.Instance != null && PlayFabLoginManager.Instance.IsLoggedIn)
         {

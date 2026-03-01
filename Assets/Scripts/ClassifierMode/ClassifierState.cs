@@ -22,18 +22,12 @@ public class ClassifierState : MonoBehaviour
     private float countDownTimer = 3f;
 
     [SerializeField] private float goDuration = 0.7f;
-    private Coroutine goRoutine;
 
     private void Awake()
     {
         Instance = this;
         classifierGameState = ClassiferGameStateEnum.None;
         countDownTimer = 3f;
-    }
-
-    private void Start()
-    {
-        StartCountdown();
     }
 
     private void Update()
@@ -57,12 +51,6 @@ public class ClassifierState : MonoBehaviour
             case ClassiferGameStateEnum.Countdown:
                 HandleCountdown();
                 break;
-
-            case ClassiferGameStateEnum.Playing:
-                break;
-
-            case ClassiferGameStateEnum.GameOver:
-                break;
         }
     }
 
@@ -75,23 +63,28 @@ public class ClassifierState : MonoBehaviour
             countDownTimer = 0f;
             classifierGameState = ClassiferGameStateEnum.Go;
 
+            // El "GO" lo gestiona la UI y al terminar debe llamar a StartGameAfterGo()
             if (ClassifierCountdownUI.Instance != null)
+            {
                 ClassifierCountdownUI.Instance.ShowGo(goDuration);
-
-            if (goRoutine != null) StopCoroutine(goRoutine);
-            goRoutine = StartCoroutine(GoThenPlay());
+            }
+            else
+            {
+                StartCoroutine(GoFallbackThenPlay());
+            }
         }
     }
 
-    private IEnumerator GoThenPlay()
+    private IEnumerator GoFallbackThenPlay()
     {
         yield return new WaitForSeconds(goDuration);
         StartGameAfterGo();
-        goRoutine = null;
     }
 
     public void StartGameAfterGo()
     {
+        if (classifierGameState == ClassiferGameStateEnum.Playing) return;
+
         classifierGameState = ClassiferGameStateEnum.Playing;
         OnPlayingClassifierGame?.Invoke(this, EventArgs.Empty);
     }
@@ -103,4 +96,3 @@ public class ClassifierState : MonoBehaviour
         classifierGameState = ClassiferGameStateEnum.GameOver;
     }
 }
-
