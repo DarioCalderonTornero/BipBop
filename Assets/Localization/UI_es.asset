@@ -995,6 +995,22 @@ MonoBehaviour:
     m_Localized: Hacker
     m_Metadata:
       m_Items: []
+  - m_Id: 39493068370444288
+    m_Localized: Inventario de avatares
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39493161022619648
+    m_Localized: Inventario de fondos
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39493253335056384
+    m_Localized: "\xA1Elije un avatar!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39493332712259584
+    m_Localized: "\xA1Elije un fondo!"
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

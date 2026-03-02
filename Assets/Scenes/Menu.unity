@@ -18806,6 +18806,27 @@ MonoBehaviour:
   defaultScoreTemplate: Alcanza {0} puntos para desbloquearlo.
   noSelectionText: "\xA1Elige un avatar!"
   titleText: {fileID: 121205762}
+  inventoryTitleLS:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 39493068370444288
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  chooseAvatarLS:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 39493253335056384
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  references:
+    version: 2
+    RefIds: []
 --- !u!114 &756736024
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -29841,8 +29862,29 @@ MonoBehaviour:
   defaultOwnedText: "\xA1Conseguido!"
   defaultStoreText: Comprable en la tienda.
   noSelectionText: "\xA1Elige un fondo!"
+  inventoryTitleLS:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 39493161022619648
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  chooseBackgroundLS:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 39493332712259584
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
   equippedBackgroundPreview: {fileID: 1312877326}
   titleText: {fileID: 121205762}
+  references:
+    version: 2
+    RefIds: []
 --- !u!1 &1280853185
 GameObject:
   m_ObjectHideFlags: 0

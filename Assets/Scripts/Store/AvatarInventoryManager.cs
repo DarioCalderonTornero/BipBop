@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization;
 using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
 
@@ -51,6 +52,10 @@ public class AvatarInventoryManager : MonoBehaviour
 
     [SerializeField] private TextMeshProUGUI titleText;
 
+    [Header("Localization")]
+    [SerializeField] private LocalizedString inventoryTitleLS;   // "Inventario de avatares"
+    [SerializeField] private LocalizedString chooseAvatarLS;     // "¡Elige un avatar!"
+
     private void Awake()
     {
         if (panel == null)
@@ -91,7 +96,9 @@ public class AvatarInventoryManager : MonoBehaviour
 
         // Textos iniciales: nada seleccionado aún
         if (selectedAvatarNameText != null) selectedAvatarNameText.text = "";
-        if (selectedAvatarDescriptionText != null) selectedAvatarDescriptionText.text = noSelectionText;
+        if (selectedAvatarDescriptionText != null) selectedAvatarDescriptionText.text = LS(chooseAvatarLS, noSelectionText);
+
+        RefreshStaticTexts();
     }
 
     private void EnsureDefaultAvatarOwnedAndEquipped()
@@ -138,10 +145,12 @@ public class AvatarInventoryManager : MonoBehaviour
         selectedAvatarItem = null;
 
         if (selectedAvatarNameText != null) selectedAvatarNameText.text = "";
-        if (selectedAvatarDescriptionText != null) selectedAvatarDescriptionText.text = noSelectionText;
+        if (selectedAvatarDescriptionText != null)
+            selectedAvatarDescriptionText.text = LS(chooseAvatarLS, noSelectionText);
+        RefreshStaticTexts();
         if (saveButton != null) saveButton.interactable = false;
 
-        titleText.text = "Inventario de avatares";
+        if (titleText != null) titleText.text = LS(inventoryTitleLS, "Inventario de avatares");
 
         AvatarCollectionUnlocker.EvaluateCatalog(avatarCatalog.avatarDataSO, syncPlayFabIfLoggedIn: true);
 
@@ -357,7 +366,10 @@ public class AvatarInventoryManager : MonoBehaviour
 
     private void OnLocaleChanged(UnityEngine.Localization.Locale _)
     {
-        // si hay un avatar seleccionado, repintamos su texto
+        // repintar textos estáticos
+        RefreshStaticTexts();
+
+        // si hay un avatar seleccionado, repintamos su texto (displayName/desc)
         if (selectedAvatarItem != null)
             OnAvatarSelected(selectedAvatarItem);
     }
@@ -418,5 +430,23 @@ public class AvatarInventoryManager : MonoBehaviour
             {
                 Debug.LogWarning("Error al actualizar avatar en PlayFab: " + error.GenerateErrorReport());
             });
+    }
+
+    private string LS(LocalizedString ls, string fallback)
+    {
+        if (ls == null) return fallback;
+        string v = ls.GetLocalizedString();
+        return string.IsNullOrEmpty(v) ? fallback : v;
+    }
+
+    private void RefreshStaticTexts()
+    {
+        // Título
+        if (titleText != null)
+            titleText.text = LS(inventoryTitleLS, "Inventario de avatares");
+
+        // Texto “no seleccionado”
+        if (selectedAvatarDescriptionText != null && selectedAvatarItem == null)
+            selectedAvatarDescriptionText.text = LS(chooseAvatarLS, noSelectionText);
     }
 }

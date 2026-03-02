@@ -2,6 +2,8 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 
 public class BackgroundInventoryManager : MonoBehaviour
 {
@@ -33,10 +35,14 @@ public class BackgroundInventoryManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI selectedNameText;
     [SerializeField] private TextMeshProUGUI selectedDescriptionText;
 
-    [Header("Textos descriptivos")]
+    [Header("Textos descriptivos (fallback si falta tabla)")]
     [SerializeField] private string defaultOwnedText = "¡Conseguido!";
     [SerializeField] private string defaultStoreText = "Comprable en la tienda.";
     [SerializeField] private string noSelectionText = "¡Elige un fondo!";
+
+    [Header("Localization")]
+    [SerializeField] private LocalizedString inventoryTitleLS;  // "Inventario de fondos"
+    [SerializeField] private LocalizedString chooseBackgroundLS; // "¡Elige un fondo!"
 
     private bool isPanelVisible;
     private bool isAnimating;
@@ -46,7 +52,6 @@ public class BackgroundInventoryManager : MonoBehaviour
     private Vector2 originalPanelAnchoredPosition;
 
     [SerializeField] private Image equippedBackgroundPreview;
-
     [SerializeField] private TextMeshProUGUI titleText;
 
     private void Awake()
@@ -75,6 +80,16 @@ public class BackgroundInventoryManager : MonoBehaviour
         }
     }
 
+    private void OnEnable()
+    {
+        LocalizationSettings.SelectedLocaleChanged += OnLocaleChanged;
+    }
+
+    private void OnDisable()
+    {
+        LocalizationSettings.SelectedLocaleChanged -= OnLocaleChanged;
+    }
+
     private void Start()
     {
         EnsureDefaultBackgroundOwnedAndEquipped();
@@ -89,7 +104,34 @@ public class BackgroundInventoryManager : MonoBehaviour
             saveButton.interactable = false;
 
         if (selectedNameText != null) selectedNameText.text = "";
-        if (selectedDescriptionText != null) selectedDescriptionText.text = noSelectionText;
+        if (selectedDescriptionText != null) selectedDescriptionText.text = LS(chooseBackgroundLS, noSelectionText);
+
+        RefreshStaticTexts();
+    }
+
+    private string LS(LocalizedString ls, string fallback)
+    {
+        if (ls == null) return fallback;
+        string v = ls.GetLocalizedString();
+        return string.IsNullOrEmpty(v) ? fallback : v;
+    }
+
+    private void RefreshStaticTexts()
+    {
+        if (titleText != null)
+            titleText.text = LS(inventoryTitleLS, "Inventario de fondos");
+
+        if (selectedDescriptionText != null && selectedItem == null)
+            selectedDescriptionText.text = LS(chooseBackgroundLS, noSelectionText);
+    }
+
+    private void OnLocaleChanged(Locale _)
+    {
+        RefreshStaticTexts();
+
+        // si hay un item seleccionado, repinta displayName/desc (por si vienen localizados)
+        if (selectedItem != null)
+            OnBackgroundSelected(selectedItem);
     }
 
     private void EnsureDefaultBackgroundOwnedAndEquipped()
@@ -97,7 +139,6 @@ public class BackgroundInventoryManager : MonoBehaviour
         if (backgroundCatalog == null || string.IsNullOrEmpty(defaultBackgroundId))
             return;
 
-        // (Opcional) comprobar que existe en el catálogo
         bool exists = backgroundCatalog.backgroundDataSO.Exists(b => b != null && b.id == defaultBackgroundId);
         if (!exists)
         {
@@ -105,19 +146,15 @@ public class BackgroundInventoryManager : MonoBehaviour
             return;
         }
 
-        // 1) Marcarlo como comprado siempre
         string purchaseKey = "Purchased_" + defaultBackgroundId;
         if (PlayerPrefs.GetInt(purchaseKey, 0) == 0)
             PlayerPrefs.SetInt(purchaseKey, 1);
 
-        // 2) Equiparlo en cuentas nuevas (si no hay nada seleccionado o lo seleccionado es inválido)
         string selected = PlayerPrefs.GetString("SelectedBackground", "");
 
         bool hasValidSelection = false;
         if (!string.IsNullOrEmpty(selected))
-        {
             hasValidSelection = backgroundCatalog.backgroundDataSO.Exists(b => b != null && b.id == selected);
-        }
 
         if (!hasValidSelection)
             PlayerPrefs.SetString("SelectedBackground", defaultBackgroundId);
@@ -145,6 +182,7 @@ public class BackgroundInventoryManager : MonoBehaviour
             equippedBackgroundPreview.color = Color.white;
         }
     }
+
     public void OpenPanel()
     {
         if (isAnimating || isPanelVisible) return;
@@ -157,10 +195,10 @@ public class BackgroundInventoryManager : MonoBehaviour
         selectedItem = null;
 
         if (selectedNameText != null) selectedNameText.text = "";
-        if (selectedDescriptionText != null) selectedDescriptionText.text = noSelectionText;
+        if (selectedDescriptionText != null) selectedDescriptionText.text = LS(chooseBackgroundLS, noSelectionText);
         if (saveButton != null) saveButton.interactable = false;
 
-        titleText.text = "Inventario de fondos";
+        RefreshStaticTexts();
 
         LoadBackgroundsInPages();
 
@@ -344,11 +382,5 @@ public class BackgroundInventoryManager : MonoBehaviour
         PlayerPrefs.Save();
 
         UpdateEquippedPreview();
-
-        // Si quieres aplicar el fondo instant:
-        // Busca tu sistema actual y llama aquí (por ejemplo un manager de UI que cambie el sprite).
-        // Ejemplo:
-        // var selector = FindFirstObjectByType<FondoSelector>();
-        // if (selector != null) selector.CambiarFondo(data.sprite);
     }
 }
