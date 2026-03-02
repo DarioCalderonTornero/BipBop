@@ -7,8 +7,9 @@ public class ReviveOfferUIController : MonoBehaviour
 {
     [Header("Offer UI")]
     [SerializeField] private GameObject offerRoot;
-    [SerializeField] private CanvasGroup offerCanvasGroup; // NUEVO (recomendado)
+    [SerializeField] private CanvasGroup offerCanvasGroup;
     [SerializeField] private Button watchAdButton;
+    [SerializeField] private Button declineButton; // NUEVO
     [SerializeField] private Image backgroundImage;
     [SerializeField] private TextMeshProUGUI watchAdText;
     [SerializeField] private Animator offerAnimator;
@@ -17,7 +18,7 @@ public class ReviveOfferUIController : MonoBehaviour
     [Header("Timer")]
     [SerializeField] private AdOfferTimer offerTimer;
 
-    [Header("Countdown UI")]
+    [Header("Countdown UI (después del rewarded)")]
     [SerializeField] private ReviveCountdownUI reviveCountdownUI;
 
     private Action onTimeoutOrDecline;
@@ -26,7 +27,6 @@ public class ReviveOfferUIController : MonoBehaviour
 
     private void Awake()
     {
-        // Importante: si el juego baja timeScale, que el animator no se quede congelado
         if (offerAnimator != null)
             offerAnimator.updateMode = AnimatorUpdateMode.UnscaledTime;
 
@@ -38,11 +38,23 @@ public class ReviveOfferUIController : MonoBehaviour
             watchAdButton.onClick.AddListener(OnClickWatchAd);
         }
 
+        if (declineButton != null)
+        {
+            declineButton.onClick.RemoveAllListeners();
+            declineButton.onClick.AddListener(OnClickDecline);
+        }
+
         if (offerTimer != null)
         {
             offerTimer.OnExpired -= HandleOfferExpired;
             offerTimer.OnExpired += HandleOfferExpired;
         }
+    }
+
+    private void OnDestroy()
+    {
+        if (offerTimer != null)
+            offerTimer.OnExpired -= HandleOfferExpired;
     }
 
     public void Open(Action onTimeoutOrDecline, Action onRewardedCompleted)
@@ -52,11 +64,9 @@ public class ReviveOfferUIController : MonoBehaviour
 
         isOpen = true;
 
-        // Activamos el GO por si estaba apagado
         gameObject.SetActive(true);
         if (offerRoot != null) offerRoot.SetActive(true);
 
-        // Mostrar INSTANT (da igual timeScale)
         SetOfferVisible(true);
 
         if (offerAnimator != null && !string.IsNullOrEmpty(offerAnimatorBool))
@@ -76,7 +86,6 @@ public class ReviveOfferUIController : MonoBehaviour
         if (offerAnimator != null && !string.IsNullOrEmpty(offerAnimatorBool))
             offerAnimator.SetBool(offerAnimatorBool, false);
 
-        // Oculta instantáneo y corta interacción
         SetOfferVisible(false);
 
         if (offerRoot != null)
@@ -92,9 +101,15 @@ public class ReviveOfferUIController : MonoBehaviour
     {
         if (!isOpen) return;
 
-        // Oculta ya
         HideOfferVisuals();
+        onTimeoutOrDecline?.Invoke();
+    }
 
+    private void OnClickDecline()
+    {
+        if (!isOpen) return;
+
+        HideOfferVisuals();
         onTimeoutOrDecline?.Invoke();
     }
 
@@ -102,10 +117,8 @@ public class ReviveOfferUIController : MonoBehaviour
     {
         if (!isOpen) return;
 
-        // Oculta YA al click (antes de cualquier cosa)
         HideOfferVisuals();
 
-        // Si no hay ads manager, caemos a final
         if (MediationAds.Instance == null)
         {
             Debug.LogWarning("[ReviveOfferUIController] MediationAds.Instance is null.");
@@ -125,7 +138,6 @@ public class ReviveOfferUIController : MonoBehaviour
 
     private void OnRewardedSuccess()
     {
-        // Seguridad extra: oculta otra vez por si algo lo reactivó
         HideOfferVisuals();
 
         if (reviveCountdownUI == null)
@@ -151,13 +163,8 @@ public class ReviveOfferUIController : MonoBehaviour
         SetOfferVisible(false);
     }
 
-    /// <summary>
-    /// Visible/invisible instantáneo (no depende de timeScale),
-    /// y además corta raycasts/interacción.
-    /// </summary>
     private void SetOfferVisible(bool visible)
     {
-        // 1) CanvasGroup manda (recomendado)
         if (offerCanvasGroup != null)
         {
             offerCanvasGroup.alpha = visible ? 1f : 0f;
@@ -165,22 +172,24 @@ public class ReviveOfferUIController : MonoBehaviour
             offerCanvasGroup.blocksRaycasts = visible;
         }
 
-        // 2) Por si no usas CanvasGroup, apagamos objetos explícitos también
         if (watchAdButton != null)
         {
             watchAdButton.interactable = visible;
             watchAdButton.gameObject.SetActive(visible);
         }
 
-        if (backgroundImage != null)
+        if (declineButton != null)
         {
-            backgroundImage.gameObject.SetActive(visible);
+            declineButton.interactable = visible;
+            declineButton.gameObject.SetActive(visible);
         }
+
+        if (backgroundImage != null)
+            backgroundImage.gameObject.SetActive(visible);
 
         if (watchAdText != null)
             watchAdText.gameObject.SetActive(visible);
 
-        // Si tienes root y quieres que desaparezca sí o sí:
         if (offerRoot != null)
             offerRoot.SetActive(visible);
     }
