@@ -204,9 +204,17 @@ public class DailyLuckManager : MonoBehaviour
             LockButtons(true);
             SetFeedback("");
 
-            ads.ShowRewardedAd(() =>
+            ads.ShowRewardedAd((bool rewardEarned) =>
             {
-                _ = DoBackgroundRollInternal(remaining, isFreeRoll: true);
+                if (rewardEarned)
+                {
+                    _ = DoBackgroundRollInternal(remaining, isFreeRoll: true);
+                }
+                else
+                {
+                    SetFeedback("Anuncio cancelado.");
+                    LockButtons(false);
+                }
             });
         }
         else
@@ -266,9 +274,17 @@ public class DailyLuckManager : MonoBehaviour
             LockButtons(true);
             SetFeedback("");
 
-            ads.ShowRewardedAd(() =>
+            ads.ShowRewardedAd((bool rewardEarned) =>
             {
-                _ = DoAvatarRollInternal(remaining, isFreeRoll: true);
+                if (rewardEarned)
+                {
+                    _ = DoAvatarRollInternal(remaining, isFreeRoll: true);
+                }
+                else
+                {
+                    SetFeedback("Anuncio cancelado.");
+                    LockButtons(false);
+                }
             });
         }
         else

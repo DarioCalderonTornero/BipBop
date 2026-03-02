@@ -1,6 +1,7 @@
 using UnityEngine;
 using Unity.Services.LevelPlay;
 using System;
+using System.Collections;
 
 public class MediationAds : MonoBehaviour
 {
@@ -11,9 +12,11 @@ public class MediationAds : MonoBehaviour
 
     private LevelPlayRewardedAd rewardedAd;
     private string adUnitId;
-    private Action onRewardedCallback;
 
-    public event Action<bool> OnAdAvailabilityChanged; // opcional para UI
+    private Action<bool> onAdFinishedCallback;
+    private bool rewardEarned = false;
+
+    public event Action<bool> OnAdAvailabilityChanged;
 
     void Awake()
     {
@@ -77,29 +80,42 @@ public class MediationAds : MonoBehaviour
 
     private void OnAdRewarded(LevelPlayAdInfo adInfo, LevelPlayReward reward)
     {
-        // IMPORTANT: aquí NO damos monedas.
-        onRewardedCallback?.Invoke();
-        onRewardedCallback = null;
+        rewardEarned = true; // Anotamos que ha ganado el premio
     }
 
     private void OnAdClosed(LevelPlayAdInfo adInfo)
     {
+        // Pedimos otro anuncio para tenerlo listo
         rewardedAd?.LoadAd();
         OnAdAvailabilityChanged?.Invoke(IsAdReady());
+
+        // ¡EL ARREGLO! En lugar de ejecutarlo ya, iniciamos una corrutina de seguridad
+        StartCoroutine(WaitAndNotifyReward());
     }
 
-    public void ShowRewardedAd(Action onRewarded)
+    private IEnumerator WaitAndNotifyReward()
+    {
+        // Esperamos medio segundo real (inmune a la pausa) para darle tiempo al SDK
+        // a disparar el OnAdRewarded si es que viene con lag.
+        yield return new WaitForSecondsRealtime(0.5f);
+
+        onAdFinishedCallback?.Invoke(rewardEarned);
+        onAdFinishedCallback = null;
+    }
+
+    public void ShowRewardedAd(Action<bool> onAdFinished)
     {
         if (rewardedAd != null && rewardedAd.IsAdReady())
         {
-            onRewardedCallback = onRewarded;
+            onAdFinishedCallback = onAdFinished;
+            rewardEarned = false; // Reseteamos siempre antes de mostrar
             rewardedAd.ShowAd();
             OnAdAvailabilityChanged?.Invoke(false);
         }
         else
         {
-            // Si quieres feedback, aquí podrías loguear
             OnAdAvailabilityChanged?.Invoke(false);
+            onAdFinished?.Invoke(false);
         }
     }
 

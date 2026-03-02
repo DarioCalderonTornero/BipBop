@@ -7,7 +7,7 @@ using UnityEngine.UI;
 [RequireComponent(typeof(ClassifierInput))]
 [RequireComponent(typeof(ClassifierTimer))]
 [RequireComponent(typeof(ClassifierScore))]
-public class ClassifierManager : MonoBehaviour
+public class ClassifierManager : MonoBehaviour, IGameOverClient // ✅ Añadida la interfaz
 {
     public static ClassifierManager Instance { get; private set; }
 
@@ -45,6 +45,13 @@ public class ClassifierManager : MonoBehaviour
     private bool isGameOver = false;
     private bool hasEnded = false;
 
+    // =========================
+    // ADS / GameOverFlow (NEW)
+    // =========================
+    public bool HasUsedReviveOffer { get; set; } = false;
+    private bool isPausedByOffer = false;
+    private bool gameOverInvoked = false;
+
     // --- MUTADORES ---
     private enum MutatorType { MemoryFlash, Chaos, Inverse }
     private Dictionary<MutatorType, int> activeMutators = new Dictionary<MutatorType, int>();
@@ -68,7 +75,7 @@ public class ClassifierManager : MonoBehaviour
     private Dictionary<SwipeDirection, Vector3> slotBgPos = new Dictionary<SwipeDirection, Vector3>();
 
     // ==================
-    // Tutorial (igual que Color)
+    // Tutorial
     // ==================
     [Header("Tutorial Panel")]
     [SerializeField] private TutorialPanelUI tutorialPrefab;
@@ -97,7 +104,6 @@ public class ClassifierManager : MonoBehaviour
         inputModule.OnSwipeDetected += HandlePlayerSwipe;
         timerModule.OnTimeOut += TimerModule_OnTimeOut;
 
-        // 👇 Binding robusto: si ClassifierState aún no existe, esperamos.
         if (bindStateRoutine != null) StopCoroutine(bindStateRoutine);
         bindStateRoutine = StartCoroutine(BindToClassifierStateWhenReady());
     }
@@ -112,11 +118,9 @@ public class ClassifierManager : MonoBehaviour
 
     private IEnumerator BindToClassifierStateWhenReady()
     {
-        // Espera hasta que exista el State
         while (ClassifierState.Instance == null)
             yield return null;
 
-        // Por seguridad, reenganchar siempre limpio
         UnbindFromClassifierState();
 
         ClassifierState.Instance.OnPlayingClassifierGame += ClassifierState_OnPlayingClassifierGame;
@@ -135,21 +139,24 @@ public class ClassifierManager : MonoBehaviour
 
     private void Start()
     {
+        // ✅ Reseteo de flags (incluidos los de Ads)
         isGameOver = false;
         hasEnded = false;
+        gameOverInvoked = false;
+        HasUsedReviveOffer = false;
+        isPausedByOffer = false;
+
         activeMutators.Clear();
         presentationRoundsLeft = 0;
 
         if (categories == null || categories.Count != 4)
             Debug.LogError("ClassifierManager: 'categories' debe tener EXACTAMENTE 4 elementos.");
 
-        // 1) Guardar slots físicos
         if (topCategoryIcon != null) { slotIconPos[SwipeDirection.Up] = topCategoryIcon.transform.position; slotBgPos[SwipeDirection.Up] = topCategoryBg.transform.position; }
         if (bottomCategoryIcon != null) { slotIconPos[SwipeDirection.Down] = bottomCategoryIcon.transform.position; slotBgPos[SwipeDirection.Down] = bottomCategoryBg.transform.position; }
         if (leftCategoryIcon != null) { slotIconPos[SwipeDirection.Left] = leftCategoryIcon.transform.position; slotBgPos[SwipeDirection.Left] = leftCategoryBg.transform.position; }
         if (rightCategoryIcon != null) { slotIconPos[SwipeDirection.Right] = rightCategoryIcon.transform.position; slotBgPos[SwipeDirection.Right] = rightCategoryBg.transform.position; }
 
-        // 2) Vincular packs iniciales
         originalDirections.Clear();
         catUIPacks.Clear();
 
@@ -172,13 +179,10 @@ public class ClassifierManager : MonoBehaviour
         SetupCategoryUI();
         StartUIBreathing();
 
-        // Item inicial, pero SIN mecánicas
         SpawnNewItem(false);
 
-        // 🔒 Pausa real: input/timer off
         PauseGameplay();
 
-        // Tutorial flow (igual que Color)
         bool showTutorialOnStart = PlayerPrefs.GetInt(ShowTutorialKey, 1) == 1;
 
         if (showTutorialOnStart)
@@ -192,9 +196,6 @@ public class ClassifierManager : MonoBehaviour
         }
     }
 
-    // ==================
-    // Tutorial flow
-    // ==================
     private void ShowTutorial()
     {
         if (tutorialInstance != null)
@@ -203,7 +204,6 @@ public class ClassifierManager : MonoBehaviour
         }
         else
         {
-            // 1) Primero intenta encontrar uno ya en escena (aunque esté inactivo)
             var existing = FindObjectOfType<TutorialPanelUI>(true);
             if (existing != null)
             {
@@ -212,7 +212,6 @@ public class ClassifierManager : MonoBehaviour
             }
             else
             {
-                // 2) Si no hay, intenta instanciar el prefab si está asignado
                 if (tutorialPrefab != null)
                 {
                     Transform parent = tutorialParent;
@@ -256,7 +255,6 @@ public class ClassifierManager : MonoBehaviour
 
     private void BeginGameAfterTutorial()
     {
-        // 👇 Arranque robusto: espera a que exista el state y entonces inicia countdown
         StartCoroutine(BeginCountdownWhenStateReady());
     }
 
@@ -265,11 +263,9 @@ public class ClassifierManager : MonoBehaviour
         while (ClassifierState.Instance == null)
             yield return null;
 
-        // Reinicio de flags run
         isGameOver = false;
         hasEnded = false;
 
-        // Asegurar que gameplay está parado hasta Playing
         PauseGameplay();
 
         ClassifierState.Instance.StartCountdown();
@@ -281,23 +277,17 @@ public class ClassifierManager : MonoBehaviour
         timerModule.StopTimer();
     }
 
-    // ==================
-    // Estado: empieza el juego al pasar a Playing
-    // ==================
     private void ClassifierState_OnPlayingClassifierGame(object sender, EventArgs e)
     {
         if (isGameOver) return;
 
-        // ✅ ESTE ERA EL PUNTO CLAVE: si no te suscribes, nunca llega aquí
         timerModule.ResetAndStartTimer();
         inputModule.isInputActive = true;
-
-        // Por si venías del “spawn inicial” sin mecánicas:
-        // Ya hay sprite puesto, no hace falta respawnear aquí.
     }
 
     private void TimerModule_OnTimeOut(object sender, EventArgs e)
     {
+        if (isPausedByOffer) return; // ✅ Bloqueo si hay anuncio
         HandleGameOver();
     }
 
@@ -322,7 +312,6 @@ public class ClassifierManager : MonoBehaviour
         }
     }
 
-    // --- ANIMACIONES UI ---
     private void StartUIBreathing()
     {
         if (topCategoryIcon != null) AnimateBreathing(topCategoryIcon);
@@ -339,7 +328,6 @@ public class ClassifierManager : MonoBehaviour
             .setLoopPingPong();
     }
 
-    // --- MUTADORES (tu lógica igual) ---
     private void CheckAndApplyMutators()
     {
         int currentScore = GetCurrentScore();
@@ -551,6 +539,8 @@ public class ClassifierManager : MonoBehaviour
 
     private void HandlePlayerSwipe(SwipeDirection playerDirection)
     {
+        if (isPausedByOffer) return; // ✅ Bloqueo si hay anuncio
+
         inputModule.isInputActive = false;
         timerModule.StopTimer();
 
@@ -604,13 +594,49 @@ public class ClassifierManager : MonoBehaviour
             });
     }
 
+    // ==========================================
+    // LÓGICA IGameOverClient / AD FLOW
+    // ==========================================
+
     private void HandleGameOver()
     {
-        if (isGameOver) return;
+        if (isGameOver || gameOverInvoked) return;
         isGameOver = true;
 
         inputModule.isInputActive = false;
         timerModule.StopTimer();
+
+        // 🎯 En lugar de terminar de golpe, delegamos en el FlowManager
+        if (GameOverFlowManager.Instance != null)
+            GameOverFlowManager.Instance.NotifyFail(this);
+        else
+            FinalGameOver();
+    }
+
+    public void PauseOnFail()
+    {
+        isPausedByOffer = true;
+        inputModule.isInputActive = false;
+        timerModule.StopTimer();
+    }
+
+    public void Revive()
+    {
+        isPausedByOffer = false;
+        isGameOver = false;
+        hasEnded = false;
+        gameOverInvoked = false;
+
+        // ✅ El jugador vuelve a la vida. Le rellenamos el tiempo para la figura 
+        // con la que acaba de fallar y le damos el control de nuevo.
+        timerModule.ResetAndStartTimer();
+        inputModule.isInputActive = true;
+    }
+
+    public void FinalGameOver()
+    {
+        if (gameOverInvoked) return;
+        gameOverInvoked = true;
 
         EndGame();
     }

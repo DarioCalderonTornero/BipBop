@@ -9,7 +9,7 @@ public class ReviveOfferUIController : MonoBehaviour
     [SerializeField] private GameObject offerRoot;
     [SerializeField] private CanvasGroup offerCanvasGroup;
     [SerializeField] private Button watchAdButton;
-    [SerializeField] private Button declineButton; // NUEVO
+    [SerializeField] private Button declineButton;
     [SerializeField] private Image backgroundImage;
     [SerializeField] private TextMeshProUGUI watchAdText;
     [SerializeField] private Animator offerAnimator;
@@ -133,23 +133,31 @@ public class ReviveOfferUIController : MonoBehaviour
             return;
         }
 
-        MediationAds.Instance.ShowRewardedAd(OnRewardedSuccess);
+        // Llamamos al nuevo método que nos devolverá un booleano cuando el anuncio se CIERRE
+        MediationAds.Instance.ShowRewardedAd(OnAdFinished);
     }
 
-    private void OnRewardedSuccess()
+    private void OnAdFinished(bool rewardEarned)
     {
-        HideOfferVisuals();
-
-        if (reviveCountdownUI == null)
+        if (rewardEarned)
         {
-            onRewardedCompleted?.Invoke();
-            return;
+            // El jugador se tragó el anuncio y lo cerró bien. Lo revivimos.
+            if (reviveCountdownUI == null)
+            {
+                onRewardedCompleted?.Invoke();
+                return;
+            }
+
+            reviveCountdownUI.Play(() =>
+            {
+                onRewardedCompleted?.Invoke();
+            });
         }
-
-        reviveCountdownUI.Play(() =>
+        else
         {
-            onRewardedCompleted?.Invoke();
-        });
+            // El jugador cerró el anuncio antes de tiempo (o falló). Lo mandamos al Game Over.
+            onTimeoutOrDecline?.Invoke();
+        }
     }
 
     private void HideOfferVisuals()

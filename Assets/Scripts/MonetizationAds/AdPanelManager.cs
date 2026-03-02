@@ -116,8 +116,6 @@ public class AdPanelManager : MonoBehaviour
 
     private void OnWatchAdBtnClicked()
     {
-        // Opcional: si quieres NO cerrar el panel hasta que termine el anuncio,
-        // mueve ClosePanel() dentro del callback de recompensa.
         ClosePanel();
 
         if (Mediation == null)
@@ -126,12 +124,19 @@ public class AdPanelManager : MonoBehaviour
             return;
         }
 
-        Mediation.ShowRewardedAd(() =>
+        // ¡AQUÍ ESTÁ EL CAMBIO! Ahora recibe (bool rewardEarned)
+        Mediation.ShowRewardedAd((bool rewardEarned) =>
         {
+            if (!rewardEarned)
+            {
+                Debug.Log("AdPanelManager: Anuncio cancelado o fallido. No hay recompensa.");
+                return;
+            }
+
             RefreshDailyReset();
 
             int watched = PlayerPrefs.GetInt(PREF_WATCHED_TODAY, 0);
-            int reward = GetRewardForWatchIndex(watched); // watched=0 => 30 (primer anuncio)
+            int reward = GetRewardForWatchIndex(watched);
             PlayerPrefs.SetInt(PREF_WATCHED_TODAY, watched + 1);
             PlayerPrefs.Save();
 
