@@ -406,7 +406,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 14100908225822720
-    m_Localized: 'Points: {0}'
+    m_Localized: Final score
     m_Metadata:
       m_Items: []
   - m_Id: 19905045483978752
@@ -1006,6 +1006,66 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 39493332712259584
     m_Localized: Choose background!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39768249944997888
+    m_Localized: New update available!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39768370355077120
+    m_Localized: Update
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39768448343965696
+    m_Localized: Please update to continue
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39771934053859328
+    m_Localized: Checking for updates...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39772068661657600
+    m_Localized: Loading resources...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39772222605197312
+    m_Localized: Preparing sounds...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39772311591550976
+    m_Localized: Loading backgrounds...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39772464075472896
+    m_Localized: Loading avatars...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39772581507596288
+    m_Localized: Optimizing shaders...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39772705864515584
+    m_Localized: Almost ready...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39773284565221376
+    m_Localized: Be quick on your feet to appear in the global ranking!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39774533746393088
+    m_Localized: Continue...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39774612410564608
+    m_Localized: Watch ad
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39774670413594624
+    m_Localized: No thanks
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39852471045029888
+    m_Localized: GAME OVER
     m_Metadata:
       m_Items: []
   references:

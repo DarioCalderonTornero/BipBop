@@ -11,7 +11,7 @@ public class ReviveOfferUIController : MonoBehaviour
     [SerializeField] private Button watchAdButton;
     [SerializeField] private Button declineButton;
     [SerializeField] private Image backgroundImage;
-    [SerializeField] private TextMeshProUGUI watchAdText;
+    // [SerializeField] private TextMeshProUGUI watchAdText;
     [SerializeField] private Animator offerAnimator;
     [SerializeField] private string offerAnimatorBool = "PlayVideoGameOver";
 
@@ -195,8 +195,8 @@ public class ReviveOfferUIController : MonoBehaviour
         if (backgroundImage != null)
             backgroundImage.gameObject.SetActive(visible);
 
-        if (watchAdText != null)
-            watchAdText.gameObject.SetActive(visible);
+        // if (watchAdText != null)
+            // watchAdText.gameObject.SetActive(visible);
 
         if (offerRoot != null)
             offerRoot.SetActive(visible);

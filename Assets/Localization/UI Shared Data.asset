@@ -995,6 +995,66 @@ MonoBehaviour:
     m_Key: ElijeUnFondo
     m_Metadata:
       m_Items: []
+  - m_Id: 39768249944997888
+    m_Key: "NuevaActualizaci\xF3nDisponible"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39768370355077120
+    m_Key: Actualizar
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39768448343965696
+    m_Key: ActualizaParaContinuar
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39771934053859328
+    m_Key: ComprobandoActualizaciones
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39772068661657600
+    m_Key: loading01
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39772222605197312
+    m_Key: loading02
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39772311591550976
+    m_Key: loading03
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39772464075472896
+    m_Key: loading04
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39772581507596288
+    m_Key: loading05
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39772705864515584
+    m_Key: loading06
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39773284565221376
+    m_Key: SubTitleLoadingScreen
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39774533746393088
+    m_Key: Continuar...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39774612410564608
+    m_Key: VerAnuncio
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39774670413594624
+    m_Key: NoGracias
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39852471045029888
+    m_Key: GameOverTitle
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

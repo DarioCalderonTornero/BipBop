@@ -4,6 +4,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
+
 #if UNITY_ANDROID && !UNITY_EDITOR
 using Google.Play.AppUpdate;
 using Google.Play.Common;
@@ -26,8 +29,8 @@ public class SplashScreenManager : MonoBehaviour
     [SerializeField] private float delayBeforeLoadingUI = 0.25f;
 
     [Header("Update Gate (Panel obligatorio)")]
-    [SerializeField] private GameObject updatePanel;        // Desactivado por defecto
-    [SerializeField] private RectTransform updatePanelRoot;  // El RectTransform que quieres “popear” (panel o hijo)
+    [SerializeField] private GameObject updatePanel;
+    [SerializeField] private RectTransform updatePanelRoot;
     [SerializeField] private Button openStoreButton;
     [SerializeField] private bool allowIfCheckFails = true;
 
@@ -37,23 +40,17 @@ public class SplashScreenManager : MonoBehaviour
     [SerializeField] private float updatePopStartScale = 0.85f;
 
     [Header("Pulse (Texto update)")]
-    [SerializeField] private TextMeshProUGUI updateHintText;   // el TMP que dice "Actualiza para continuar"
-    [SerializeField] private float pulseScaleAmount = 0.06f;   // 6% aprox
-    [SerializeField] private float pulsePeriod = 1.2f;         // segundos por ciclo (lento)
+    [SerializeField] private TextMeshProUGUI updateHintText;
+    [SerializeField] private float pulseScaleAmount = 0.06f;
+    [SerializeField] private float pulsePeriod = 1.2f;
 
     private Coroutine pulseRoutine;
 
+    [Header("Localization (Splash)")]
+    [SerializeField] private LocalizedString checkingUpdatesText;     // key: checking_updates
+    [SerializeField] private LocalizedString[] loadingMessages;       // keys: loading_01..loading_06
 
-
-    private string[] loadingMessages =
-    {
-        "Cargando recursos...",
-        "Inicializando entorno...",
-        "Preparando sonidos...",
-        "Cargando fondos...",
-        "Optimizando shaders...",
-        "Casi listo..."
-    };
+    private string[] cachedLoadingMessages; // precargadas ya traducidas
 
     [Header("Loading / Fade")]
     [SerializeField] private string nextSceneName = "Menu";
@@ -86,6 +83,24 @@ public class SplashScreenManager : MonoBehaviour
         if (loadingBar != null) loadingBar.SetFill01(0f);
         if (percentageText != null) percentageText.text = "0%";
 
+        // Importante: inicializar Localization y precargar textos antes de empezar la secuencia
+        StartCoroutine(InitLocalizationThenRun());
+    }
+
+    private IEnumerator InitLocalizationThenRun()
+    {
+        // Espera a que el sistema de Localization esté listo
+        yield return LocalizationSettings.InitializationOperation;
+
+        // Precarga mensajes de loading en el idioma actual
+        cachedLoadingMessages = new string[loadingMessages.Length];
+        for (int i = 0; i < loadingMessages.Length; i++)
+        {
+            var op = loadingMessages[i].GetLocalizedStringAsync();
+            yield return op;
+            cachedLoadingMessages[i] = op.Result;
+        }
+
         StartCoroutine(SplashSequence());
     }
 
@@ -112,9 +127,13 @@ public class SplashScreenManager : MonoBehaviour
         if (loadingGroup != null)
             yield return StartCoroutine(FadeCanvasGroup(loadingGroup, 0f, 1f, 0.4f));
 
-        // ✅ Mientras comprobamos updates, texto fijo y NO avanza la barra
+        // ✅ Texto localizado: "Comprobando actualizaciones..."
         if (loadingText != null)
-            loadingText.text = "Comprobando actualizaciones...";
+        {
+            var op = checkingUpdatesText.GetLocalizedStringAsync();
+            yield return op;
+            loadingText.text = op.Result;
+        }
 
         // 5) Gate de actualización (bloquea carga hasta decidir)
         bool updateNeeded = false;
@@ -122,7 +141,6 @@ public class SplashScreenManager : MonoBehaviour
 
         if (updateNeeded)
         {
-            // No cargamos nada: enseñamos panel y paramos aquí.
             ShowUpdatePanelPop();
             yield break;
         }
@@ -146,7 +164,7 @@ public class SplashScreenManager : MonoBehaviour
         if (!infoOp.IsSuccessful)
         {
             Debug.LogWarning($"[UpdateGate] GetAppUpdateInfo error: {infoOp.Error}");
-            onResult?.Invoke(!allowIfCheckFails); // si NO permites fallo => fuerzas panel
+            onResult?.Invoke(!allowIfCheckFails);
             yield break;
         }
 
@@ -158,7 +176,6 @@ public class SplashScreenManager : MonoBehaviour
         onResult?.Invoke(updateAvailable || updateInProgress);
         yield break;
 #else
-        // Editor / otras plataformas: no bloqueamos
         onResult?.Invoke(false);
         yield break;
 #endif
@@ -184,7 +201,7 @@ public class SplashScreenManager : MonoBehaviour
 
         while (true)
         {
-            t += Time.unscaledDeltaTime; // para que siga aunque pauses Time.timeScale
+            t += Time.unscaledDeltaTime;
             float s = 1f + amount * Mathf.Sin(t * (2f * Mathf.PI / period));
             target.localScale = baseScale * s;
             yield return null;
@@ -193,7 +210,6 @@ public class SplashScreenManager : MonoBehaviour
 
     private IEnumerator PopRect(RectTransform target, float duration, float overshoot, float startScale)
     {
-        // Estado inicial
         target.localScale = Vector3.one * startScale;
 
         float expandTime = duration * 0.7f;
@@ -203,7 +219,6 @@ public class SplashScreenManager : MonoBehaviour
         Vector3 toOvershoot = Vector3.one * overshoot;
         Vector3 toFinal = Vector3.one;
 
-        // Expande
         float t = 0f;
         while (t < expandTime)
         {
@@ -214,7 +229,6 @@ public class SplashScreenManager : MonoBehaviour
             yield return null;
         }
 
-        // Asienta
         t = 0f;
         while (t < settleTime)
         {
@@ -330,6 +344,9 @@ public class SplashScreenManager : MonoBehaviour
 
     private string GetRandomMessage()
     {
-        return loadingMessages[Random.Range(0, loadingMessages.Length)];
+        if (cachedLoadingMessages == null || cachedLoadingMessages.Length == 0)
+            return "";
+
+        return cachedLoadingMessages[Random.Range(0, cachedLoadingMessages.Length)];
     }
 }

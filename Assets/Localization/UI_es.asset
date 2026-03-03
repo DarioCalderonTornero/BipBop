@@ -407,7 +407,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 14100908225822720
-    m_Localized: "Puntuaci\xF3n: {0}"
+    m_Localized: "Puntuaci\xF3n final"
     m_Metadata:
       m_Items: []
   - m_Id: 19905045483978752
@@ -1009,6 +1009,66 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 39493332712259584
     m_Localized: "\xA1Elije un fondo!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39768249944997888
+    m_Localized: "\xA1Nueva actualizaci\xF3n disponible!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39768370355077120
+    m_Localized: Actualizar
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39768448343965696
+    m_Localized: Actualiza para continuar
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39771934053859328
+    m_Localized: Comprobando actualizaciones...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39772068661657600
+    m_Localized: Cargando recursos...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39772222605197312
+    m_Localized: Preparando sonidos...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39772311591550976
+    m_Localized: Cargando fondos...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39772464075472896
+    m_Localized: Cargando avatares...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39772581507596288
+    m_Localized: Optimizando shaders...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39772705864515584
+    m_Localized: Casi listo...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39773284565221376
+    m_Localized: "\xA1S\xE9 r\xE1pido de reflejos para aparecer en el ranking global!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39774533746393088
+    m_Localized: Continuar...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39774612410564608
+    m_Localized: Ver anuncio
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39774670413594624
+    m_Localized: No gracias
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39852471045029888
+    m_Localized: FIN DEL JUEGO
     m_Metadata:
       m_Items: []
   references:
