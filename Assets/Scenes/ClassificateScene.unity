@@ -1659,10 +1659,18 @@ MonoBehaviour:
   rightCategoryBg: {fileID: 1630846477}
   distX: 2.5
   distY: 4.5
+  correctAudioclips:
+  - {fileID: 8300000, guid: f9b15712db5be9546aad65f7feeeb5ab, type: 3}
+  - {fileID: 8300000, guid: 9a419d232ec990e48816c38dcfd54a8f, type: 3}
+  errorAudioclip:
+  - {fileID: 8300000, guid: a63c4b0d00405df46ac7c8dd542b85ff, type: 3}
+  - {fileID: 8300000, guid: acb97b3c8044f7a4ebdaf0197ffa9398, type: 3}
+  swipeAudioclip: {fileID: 8300000, guid: a42de15107eb26a40a60b286a8e4ea10, type: 3}
+  spawnPopAudioclip: {fileID: 8300000, guid: 6afa2338ae880cf4e8b9bf113d3cb974, type: 3}
   scoreModule: {fileID: 374007189}
-  memoryFlashRoundBegin: 2
-  chaosRoundBegin: 8
-  inverseRoundBegin: 15
+  memoryFlashRoundBegin: 10
+  chaosRoundBegin: 20
+  inverseRoundBegin: 30
   tutorialPrefab: {fileID: 1617208940}
   tutorialParent: {fileID: 1617208939}
 --- !u!114 &374007187

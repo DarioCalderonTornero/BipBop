@@ -7,7 +7,7 @@ using UnityEngine.UI;
 [RequireComponent(typeof(ClassifierInput))]
 [RequireComponent(typeof(ClassifierTimer))]
 [RequireComponent(typeof(ClassifierScore))]
-public class ClassifierManager : MonoBehaviour, IGameOverClient // ✅ Añadida la interfaz
+public class ClassifierManager : MonoBehaviour, IGameOverClient
 {
     public static ClassifierManager Instance { get; private set; }
 
@@ -37,6 +37,12 @@ public class ClassifierManager : MonoBehaviour, IGameOverClient // ✅ Añadida 
     [SerializeField] private float distX = 2.8f;
     [SerializeField] private float distY = 5.0f;
 
+    [Header("Sounds")]
+    [SerializeField] private AudioClip[] correctAudioclips;
+    [SerializeField] private AudioClip[] errorAudioclip;
+    [SerializeField] private AudioClip swipeAudioclip;
+    [SerializeField] private AudioClip spawnPopAudioclip;
+
     private ClassifierInput inputModule;
     private ClassifierTimer timerModule;
     [SerializeField] private ClassifierScore scoreModule;
@@ -46,7 +52,7 @@ public class ClassifierManager : MonoBehaviour, IGameOverClient // ✅ Añadida 
     private bool hasEnded = false;
 
     // =========================
-    // ADS / GameOverFlow (NEW)
+    // ADS / GameOverFlow
     // =========================
     public bool HasUsedReviveOffer { get; set; } = false;
     private bool isPausedByOffer = false;
@@ -139,7 +145,6 @@ public class ClassifierManager : MonoBehaviour, IGameOverClient // ✅ Añadida 
 
     private void Start()
     {
-        // ✅ Reseteo de flags (incluidos los de Ads)
         isGameOver = false;
         hasEnded = false;
         gameOverInvoked = false;
@@ -287,7 +292,7 @@ public class ClassifierManager : MonoBehaviour, IGameOverClient // ✅ Añadida 
 
     private void TimerModule_OnTimeOut(object sender, EventArgs e)
     {
-        if (isPausedByOffer) return; // ✅ Bloqueo si hay anuncio
+        if (isPausedByOffer) return;
         HandleGameOver();
     }
 
@@ -353,21 +358,20 @@ public class ClassifierManager : MonoBehaviour, IGameOverClient // ✅ Añadida 
             if (activeMutators[key] <= 0) DeactivateMutator(key);
         }
 
-        if (currentScore > memoryFlashRoundBegin && presentationRoundsLeft <= 0)
+        // ✅ AQUI ESTÁ LA MAGIA:
+        // Solo empezamos a lanzar mutadores al azar cuando hemos superado el INICIO del último mutador 
+        // + las 3 rondas que dura su presentación. (Ej: 30 + 3 = 33).
+        if (currentScore >= (inverseRoundBegin + 3) && presentationRoundsLeft <= 0)
         {
             int chance = UnityEngine.Random.Range(0, 100);
             if (chance < 25)
             {
                 List<MutatorType> available = new List<MutatorType>();
 
-                if (currentScore >= memoryFlashRoundBegin && !activeMutators.ContainsKey(MutatorType.MemoryFlash))
-                    available.Add(MutatorType.MemoryFlash);
-
-                if (currentScore >= chaosRoundBegin && !activeMutators.ContainsKey(MutatorType.Chaos))
-                    available.Add(MutatorType.Chaos);
-
-                if (currentScore >= inverseRoundBegin && !activeMutators.ContainsKey(MutatorType.Inverse))
-                    available.Add(MutatorType.Inverse);
+                // Como ya estamos más allá del tutorial del último, sabemos que TODOS están disponibles
+                if (!activeMutators.ContainsKey(MutatorType.MemoryFlash)) available.Add(MutatorType.MemoryFlash);
+                if (!activeMutators.ContainsKey(MutatorType.Chaos)) available.Add(MutatorType.Chaos);
+                if (!activeMutators.ContainsKey(MutatorType.Inverse)) available.Add(MutatorType.Inverse);
 
                 if (available.Count > 0)
                 {
@@ -524,6 +528,11 @@ public class ClassifierManager : MonoBehaviour, IGameOverClient // ✅ Añadida 
         centerItemRenderer.transform.localScale = Vector3.zero;
         LeanTween.scale(centerItemRenderer.gameObject, finalScale, 0.35f).setEase(LeanTweenType.easeOutBack);
 
+        if (spawnPopAudioclip != null && SoundManager.Instance != null)
+        {
+           //SoundManager.Instance.PlaySound(spawnPopAudioclip, 1.0f);
+        }
+
         currentCorrectDirection = selectedCategory.correctDirection;
 
         if (startMechanics)
@@ -539,7 +548,12 @@ public class ClassifierManager : MonoBehaviour, IGameOverClient // ✅ Añadida 
 
     private void HandlePlayerSwipe(SwipeDirection playerDirection)
     {
-        if (isPausedByOffer) return; // ✅ Bloqueo si hay anuncio
+        if (isPausedByOffer) return;
+
+        if (swipeAudioclip != null && SoundManager.Instance != null)
+        {
+            SoundManager.Instance.PlaySound(swipeAudioclip, 1.0f);
+        }
 
         inputModule.isInputActive = false;
         timerModule.StopTimer();
@@ -556,6 +570,12 @@ public class ClassifierManager : MonoBehaviour, IGameOverClient // ✅ Añadida 
         }
         else
         {
+            if (errorAudioclip != null && errorAudioclip.Length > 0 && SoundManager.Instance != null)
+            {
+                AudioClip randomErrorAudioClip = errorAudioclip[UnityEngine.Random.Range(0, errorAudioclip.Length)];
+                SoundManager.Instance.PlaySound(randomErrorAudioClip, 1.0f);
+            }
+
             HandleGameOver();
         }
     }
@@ -584,6 +604,13 @@ public class ClassifierManager : MonoBehaviour, IGameOverClient // ✅ Añadida 
             .setEase(LeanTweenType.easeInCubic)
             .setOnComplete(() =>
             {
+                // Acierto
+                if (correctAudioclips.Length > 0 && SoundManager.Instance != null)
+                {
+                    AudioClip randomClip = correctAudioclips[UnityEngine.Random.Range(0, correctAudioclips.Length)];
+                    SoundManager.Instance.PlaySound(randomClip, 1.0f);
+                }
+
                 item.transform.localPosition = Vector3.zero;
 
                 if (!isGameOver)
@@ -606,7 +633,6 @@ public class ClassifierManager : MonoBehaviour, IGameOverClient // ✅ Añadida 
         inputModule.isInputActive = false;
         timerModule.StopTimer();
 
-        // 🎯 En lugar de terminar de golpe, delegamos en el FlowManager
         if (GameOverFlowManager.Instance != null)
             GameOverFlowManager.Instance.NotifyFail(this);
         else
@@ -627,8 +653,6 @@ public class ClassifierManager : MonoBehaviour, IGameOverClient // ✅ Añadida 
         hasEnded = false;
         gameOverInvoked = false;
 
-        // ✅ El jugador vuelve a la vida. Le rellenamos el tiempo para la figura 
-        // con la que acaba de fallar y le damos el control de nuevo.
         timerModule.ResetAndStartTimer();
         inputModule.isInputActive = true;
     }
