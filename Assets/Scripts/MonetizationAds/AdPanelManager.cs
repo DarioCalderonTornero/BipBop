@@ -4,6 +4,8 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+using UnityEngine.Localization; // ✅ Localization
+
 public class AdPanelManager : MonoBehaviour
 {
     [Header("UI Components")]
@@ -18,10 +20,17 @@ public class AdPanelManager : MonoBehaviour
     [SerializeField] private RectTransform bonusButtonRoot;     // contenedor (NO escalar)
     [SerializeField] private RectTransform bonusButtonVisual;   // ✅ hijo visual (SÍ escalar)
     [SerializeField] private TextMeshProUGUI bonusLeftText;     // texto debajo
+
+    [Header("Localization (texto botón bonus)")]
+    [SerializeField] private LocalizedString lsBonusRemaining;  // key: ads_bonus_remaining  => "Quedan {0} bonus hoy" (Smart)
+    [SerializeField] private LocalizedString lsGet20Coins;      // key: ads_bonus_get_20     => "Conseguir 20 monedas"
+
     [SerializeField] private float breatheAmount = 0.05f;       // +5%
     [SerializeField] private float breathePeriod = 2.4f;        // lento
     private Coroutine breatheRoutine;
     private Vector3 visualBaseScale = Vector3.one;
+
+    private Coroutine bonusTextRoutine;                         // ✅ para evitar solapes de async
 
     [Header("Otros scripts")]
     [SerializeField] private CurrencyManager gameManager;
@@ -95,7 +104,7 @@ public class AdPanelManager : MonoBehaviour
         RefreshUI();
         RefreshBonusButtonUI();
 
-        // La respiración SIEMPRE activa (aunque queden 0)
+        // La respiración SIEMPRE activa
         EnsureBreathing();
     }
 
@@ -164,7 +173,6 @@ public class AdPanelManager : MonoBehaviour
 
             int watched = PlayerPrefs.GetInt(PREF_WATCHED_TODAY, 0);
 
-            // ✅ Si ya hizo los 4 bonus, no damos más monedas bonus (pero todo sigue normal)
             int reward = GetRewardForWatchIndex(watched);
             PlayerPrefs.SetInt(PREF_WATCHED_TODAY, watched + 1);
             PlayerPrefs.Save();
@@ -189,16 +197,39 @@ public class AdPanelManager : MonoBehaviour
     private int GetRewardForWatchIndex(int watchedSoFarToday)
     {
         if (watchedSoFarToday < 0) watchedSoFarToday = 0;
-        if (watchedSoFarToday >= DailyRewards.Length) return 0; // ✅ no más bonus
+        if (watchedSoFarToday >= DailyRewards.Length) return 0;
         return DailyRewards[watchedSoFarToday];
     }
 
     private void RefreshBonusButtonUI()
     {
+        if (bonusLeftText == null) return;
+
         int remaining = GetRemainingBonusToday();
 
-        if (bonusLeftText != null)
-            bonusLeftText.text = $"Bonus hoy: {remaining}/{DailyBonusLimit}";
+        if (bonusTextRoutine != null) StopCoroutine(bonusTextRoutine);
+        bonusTextRoutine = StartCoroutine(UpdateBonusLabelRoutine(remaining));
+    }
+
+    private IEnumerator UpdateBonusLabelRoutine(int remaining)
+    {
+        if (remaining > 0)
+        {
+            // ✅ "Quedan {0} bonus hoy"
+            lsBonusRemaining.Arguments = new object[] { remaining };
+            var op = lsBonusRemaining.GetLocalizedStringAsync();
+            yield return op;
+            if (bonusLeftText != null) bonusLeftText.text = op.Result;
+        }
+        else
+        {
+            // ✅ "Conseguir 20 monedas"
+            var op = lsGet20Coins.GetLocalizedStringAsync();
+            yield return op;
+            if (bonusLeftText != null) bonusLeftText.text = op.Result;
+        }
+
+        bonusTextRoutine = null;
     }
 
     // ------------------ Daily reset ------------------
@@ -222,7 +253,6 @@ public class AdPanelManager : MonoBehaviour
     {
         int watched = PlayerPrefs.GetInt(PREF_WATCHED_TODAY, 0);
 
-        // ✅ 4 hitos reales: se colorean si ya los reclamaste
         for (int i = 0; i < 4; i++)
         {
             bool completed = watched >= (i + 1);
@@ -250,17 +280,16 @@ public class AdPanelManager : MonoBehaviour
 
     private IEnumerator CaptureVisualBaseScaleNextFrame()
     {
-        yield return null; // deja que el layout se asiente
+        yield return null;
 
         if (bonusButtonVisual != null)
             visualBaseScale = bonusButtonVisual.localScale;
         else if (bonusButtonRoot != null)
-            visualBaseScale = bonusButtonRoot.localScale; // fallback
+            visualBaseScale = bonusButtonRoot.localScale;
     }
 
     private void EnsureBreathing()
     {
-        // Siempre intentamos respirar. Si falta la referencia, no hacemos nada.
         if (bonusButtonVisual == null && bonusButtonRoot == null) return;
 
         if (breatheRoutine == null)
@@ -269,10 +298,9 @@ public class AdPanelManager : MonoBehaviour
 
     private IEnumerator BreatheRoutine()
     {
-        // Si no asignaste visual, usa root como fallback (pero lo ideal es visual)
         RectTransform target = bonusButtonVisual != null ? bonusButtonVisual : bonusButtonRoot;
 
-        // ✅ Base scale fija (NO se recalcula nunca desde target.localScale)
+        // ✅ Base scale fija (evita “runaway”)
         Vector3 baseScale = target.localScale;
 
         float t = 0f;
@@ -280,7 +308,6 @@ public class AdPanelManager : MonoBehaviour
         {
             t += Time.unscaledDeltaTime;
 
-            // ✅ solo crece (no encoge): 1.0 -> 1.0 + breatheAmount -> 1.0
             float sin01 = 0.5f + 0.5f * Mathf.Sin(t * (2f * Mathf.PI / breathePeriod));
             float s = 1f + breatheAmount * sin01;
 
@@ -298,9 +325,9 @@ public class AdPanelManager : MonoBehaviour
         }
 
         if (bonusButtonVisual != null)
-            bonusButtonVisual.localScale = Vector3.one;  // si tu visual está a 1,1,1
-                                                         // Si tu visual NO está a 1,1,1, entonces mejor:
-                                                         // bonusButtonVisual.localScale = visualBaseScale;
+            bonusButtonVisual.localScale = visualBaseScale;
+        else if (bonusButtonRoot != null)
+            bonusButtonRoot.localScale = visualBaseScale;
     }
 
     // ------------------ Panel animations ------------------
@@ -372,6 +399,12 @@ public class AdPanelManager : MonoBehaviour
             MediationAds.Instance.OnAdAvailabilityChanged -= HandleAdReadyChanged;
 
         StopBreathing();
+
+        if (bonusTextRoutine != null)
+        {
+            StopCoroutine(bonusTextRoutine);
+            bonusTextRoutine = null;
+        }
     }
 
     private void HandleAdReadyChanged(bool ready)

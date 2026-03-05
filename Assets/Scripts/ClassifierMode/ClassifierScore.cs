@@ -26,6 +26,7 @@ public class ClassifierScore : MonoBehaviour
     public void AddPoint(int score)
     {
         CurrentScore += score;
+        PlayerLevelManager.Instance.AddXP(5);
         UpdateScoreUI();
     }
 

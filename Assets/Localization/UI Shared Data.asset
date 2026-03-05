@@ -1055,6 +1055,18 @@ MonoBehaviour:
     m_Key: GameOverTitle
     m_Metadata:
       m_Items: []
+  - m_Id: 40561697228816384
+    m_Key: QuedanXBonusHoy
+    m_Metadata:
+      m_Items: []
+  - m_Id: 40561899918557184
+    m_Key: Conseguir20Monedas
+    m_Metadata:
+      m_Items: []
+  - m_Id: 40563778983526400
+    m_Key: dailyMissions_consigue20puntosclasificar
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

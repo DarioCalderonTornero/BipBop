@@ -1068,6 +1068,19 @@ MonoBehaviour:
     m_Localized: GAME OVER
     m_Metadata:
       m_Items: []
+  - m_Id: 40561697228816384
+    m_Localized: '{0} bonuses left today'
+    m_Metadata:
+      m_Items:
+      - rid: 39710471166099560
+  - m_Id: 40561899918557184
+    m_Localized: Get 20 coins
+    m_Metadata:
+      m_Items: []
+  - m_Id: 40563778983526400
+    m_Localized: "Earn 20 points in a game in \u201CClassifier\u201D mode"
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:
@@ -1077,3 +1090,4 @@ MonoBehaviour:
         m_Entries: 
         m_SharedEntries:
         - id: 14066600828174336
+        - id: 40561697228816384

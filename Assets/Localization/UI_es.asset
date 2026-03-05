@@ -1071,6 +1071,19 @@ MonoBehaviour:
     m_Localized: FIN DEL JUEGO
     m_Metadata:
       m_Items: []
+  - m_Id: 40561697228816384
+    m_Localized: Quedan {0} bonus hoy
+    m_Metadata:
+      m_Items:
+      - rid: 39710471166099559
+  - m_Id: 40561899918557184
+    m_Localized: Conseguir 20 monedas
+    m_Metadata:
+      m_Items: []
+  - m_Id: 40563778983526400
+    m_Localized: Consigue en una partida 20 puntos en modo "Clasificar"
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:
@@ -1080,3 +1093,4 @@ MonoBehaviour:
         m_Entries: 
         m_SharedEntries:
         - id: 14066600828174336
+        - id: 40561697228816384

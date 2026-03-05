@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SocialPlatforms.Impl;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(ClassifierInput))]
@@ -682,6 +683,16 @@ public class ClassifierManager : MonoBehaviour, IGameOverClient
         CoinsRewardUI rewardUI = FindObjectOfType<CoinsRewardUI>(true);
         if (rewardUI != null) rewardUI.ShowReward(coinsEarned);
         else CurrencyManager.Instance.AddCoins(coinsEarned);
+
+        if (DailyMissionManager.Instance != null)
+        {
+            DailyMissionManager.Instance.AddProgress("juega_1_partida", 1);
+            DailyMissionManager.Instance.AddProgress("juega_3_partidas", 1);
+            DailyMissionManager.Instance.AddProgress("juega_8_partidas", 1);
+            DailyMissionManager.Instance.AddProgress("juega_10_partidas", 1);
+
+            if (ClassifierScore.Instance.GetScore() >= 20) DailyMissionManager.Instance.AddProgress("consigue_20_puntos_clasificar", 1);
+        }
     }
 
     public int GetCurrentScore()
