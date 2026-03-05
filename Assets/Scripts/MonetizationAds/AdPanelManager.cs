@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
@@ -14,19 +14,28 @@ public class AdPanelManager : MonoBehaviour
     [SerializeField] private Sprite coinSprite;
     [SerializeField] private Button openAdPanelButton;
 
+    [Header("BotÃ³n bonus (texto + respiraciÃ³n)")]
+    [SerializeField] private RectTransform bonusButtonRoot;     // contenedor (NO escalar)
+    [SerializeField] private RectTransform bonusButtonVisual;   // âœ… hijo visual (SÃ escalar)
+    [SerializeField] private TextMeshProUGUI bonusLeftText;     // texto debajo
+    [SerializeField] private float breatheAmount = 0.05f;       // +5%
+    [SerializeField] private float breathePeriod = 2.4f;        // lento
+    private Coroutine breatheRoutine;
+    private Vector3 visualBaseScale = Vector3.one;
+
     [Header("Otros scripts")]
     [SerializeField] private CurrencyManager gameManager;
 
-    [Header("Progress UI (4 hitos: 30 / 50 / 80 / 20+)")]
-    [SerializeField] private Image[] milestoneIcons;          // tamaño 4 (iconos circulares)
-    [SerializeField] private TextMeshProUGUI[] milestoneTexts; // tamaño 4 ("30","50","80","20+")
+    [Header("Progress UI (4 hitos: 30 / 50 / 80 / 20)")]
+    [SerializeField] private Image[] milestoneIcons;            // tamaÃ±o 4
+    [SerializeField] private TextMeshProUGUI[] milestoneTexts;  // tamaÃ±o 4
     [SerializeField] private Color milestoneGray = new Color(0.65f, 0.65f, 0.65f, 1f);
-    [SerializeField] private Color milestoneColor = Color.white; // si tus sprites ya son dorados, blanco = “a color”
+    [SerializeField] private Color milestoneColor = Color.white;
     [SerializeField] private Color claimedTextColor = new Color(0.42f, 0.24f, 0.12f);
 
     [Header("Next reward UI")]
-    [SerializeField] private TextMeshProUGUI nextRewardText;  // "Siguiente recompensa: 30"
-    [SerializeField] private Image nextRewardCoinIcon;        // icono moneda a la derecha
+    [SerializeField] private TextMeshProUGUI nextRewardText;
+    [SerializeField] private Image nextRewardCoinIcon;
 
     [Header("Pop Animation (suave)")]
     [SerializeField] private float popInDuration = 0.16f;
@@ -45,9 +54,9 @@ public class AdPanelManager : MonoBehaviour
     private const string PREF_LAST_DAY = "ADS_LAST_DAY";
     private const string PREF_WATCHED_TODAY = "ADS_WATCHED_TODAY";
 
-    // 1º, 2º, 3º y luego 20 siempre
-    private static readonly int[] FirstRewards = { 30, 50, 80 };
-    private const int RepeatReward = 20;
+    // âœ… Los 4 â€œbonusâ€ diarios (los buenos)
+    private static readonly int[] DailyRewards = { 30, 50, 80, 20 };
+    private int DailyBonusLimit => DailyRewards.Length; // 4
 
     private void Start()
     {
@@ -60,12 +69,18 @@ public class AdPanelManager : MonoBehaviour
         if (coinImage != null) coinImage.sprite = coinSprite;
         if (nextRewardCoinIcon != null) nextRewardCoinIcon.sprite = coinSprite;
 
-        watchAdButton.onClick.RemoveAllListeners();
-        watchAdButton.onClick.AddListener(OnWatchAdBtnClicked);
-        watchAdButton.interactable = false;
+        if (watchAdButton != null)
+        {
+            watchAdButton.onClick.RemoveAllListeners();
+            watchAdButton.onClick.AddListener(OnWatchAdBtnClicked);
+            watchAdButton.interactable = false;
+        }
 
-        closeButton.onClick.RemoveAllListeners();
-        closeButton.onClick.AddListener(ClosePanel);
+        if (closeButton != null)
+        {
+            closeButton.onClick.RemoveAllListeners();
+            closeButton.onClick.AddListener(ClosePanel);
+        }
 
         if (openAdPanelButton != null)
         {
@@ -73,17 +88,26 @@ public class AdPanelManager : MonoBehaviour
             openAdPanelButton.onClick.AddListener(ShowPanel);
         }
 
-        else Debug.LogWarning("AdPanelManager: MediationAds.Instance es null al iniciar el menú.");
+        // Captura escala base del "visual" cuando el layout ya estÃ¡ asentado
+        StartCoroutine(CaptureVisualBaseScaleNextFrame());
 
         RefreshDailyReset();
         RefreshUI();
+        RefreshBonusButtonUI();
+
+        // La respiraciÃ³n SIEMPRE activa (aunque queden 0)
+        EnsureBreathing();
     }
 
     private void OnApplicationFocus(bool hasFocus)
     {
         if (!hasFocus) return;
+
         RefreshDailyReset();
         RefreshUI();
+        RefreshBonusButtonUI();
+
+        EnsureBreathing();
     }
 
     public void ShowPanel()
@@ -93,11 +117,15 @@ public class AdPanelManager : MonoBehaviour
 
         RefreshDailyReset();
         RefreshUI();
+        RefreshBonusButtonUI();
+
+        EnsureBreathing();
 
         isOpen = true;
         adPanel.SetActive(true);
 
-        watchAdButton.interactable = (Mediation != null) && Mediation.IsAdReady();
+        if (watchAdButton != null)
+            watchAdButton.interactable = (Mediation != null) && Mediation.IsAdReady();
 
         if (animRoutine != null) StopCoroutine(animRoutine);
         animRoutine = StartCoroutine(PopInRoutine());
@@ -124,7 +152,6 @@ public class AdPanelManager : MonoBehaviour
             return;
         }
 
-        // ¡AQUÍ ESTÁ EL CAMBIO! Ahora recibe (bool rewardEarned)
         Mediation.ShowRewardedAd((bool rewardEarned) =>
         {
             if (!rewardEarned)
@@ -136,24 +163,45 @@ public class AdPanelManager : MonoBehaviour
             RefreshDailyReset();
 
             int watched = PlayerPrefs.GetInt(PREF_WATCHED_TODAY, 0);
+
+            // âœ… Si ya hizo los 4 bonus, no damos mÃ¡s monedas bonus (pero todo sigue normal)
             int reward = GetRewardForWatchIndex(watched);
             PlayerPrefs.SetInt(PREF_WATCHED_TODAY, watched + 1);
             PlayerPrefs.Save();
 
-            if (gameManager != null) gameManager.AddCoins(reward);
+            if (reward > 0 && gameManager != null)
+                gameManager.AddCoins(reward);
 
             RefreshUI();
+            RefreshBonusButtonUI();
+            EnsureBreathing();
         });
     }
 
-    // ------------------ Rewards / UI ------------------
+    // ------------------ Bonus helpers ------------------
+
+    private int GetRemainingBonusToday()
+    {
+        int watched = PlayerPrefs.GetInt(PREF_WATCHED_TODAY, 0);
+        return Mathf.Max(0, DailyBonusLimit - watched);
+    }
 
     private int GetRewardForWatchIndex(int watchedSoFarToday)
     {
         if (watchedSoFarToday < 0) watchedSoFarToday = 0;
-        if (watchedSoFarToday < FirstRewards.Length) return FirstRewards[watchedSoFarToday];
-        return RepeatReward;
+        if (watchedSoFarToday >= DailyRewards.Length) return 0; // âœ… no mÃ¡s bonus
+        return DailyRewards[watchedSoFarToday];
     }
+
+    private void RefreshBonusButtonUI()
+    {
+        int remaining = GetRemainingBonusToday();
+
+        if (bonusLeftText != null)
+            bonusLeftText.text = $"Bonus hoy: {remaining}/{DailyBonusLimit}";
+    }
+
+    // ------------------ Daily reset ------------------
 
     private void RefreshDailyReset()
     {
@@ -168,21 +216,19 @@ public class AdPanelManager : MonoBehaviour
         }
     }
 
+    // ------------------ Main UI refresh ------------------
+
     private void RefreshUI()
     {
         int watched = PlayerPrefs.GetInt(PREF_WATCHED_TODAY, 0);
 
-        // Milestones: 0..2 se colorean si ya los has visto, el 3 (20+) siempre gris
+        // âœ… 4 hitos reales: se colorean si ya los reclamaste
         for (int i = 0; i < 4; i++)
         {
-            bool isInfinite = (i == 3);                 // el "20+"
-            bool completed = (!isInfinite) && (watched >= (i + 1));
+            bool completed = watched >= (i + 1);
 
-            // ICONO (moneda)
-            Color iconColor = isInfinite ? milestoneGray : (completed ? milestoneColor : milestoneGray);
-
-            // TEXTO (número): cuando esté completado usa claimedTextColor (distinto al icono)
-            Color textColor = isInfinite ? milestoneGray : (completed ? claimedTextColor : milestoneGray);
+            Color iconColor = completed ? milestoneColor : milestoneGray;
+            Color textColor = completed ? claimedTextColor : milestoneGray;
 
             if (milestoneIcons != null && i < milestoneIcons.Length && milestoneIcons[i] != null)
                 milestoneIcons[i].color = iconColor;
@@ -191,8 +237,8 @@ public class AdPanelManager : MonoBehaviour
                 milestoneTexts[i].color = textColor;
         }
 
-        // Next reward text
         int next = GetRewardForWatchIndex(watched);
+
         if (nextRewardText != null)
             nextRewardText.text = $"Siguiente anuncio: {next}";
 
@@ -200,14 +246,70 @@ public class AdPanelManager : MonoBehaviour
             nextRewardCoinIcon.enabled = true;
     }
 
-    // ------------------ Animations ------------------
+    // ------------------ Breathing (SIEMPRE) ------------------
+
+    private IEnumerator CaptureVisualBaseScaleNextFrame()
+    {
+        yield return null; // deja que el layout se asiente
+
+        if (bonusButtonVisual != null)
+            visualBaseScale = bonusButtonVisual.localScale;
+        else if (bonusButtonRoot != null)
+            visualBaseScale = bonusButtonRoot.localScale; // fallback
+    }
+
+    private void EnsureBreathing()
+    {
+        // Siempre intentamos respirar. Si falta la referencia, no hacemos nada.
+        if (bonusButtonVisual == null && bonusButtonRoot == null) return;
+
+        if (breatheRoutine == null)
+            breatheRoutine = StartCoroutine(BreatheRoutine());
+    }
+
+    private IEnumerator BreatheRoutine()
+    {
+        // Si no asignaste visual, usa root como fallback (pero lo ideal es visual)
+        RectTransform target = bonusButtonVisual != null ? bonusButtonVisual : bonusButtonRoot;
+
+        // âœ… Base scale fija (NO se recalcula nunca desde target.localScale)
+        Vector3 baseScale = target.localScale;
+
+        float t = 0f;
+        while (true)
+        {
+            t += Time.unscaledDeltaTime;
+
+            // âœ… solo crece (no encoge): 1.0 -> 1.0 + breatheAmount -> 1.0
+            float sin01 = 0.5f + 0.5f * Mathf.Sin(t * (2f * Mathf.PI / breathePeriod));
+            float s = 1f + breatheAmount * sin01;
+
+            target.localScale = baseScale * s;
+            yield return null;
+        }
+    }
+
+    private void StopBreathing()
+    {
+        if (breatheRoutine != null)
+        {
+            StopCoroutine(breatheRoutine);
+            breatheRoutine = null;
+        }
+
+        if (bonusButtonVisual != null)
+            bonusButtonVisual.localScale = Vector3.one;  // si tu visual estÃ¡ a 1,1,1
+                                                         // Si tu visual NO estÃ¡ a 1,1,1, entonces mejor:
+                                                         // bonusButtonVisual.localScale = visualBaseScale;
+    }
+
+    // ------------------ Panel animations ------------------
 
     private IEnumerator PopInRoutine()
     {
         panelRT.localScale = panelBaseScale * 0.90f;
 
         float t = 0f;
-
         Vector3 a = panelBaseScale * 0.90f;
         Vector3 b = panelBaseScale * popOvershoot;
 
@@ -268,6 +370,8 @@ public class AdPanelManager : MonoBehaviour
     {
         if (MediationAds.Instance != null)
             MediationAds.Instance.OnAdAvailabilityChanged -= HandleAdReadyChanged;
+
+        StopBreathing();
     }
 
     private void HandleAdReadyChanged(bool ready)
