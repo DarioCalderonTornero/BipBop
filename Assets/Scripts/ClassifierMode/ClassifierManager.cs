@@ -310,6 +310,7 @@ public class ClassifierManager : MonoBehaviour, IGameOverClient
 
             SwipeDirection targetSlot = category.correctDirection;
 
+            // Vuelve a ser instantáneo para evitar bugs visuales
             if (pack.icon != null && slotIconPos.ContainsKey(targetSlot))
                 pack.icon.transform.position = slotIconPos[targetSlot];
 
@@ -594,10 +595,16 @@ public class ClassifierManager : MonoBehaviour, IGameOverClient
             _ => Vector3.zero
         };
 
-        float flyDuration = 0.25f;
-        GameObject item = centerItemRenderer.gameObject;
+        // En lugar de float flyDuration = 0.25f;
+        // Haz que baje un poquito con cada punto, con un mínimo de 0.1 segundos:
+        float flyDuration = Mathf.Max(0.1f, 0.25f - (scoreModule.CurrentScore * 0.002f)); GameObject item = centerItemRenderer.gameObject;
 
         LeanTween.cancel(item);
+
+        // 🌟 NUEVO: Le damos un giro aleatorio (entre -90 y 90 grados) para que parezca que la lanzas físicamente
+        float randomRotation = UnityEngine.Random.Range(-90f, 90f);
+        LeanTween.rotateZ(item, randomRotation, flyDuration)
+            .setEase(LeanTweenType.easeInCubic);
 
         LeanTween.moveLocal(item, targetFlyPosition, flyDuration)
             .setEase(LeanTweenType.easeInBack)
@@ -614,7 +621,9 @@ public class ClassifierManager : MonoBehaviour, IGameOverClient
                     SoundManager.Instance.PlaySound(randomClip, 1.0f);
                 }
 
+                // Reseteamos posición y TAMBIÉN LA ROTACIÓN para que la siguiente salga recta
                 item.transform.localPosition = Vector3.zero;
+                item.transform.localRotation = Quaternion.identity; // <-- ¡Clave para no romper el juego!
 
                 if (!isGameOver)
                 {
