@@ -142,12 +142,12 @@ TextureImporter:
       name: FrascoMorado_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 8
-        width: 1024
-        height: 1524
+        x: 231
+        y: 436
+        width: 567
+        height: 690
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -164,7 +164,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 1e2a2f68eaced6940a5b0365fc52d7c0
     internalID: 0
     vertices: []
     indices: 

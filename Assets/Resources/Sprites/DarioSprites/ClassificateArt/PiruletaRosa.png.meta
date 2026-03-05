@@ -142,12 +142,12 @@ TextureImporter:
       name: PiruletaRosa_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 8
-        width: 1024
-        height: 1524
+        x: 319
+        y: 383
+        width: 408
+        height: 965
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -164,7 +164,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 0ad46067427de0542868e8908ce9b37d
     internalID: 0
     vertices: []
     indices: 

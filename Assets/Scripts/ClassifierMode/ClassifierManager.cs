@@ -554,6 +554,8 @@ public class ClassifierManager : MonoBehaviour, IGameOverClient
         if (swipeAudioclip != null && SoundManager.Instance != null)
         {
             SoundManager.Instance.PlaySound(swipeAudioclip, 1.0f);
+            SoundManager.Instance.PlaySound(swipeAudioclip, 1.0f);
+            SoundManager.Instance.PlaySound(swipeAudioclip, 1.0f);
         }
 
         inputModule.isInputActive = false;

@@ -142,12 +142,12 @@ TextureImporter:
       name: LibroMorado_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 8
-        width: 1024
-        height: 1517
+        x: 259
+        y: 524
+        width: 541
+        height: 646
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -164,7 +164,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: bd42dbc9af9d1964388751e1271d537d
     internalID: 0
     vertices: []
     indices: 

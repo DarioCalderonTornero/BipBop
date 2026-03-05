@@ -142,12 +142,12 @@ TextureImporter:
       name: HojaVerde_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 1024
-        height: 1532
+        x: 345
+        y: 506
+        width: 341
+        height: 649
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -164,7 +164,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: aa073f79f3aa7a94784efb9337e03d59
     internalID: 0
     vertices: []
     indices: 

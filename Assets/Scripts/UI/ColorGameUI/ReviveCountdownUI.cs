@@ -15,6 +15,8 @@ public class ReviveCountdownUI : MonoBehaviour
     [SerializeField] private float goDuration = 0.7f;     // GO un pelín más largo
     [SerializeField] private string triggerName = "Pop";  // Trigger del Animator
 
+    [SerializeField] private AudioClip countdownAudioClip;
+
     private Coroutine routine;
 
     private void Awake()
@@ -60,6 +62,11 @@ public class ReviveCountdownUI : MonoBehaviour
         // Disparamos SIEMPRE la misma animación
         if (animator != null && !string.IsNullOrEmpty(triggerName))
             animator.SetTrigger(triggerName);
+
+        if (countdownAudioClip != null && SoundManager.Instance != null)
+        {
+            SoundManager.Instance.PlaySound(countdownAudioClip, 1f);
+        }
 
         // Espera en tiempo real (independiente de Time.timeScale)
         yield return new WaitForSecondsRealtime(duration);
