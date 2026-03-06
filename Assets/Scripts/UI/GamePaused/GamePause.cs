@@ -10,6 +10,9 @@ public class GamePause : MonoBehaviour
 {
     public event EventHandler OnPauseMenu;
 
+    [Header("UI Containers")]
+    [SerializeField] private GameObject visualContainer; // <-- ¡NUEVO! Arrastra aquí tu "VisualContainer"
+
     [Header("Main Buttons")]
     [SerializeField] private Button pauseGameButton;
     [SerializeField] private Button resumeGameButton;
@@ -154,12 +157,17 @@ public class GamePause : MonoBehaviour
     {
         isResuming = true;
 
-        // Bloqueamos interacción
+        // 1. Apagamos el contenedor visual de golpe para limpiar la pantalla
+        if (visualContainer != null)
+            visualContainer.SetActive(false);
+
+        // Bloqueamos interacción por seguridad
         resumeGameButton.interactable = false;
         pauseGameButton.interactable = false;
         settingsButton.interactable = false;
         mainMenuButton.interactable = false;
 
+        // 2. Lanzamos la cuenta atrás 
         resumeCountdownUI.Play(OnResumeCountdownFinished);
 
         Time.timeScale = 0f;
@@ -167,6 +175,7 @@ public class GamePause : MonoBehaviour
 
     private void OnResumeCountdownFinished()
     {
+        // 3. Cerramos el Animator (que sigue en la raíz) para cualquier lógica/animación residual
         gamePauseAnimator.SetBool("IsGamePaused", false);
 
         Time.timeScale = 1f;
@@ -177,6 +186,10 @@ public class GamePause : MonoBehaviour
         pauseGameButton.interactable = true;
         settingsButton.interactable = true;
         mainMenuButton.interactable = true;
+
+        // 4. Encendemos el visualContainer para que esté listo la próxima vez que el jugador pause
+        if (visualContainer != null)
+            visualContainer.SetActive(true);
 
         isResuming = false;
     }
