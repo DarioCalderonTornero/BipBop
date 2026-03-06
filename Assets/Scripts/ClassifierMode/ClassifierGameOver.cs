@@ -52,7 +52,7 @@ public class ClassifierGameOver : MonoBehaviour
             scoreText.text = score.ToString();
 
         if (coinText != null)
-            //coinText.text = coinsObtainedLocalized.GetLocalizedString(coinsEarned);
+            coinText.text = coinsObtainedLocalized.GetLocalizedString(coinsEarned);
 
         myanimator.SetBool("IsGameOver", true);
         Debug.Log("Classifier Game Over True");
