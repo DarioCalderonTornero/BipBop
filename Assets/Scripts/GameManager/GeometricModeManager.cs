@@ -63,6 +63,7 @@ public class GeometricModeManager : MonoBehaviour, IGameOverClient
     public TextMeshProUGUI scoreText;
     public Image timeBarImage;
     public float startTime = 60f;
+    public Color scoreHighlightColor = Color.yellow;
 
     [Header("Game Settings")]
     public float speedMultiplier = 1f;
@@ -669,6 +670,29 @@ public class GeometricModeManager : MonoBehaviour, IGameOverClient
     private void UpdateScoreText()
     {
         scoreText.text = scoreLabel.GetLocalizedString(score);
+
+        // --- Efecto "Pop" y destello de color ---
+        if (scoreText != null && score > 0)
+        {
+            LeanTween.cancel(scoreText.gameObject);
+
+            // 1. Efecto de Escala (Pop)
+            scoreText.transform.localScale = Vector3.one;
+            LeanTween.scale(scoreText.gameObject, Vector3.one * 1.4f, 0.2f)
+                .setEase(LeanTweenType.easeOutBack)
+                .setLoopPingPong(1);
+
+            // 2. Efecto de Color (Compatible con TextMeshPro)
+            scoreText.color = scoreHighlightColor;
+
+            LeanTween.value(scoreText.gameObject, scoreHighlightColor, Color.white, 0.4f)
+                .setEase(LeanTweenType.easeOutQuad)
+                .setOnUpdate((Color colorAnimado) =>
+                {
+                    // Aplicamos el color al TextMeshPro en cada frame de la animación
+                    scoreText.color = colorAnimado;
+                });
+        }
     }
 
     public int GetScore() => score;
