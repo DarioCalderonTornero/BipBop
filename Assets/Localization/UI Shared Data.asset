@@ -1071,6 +1071,14 @@ MonoBehaviour:
     m_Key: avatar_unlock_ads_progress
     m_Metadata:
       m_Items: []
+  - m_Id: 40880130042593280
+    m_Key: Costo
+    m_Metadata:
+      m_Items: []
+  - m_Id: 40880625700274176
+    m_Key: Genial
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

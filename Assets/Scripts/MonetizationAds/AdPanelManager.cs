@@ -2,9 +2,9 @@
 using System.Collections;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
-
 using UnityEngine.Localization; // ✅ Localization
+using UnityEngine.UI;
+using UnityEngine.Localization.Settings;
 
 public class AdPanelManager : MonoBehaviour
 {
@@ -391,12 +391,16 @@ public class AdPanelManager : MonoBehaviour
     {
         if (MediationAds.Instance != null)
             MediationAds.Instance.OnAdAvailabilityChanged += HandleAdReadyChanged;
+
+        LocalizationSettings.SelectedLocaleChanged += HandleLocaleChanged;
     }
 
     private void OnDisable()
     {
         if (MediationAds.Instance != null)
             MediationAds.Instance.OnAdAvailabilityChanged -= HandleAdReadyChanged;
+
+        LocalizationSettings.SelectedLocaleChanged -= HandleLocaleChanged;
 
         StopBreathing();
 
@@ -405,6 +409,12 @@ public class AdPanelManager : MonoBehaviour
             StopCoroutine(bonusTextRoutine);
             bonusTextRoutine = null;
         }
+    }
+
+    private void HandleLocaleChanged(UnityEngine.Localization.Locale _)
+    {
+        RefreshBonusButtonUI();
+        RefreshUI();
     }
 
     private void HandleAdReadyChanged(bool ready)

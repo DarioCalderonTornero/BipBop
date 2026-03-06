@@ -290,7 +290,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1144528112156672
-    m_Localized: "Consigue 10 puntos en el modo Geom\xE9trico"
+    m_Localized: Consigue 10 puntos en el modo "Formas"
     m_Metadata:
       m_Items: []
   - m_Id: 1156087655923712
@@ -627,7 +627,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 24664587031773184
-    m_Localized: "Juega 5 partidas del modo \"Geom\xE9trico\""
+    m_Localized: Juega 5 partidas del modo "Formas"
     m_Metadata:
       m_Items: []
   - m_Id: 24665038863171584
@@ -787,7 +787,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 24986470138740736
-    m_Localized: "Consigue en una partida 50 puntos en modo \"Geom\xE9trico\""
+    m_Localized: Consigue en una partida 50 puntos en modo "Formas"
     m_Metadata:
       m_Items: []
   - m_Id: 25343307073683456
@@ -1086,6 +1086,14 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 40875248623517696
     m_Localized: Desbloqueo al ver {1} anuncios ({0} / {1})
+    m_Metadata:
+      m_Items: []
+  - m_Id: 40880130042593280
+    m_Localized: 'Costo: 100'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 40880625700274176
+    m_Localized: "\xA1Genial!"
     m_Metadata:
       m_Items: []
   references:

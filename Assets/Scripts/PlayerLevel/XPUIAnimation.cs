@@ -61,6 +61,8 @@ public class XPUIAnimation : MonoBehaviour
     [SerializeField] private TextMeshProUGUI geometricRecordText; // GeometricScore
     [SerializeField] private TextMeshProUGUI gridRecordText;      // GridScore
     [SerializeField] private TextMeshProUGUI dodgeRecordText;     // DodgeScore
+    [SerializeField] private TextMeshProUGUI differentRecordText; // DifferentScore
+    [SerializeField] private TextMeshProUGUI classifierRecordText; // ClassifierScore
 
     [Header("Conteo de Avatares y Fondos")]
     [SerializeField] private TextMeshProUGUI avatarCountText;
@@ -638,18 +640,30 @@ public class XPUIAnimation : MonoBehaviour
                 if (result.Leaderboard != null && result.Leaderboard.Count > 0)
                     high = result.Leaderboard[0].StatValue;
 
-                classicRecordText.text = high.ToString();
+                if (classicRecordText != null)
+                    classicRecordText.text = high.ToString();
 
                 LoadRemoteRecordForStat(playFabId, "ColorScore", colorRecordText);
                 LoadRemoteRecordForStat(playFabId, "GeometricScore", geometricRecordText);
                 LoadRemoteRecordForStat(playFabId, "GridScore", gridRecordText);
                 LoadRemoteRecordForStat(playFabId, "DodgeScore", dodgeRecordText);
+                LoadRemoteRecordForStat(playFabId, "DifferentScore", differentRecordText);
+                LoadRemoteRecordForStat(playFabId, "ClassifierScore", classifierRecordText);
 
                 OnRemoteLoadFinished(playFabId);
             },
             error =>
             {
                 Debug.LogWarning(error.GenerateErrorReport());
+
+                if (classicRecordText != null) classicRecordText.text = "0";
+                if (colorRecordText != null) colorRecordText.text = "0";
+                if (geometricRecordText != null) geometricRecordText.text = "0";
+                if (gridRecordText != null) gridRecordText.text = "0";
+                if (dodgeRecordText != null) dodgeRecordText.text = "0";
+                if (differentRecordText != null) differentRecordText.text = "0";
+                if (classifierRecordText != null) classifierRecordText.text = "0";
+
                 OnRemoteLoadFinished(playFabId);
             }
         );
@@ -657,6 +671,8 @@ public class XPUIAnimation : MonoBehaviour
 
     private void LoadRemoteRecordForStat(string playFabId, string statName, TextMeshProUGUI targetText)
     {
+        if (targetText == null) return;
+
         var request = new GetLeaderboardAroundPlayerRequest
         {
             PlayFabId = playFabId,
@@ -1211,6 +1227,12 @@ public class XPUIAnimation : MonoBehaviour
 
         if (dodgeRecordText != null)
             dodgeRecordText.text = PlayerPrefs.GetInt("MaxRecordDodge", 0).ToString();
+
+        if (differentRecordText != null)
+            differentRecordText.text = PlayerPrefs.GetInt("MaxRecordDifferent", 0).ToString();
+
+        if (classifierRecordText != null)
+            classifierRecordText.text = PlayerPrefs.GetInt("MaxRecordClassifier", 0).ToString();
     }
 
     private void ApplyOpenButtonMaterial(AvatarDataSO data)

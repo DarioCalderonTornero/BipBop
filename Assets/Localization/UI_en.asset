@@ -289,7 +289,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1144528112156672
-    m_Localized: Score 10 points in Geometric Mode
+    m_Localized: Score 10 points in Forms Mode
     m_Metadata:
       m_Items: []
   - m_Id: 1156087655923712
@@ -626,7 +626,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 24664587031773184
-    m_Localized: "Play 5 games in \u201CGeometric\u201D mode"
+    m_Localized: "Play 5 games in \u201CForms\u201D mode"
     m_Metadata:
       m_Items: []
   - m_Id: 24665038863171584
@@ -786,7 +786,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 24986470138740736
-    m_Localized: "Earn 50 points in a game in \u201CGeometric\u201D mode"
+    m_Localized: Earn 50 points in a game in Forms mode
     m_Metadata:
       m_Items: []
   - m_Id: 25343307073683456
@@ -1083,6 +1083,14 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 40875248623517696
     m_Localized: Unlock by watching {1} ads ({0} / {1})
+    m_Metadata:
+      m_Items: []
+  - m_Id: 40880130042593280
+    m_Localized: 'Price: 100'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 40880625700274176
+    m_Localized: Great!
     m_Metadata:
       m_Items: []
   references:
