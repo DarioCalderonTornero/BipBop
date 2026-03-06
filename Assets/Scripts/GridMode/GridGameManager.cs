@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 public class GridGameManager : MonoBehaviour, IGameOverClient
 {
@@ -62,6 +63,10 @@ public class GridGameManager : MonoBehaviour, IGameOverClient
     private int score = 0;
     private bool isGameOver = false;
     private bool isMoving = false;
+
+    private bool isHoldingButton = false;
+    private int holdDx = 0;
+    private int holdDy = 0;
 
     private float coinTimer;
     private Vector3 originalScale;
@@ -150,10 +155,11 @@ public class GridGameManager : MonoBehaviour, IGameOverClient
 
     private void Start()
     {
-        upButton.onClick.AddListener(() => TryMove(0, -1));
-        downButton.onClick.AddListener(() => TryMove(0, 1));
-        leftButton.onClick.AddListener(() => TryMove(-1, 0));
-        rightButton.onClick.AddListener(() => TryMove(1, 0));
+        // SUSTITUIMOS LOS onClick POR NUESTRO NUEVO SISTEMA HOLD
+        AddHoldEvent(upButton, 0, -1);
+        AddHoldEvent(downButton, 0, 1);
+        AddHoldEvent(leftButton, -1, 0);
+        AddHoldEvent(rightButton, 1, 0);
 
         coinTimerImage.fillAmount = 1f;
         coinTimerImage.color = fullColor;
@@ -162,6 +168,32 @@ public class GridGameManager : MonoBehaviour, IGameOverClient
 
         if (showTutorialOnStart && tutorialPrefab != null) ShowTutorial();
         else { HideAnyExistingTutorialPanel(); BeginGameAfterTutorial(); }
+    }
+
+    // --- MÉTODO NUEVO ---
+    private void AddHoldEvent(Button btn, int dx, int dy)
+    {
+        // Le añadimos un EventTrigger al botón por código
+        EventTrigger trigger = btn.gameObject.GetComponent<EventTrigger>();
+        if (trigger == null) trigger = btn.gameObject.AddComponent<EventTrigger>();
+
+        // Evento al PULSAR el dedo (PointerDown)
+        EventTrigger.Entry pointerDown = new EventTrigger.Entry();
+        pointerDown.eventID = EventTriggerType.PointerDown;
+        pointerDown.callback.AddListener((data) => {
+            isHoldingButton = true;
+            holdDx = dx;
+            holdDy = dy;
+        });
+        trigger.triggers.Add(pointerDown);
+
+        // Evento al LEVANTAR el dedo (PointerUp)
+        EventTrigger.Entry pointerUp = new EventTrigger.Entry();
+        pointerUp.eventID = EventTriggerType.PointerUp;
+        pointerUp.callback.AddListener((data) => {
+            isHoldingButton = false;
+        });
+        trigger.triggers.Add(pointerUp);
     }
 
     private void HideAnyExistingTutorialPanel()
@@ -341,11 +373,24 @@ public class GridGameManager : MonoBehaviour, IGameOverClient
     private void Update()
     {
         if (isPausedByOffer) return;
-        if (isGameOver || isDyingByArrow) return;
+
+        // Modificamos esta línea para apagar el hold si nos matan
+        if (isGameOver || isDyingByArrow)
+        {
+            isHoldingButton = false;
+            return;
+        }
 
         if (GridState.Instance != null &&
             GridState.Instance.gridGameState == GridState.GridGameStateEnum.Playing)
         {
+            // --- NUEVO: Magia del Hold to Move ---
+            if (isHoldingButton && !isMoving)
+            {
+                TryMove(holdDx, holdDy);
+            }
+            // -------------------------------------
+
             if (coinObj != null)
             {
                 coinTimer -= Time.deltaTime;
@@ -365,7 +410,7 @@ public class GridGameManager : MonoBehaviour, IGameOverClient
                 }
 
                 if (coinTimer <= 0f)
-                    TriggerFail(); // CHANGED
+                    TriggerFail();
             }
         }
     }

@@ -65,6 +65,10 @@ public class GamePause : MonoBehaviour
         // PAUSE
         pauseGameButton.onClick.AddListener(() =>
         {
+            // AÑÁDELO AQUÍ: Lo encendemos justo antes de que empiece la animación de entrada
+            if (visualContainer != null)
+                visualContainer.SetActive(true);
+
             gamePauseAnimator.SetBool("IsGamePaused", true);
             pauseGameButton.gameObject.SetActive(false);
             closeGamePauseImage.gameObject.SetActive(true);
@@ -175,7 +179,6 @@ public class GamePause : MonoBehaviour
 
     private void OnResumeCountdownFinished()
     {
-        // 3. Cerramos el Animator (que sigue en la raíz) para cualquier lógica/animación residual
         gamePauseAnimator.SetBool("IsGamePaused", false);
 
         Time.timeScale = 1f;
@@ -187,9 +190,9 @@ public class GamePause : MonoBehaviour
         settingsButton.interactable = true;
         mainMenuButton.interactable = true;
 
-        // 4. Encendemos el visualContainer para que esté listo la próxima vez que el jugador pause
-        if (visualContainer != null)
-            visualContainer.SetActive(true);
+        // BÓRRALO DE AQUÍ:
+        // if (visualContainer != null)
+        //    visualContainer.SetActive(true);
 
         isResuming = false;
     }
