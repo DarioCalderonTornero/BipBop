@@ -1081,6 +1081,10 @@ MonoBehaviour:
     m_Localized: "Earn 20 points in a game in \u201CClassifier\u201D mode"
     m_Metadata:
       m_Items: []
+  - m_Id: 40875248623517696
+    m_Localized: Unlock by watching {1} ads ({0} / {1})
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

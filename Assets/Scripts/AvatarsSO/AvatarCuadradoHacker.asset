@@ -42,9 +42,9 @@ MonoBehaviour:
   unlockDescriptionFallback: 
   lockedMessageLS:
     m_TableReference:
-      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+      m_TableCollectionName: 
     m_TableEntryReference:
-      m_KeyId: 24629567479054336
+      m_KeyId: 0
       m_Key: 
     m_FallbackState: 0
     m_WaitForCompletion: 0
@@ -64,6 +64,18 @@ MonoBehaviour:
   effectType: 0
   effectMaterial: {fileID: 2100000, guid: a5a0c54f9a1ddb04e864b8a87dae7189, type: 2}
   fxPreset: {fileID: 11400000, guid: d164cc4e66f38b04cbd2bb4a78c09758, type: 2}
+  unlockByAdsViewed: 1
+  requiredAdsViewed: 100
+  adsProgressDescriptionLS:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 40875248623517696
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  adsProgressDescriptionFallback: Desbloqueo al ver anuncios ({0} / {1})
   references:
     version: 2
     RefIds: []

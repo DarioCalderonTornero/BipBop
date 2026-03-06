@@ -51,6 +51,15 @@ public class AvatarDataSO : ScriptableObject
 
     public AvatarFxSO fxPreset;
 
+    [Header("Desbloqueo por anuncios vistos (opcional)")]
+    public bool unlockByAdsViewed = false;
+    public int requiredAdsViewed = 0;
+
+    [Header("Descripción dinámica por anuncios (opcional)")]
+    [Tooltip("Smart String con {0} = vistos y {1} = requeridos")]
+    public LocalizedString adsProgressDescriptionLS;
+    [TextArea] public string adsProgressDescriptionFallback = "Desbloqueo al ver anuncios ({0} / {1})";
+
     // ---- Helpers (sync) ----
     public string GetDisplayName()
     {

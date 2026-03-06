@@ -1067,6 +1067,10 @@ MonoBehaviour:
     m_Key: dailyMissions_consigue20puntosclasificar
     m_Metadata:
       m_Items: []
+  - m_Id: 40875248623517696
+    m_Key: avatar_unlock_ads_progress
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

@@ -95,9 +95,12 @@ public class MediationAds : MonoBehaviour
 
     private IEnumerator WaitAndNotifyReward()
     {
-        // Esperamos medio segundo real (inmune a la pausa) para darle tiempo al SDK
-        // a disparar el OnAdRewarded si es que viene con lag.
         yield return new WaitForSecondsRealtime(0.5f);
+
+        if (rewardEarned)
+        {
+            AdsProgressManager.RegisterAdViewed();
+        }
 
         onAdFinishedCallback?.Invoke(rewardEarned);
         onAdFinishedCallback = null;

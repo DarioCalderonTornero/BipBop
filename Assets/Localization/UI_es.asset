@@ -1084,6 +1084,10 @@ MonoBehaviour:
     m_Localized: Consigue en una partida 20 puntos en modo "Clasificar"
     m_Metadata:
       m_Items: []
+  - m_Id: 40875248623517696
+    m_Localized: Desbloqueo al ver {1} anuncios ({0} / {1})
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

@@ -83,6 +83,8 @@ public class AvatarInventoryManager : MonoBehaviour
         if (closeButton != null) closeButton.onClick.AddListener(ClosePanel);
         if (saveButton != null) saveButton.onClick.AddListener(SaveSelectedAvatar);
 
+        EvaluateAdsUnlocks();
+        
         LoadAvatarsInPages();
 
         // Panel cerrado por escala, pero posición original intacta
@@ -152,6 +154,7 @@ public class AvatarInventoryManager : MonoBehaviour
 
         if (titleText != null) titleText.text = LS(inventoryTitleLS, "Inventario de avatares");
 
+        EvaluateAdsUnlocks();
         AvatarCollectionUnlocker.EvaluateCatalog(avatarCatalog.avatarDataSO, syncPlayFabIfLoggedIn: true);
 
         // Cargamos los avatares
@@ -334,7 +337,37 @@ public class AvatarInventoryManager : MonoBehaviour
             {
                 string locked = data.GetLockedMessage();
                 if (!string.IsNullOrEmpty(locked))
+                {
                     selectedAvatarDescriptionText.text = locked;
+                }
+                else if (data.unlockByAdsViewed && data.requiredAdsViewed > 0)
+                {
+                    int currentAds = AdsProgressManager.TotalAdsViewed;
+                    int shownAds = Mathf.Min(currentAds, data.requiredAdsViewed);
+
+                    if (data.adsProgressDescriptionLS != null && !data.adsProgressDescriptionLS.IsEmpty)
+                    {
+                        data.adsProgressDescriptionLS.Arguments = new object[] { shownAds, data.requiredAdsViewed };
+                        string localized = data.adsProgressDescriptionLS.GetLocalizedString();
+
+                        selectedAvatarDescriptionText.text =
+                            !string.IsNullOrEmpty(localized)
+                            ? localized
+                            : string.Format(
+                                data.adsProgressDescriptionFallback,
+                                shownAds,
+                                data.requiredAdsViewed
+                              );
+                    }
+                    else
+                    {
+                        selectedAvatarDescriptionText.text = string.Format(
+                            data.adsProgressDescriptionFallback,
+                            shownAds,
+                            data.requiredAdsViewed
+                        );
+                    }
+                }
                 else
                 {
                     string unlockDesc = data.GetUnlockDescription();
@@ -430,6 +463,32 @@ public class AvatarInventoryManager : MonoBehaviour
             {
                 Debug.LogWarning("Error al actualizar avatar en PlayFab: " + error.GenerateErrorReport());
             });
+    }
+
+    private void EvaluateAdsUnlocks()
+    {
+        if (avatarCatalog == null || avatarCatalog.avatarDataSO == null)
+            return;
+
+        foreach (var avatar in avatarCatalog.avatarDataSO)
+        {
+            if (avatar == null) continue;
+            if (!avatar.unlockByAdsViewed) continue;
+            if (avatar.requiredAdsViewed <= 0) continue;
+
+            if (AdsProgressManager.HasReachedAdsRequirement(avatar.requiredAdsViewed))
+            {
+                string purchaseKey = "AvatarPurchased_" + avatar.id;
+
+                if (PlayerPrefs.GetInt(purchaseKey, 0) == 0)
+                {
+                    PlayerPrefs.SetInt(purchaseKey, 1);
+                    Debug.Log($"[AvatarInventoryManager] Avatar desbloqueado por anuncios: {avatar.id}");
+                }
+            }
+        }
+
+        PlayerPrefs.Save();
     }
 
     private string LS(LocalizedString ls, string fallback)
