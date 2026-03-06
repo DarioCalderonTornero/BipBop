@@ -671,21 +671,23 @@ public class GeometricModeManager : MonoBehaviour, IGameOverClient
     {
         scoreText.text = scoreLabel.GetLocalizedString(score);
 
+        float scoreTextLocalScale = score <= 10 ? 2f : 1.6f;
+
         // --- Efecto "Pop" y destello de color ---
-        if (scoreText != null && score > 0)
+        if (scoreText != null && score > 0 && score < 10)
         {
             LeanTween.cancel(scoreText.gameObject);
 
             // 1. Efecto de Escala (Pop)
             scoreText.transform.localScale = Vector3.one;
-            LeanTween.scale(scoreText.gameObject, Vector3.one * 1.4f, 0.2f)
+            LeanTween.scale(scoreText.gameObject, Vector3.one * scoreTextLocalScale, 0.3f)
                 .setEase(LeanTweenType.easeOutBack)
                 .setLoopPingPong(1);
 
             // 2. Efecto de Color (Compatible con TextMeshPro)
             scoreText.color = scoreHighlightColor;
 
-            LeanTween.value(scoreText.gameObject, scoreHighlightColor, Color.white, 0.4f)
+            LeanTween.value(scoreText.gameObject, scoreHighlightColor, Color.white, 0.6f)
                 .setEase(LeanTweenType.easeOutQuad)
                 .setOnUpdate((Color colorAnimado) =>
                 {
@@ -693,6 +695,8 @@ public class GeometricModeManager : MonoBehaviour, IGameOverClient
                     scoreText.color = colorAnimado;
                 });
         }
+
+        
     }
 
     public int GetScore() => score;

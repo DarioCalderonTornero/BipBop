@@ -188,6 +188,7 @@ MonoBehaviour:
   score: 0
   CurrentEnemySpeed: 0.8
   scoreText: {fileID: 661725935}
+  scoreHighlightColor: {r: 0, g: 1, b: 0.11143541, a: 1}
   turboController: {fileID: 944474501}
   asteroidExplosionPrefabs:
   - {fileID: 3713178427722073689, guid: aaf0200649c3a8a45a56001573d974f1, type: 3}
@@ -4126,7 +4127,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: -7.4, y: -297.80005}
+  m_AnchoredPosition: {x: 18.5, y: -297.80005}
   m_SizeDelta: {x: 36.0986, y: 25.855}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &661725935
@@ -4178,8 +4179,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 25.12
-  m_fontSizeBase: 25.12
+  m_fontSize: 15
+  m_fontSizeBase: 15
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18

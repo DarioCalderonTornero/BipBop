@@ -1,3 +1,4 @@
+// DifferentManager.cs
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -17,6 +18,9 @@ public class DifferentManager : MonoBehaviour, IGameOverClient
 
     [Header("UI (Opcional)")]
     [SerializeField] private TextMeshProUGUI scoreText;
+    public Color scoreHighlightColor = Color.yellow; // <-- NUEVO: Color del destello
+    private Vector3 originalScoreScale; // <-- NUEVO: Escala original guardada
+
     [SerializeField] private Image timeBarImage;
     [SerializeField] private TextMeshProUGUI instructionText;
 
@@ -165,6 +169,12 @@ public class DifferentManager : MonoBehaviour, IGameOverClient
     private void Awake()
     {
         Instance = this;
+
+        // <-- NUEVO: Guardamos la escala original al arrancar
+        if (scoreText != null)
+        {
+            originalScoreScale = scoreText.transform.localScale;
+        }
     }
 
     private void Start()
@@ -254,7 +264,7 @@ public class DifferentManager : MonoBehaviour, IGameOverClient
         isPausedByOffer = false;
 
         BuildGrid();
-        UpdateUI();
+        UpdateUI(false); // Reset UI sin animar
         SetupRound();
 
         PauseGameplay();
@@ -312,7 +322,7 @@ public class DifferentManager : MonoBehaviour, IGameOverClient
                 TriggerFail();
                 return;
             }
-            UpdateUI();
+            UpdateUI(false); // Actualizar barra de tiempo (sin animar score)
         }
     }
 
@@ -850,7 +860,8 @@ public class DifferentManager : MonoBehaviour, IGameOverClient
             if (useTimer)
                 currentTime = Mathf.Min(startTime, currentTime + timeBonusOnCorrect);
 
-            UpdateUI();
+            // <-- AÑADIDO: Pasamos "true" para que haga el pop
+            UpdateUI(true);
             OnScoreChanged?.Invoke(score);
 
             if (playRoundTransitionOnCorrect)
@@ -1153,10 +1164,34 @@ public class DifferentManager : MonoBehaviour, IGameOverClient
         }
     }
 
-    private void UpdateUI()
+    // <-- MÉTODO ACTUALIZADO: Recibe un parámetro booleano y hace la animación LeanTween
+    private void UpdateUI(bool animate = false)
     {
         if (scoreText != null)
+        {
             scoreText.text = score.ToString();
+
+            if (animate && score > 0)
+            {
+                LeanTween.cancel(scoreText.gameObject);
+
+                // 1. Efecto de Escala (Pop) basado en tu escala real
+                scoreText.transform.localScale = originalScoreScale;
+                LeanTween.scale(scoreText.gameObject, originalScoreScale * 1.4f, 0.2f)
+                    .setEase(LeanTweenType.easeOutBack)
+                    .setLoopPingPong(1);
+
+                // 2. Efecto de Color (Compatible con TextMeshPro)
+                scoreText.color = scoreHighlightColor;
+
+                LeanTween.value(scoreText.gameObject, scoreHighlightColor, Color.white, 0.4f)
+                    .setEase(LeanTweenType.easeOutQuad)
+                    .setOnUpdate((Color colorAnimado) =>
+                    {
+                        scoreText.color = colorAnimado;
+                    });
+            }
+        }
 
         if (timeBarImage != null)
         {

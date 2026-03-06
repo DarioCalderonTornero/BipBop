@@ -11,7 +11,11 @@ public class DodgeManager : MonoBehaviour, IGameOverClient
     public int score = 0;
     public float CurrentEnemySpeed = 2f;
 
+    [Header("UI")]
     [SerializeField] private TextMeshProUGUI scoreText;
+    public Color scoreHighlightColor = Color.yellow; // Color del destello
+
+    private Vector3 originalScoreScale; // <-- AQUÍ GUARDAMOS TU ESCALA REAL
 
     [SerializeField] private TurboController turboController;
 
@@ -52,7 +56,11 @@ public class DodgeManager : MonoBehaviour, IGameOverClient
         Instance = this;
 
         if (scoreText != null)
+        {
             scoreText.text = $"{score}";
+            // <-- GUARDAMOS LA ESCALA EXACTA DE TU JUEGO NADA MÁS ARRANCAR
+            originalScoreScale = scoreText.transform.localScale;
+        }
 
         Enemy.GlobalFreeze = true; // arrancamos congelado hasta Playing
 
@@ -67,6 +75,10 @@ public class DodgeManager : MonoBehaviour, IGameOverClient
     private void Start()
     {
         Time.timeScale = 1f;
+
+        // Mostrar puntaje a 0 sin animar al inicio
+        score = 0;
+        UpdateScoreUI(false);
 
         bool showTutorial = PlayerPrefs.GetInt(ShowTutorialKey, 1) == 1;
 
@@ -140,7 +152,7 @@ public class DodgeManager : MonoBehaviour, IGameOverClient
 
         // Reset partida
         score = 0;
-        if (scoreText != null) scoreText.text = $"{score}";
+        UpdateScoreUI(false); // Reset visual sin animación
 
         isGameOver = false;
 
@@ -201,14 +213,43 @@ public class DodgeManager : MonoBehaviour, IGameOverClient
         Destroy(e2);
 
         score += 1;
-        if (scoreText != null)
-            scoreText.text = $"{score}";
+        UpdateScoreUI(true); // Suma punto y anima el POP
 
         PlayerLevelManager.Instance.AddXP(15);
 
 #if UNITY_ANDROID || UNITY_IOS
         Haptics.TryVibrate();
 #endif
+    }
+
+    // <-- MÉTODO ACTUALIZADO: Usa la escala original
+    private void UpdateScoreUI(bool animate)
+    {
+        if (scoreText != null)
+        {
+            scoreText.text = $"{score}";
+
+            if (animate && score > 0)
+            {
+                LeanTween.cancel(scoreText.gameObject);
+
+                // 1. Efecto de Escala (Pop) basado en tu escala real
+                scoreText.transform.localScale = originalScoreScale;
+                LeanTween.scale(scoreText.gameObject, originalScoreScale * 1.4f, 0.2f)
+                    .setEase(LeanTweenType.easeOutBack)
+                    .setLoopPingPong(1);
+
+                // 2. Efecto de Color (Compatible con TextMeshPro)
+                scoreText.color = scoreHighlightColor;
+
+                LeanTween.value(scoreText.gameObject, scoreHighlightColor, Color.white, 0.4f)
+                    .setEase(LeanTweenType.easeOutQuad)
+                    .setOnUpdate((Color colorAnimado) =>
+                    {
+                        scoreText.color = colorAnimado;
+                    });
+            }
+        }
     }
 
     private void SpawnExplosion(Enemy enemy)

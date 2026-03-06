@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections;
-using TMPro;
 using UnityEngine;
+using TMPro;
 
 public class ColorGamePuntos : MonoBehaviour
 {
@@ -11,13 +10,10 @@ public class ColorGamePuntos : MonoBehaviour
     [Header("UI")]
     [SerializeField] private TextMeshProUGUI scoreText;
 
-    [Tooltip("Elementos que harán el efecto (sin meterlos en un padre).")]
-    [SerializeField] private RectTransform[] scoreEffectTargets;
+    [Header("Animación")]
+    public Color scoreHighlightColor = Color.yellow; // <-- NUEVO: Color del destello
 
     public int score = 0;
-
-    private bool isAnimating = false;
-    private Vector3[] originalScales;
 
     private void Awake()
     {
@@ -27,32 +23,13 @@ public class ColorGamePuntos : MonoBehaviour
     private void Start()
     {
         score = 0;
-        UpdateScoreText();
-
-        // Guardar escalas originales
-        if (scoreEffectTargets != null && scoreEffectTargets.Length > 0)
-        {
-            originalScales = new Vector3[scoreEffectTargets.Length];
-            for (int i = 0; i < scoreEffectTargets.Length; i++)
-            {
-                if (scoreEffectTargets[i] != null)
-                {
-                    originalScales[i] = scoreEffectTargets[i].localScale;
-                    scoreEffectTargets[i].localScale = originalScales[i];
-                }
-            }
-        }
+        // Le pasamos "false" para que no haga la animación al arrancar
+        UpdateScoreText(false);
     }
 
     public int GetScore() => score;
 
     public int GetCoinsEarned() => score / 3;
-
-    private void UpdateScoreText()
-    {
-        if (scoreText != null)
-            scoreText.text = score.ToString();
-    }
 
     public void AddScore()
     {
@@ -60,18 +37,17 @@ public class ColorGamePuntos : MonoBehaviour
         score++;
 
         PlayerLevelManager.Instance.AddXP(10);
-        UpdateScoreText();
-
-        PlayScoreEffect(); // ✅ Actívalo si quieres el pop
+        // Le pasamos "true" para que haga el Pop y cambie de color
+        UpdateScoreText(true);
     }
 
     public void AddScoreRaw(int amount)
     {
         score += amount;
-        UpdateScoreText();
+        UpdateScoreText(true);
     }
 
-    public void ShowScore() => UpdateScoreText();
+    public void ShowScore() => UpdateScoreText(false);
 
     public void SafeRecordIfNeeded()
     {
@@ -83,67 +59,33 @@ public class ColorGamePuntos : MonoBehaviour
         }
     }
 
-    private void PlayScoreEffect()
+    // <-- NUEVO: Método actualizado con LeanTween para tamaño y color
+    private void UpdateScoreText(bool animate)
     {
-        if (!isAnimating && scoreEffectTargets != null && scoreEffectTargets.Length > 0)
-            StartCoroutine(AnimateScoreEffect());
-    }
-
-    private IEnumerator AnimateScoreEffect()
-    {
-        isAnimating = true;
-
-        float duration = 0.05f;
-        float half = duration / 2f;
-        float time;
-
-        float mult = 1.2f;
-
-        // Zoom in
-        time = 0f;
-        while (time < half)
+        if (scoreText != null)
         {
-            float t = time / half;
-            for (int i = 0; i < scoreEffectTargets.Length; i++)
+            scoreText.text = score.ToString();
+
+            if (animate && score > 0)
             {
-                var rt = scoreEffectTargets[i];
-                if (rt == null) continue;
+                LeanTween.cancel(scoreText.gameObject);
 
-                Vector3 from = originalScales[i];
-                Vector3 to = originalScales[i] * mult;
-                rt.localScale = Vector3.Lerp(from, to, t);
+                // 1. Efecto de Escala (Pop)
+                scoreText.transform.localScale = Vector3.one;
+                LeanTween.scale(scoreText.gameObject, Vector3.one * 1.4f, 0.2f)
+                    .setEase(LeanTweenType.easeOutBack)
+                    .setLoopPingPong(1);
+
+                // 2. Efecto de Color (Compatible con TextMeshPro)
+                scoreText.color = scoreHighlightColor;
+
+                LeanTween.value(scoreText.gameObject, scoreHighlightColor, Color.white, 0.4f)
+                    .setEase(LeanTweenType.easeOutQuad)
+                    .setOnUpdate((Color colorAnimado) =>
+                    {
+                        scoreText.color = colorAnimado;
+                    });
             }
-
-            time += Time.deltaTime;
-            yield return null;
         }
-
-        // Zoom out
-        time = 0f;
-        while (time < half)
-        {
-            float t = time / half;
-            for (int i = 0; i < scoreEffectTargets.Length; i++)
-            {
-                var rt = scoreEffectTargets[i];
-                if (rt == null) continue;
-
-                Vector3 from = originalScales[i] * mult;
-                Vector3 to = originalScales[i];
-                rt.localScale = Vector3.Lerp(from, to, t);
-            }
-
-            time += Time.deltaTime;
-            yield return null;
-        }
-
-        // Reset exacto
-        for (int i = 0; i < scoreEffectTargets.Length; i++)
-        {
-            if (scoreEffectTargets[i] != null)
-                scoreEffectTargets[i].localScale = originalScales[i];
-        }
-
-        isAnimating = false;
     }
 }

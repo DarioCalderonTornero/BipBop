@@ -80,6 +80,8 @@ public class GridGameManager : MonoBehaviour, IGameOverClient
 
     [Header("UI Score")]
     [SerializeField] private TextMeshProUGUI scoreText;
+    // --- NUEVO: Color para el efecto del texto ---
+    public Color scoreHighlightColor = Color.yellow;
 
     private bool isDyingByArrow = false;
 
@@ -164,7 +166,7 @@ public class GridGameManager : MonoBehaviour, IGameOverClient
         coinTimerImage.fillAmount = 1f;
         coinTimerImage.color = fullColor;
 
-        UpdateScoreText();
+        UpdateScoreText(false); // No animar al arrancar
 
         if (showTutorialOnStart && tutorialPrefab != null) ShowTutorial();
         else { HideAnyExistingTutorialPanel(); BeginGameAfterTutorial(); }
@@ -263,7 +265,7 @@ public class GridGameManager : MonoBehaviour, IGameOverClient
         coinTimerImage.fillAmount = 1f;
         coinTimerImage.color = fullColor;
 
-        UpdateScoreText();
+        UpdateScoreText(false); // No animar al reiniciar
 
         if (GridState.Instance != null)
             GridState.Instance.StartCountdown();
@@ -415,10 +417,33 @@ public class GridGameManager : MonoBehaviour, IGameOverClient
         }
     }
 
-    private void UpdateScoreText()
+    // --- MÉTODO ACTUALIZADO: LeanTween para Pop y Color ---
+    private void UpdateScoreText(bool animate = true)
     {
         if (scoreText == null) return;
+
         scoreText.text = score.ToString();
+
+        if (animate && score > 0)
+        {
+            LeanTween.cancel(scoreText.gameObject);
+
+            // 1. Efecto de Escala (Pop) 
+            scoreText.transform.localScale = Vector3.one;
+            LeanTween.scale(scoreText.gameObject, Vector3.one * 1.4f, 0.2f)
+                .setEase(LeanTweenType.easeOutBack)
+                .setLoopPingPong(1);
+
+            // 2. Efecto de Color (Compatible con TextMeshPro)
+            scoreText.color = scoreHighlightColor;
+
+            LeanTween.value(scoreText.gameObject, scoreHighlightColor, Color.white, 0.4f)
+                .setEase(LeanTweenType.easeOutQuad)
+                .setOnUpdate((Color colorAnimado) =>
+                {
+                    scoreText.color = colorAnimado;
+                });
+        }
     }
 
     void TryMove(int dx, int dy)
@@ -538,6 +563,7 @@ public class GridGameManager : MonoBehaviour, IGameOverClient
                 Haptics.TryVibrate();
 #endif
 
+                // Llama al destello al sumar punto
                 UpdateScoreText();
 
                 if (score % 2 == 0)
