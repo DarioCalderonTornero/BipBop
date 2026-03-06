@@ -366,7 +366,9 @@ public class ClassifierManager : MonoBehaviour, IGameOverClient
         if (currentScore >= (inverseRoundBegin + 3) && presentationRoundsLeft <= 0)
         {
             int chance = UnityEngine.Random.Range(0, 100);
-            if (chance < 25)
+            int activate = (currentScore >= 50) ? 33 : 25;
+
+            if (chance < activate)
             {
                 List<MutatorType> available = new List<MutatorType>();
 
