@@ -1096,6 +1096,30 @@ MonoBehaviour:
     m_Localized: "\xA1Genial!"
     m_Metadata:
       m_Items: []
+  - m_Id: 40891931228602368
+    m_Localized: Desliza el objeto hacia el lado correcto! Hay 4 grupos con 4 objetos
+      cada uno
+    m_Metadata:
+      m_Items: []
+  - m_Id: 40892034425257984
+    m_Localized: "Memoria: En algunas rondas, los iconos desaparecer\xE1n de la pantalla.
+      \xA1Tendr\xE1s que tirar de memoria!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 40892179376209920
+    m_Localized: "Caos: En algunas rondas, los iconos cambiar\xE1n de lugar, estate
+      atento!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 40892243410649088
+    m_Localized: "Si el objeto aparece en rojo, las reglas se invierten. \xA1Desl\xEDzala
+      hacia la direcci\xF3n contraria a la que pertenece!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 40892309793898496
+    m_Localized: "Si te equivocas de direcci\xF3n o se agota el tiempo, pierdes."
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

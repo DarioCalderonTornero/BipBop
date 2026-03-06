@@ -1079,6 +1079,26 @@ MonoBehaviour:
     m_Key: Genial
     m_Metadata:
       m_Items: []
+  - m_Id: 40891931228602368
+    m_Key: ClassifierTutorial_slot1
+    m_Metadata:
+      m_Items: []
+  - m_Id: 40892034425257984
+    m_Key: ClassifierTutorial_slot2_text1
+    m_Metadata:
+      m_Items: []
+  - m_Id: 40892179376209920
+    m_Key: ClassifierTutorial_slot2_text2
+    m_Metadata:
+      m_Items: []
+  - m_Id: 40892243410649088
+    m_Key: ClassifierTutorial_slot2_text3
+    m_Metadata:
+      m_Items: []
+  - m_Id: 40892309793898496
+    m_Key: ClassifierTutorial_slot3
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

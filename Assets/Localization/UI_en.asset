@@ -1093,6 +1093,29 @@ MonoBehaviour:
     m_Localized: Great!
     m_Metadata:
       m_Items: []
+  - m_Id: 40891931228602368
+    m_Localized: Slide the object to the correct side! There are 4 groups with 4
+      objects each.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 40892034425257984
+    m_Localized: 'Memory: In some rounds, the icons will disappear from the screen.
+      You''ll have to rely on your memory!'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 40892179376209920
+    m_Localized: 'Chaos: In some rounds, the icons will change places, so stay alert!'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 40892243410649088
+    m_Localized: If the object appears in red, the rules are reversed. Slide it in
+      the opposite direction to where it belongs!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 40892309793898496
+    m_Localized: If you take the wrong turn or run out of time, you lose.
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

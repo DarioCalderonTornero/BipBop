@@ -8784,6 +8784,7 @@ GameObject:
   - component: {fileID: 2040418658}
   - component: {fileID: 2040418657}
   - component: {fileID: 2040418659}
+  - component: {fileID: 2040418660}
   m_Layer: 5
   m_Name: GameOverText
   m_TagString: Untagged
@@ -8949,6 +8950,20 @@ MonoBehaviour:
   references:
     version: 2
     RefIds: []
+--- !u!114 &2040418660
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2040418655}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6fab516b250eb44e9124219363a9bad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spanishSize: 86.59
+  englishSize: 100
 --- !u!1 &2043977644
 GameObject:
   m_ObjectHideFlags: 0
