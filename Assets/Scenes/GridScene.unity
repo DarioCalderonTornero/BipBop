@@ -4119,6 +4119,7 @@ MonoBehaviour:
   deathAudioClip: {fileID: 8300000, guid: a49a873082d7bdd4a8d967be558faa0b, type: 3}
   cellHitRadius: 0.4
   scoreText: {fileID: 691293951}
+  scoreHighlightColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   playerCellScaleMultiplier: 1.35
   playerCellOffset: {x: 0, y: 0.2, z: 0}
   coinCellOffset: {x: 0, y: 0.3, z: 0}
@@ -8985,6 +8986,7 @@ GameObject:
   - component: {fileID: 1412150838}
   - component: {fileID: 1412150837}
   - component: {fileID: 1412150839}
+  - component: {fileID: 1412150840}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -9150,6 +9152,20 @@ MonoBehaviour:
   references:
     version: 2
     RefIds: []
+--- !u!114 &1412150840
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1412150835}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6fab516b250eb44e9124219363a9bad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spanishSize: 60
+  englishSize: 70
 --- !u!1 &1423656022
 GameObject:
   m_ObjectHideFlags: 0

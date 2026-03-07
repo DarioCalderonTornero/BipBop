@@ -954,6 +954,7 @@ GameObject:
   - component: {fileID: 284907973}
   - component: {fileID: 284907972}
   - component: {fileID: 284907974}
+  - component: {fileID: 284907975}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -1119,6 +1120,20 @@ MonoBehaviour:
   references:
     version: 2
     RefIds: []
+--- !u!114 &284907975
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 284907970}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6fab516b250eb44e9124219363a9bad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spanishSize: 60
+  englishSize: 70
 --- !u!1 &304693026
 GameObject:
   m_ObjectHideFlags: 0
@@ -5294,6 +5309,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   scoreText: {fileID: 1314749415}
+  scoreHighlightColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   timeBarImage: {fileID: 1044742320}
   instructionText: {fileID: 2048003040}
   useTimer: 1

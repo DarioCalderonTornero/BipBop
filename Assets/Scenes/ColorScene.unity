@@ -7190,11 +7190,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   scoreText: {fileID: 2009711222}
-  scoreEffectTargets:
-  - {fileID: 1990694272}
-  - {fileID: 994703117}
-  - {fileID: 1163637975}
-  - {fileID: 738938243}
+  scoreHighlightColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   score: 0
 --- !u!4 &1578115934
 Transform:
@@ -8296,6 +8292,7 @@ GameObject:
   - component: {fileID: 1709382563}
   - component: {fileID: 1709382562}
   - component: {fileID: 1709382564}
+  - component: {fileID: 1709382565}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -8461,6 +8458,20 @@ MonoBehaviour:
   references:
     version: 2
     RefIds: []
+--- !u!114 &1709382565
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1709382560}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6fab516b250eb44e9124219363a9bad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spanishSize: 60
+  englishSize: 70
 --- !u!1 &1715769424
 GameObject:
   m_ObjectHideFlags: 0
