@@ -2286,7 +2286,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6fab516b250eb44e9124219363a9bad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spanishSize: 60
+  spanishSize: 57
   englishSize: 70
 --- !u!1 &610431259
 GameObject:
@@ -8144,7 +8144,7 @@ CanvasGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1953137040}
   m_Enabled: 1
-  m_Alpha: 0
+  m_Alpha: 1
   m_Interactable: 0
   m_BlocksRaycasts: 0
   m_IgnoreParentGroups: 0

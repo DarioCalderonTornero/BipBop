@@ -8470,7 +8470,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6fab516b250eb44e9124219363a9bad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spanishSize: 60
+  spanishSize: 57
   englishSize: 70
 --- !u!1 &1715769424
 GameObject:
