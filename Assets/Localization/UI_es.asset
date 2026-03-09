@@ -1120,6 +1120,56 @@ MonoBehaviour:
     m_Localized: "Si te equivocas de direcci\xF3n o se agota el tiempo, pierdes."
     m_Metadata:
       m_Items: []
+  - m_Id: 41960309984821248
+    m_Localized: "\xA1Toca para consejo!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 41960556257574912
+    m_Localized: "Mant\xE9n las flechas del modo \"Plataformas\" para moverte m\xE1s
+      r\xE1pido"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 41960706514321408
+    m_Localized: "Aprovecha los bonus de monedas cada d\xEDa"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 41960871367245824
+    m_Localized: "Si desactivas las tareas f\xEDsicas del modo \"Cl\xE1sico\" no
+      te contar\xE1 para r\xE9cord ni ranking"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 41961126691307520
+    m_Localized: "Espera a que la gelatina est\xE9 completamente sola en el modo
+      \"Formas\" antes de pulsarla"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 41961316110270464
+    m_Localized: "Usa el turbo del modo \"Nave\" con cabeza, \xA1puede explotar!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 41961509962612736
+    m_Localized: "F\xEDjate bien de cu\xE1l es el objetivo de la ronda en el modo
+      \"Colores\" antes de pulsar nada"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 41961909981773824
+    m_Localized: "Si no est\xE1s seguro de qu\xE9 objeto es diferente en el modo
+      \"B\xFAsqueda\" , espera a tenerlo claro"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 41962466171650048
+    m_Localized: "F\xEDjate en el color del objeto del modo \"Clasificar\" antes
+      de deslizar, no lo hagas por mem\xF3ria"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 41962739933872128
+    m_Localized: "Los mejores avatares tienen animaciones, \xA1cons\xEDguelos todos!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 41963071845924864
+    m_Localized: Pulsa sobre cualquier jugador en el ranking para ver su perfil
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

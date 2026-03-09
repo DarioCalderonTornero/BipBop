@@ -1116,6 +1116,55 @@ MonoBehaviour:
     m_Localized: If you take the wrong turn or run out of time, you lose.
     m_Metadata:
       m_Items: []
+  - m_Id: 41960309984821248
+    m_Localized: Tap to change tips!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 41960556257574912
+    m_Localized: "Hold down the arrows in \u201CPlatforms\u201D mode to move faster"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 41960706514321408
+    m_Localized: Take advantage of the coin bonuses every day
+    m_Metadata:
+      m_Items: []
+  - m_Id: 41960871367245824
+    m_Localized: "If you disable motion tasks in \u201CClassic\u201D mode, they will
+      not count towards your record or ranking."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 41961126691307520
+    m_Localized: "Wait until the gelatin is completely alone in \u201CForms\u201D
+      mode before pressing it."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 41961316110270464
+    m_Localized: "Use the turbo in \u201CNave\u201D mode wisely, it can explode!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 41961509962612736
+    m_Localized: "Pay close attention to the objective of the round in \u201CColors\u201D
+      mode before pressing anything."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 41961909981773824
+    m_Localized: "If you are unsure which object is different in \u201CSearch\u201D
+      mode, wait until you are sure."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 41962466171650048
+    m_Localized: "Look at the color of the object in \u201CSort\u201D mode before
+      swiping; don't do it from memory."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 41962739933872128
+    m_Localized: "The best avatars have animations\u2014collect them all!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 41963071845924864
+    m_Localized: Click on any player in the ranking to view their profile.
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

@@ -315,7 +315,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -1375,16 +1375,16 @@ MonoBehaviour:
   coinPrefab: {fileID: 9179183407674599741, guid: e3092e5e26ee54049a1c700f6d7f2a3f, type: 3}
   panelCanvasGroup: {fileID: 1724361197}
   totalCoinsText: {fileID: 451171522}
-  scatterRadius: 200
-  fadeDuration: 0.12
+  scatterRadius: 164
+  fadeDuration: 0.5
   shortDelay: 0.15
   maxVisualCoins: 30
-  burstForceMin: 850
-  burstForceMax: 1450
-  burstDurationMin: 0.1
-  burstDurationMax: 0.18
-  homingDurationMin: 0.25
-  homingDurationMax: 0.38
+  burstForceMin: 2000
+  burstForceMax: 2400
+  burstDurationMin: 0.3
+  burstDurationMax: 0.4
+  homingDurationMin: 0.6
+  homingDurationMax: 0.7
   lateralBias: 0.65
 --- !u!1 &383312291
 GameObject:
@@ -8144,7 +8144,7 @@ CanvasGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1953137040}
   m_Enabled: 1
-  m_Alpha: 1
+  m_Alpha: 0
   m_Interactable: 0
   m_BlocksRaycasts: 0
   m_IgnoreParentGroups: 0

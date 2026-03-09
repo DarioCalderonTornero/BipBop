@@ -6,6 +6,7 @@ using UnityEngine.Localization; // ✅ Localization
 using UnityEngine.UI;
 using UnityEngine.Localization.Settings;
 
+
 public class AdPanelManager : MonoBehaviour
 {
     [Header("UI Components")]
@@ -35,9 +36,10 @@ public class AdPanelManager : MonoBehaviour
     [Header("Otros scripts")]
     [SerializeField] private CurrencyManager gameManager;
 
-    [Header("Progress UI (4 hitos: 30 / 50 / 80 / 20)")]
+    [Header("Progress UI (3 bonus: 30 / 50 / 80)")]
     [SerializeField] private Image[] milestoneIcons;            // tamaño 4
     [SerializeField] private TextMeshProUGUI[] milestoneTexts;  // tamaño 4
+    [SerializeField] private Image progressFillImage;
     [SerializeField] private Color milestoneGray = new Color(0.65f, 0.65f, 0.65f, 1f);
     [SerializeField] private Color milestoneColor = Color.white;
     [SerializeField] private Color claimedTextColor = new Color(0.42f, 0.24f, 0.12f);
@@ -63,9 +65,20 @@ public class AdPanelManager : MonoBehaviour
     private const string PREF_LAST_DAY = "ADS_LAST_DAY";
     private const string PREF_WATCHED_TODAY = "ADS_WATCHED_TODAY";
 
-    // ✅ Los 4 “bonus” diarios (los buenos)
-    private static readonly int[] DailyRewards = { 30, 50, 80, 20 };
-    private int DailyBonusLimit => DailyRewards.Length; // 4
+    // ✅ Sólo los 3 bonus diarios
+    private static readonly int[] DailyBonusRewards = { 30, 50, 80 };
+    private const int PostBonusReward = 20;
+    private int DailyBonusLimit => DailyBonusRewards.Length; // 3
+
+    [ContextMenu("Reset Ads Today")]
+    public void ResetAdsToday()
+    {
+        PlayerPrefs.DeleteKey("ADS_LAST_DAY");
+        PlayerPrefs.DeleteKey("ADS_WATCHED_TODAY");
+        PlayerPrefs.Save();
+
+        Debug.Log("Ads diarios reseteados.");
+    }
 
     private void Start()
     {
@@ -197,8 +210,13 @@ public class AdPanelManager : MonoBehaviour
     private int GetRewardForWatchIndex(int watchedSoFarToday)
     {
         if (watchedSoFarToday < 0) watchedSoFarToday = 0;
-        if (watchedSoFarToday >= DailyRewards.Length) return 0;
-        return DailyRewards[watchedSoFarToday];
+
+        // Primeros 3 anuncios: bonus especiales
+        if (watchedSoFarToday < DailyBonusRewards.Length)
+            return DailyBonusRewards[watchedSoFarToday];
+
+        // A partir de ahí: 20 siempre
+        return PostBonusReward;
     }
 
     private void RefreshBonusButtonUI()
@@ -253,7 +271,8 @@ public class AdPanelManager : MonoBehaviour
     {
         int watched = PlayerPrefs.GetInt(PREF_WATCHED_TODAY, 0);
 
-        for (int i = 0; i < 4; i++)
+        // Los 3 bonus normales sí se encienden
+        for (int i = 0; i < DailyBonusLimit; i++)
         {
             bool completed = watched >= (i + 1);
 
@@ -267,6 +286,38 @@ public class AdPanelManager : MonoBehaviour
                 milestoneTexts[i].color = textColor;
         }
 
+        // La última imagen/texto (+20) siempre apagada
+        int postBonusIndex = DailyBonusLimit; // índice 3
+
+        if (milestoneIcons != null && postBonusIndex < milestoneIcons.Length && milestoneIcons[postBonusIndex] != null)
+            milestoneIcons[postBonusIndex].color = milestoneGray;
+
+        if (milestoneTexts != null && postBonusIndex < milestoneTexts.Length && milestoneTexts[postBonusIndex] != null)
+            milestoneTexts[postBonusIndex].color = milestoneGray;
+
+        // Si hubiera elementos extra sobrantes, también apagados
+        if (milestoneIcons != null)
+        {
+            for (int i = postBonusIndex + 1; i < milestoneIcons.Length; i++)
+            {
+                if (milestoneIcons[i] != null)
+                    milestoneIcons[i].color = milestoneGray;
+            }
+        }
+
+        if (milestoneTexts != null)
+        {
+            for (int i = postBonusIndex + 1; i < milestoneTexts.Length; i++)
+            {
+                if (milestoneTexts[i] != null)
+                    milestoneTexts[i].color = milestoneGray;
+            }
+        }
+
+        // Fill manual
+        if (progressFillImage != null)
+            progressFillImage.fillAmount = GetProgressFillAmount(watched);
+
         int next = GetRewardForWatchIndex(watched);
 
         if (nextRewardText != null)
@@ -274,6 +325,17 @@ public class AdPanelManager : MonoBehaviour
 
         if (nextRewardCoinIcon != null)
             nextRewardCoinIcon.enabled = true;
+    }
+
+    private float GetProgressFillAmount(int watched)
+    {
+        if (watched <= 0) return 0f;     // ningún vídeo
+        if (watched == 1) return 0.16f;  // tras el primero
+        if (watched == 2) return 0.35f;  // tras el segundo
+        if (watched == 3) return 0.66f;  // tras el tercero
+
+        // Ya está en fase de anuncios de 20 monedas
+        return 1f;
     }
 
     // ------------------ Breathing (SIEMPRE) ------------------

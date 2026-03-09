@@ -17,16 +17,39 @@ public class SplashScreenManager : MonoBehaviour
     [Header("UI References")]
     [SerializeField] private Image firstImage;
     [SerializeField] private TextMeshProUGUI subtitleText;
-    [SerializeField] private LoadingBarScrollFill loadingBar;
+
+    [SerializeField] private RectTransform loadingSpinner;
+    [SerializeField] private CanvasGroup spinnerGroup;
+
     [SerializeField] private TextMeshProUGUI percentageText;
+    [SerializeField] private CanvasGroup percentageGroup;
+
     [SerializeField] private TextMeshProUGUI loadingText;
-    [SerializeField] private CanvasGroup loadingGroup;
+    [SerializeField] private CanvasGroup loadingTextGroup;
+
+    [Header("Tips UI")]
+    [SerializeField] private CanvasGroup tipsGroup;
+    [SerializeField] private TextMeshProUGUI tapForTipText;
+    [SerializeField] private TextMeshProUGUI tipText;
+
+    [Header("Tips Localization")]
+    [SerializeField] private LocalizedString tapForTipLocalizedText;   // "Toca para consejo"
+    [SerializeField] private LocalizedString[] tipMessages;            // consejos
+
+    [Header("Tips Animation")]
+    [SerializeField] private float tipPopDuration = 0.18f;
+    [SerializeField] private float tipPopOvershoot = 1.08f;
+
+    [Header("Spinner")]
+    [SerializeField] private float spinnerSpeed = 180f;
+    [SerializeField] private bool rotateClockwise = true;
 
     [Header("Intro Animation")]
     [SerializeField] private float popDuration = 0.35f;
     [SerializeField] private float popOvershoot = 1.15f;
     [SerializeField] private float delayBetweenTexts = 0.25f;
     [SerializeField] private float delayBeforeLoadingUI = 0.25f;
+    [SerializeField] private float loadingUIFadeDuration = 0.4f;
 
     [Header("Update Gate (Panel obligatorio)")]
     [SerializeField] private GameObject updatePanel;
@@ -45,15 +68,22 @@ public class SplashScreenManager : MonoBehaviour
     [SerializeField] private float pulsePeriod = 1.2f;
 
     private Coroutine pulseRoutine;
+    private Coroutine tipPopRoutine;
+    private bool spinnerActive = false;
+    private bool tipsInputEnabled = false;
 
     [Header("Localization (Splash)")]
-    [SerializeField] private LocalizedString checkingUpdatesText;     // key: checking_updates
-    [SerializeField] private LocalizedString[] loadingMessages;       // keys: loading_01..loading_06
+    [SerializeField] private LocalizedString checkingUpdatesText;
+    [SerializeField] private LocalizedString[] loadingMessages;
 
-    private string[] cachedLoadingMessages; // precargadas ya traducidas
+    private string[] cachedLoadingMessages;
+    private string[] cachedTipMessages;
+    private int currentTipIndex = -1;
 
     [Header("Loading / Fade")]
     [SerializeField] private string nextSceneName = "Menu";
+
+    private Vector3 tipTextBaseScale;
 
 #if UNITY_ANDROID && !UNITY_EDITOR
     private AppUpdateManager appUpdateManager;
@@ -74,25 +104,59 @@ public class SplashScreenManager : MonoBehaviour
 
     private void Start()
     {
-        // Estado inicial
         if (firstImage != null) firstImage.gameObject.SetActive(false);
         if (subtitleText != null) subtitleText.gameObject.SetActive(false);
-        if (loadingGroup != null) loadingGroup.alpha = 0f;
 
-        // Barra y % vacíos desde el inicio
-        if (loadingBar != null) loadingBar.SetFill01(0f);
-        if (percentageText != null) percentageText.text = "0%";
+        if (tipText != null)
+            tipTextBaseScale = tipText.rectTransform.localScale;
 
-        // Importante: inicializar Localization y precargar textos antes de empezar la secuencia
+        SetCanvasGroupAlpha(spinnerGroup, 0f);
+        SetCanvasGroupAlpha(percentageGroup, 0f);
+        SetCanvasGroupAlpha(loadingTextGroup, 0f);
+        SetCanvasGroupAlpha(tipsGroup, 0f);
+
+        if (loadingSpinner != null)
+            loadingSpinner.localRotation = Quaternion.identity;
+
+        if (percentageText != null)
+            percentageText.text = "0%";
+
+        if (tapForTipText != null)
+            tapForTipText.text = "";
+
+        if (tipText != null)
+            tipText.text = "";
+
         StartCoroutine(InitLocalizationThenRun());
+    }
+
+    private void Update()
+    {
+        if (spinnerActive && loadingSpinner != null)
+        {
+            float direction = rotateClockwise ? -1f : 1f;
+            loadingSpinner.Rotate(0f, 0f, spinnerSpeed * direction * Time.deltaTime);
+        }
+
+        if (tipsInputEnabled && WasScreenTapped())
+        {
+            ShowNextTip();
+        }
+    }
+
+    private bool WasScreenTapped()
+    {
+#if UNITY_EDITOR
+        return Input.GetMouseButtonDown(0);
+#else
+        return Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began;
+#endif
     }
 
     private IEnumerator InitLocalizationThenRun()
     {
-        // Espera a que el sistema de Localization esté listo
         yield return LocalizationSettings.InitializationOperation;
 
-        // Precarga mensajes de loading en el idioma actual
         cachedLoadingMessages = new string[loadingMessages.Length];
         for (int i = 0; i < loadingMessages.Length; i++)
         {
@@ -101,33 +165,57 @@ public class SplashScreenManager : MonoBehaviour
             cachedLoadingMessages[i] = op.Result;
         }
 
+        if (tapForTipLocalizedText != null)
+        {
+            var tapOp = tapForTipLocalizedText.GetLocalizedStringAsync();
+            yield return tapOp;
+
+            if (tapForTipText != null)
+                tapForTipText.text = tapOp.Result;
+        }
+
+        cachedTipMessages = new string[tipMessages.Length];
+        for (int i = 0; i < tipMessages.Length; i++)
+        {
+            var op = tipMessages[i].GetLocalizedStringAsync();
+            yield return op;
+            cachedTipMessages[i] = op.Result;
+        }
+
+        SetInitialTip();
+
         StartCoroutine(SplashSequence());
+    }
+
+    private void SetInitialTip()
+    {
+        if (tipText == null || cachedTipMessages == null || cachedTipMessages.Length == 0)
+            return;
+
+        currentTipIndex = Random.Range(0, cachedTipMessages.Length);
+        tipText.text = cachedTipMessages[currentTipIndex];
     }
 
     private IEnumerator SplashSequence()
     {
-        // 1) Pop imagen
         if (firstImage != null)
             yield return StartCoroutine(AnimatePop(firstImage.rectTransform));
 
-        // 2) Pop subtitle
         yield return new WaitForSeconds(delayBetweenTexts);
 
         if (subtitleText != null)
             yield return StartCoroutine(AnimatePop(subtitleText.rectTransform));
 
-        // 3) Espera antes del loading
         yield return new WaitForSeconds(delayBeforeLoadingUI);
 
-        // Asegura vacío antes del fade
-        if (loadingBar != null) loadingBar.SetFill01(0f);
-        if (percentageText != null) percentageText.text = "0%";
+        if (loadingSpinner != null)
+            loadingSpinner.localRotation = Quaternion.identity;
 
-        // 4) Fade-in del grupo de carga
-        if (loadingGroup != null)
-            yield return StartCoroutine(FadeCanvasGroup(loadingGroup, 0f, 1f, 0.4f));
+        if (percentageText != null)
+            percentageText.text = "0%";
 
-        // ✅ Texto localizado: "Comprobando actualizaciones..."
+        yield return StartCoroutine(FadeInLoadingUI());
+
         if (loadingText != null)
         {
             var op = checkingUpdatesText.GetLocalizedStringAsync();
@@ -135,7 +223,6 @@ public class SplashScreenManager : MonoBehaviour
             loadingText.text = op.Result;
         }
 
-        // 5) Gate de actualización (bloquea carga hasta decidir)
         bool updateNeeded = false;
         yield return StartCoroutine(CheckForUpdate(result => updateNeeded = result));
 
@@ -145,14 +232,109 @@ public class SplashScreenManager : MonoBehaviour
             yield break;
         }
 
-        // 6) Si no hay update, ya empieza el loading normal
         if (loadingText != null)
             loadingText.text = GetRandomMessage();
 
+        spinnerActive = true;
+        tipsInputEnabled = true;
+
         yield return StartCoroutine(FakeLoading());
+
+        tipsInputEnabled = false;
+        spinnerActive = false;
 
         yield return new WaitForSeconds(0.2f);
         SceneManager.LoadScene(nextSceneName);
+    }
+
+    private IEnumerator FadeInLoadingUI()
+    {
+        float t = 0f;
+
+        while (t < 1f)
+        {
+            t += Time.deltaTime / loadingUIFadeDuration;
+            float a = Mathf.Lerp(0f, 1f, t);
+
+            SetCanvasGroupAlpha(spinnerGroup, a);
+            SetCanvasGroupAlpha(percentageGroup, a);
+            SetCanvasGroupAlpha(loadingTextGroup, a);
+            SetCanvasGroupAlpha(tipsGroup, a);
+
+            yield return null;
+        }
+
+        SetCanvasGroupAlpha(spinnerGroup, 1f);
+        SetCanvasGroupAlpha(percentageGroup, 1f);
+        SetCanvasGroupAlpha(loadingTextGroup, 1f);
+        SetCanvasGroupAlpha(tipsGroup, 1f);
+    }
+
+    private void ShowNextTip()
+    {
+        if (tipText == null || cachedTipMessages == null || cachedTipMessages.Length == 0)
+            return;
+
+        int nextIndex = currentTipIndex;
+
+        if (cachedTipMessages.Length == 1)
+        {
+            nextIndex = 0;
+        }
+        else
+        {
+            while (nextIndex == currentTipIndex)
+                nextIndex = Random.Range(0, cachedTipMessages.Length);
+        }
+
+        if (tipPopRoutine != null)
+        {
+            StopCoroutine(tipPopRoutine);
+            tipPopRoutine = null;
+        }
+
+        tipText.rectTransform.localScale = tipTextBaseScale;
+
+        currentTipIndex = nextIndex;
+        tipText.text = cachedTipMessages[currentTipIndex];
+
+        tipPopRoutine = StartCoroutine(AnimateTipPop(tipText.rectTransform));
+    }
+
+    private IEnumerator AnimateTipPop(RectTransform target)
+    {
+        if (target == null) yield break;
+
+        Vector3 originalScale = tipTextBaseScale;
+        Vector3 overshootScale = originalScale * tipPopOvershoot;
+
+        float expandTime = tipPopDuration * 0.6f;
+        float settleTime = tipPopDuration * 0.4f;
+
+        target.localScale = originalScale;
+
+        float t = 0f;
+        while (t < expandTime)
+        {
+            t += Time.deltaTime;
+            float lerp = Mathf.Clamp01(t / expandTime);
+            float eased = Mathf.SmoothStep(0f, 1f, lerp);
+            target.localScale = Vector3.LerpUnclamped(originalScale, overshootScale, eased);
+            yield return null;
+        }
+
+        t = 0f;
+        while (t < settleTime)
+        {
+            t += Time.deltaTime;
+            float lerp = Mathf.Clamp01(t / settleTime);
+            float eased = Mathf.SmoothStep(0f, 1f, lerp);
+            target.localScale = Vector3.LerpUnclamped(overshootScale, originalScale, eased);
+            yield return null;
+        }
+
+        target.localScale = originalScale;
+        tipPopRoutine = null;
     }
 
     private IEnumerator CheckForUpdate(System.Action<bool> onResult)
@@ -183,6 +365,9 @@ public class SplashScreenManager : MonoBehaviour
 
     private void ShowUpdatePanelPop()
     {
+        spinnerActive = false;
+        tipsInputEnabled = false;
+
         if (updatePanel == null) return;
 
         updatePanel.SetActive(true);
@@ -279,9 +464,6 @@ public class SplashScreenManager : MonoBehaviour
 
     private void UpdateProgressUI(float progress)
     {
-        if (loadingBar != null)
-            loadingBar.SetFill01(progress);
-
         if (percentageText != null)
             percentageText.text = Mathf.RoundToInt(progress * 100f) + "%";
     }
@@ -320,26 +502,28 @@ public class SplashScreenManager : MonoBehaviour
         target.localScale = originalScale;
     }
 
+    private void SetCanvasGroupAlpha(CanvasGroup cg, float alpha)
+    {
+        if (cg == null) return;
+        cg.alpha = alpha;
+    }
+
     private void OnDisable()
     {
+        spinnerActive = false;
+        tipsInputEnabled = false;
+
         if (pulseRoutine != null)
         {
             StopCoroutine(pulseRoutine);
             pulseRoutine = null;
         }
-    }
 
-    private IEnumerator FadeCanvasGroup(CanvasGroup cg, float from, float to, float duration)
-    {
-        float t = 0f;
-        cg.alpha = from;
-        while (t < 1f)
+        if (tipPopRoutine != null)
         {
-            t += Time.deltaTime / duration;
-            cg.alpha = Mathf.Lerp(from, to, t);
-            yield return null;
+            StopCoroutine(tipPopRoutine);
+            tipPopRoutine = null;
         }
-        cg.alpha = to;
     }
 
     private string GetRandomMessage()
