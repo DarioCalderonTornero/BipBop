@@ -56,7 +56,7 @@ public class GameStates : MonoBehaviour
 
                     // Mostrar GO aquí (UI)
                     if (CountDownUI.Instance != null && LogicaJuego.Instance != null)
-                        CountDownUI.Instance.ShowMessage(LogicaJuego.Instance.goText.GetLocalizedString());
+                        CountDownUI.Instance.ShowGoMessage();
 
                     if (goRoutine != null) StopCoroutine(goRoutine);
                     goRoutine = StartCoroutine(GoThenPlay());

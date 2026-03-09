@@ -15,7 +15,10 @@ public class ReviveCountdownUI : MonoBehaviour
     [SerializeField] private float goDuration = 0.7f;     // GO un pelín más largo
     [SerializeField] private string triggerName = "Pop";  // Trigger del Animator
 
-    [SerializeField] private AudioClip countdownAudioClip;
+    [Header("Audio")]
+    [SerializeField] private AudioClip countdownAudioClip; // Sonido para 3, 2, 1
+    [SerializeField] private float countdownPitch = 1.5f;  // "Más pitch" para hacer el tick más agudo
+    [SerializeField] private AudioClip goAudioClip;        // NUEVO: Sonido distinto para el GO!
 
     private Coroutine routine;
 
@@ -40,13 +43,13 @@ public class ReviveCountdownUI : MonoBehaviour
     {
         if (root != null) root.SetActive(true);
 
-        // 3,2,1
-        yield return PlayToken("3", numberDuration);
-        yield return PlayToken("2", numberDuration);
-        yield return PlayToken("1", numberDuration);
+        // 3, 2, 1 (Usamos el clip normal con el pitch alto)
+        yield return PlayToken("3", numberDuration, countdownAudioClip, countdownPitch);
+        yield return PlayToken("2", numberDuration, countdownAudioClip, countdownPitch);
+        yield return PlayToken("1", numberDuration, countdownAudioClip, countdownPitch);
 
-        // GO
-        yield return PlayToken("GO!", goDuration);
+        // GO (Usamos el clip nuevo con pitch normal = 1f)
+        yield return PlayToken("GO!", goDuration, goAudioClip, 1f);
 
         if (root != null) root.SetActive(false);
 
@@ -54,7 +57,8 @@ public class ReviveCountdownUI : MonoBehaviour
         onFinished?.Invoke();
     }
 
-    private IEnumerator PlayToken(string token, float duration)
+    // NUEVO: Ahora le pasamos el audio y el pitch específico que queremos que suene
+    private IEnumerator PlayToken(string token, float duration, AudioClip clipToPlay, float pitch)
     {
         if (countdownText != null)
             countdownText.text = token;
@@ -63,9 +67,10 @@ public class ReviveCountdownUI : MonoBehaviour
         if (animator != null && !string.IsNullOrEmpty(triggerName))
             animator.SetTrigger(triggerName);
 
-        if (countdownAudioClip != null && SoundManager.Instance != null)
+        // Reproducimos el sonido que nos hayan pasado por parámetro
+        if (clipToPlay != null && SoundManager.Instance != null)
         {
-            SoundManager.Instance.PlaySound(countdownAudioClip, 1f);
+            SoundManager.Instance.PlaySound(clipToPlay, 1f, pitch);
         }
 
         // Espera en tiempo real (independiente de Time.timeScale)

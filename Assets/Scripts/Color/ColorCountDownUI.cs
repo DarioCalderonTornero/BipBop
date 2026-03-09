@@ -15,6 +15,13 @@ public class ColorCountDownUI : MonoBehaviour
     [Header("Localization")]
     public LocalizedString goMessage;
 
+    [Header("Audio")]
+    [SerializeField] private AudioClip countdownAudioClip; // Sonido para 3, 2, 1
+    [SerializeField] private float countdownPitch = 1.5f;  // Pitch agudo para los números
+    [SerializeField] private AudioClip goAudioClip;        // Sonido distinto para el GO!
+
+    private int lastSecondPlayed = -1; // Evita que suene múltiples veces por segundo
+
     private void Awake()
     {
         Instance = this;
@@ -31,13 +38,27 @@ public class ColorCountDownUI : MonoBehaviour
         float t = ColorGameState.Instance.GetCountDownTimer();
 
         if (t > 0f)
-            countDownText.text = Mathf.Ceil(t).ToString();
+        {
+            int currentSecond = Mathf.CeilToInt(t);
+            countDownText.text = currentSecond.ToString();
+
+            // --- NUEVO: Magia de Audio ---
+            if (currentSecond != lastSecondPlayed && currentSecond > 0)
+            {
+                lastSecondPlayed = currentSecond;
+                if (countdownAudioClip != null && SoundManager.Instance != null)
+                {
+                    SoundManager.Instance.PlaySound(countdownAudioClip, 1f, countdownPitch);
+                }
+            }
+        }
     }
 
     public void Show()
     {
         isCustomMessage = false;
         countDownText.gameObject.SetActive(true);
+        lastSecondPlayed = -1; // Reseteamos el tracker de sonido
 
         if (myAnimator != null)
             myAnimator.SetBool("IsCountDown", true);
@@ -74,6 +95,12 @@ public class ColorCountDownUI : MonoBehaviour
 
         countDownText.gameObject.SetActive(true);
         countDownText.text = goMessage.GetLocalizedString();
+
+        // --- NUEVO: Sonido final distinto para el GO! ---
+        if (goAudioClip != null && SoundManager.Instance != null)
+        {
+            SoundManager.Instance.PlaySound(goAudioClip, 1f, 1f);
+        }
 
         yield return new WaitForSeconds(duration);
 

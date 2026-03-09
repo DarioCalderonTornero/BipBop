@@ -14,8 +14,14 @@ public class CountDownUI : MonoBehaviour
     public LocalizedString readyMessage;  // "Prepárate..." / "Get ready..."
     public LocalizedString goMessage;     // "GO!" / "Go!"
 
+    [Header("Audio")]
+    [SerializeField] private AudioClip countdownAudioClip; // Sonido para 3, 2, 1
+    [SerializeField] private float countdownPitch = 1.5f;  // Pitch agudo para los números
+    [SerializeField] private AudioClip goAudioClip;        // Sonido distinto para el GO!
+
     private Animator myAnimator;
     private bool isCustomMessage = false;
+    private int lastSecondPlayed = -1; // Evita que suene múltiples veces por segundo
 
     private void Awake()
     {
@@ -32,7 +38,25 @@ public class CountDownUI : MonoBehaviour
     {
         if (!isCustomMessage)
         {
-            countDownText.text = Mathf.Ceil(GameStates.Instance.GetCountDownTime()).ToString();
+            if (GameStates.Instance == null) return; // Añadido por seguridad
+
+            float t = GameStates.Instance.GetCountDownTime();
+
+            if (t > 0f)
+            {
+                int currentSecond = Mathf.CeilToInt(t);
+                countDownText.text = currentSecond.ToString();
+
+                // --- NUEVO: Magia de Audio ---
+                if (currentSecond != lastSecondPlayed && currentSecond > 0)
+                {
+                    lastSecondPlayed = currentSecond;
+                    if (countdownAudioClip != null && SoundManager.Instance != null)
+                    {
+                        SoundManager.Instance.PlaySound(countdownAudioClip, 1f, countdownPitch);
+                    }
+                }
+            }
         }
     }
 
@@ -41,6 +65,7 @@ public class CountDownUI : MonoBehaviour
         countDownText.gameObject.SetActive(true);
         myAnimator.SetBool("IsCountDown", true);
         isCustomMessage = false;
+        lastSecondPlayed = -1; // Reseteamos el tracker de sonido
     }
 
     public void Hide()
@@ -73,6 +98,12 @@ public class CountDownUI : MonoBehaviour
     {
         isCustomMessage = true;
         countDownText.text = goMessage.GetLocalizedString();
+
+        // --- NUEVO: Sonido final distinto para el GO! ---
+        if (goAudioClip != null && SoundManager.Instance != null)
+        {
+            SoundManager.Instance.PlaySound(goAudioClip, 1f, 1f);
+        }
     }
 
     public void SetAnimatorFalse()
