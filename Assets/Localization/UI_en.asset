@@ -1169,6 +1169,14 @@ MonoBehaviour:
     m_Localized: 'Colliding meteorites:'
     m_Metadata:
       m_Items: []
+  - m_Id: 42076697487441920
+    m_Localized: Objetive
+    m_Metadata:
+      m_Items: []
+  - m_Id: 42076872406695936
+    m_Localized: successes
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

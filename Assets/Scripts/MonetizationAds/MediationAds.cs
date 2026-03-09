@@ -7,7 +7,7 @@ public class MediationAds : MonoBehaviour
 {
     public static MediationAds Instance { get; private set; }
 
-    [SerializeField] private string adUnitIdAndroid = "Rewarded_Androidd";
+    [SerializeField] private string adUnitIdAndroid = "Rewarded_Android";
     [SerializeField] private string adUnitIdIOS = "Rewarded_iOS";
 
     private LevelPlayRewardedAd rewardedAd;
@@ -15,10 +15,12 @@ public class MediationAds : MonoBehaviour
 
     private Action<bool> onAdFinishedCallback;
     private bool rewardEarned = false;
+    private bool adsInitialized = false;
+    private bool eventsHooked = false;
 
     public event Action<bool> OnAdAvailabilityChanged;
 
-    void Awake()
+    private void Awake()
     {
         if (Instance != null && Instance != this)
         {
@@ -30,18 +32,42 @@ public class MediationAds : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-    void OnEnable()
+    private void OnEnable()
     {
         AdsInicializer.OnLevelPlayInitialized += InitializeAds;
+
+        // Muy importante: si ya se inicializó antes, inicializamos aquí también
+        if (AdsInicializer.IsInitialized)
+            InitializeAds();
     }
 
-    void OnDisable()
+    private void OnDisable()
     {
         AdsInicializer.OnLevelPlayInitialized -= InitializeAds;
     }
 
+    private void OnDestroy()
+    {
+        if (rewardedAd != null && eventsHooked)
+        {
+            rewardedAd.OnAdLoaded -= OnAdLoaded;
+            rewardedAd.OnAdLoadFailed -= OnAdLoadFailed;
+            rewardedAd.OnAdRewarded -= OnAdRewarded;
+            rewardedAd.OnAdClosed -= OnAdClosed;
+            eventsHooked = false;
+        }
+
+        if (Instance == this)
+            Instance = null;
+    }
+
     private void InitializeAds()
     {
+        if (adsInitialized)
+            return;
+
+        adsInitialized = true;
+
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
         LevelPlay.LaunchTestSuite();
 #endif
@@ -50,7 +76,16 @@ public class MediationAds : MonoBehaviour
         adUnitId = adUnitIdAndroid;
 #elif UNITY_IOS
         adUnitId = adUnitIdIOS;
+#else
+        adUnitId = adUnitIdAndroid;
 #endif
+
+        if (string.IsNullOrEmpty(adUnitId))
+        {
+            Debug.LogError("MediationAds: adUnitId está vacío.");
+            OnAdAvailabilityChanged?.Invoke(false);
+            return;
+        }
 
         rewardedAd = new LevelPlayRewardedAd(adUnitId);
 
@@ -58,38 +93,53 @@ public class MediationAds : MonoBehaviour
         rewardedAd.OnAdLoadFailed += OnAdLoadFailed;
         rewardedAd.OnAdRewarded += OnAdRewarded;
         rewardedAd.OnAdClosed += OnAdClosed;
+        eventsHooked = true;
 
         rewardedAd.LoadAd();
+
+        Debug.Log($"MediationAds: Rewarded inicializado con adUnitId = {adUnitId}");
     }
 
     private void OnAdLoaded(LevelPlayAdInfo adInfo)
     {
+        Debug.Log("MediationAds: Anuncio recompensado cargado.");
         OnAdAvailabilityChanged?.Invoke(true);
     }
 
     private void OnAdLoadFailed(LevelPlayAdError error)
     {
+        Debug.LogWarning($"MediationAds: Error cargando rewarded ad: {error}");
         OnAdAvailabilityChanged?.Invoke(false);
+
+        CancelInvoke(nameof(RetryLoadAd));
         Invoke(nameof(RetryLoadAd), 5f);
     }
 
     private void RetryLoadAd()
     {
-        rewardedAd?.LoadAd();
+        if (rewardedAd == null)
+        {
+            Debug.LogWarning("MediationAds: RetryLoadAd llamado pero rewardedAd es null.");
+            return;
+        }
+
+        Debug.Log("MediationAds: Reintentando cargar anuncio...");
+        rewardedAd.LoadAd();
     }
 
     private void OnAdRewarded(LevelPlayAdInfo adInfo, LevelPlayReward reward)
     {
-        rewardEarned = true; // Anotamos que ha ganado el premio
+        rewardEarned = true;
+        Debug.Log("MediationAds: Usuario recompensado por la red de anuncios.");
     }
 
     private void OnAdClosed(LevelPlayAdInfo adInfo)
     {
-        // Pedimos otro anuncio para tenerlo listo
+        Debug.Log($"MediationAds: Anuncio cerrado. rewardEarned = {rewardEarned}");
+
         rewardedAd?.LoadAd();
         OnAdAvailabilityChanged?.Invoke(IsAdReady());
 
-        // ¡EL ARREGLO! En lugar de ejecutarlo ya, iniciamos una corrutina de seguridad
         StartCoroutine(WaitAndNotifyReward());
     }
 
@@ -102,8 +152,12 @@ public class MediationAds : MonoBehaviour
             AdsProgressManager.RegisterAdViewed();
         }
 
-        onAdFinishedCallback?.Invoke(rewardEarned);
+        Action<bool> callback = onAdFinishedCallback;
         onAdFinishedCallback = null;
+
+        callback?.Invoke(rewardEarned);
+
+        rewardEarned = false;
     }
 
     public void ShowRewardedAd(Action<bool> onAdFinished)
@@ -111,12 +165,16 @@ public class MediationAds : MonoBehaviour
         if (rewardedAd != null && rewardedAd.IsAdReady())
         {
             onAdFinishedCallback = onAdFinished;
-            rewardEarned = false; // Reseteamos siempre antes de mostrar
+            rewardEarned = false;
+
+            Debug.Log("MediationAds: Mostrando anuncio recompensado.");
             rewardedAd.ShowAd();
+
             OnAdAvailabilityChanged?.Invoke(false);
         }
         else
         {
+            Debug.LogWarning("MediationAds: Se intentó mostrar un anuncio pero no estaba listo.");
             OnAdAvailabilityChanged?.Invoke(false);
             onAdFinished?.Invoke(false);
         }

@@ -13,6 +13,9 @@ public class AdsInicializer : MonoBehaviour
 
     public static event Action OnLevelPlayInitialized;
 
+    // ? NUEVO: flag para saber si LevelPlay ya se inicializó
+    public static bool IsInitialized { get; private set; } = false;
+
     void Awake()
     {
         InitializeLevelPlay();
@@ -25,14 +28,21 @@ public class AdsInicializer : MonoBehaviour
 #elif UNITY_IOS
         _appKey = _iOSAppKey;
 #endif
+
         LevelPlay.OnInitSuccess += OnInitializationComplete;
         LevelPlay.OnInitFailed += OnInitializationFailed;
+
         LevelPlay.Init(_appKey);
     }
 
     private void OnInitializationComplete(LevelPlayConfiguration config)
     {
         Debug.Log("LevelPlay SDK initialization complete.");
+
+        // ? Marcamos que ya está inicializado
+        IsInitialized = true;
+
+        // Avisamos a todos los scripts que esperan la inicialización
         OnLevelPlayInitialized?.Invoke();
     }
 

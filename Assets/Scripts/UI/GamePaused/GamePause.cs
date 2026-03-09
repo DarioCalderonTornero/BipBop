@@ -11,7 +11,7 @@ public class GamePause : MonoBehaviour
     public event EventHandler OnPauseMenu;
 
     [Header("UI Containers")]
-    [SerializeField] private GameObject visualContainer; // <-- ¡NUEVO! Arrastra aquí tu "VisualContainer"
+    [SerializeField] private GameObject visualContainer;
 
     [Header("Main Buttons")]
     [SerializeField] private Button pauseGameButton;
@@ -26,13 +26,15 @@ public class GamePause : MonoBehaviour
     [SerializeField] private Button musicCancelVolumeButton;
     [SerializeField] private Button closeSoundSettingsButton;
 
-    [Header("Sound Images")]
-    [SerializeField] private Image getCancelSoundVolumeImage;
-    [SerializeField] private Image getSoundVolumeImage;
+    [Header("Sound Icons")]
+    [SerializeField] private Image soundIcon;
 
-    [Header("Music Images")]
-    [SerializeField] private Image getCancelMusicVolumeImage;
-    [SerializeField] private Image getMusicVolumeImage;
+    [Header("Music Icons")]
+    [SerializeField] private Image musicIcon;
+
+    [Header("Icon Colors")]
+    [SerializeField] private Color activeColor = Color.white;
+    [SerializeField] private Color disabledColor = new Color(0.65f, 0.65f, 0.65f, 1f);
 
     [Header("Sound Texts")]
     [SerializeField] private TextMeshProUGUI soundChangeText;
@@ -65,7 +67,6 @@ public class GamePause : MonoBehaviour
         // PAUSE
         pauseGameButton.onClick.AddListener(() =>
         {
-            // AÑÁDELO AQUÍ: Lo encendemos justo antes de que empiece la animación de entrada
             if (visualContainer != null)
                 visualContainer.SetActive(true);
 
@@ -94,44 +95,36 @@ public class GamePause : MonoBehaviour
             SceneLoader.LoadScene(SceneLoader.Scene.Menu);
         });
 
+        // SOUND CHANGE
         soundChangeButton.onClick.AddListener(() =>
         {
             SoundManager.Instance.ChangeSoundVolume();
             UpdateSoundText();
-
-            bool muted = SoundManager.Instance.GetSoundVolume() == 0;
-            getCancelSoundVolumeImage.gameObject.SetActive(muted);
-            getSoundVolumeImage.gameObject.SetActive(!muted);
+            UpdateSoundIcon();
         });
 
+        // MUSIC CHANGE
         musicChangeButton.onClick.AddListener(() =>
         {
             MusicManager.Instance.ChangeMusicVolume();
             UpdateMusicText();
-
-            bool muted = MusicManager.Instance.GetMusicVolume() == 0;
-            getCancelMusicVolumeImage.gameObject.SetActive(muted);
-            getMusicVolumeImage.gameObject.SetActive(!muted);
+            UpdateMusicIcon();
         });
 
+        // SOUND CANCEL
         soundCancelVolumeButton.onClick.AddListener(() =>
         {
             SoundManager.Instance.GetCancelVolume();
             UpdateSoundText();
-
-            bool muted = SoundManager.Instance.GetSoundVolume() == 0;
-            getCancelSoundVolumeImage.gameObject.SetActive(muted);
-            getSoundVolumeImage.gameObject.SetActive(!muted);
+            UpdateSoundIcon();
         });
 
+        // MUSIC CANCEL
         musicCancelVolumeButton.onClick.AddListener(() =>
         {
             MusicManager.Instance.CancelMusicVolume();
             UpdateMusicText();
-
-            bool muted = MusicManager.Instance.GetMusicVolume() == 0;
-            getCancelMusicVolumeImage.gameObject.SetActive(muted);
-            getMusicVolumeImage.gameObject.SetActive(!muted);
+            UpdateMusicIcon();
         });
 
         closeSoundSettingsButton.onClick.AddListener(() =>
@@ -148,30 +141,22 @@ public class GamePause : MonoBehaviour
         UpdateSoundText();
         UpdateMusicText();
 
-        bool soundMuted = SoundManager.Instance.GetSoundVolume() == 0;
-        getCancelSoundVolumeImage.gameObject.SetActive(soundMuted);
-        getSoundVolumeImage.gameObject.SetActive(!soundMuted);
-
-        bool musicMuted = MusicManager.Instance.GetMusicVolume() == 0;
-        getCancelMusicVolumeImage.gameObject.SetActive(musicMuted);
-        getMusicVolumeImage.gameObject.SetActive(!musicMuted);
+        UpdateSoundIcon();
+        UpdateMusicIcon();
     }
 
     private void StartResumeFlow()
     {
         isResuming = true;
 
-        // 1. Apagamos el contenedor visual de golpe para limpiar la pantalla
         if (visualContainer != null)
             visualContainer.SetActive(false);
 
-        // Bloqueamos interacción por seguridad
         resumeGameButton.interactable = false;
         pauseGameButton.interactable = false;
         settingsButton.interactable = false;
         mainMenuButton.interactable = false;
 
-        // 2. Lanzamos la cuenta atrás 
         resumeCountdownUI.Play(OnResumeCountdownFinished);
 
         Time.timeScale = 0f;
@@ -189,10 +174,6 @@ public class GamePause : MonoBehaviour
         pauseGameButton.interactable = true;
         settingsButton.interactable = true;
         mainMenuButton.interactable = true;
-
-        // BÓRRALO DE AQUÍ:
-        // if (visualContainer != null)
-        //    visualContainer.SetActive(true);
 
         isResuming = false;
     }
@@ -217,6 +198,22 @@ public class GamePause : MonoBehaviour
 
         float vol = MusicManager.Instance.GetMusicVolume();
         musicChangeText.text = musicVolumeLabel.GetLocalizedString(vol);
+    }
+
+    private void UpdateSoundIcon()
+    {
+        if (soundIcon == null) return;
+
+        bool muted = SoundManager.Instance.GetSoundVolume() == 0;
+        soundIcon.color = muted ? disabledColor : activeColor;
+    }
+
+    private void UpdateMusicIcon()
+    {
+        if (musicIcon == null) return;
+
+        bool muted = MusicManager.Instance.GetMusicVolume() == 0;
+        musicIcon.color = muted ? disabledColor : activeColor;
     }
 
     private IEnumerator InvokeNormalAnim()

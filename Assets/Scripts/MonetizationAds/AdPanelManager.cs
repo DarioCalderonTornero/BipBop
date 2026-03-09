@@ -2,10 +2,9 @@
 using System.Collections;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Localization; // ✅ Localization
+using UnityEngine.Localization;
 using UnityEngine.UI;
 using UnityEngine.Localization.Settings;
-
 
 public class AdPanelManager : MonoBehaviour
 {
@@ -18,27 +17,27 @@ public class AdPanelManager : MonoBehaviour
     [SerializeField] private Button openAdPanelButton;
 
     [Header("Botón bonus (texto + respiración)")]
-    [SerializeField] private RectTransform bonusButtonRoot;     // contenedor (NO escalar)
-    [SerializeField] private RectTransform bonusButtonVisual;   // ✅ hijo visual (SÍ escalar)
-    [SerializeField] private TextMeshProUGUI bonusLeftText;     // texto debajo
+    [SerializeField] private RectTransform bonusButtonRoot;
+    [SerializeField] private RectTransform bonusButtonVisual;
+    [SerializeField] private TextMeshProUGUI bonusLeftText;
 
     [Header("Localization (texto botón bonus)")]
-    [SerializeField] private LocalizedString lsBonusRemaining;  // key: ads_bonus_remaining  => "Quedan {0} bonus hoy" (Smart)
-    [SerializeField] private LocalizedString lsGet20Coins;      // key: ads_bonus_get_20     => "Conseguir 20 monedas"
+    [SerializeField] private LocalizedString lsBonusRemaining;
+    [SerializeField] private LocalizedString lsGet20Coins;
 
-    [SerializeField] private float breatheAmount = 0.05f;       // +5%
-    [SerializeField] private float breathePeriod = 2.4f;        // lento
+    [SerializeField] private float breatheAmount = 0.05f;
+    [SerializeField] private float breathePeriod = 2.4f;
     private Coroutine breatheRoutine;
     private Vector3 visualBaseScale = Vector3.one;
 
-    private Coroutine bonusTextRoutine;                         // ✅ para evitar solapes de async
+    private Coroutine bonusTextRoutine;
 
     [Header("Otros scripts")]
     [SerializeField] private CurrencyManager gameManager;
 
     [Header("Progress UI (3 bonus: 30 / 50 / 80)")]
-    [SerializeField] private Image[] milestoneIcons;            // tamaño 4
-    [SerializeField] private TextMeshProUGUI[] milestoneTexts;  // tamaño 4
+    [SerializeField] private Image[] milestoneIcons;
+    [SerializeField] private TextMeshProUGUI[] milestoneTexts;
     [SerializeField] private Image progressFillImage;
     [SerializeField] private Color milestoneGray = new Color(0.65f, 0.65f, 0.65f, 1f);
     [SerializeField] private Color milestoneColor = Color.white;
@@ -61,23 +60,25 @@ public class AdPanelManager : MonoBehaviour
     private Coroutine animRoutine;
     private bool isOpen = false;
 
-    // ---------- Daily Progress ----------
     private const string PREF_LAST_DAY = "ADS_LAST_DAY";
     private const string PREF_WATCHED_TODAY = "ADS_WATCHED_TODAY";
 
-    // ✅ Sólo los 3 bonus diarios
     private static readonly int[] DailyBonusRewards = { 30, 50, 80 };
     private const int PostBonusReward = 20;
-    private int DailyBonusLimit => DailyBonusRewards.Length; // 3
+    private int DailyBonusLimit => DailyBonusRewards.Length;
 
     [ContextMenu("Reset Ads Today")]
     public void ResetAdsToday()
     {
-        PlayerPrefs.DeleteKey("ADS_LAST_DAY");
-        PlayerPrefs.DeleteKey("ADS_WATCHED_TODAY");
+        PlayerPrefs.DeleteKey(PREF_LAST_DAY);
+        PlayerPrefs.DeleteKey(PREF_WATCHED_TODAY);
         PlayerPrefs.Save();
 
         Debug.Log("Ads diarios reseteados.");
+
+        RefreshDailyReset();
+        RefreshUI();
+        RefreshBonusButtonUI();
     }
 
     private void Start()
@@ -110,15 +111,47 @@ public class AdPanelManager : MonoBehaviour
             openAdPanelButton.onClick.AddListener(ShowPanel);
         }
 
-        // Captura escala base del "visual" cuando el layout ya está asentado
         StartCoroutine(CaptureVisualBaseScaleNextFrame());
 
         RefreshDailyReset();
         RefreshUI();
         RefreshBonusButtonUI();
-
-        // La respiración SIEMPRE activa
         EnsureBreathing();
+
+        // Intenta encontrar CurrencyManager si no está asignado
+        CacheCurrencyManager();
+
+        // Sincroniza el estado inicial del botón por si el anuncio ya estaba cargado
+        SyncAdButtonState();
+    }
+
+    private void OnEnable()
+    {
+        if (MediationAds.Instance != null)
+        {
+            MediationAds.Instance.OnAdAvailabilityChanged -= HandleAdReadyChanged;
+            MediationAds.Instance.OnAdAvailabilityChanged += HandleAdReadyChanged;
+        }
+
+        LocalizationSettings.SelectedLocaleChanged += HandleLocaleChanged;
+
+        SyncAdButtonState();
+    }
+
+    private void OnDisable()
+    {
+        if (MediationAds.Instance != null)
+            MediationAds.Instance.OnAdAvailabilityChanged -= HandleAdReadyChanged;
+
+        LocalizationSettings.SelectedLocaleChanged -= HandleLocaleChanged;
+
+        StopBreathing();
+
+        if (bonusTextRoutine != null)
+        {
+            StopCoroutine(bonusTextRoutine);
+            bonusTextRoutine = null;
+        }
     }
 
     private void OnApplicationFocus(bool hasFocus)
@@ -128,8 +161,9 @@ public class AdPanelManager : MonoBehaviour
         RefreshDailyReset();
         RefreshUI();
         RefreshBonusButtonUI();
-
         EnsureBreathing();
+        CacheCurrencyManager();
+        SyncAdButtonState();
     }
 
     public void ShowPanel()
@@ -140,14 +174,12 @@ public class AdPanelManager : MonoBehaviour
         RefreshDailyReset();
         RefreshUI();
         RefreshBonusButtonUI();
-
         EnsureBreathing();
+        CacheCurrencyManager();
+        SyncAdButtonState();
 
         isOpen = true;
         adPanel.SetActive(true);
-
-        if (watchAdButton != null)
-            watchAdButton.interactable = (Mediation != null) && Mediation.IsAdReady();
 
         if (animRoutine != null) StopCoroutine(animRoutine);
         animRoutine = StartCoroutine(PopInRoutine());
@@ -179,27 +211,65 @@ public class AdPanelManager : MonoBehaviour
             if (!rewardEarned)
             {
                 Debug.Log("AdPanelManager: Anuncio cancelado o fallido. No hay recompensa.");
+                RefreshUI();
+                RefreshBonusButtonUI();
+                SyncAdButtonState();
                 return;
             }
 
             RefreshDailyReset();
 
             int watched = PlayerPrefs.GetInt(PREF_WATCHED_TODAY, 0);
-
             int reward = GetRewardForWatchIndex(watched);
+
             PlayerPrefs.SetInt(PREF_WATCHED_TODAY, watched + 1);
             PlayerPrefs.Save();
 
-            if (reward > 0 && gameManager != null)
-                gameManager.AddCoins(reward);
+            CurrencyManager currency = GetCurrencyManager();
+
+            if (reward > 0 && currency != null)
+            {
+                currency.AddCoins(reward);
+                Debug.Log($"AdPanelManager: Recompensa otorgada correctamente: {reward} monedas.");
+            }
+            else
+            {
+                Debug.LogWarning($"AdPanelManager: No se pudo otorgar la recompensa. reward={reward}, CurrencyManager={(currency == null ? "NULL" : "OK")}");
+            }
 
             RefreshUI();
             RefreshBonusButtonUI();
             EnsureBreathing();
+            SyncAdButtonState();
         });
     }
 
-    // ------------------ Bonus helpers ------------------
+    private CurrencyManager GetCurrencyManager()
+    {
+        if (gameManager == null)
+            CacheCurrencyManager();
+
+        return gameManager;
+    }
+
+    private void CacheCurrencyManager()
+    {
+#if UNITY_2023_1_OR_NEWER
+        if (gameManager == null)
+            gameManager = FindFirstObjectByType<CurrencyManager>(FindObjectsInactive.Exclude);
+#else
+        if (gameManager == null)
+            gameManager = FindObjectOfType<CurrencyManager>();
+#endif
+    }
+
+    private void SyncAdButtonState()
+    {
+        if (watchAdButton == null) return;
+
+        bool ready = Mediation != null && Mediation.IsAdReady();
+        watchAdButton.interactable = ready;
+    }
 
     private int GetRemainingBonusToday()
     {
@@ -209,13 +279,12 @@ public class AdPanelManager : MonoBehaviour
 
     private int GetRewardForWatchIndex(int watchedSoFarToday)
     {
-        if (watchedSoFarToday < 0) watchedSoFarToday = 0;
+        if (watchedSoFarToday < 0)
+            watchedSoFarToday = 0;
 
-        // Primeros 3 anuncios: bonus especiales
         if (watchedSoFarToday < DailyBonusRewards.Length)
             return DailyBonusRewards[watchedSoFarToday];
 
-        // A partir de ahí: 20 siempre
         return PostBonusReward;
     }
 
@@ -233,24 +302,24 @@ public class AdPanelManager : MonoBehaviour
     {
         if (remaining > 0)
         {
-            // ✅ "Quedan {0} bonus hoy"
             lsBonusRemaining.Arguments = new object[] { remaining };
             var op = lsBonusRemaining.GetLocalizedStringAsync();
             yield return op;
-            if (bonusLeftText != null) bonusLeftText.text = op.Result;
+
+            if (bonusLeftText != null)
+                bonusLeftText.text = op.Result;
         }
         else
         {
-            // ✅ "Conseguir 20 monedas"
             var op = lsGet20Coins.GetLocalizedStringAsync();
             yield return op;
-            if (bonusLeftText != null) bonusLeftText.text = op.Result;
+
+            if (bonusLeftText != null)
+                bonusLeftText.text = op.Result;
         }
 
         bonusTextRoutine = null;
     }
-
-    // ------------------ Daily reset ------------------
 
     private void RefreshDailyReset()
     {
@@ -265,13 +334,10 @@ public class AdPanelManager : MonoBehaviour
         }
     }
 
-    // ------------------ Main UI refresh ------------------
-
     private void RefreshUI()
     {
         int watched = PlayerPrefs.GetInt(PREF_WATCHED_TODAY, 0);
 
-        // Los 3 bonus normales sí se encienden
         for (int i = 0; i < DailyBonusLimit; i++)
         {
             bool completed = watched >= (i + 1);
@@ -286,8 +352,7 @@ public class AdPanelManager : MonoBehaviour
                 milestoneTexts[i].color = textColor;
         }
 
-        // La última imagen/texto (+20) siempre apagada
-        int postBonusIndex = DailyBonusLimit; // índice 3
+        int postBonusIndex = DailyBonusLimit;
 
         if (milestoneIcons != null && postBonusIndex < milestoneIcons.Length && milestoneIcons[postBonusIndex] != null)
             milestoneIcons[postBonusIndex].color = milestoneGray;
@@ -295,7 +360,6 @@ public class AdPanelManager : MonoBehaviour
         if (milestoneTexts != null && postBonusIndex < milestoneTexts.Length && milestoneTexts[postBonusIndex] != null)
             milestoneTexts[postBonusIndex].color = milestoneGray;
 
-        // Si hubiera elementos extra sobrantes, también apagados
         if (milestoneIcons != null)
         {
             for (int i = postBonusIndex + 1; i < milestoneIcons.Length; i++)
@@ -314,7 +378,6 @@ public class AdPanelManager : MonoBehaviour
             }
         }
 
-        // Fill manual
         if (progressFillImage != null)
             progressFillImage.fillAmount = GetProgressFillAmount(watched);
 
@@ -329,16 +392,13 @@ public class AdPanelManager : MonoBehaviour
 
     private float GetProgressFillAmount(int watched)
     {
-        if (watched <= 0) return 0f;     // ningún vídeo
-        if (watched == 1) return 0.16f;  // tras el primero
-        if (watched == 2) return 0.35f;  // tras el segundo
-        if (watched == 3) return 0.66f;  // tras el tercero
+        if (watched <= 0) return 0f;
+        if (watched == 1) return 0.16f;
+        if (watched == 2) return 0.35f;
+        if (watched == 3) return 0.66f;
 
-        // Ya está en fase de anuncios de 20 monedas
         return 1f;
     }
-
-    // ------------------ Breathing (SIEMPRE) ------------------
 
     private IEnumerator CaptureVisualBaseScaleNextFrame()
     {
@@ -361,8 +421,6 @@ public class AdPanelManager : MonoBehaviour
     private IEnumerator BreatheRoutine()
     {
         RectTransform target = bonusButtonVisual != null ? bonusButtonVisual : bonusButtonRoot;
-
-        // ✅ Base scale fija (evita “runaway”)
         Vector3 baseScale = target.localScale;
 
         float t = 0f;
@@ -391,8 +449,6 @@ public class AdPanelManager : MonoBehaviour
         else if (bonusButtonRoot != null)
             bonusButtonRoot.localScale = visualBaseScale;
     }
-
-    // ------------------ Panel animations ------------------
 
     private IEnumerator PopInRoutine()
     {
@@ -447,30 +503,6 @@ public class AdPanelManager : MonoBehaviour
         adPanel.SetActive(false);
         panelRT.localScale = panelBaseScale;
         animRoutine = null;
-    }
-
-    private void OnEnable()
-    {
-        if (MediationAds.Instance != null)
-            MediationAds.Instance.OnAdAvailabilityChanged += HandleAdReadyChanged;
-
-        LocalizationSettings.SelectedLocaleChanged += HandleLocaleChanged;
-    }
-
-    private void OnDisable()
-    {
-        if (MediationAds.Instance != null)
-            MediationAds.Instance.OnAdAvailabilityChanged -= HandleAdReadyChanged;
-
-        LocalizationSettings.SelectedLocaleChanged -= HandleLocaleChanged;
-
-        StopBreathing();
-
-        if (bonusTextRoutine != null)
-        {
-            StopCoroutine(bonusTextRoutine);
-            bonusTextRoutine = null;
-        }
     }
 
     private void HandleLocaleChanged(UnityEngine.Localization.Locale _)
