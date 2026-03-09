@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dd838f2904a233b4d96de3d439a1ffba, type: 3}
+  m_Name: AnimacionPoseidon
+  m_EditorClassIdentifier: 
+  negativeKeyword: NEGATIVE_ON
+  shineKeyword: SHINE_ON
+  contrastKeyword: CONTRAST_ON
+  warpKeyword: WARP_ON
+  negativeAmountProp: _NegativeAmount
+  negativeWaitSeconds: 4
+  negativeRiseSeconds: 0.3
+  negativeHoldSeconds: 3
+  negativeFallSeconds: 0.5
+  shineColorProp: _ShineColor
+  shineLocationProp: _ShineLocation
+  shineRotateProp: _ShineRotate
+  shineWidthProp: _ShineWidth
+  shineGlowProp: _ShineGlow
+  shineLoopSeconds: 1
+  shineWidth: 0.1
+  shineGlow: 0.35
+  shineRotate: 1.5
+  shineColor: {r: 0, g: 0.92843366, b: 1, a: 1}
+  contrastProp: _Contrast
+  brightnessProp: _Brightness
+  contrast: 1.25
+  brightness: 0
+  warpStrengthProp: _WarpStrength
+  warpSpeedProp: _WarpSpeed
+  warpScaleProp: _WarpScale
+  warpStrength: 0.002
+  warpSpeed: 4
+  warpScale: 0.5

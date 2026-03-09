@@ -28,8 +28,9 @@ MonoBehaviour:
   unlockByScore: 0
   requiredScoreKey: 
   requiredScoreValue: 0
-  unlockByOwningAvatars: 0
-  requiredOwnedAvatarIds: []
+  unlockByOwningAvatars: 1
+  requiredOwnedAvatarIds:
+  - NormalAvatar
   unlockDescriptionLS:
     m_TableReference:
       m_TableCollectionName: 
@@ -60,10 +61,10 @@ MonoBehaviour:
     m_WaitForCompletion: 0
     m_LocalVariables: []
   ownedMessageFallback: 
-  hasShaderEffect: 0
+  hasShaderEffect: 1
   effectType: 0
-  effectMaterial: {fileID: 0}
-  fxPreset: {fileID: 0}
+  effectMaterial: {fileID: 2100000, guid: f1cb59c9505020540815474cee499e00, type: 2}
+  fxPreset: {fileID: 11400000, guid: aecd745b6dfd18e4694d2f07374c2fdf, type: 2}
   unlockByAdsViewed: 0
   requiredAdsViewed: 0
   adsProgressDescriptionLS:
