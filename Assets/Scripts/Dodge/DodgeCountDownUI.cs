@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization;
 
 public class DodgeCountDownUI : MonoBehaviour
 {
@@ -9,6 +10,9 @@ public class DodgeCountDownUI : MonoBehaviour
     public TextMeshProUGUI countDownText;
 
     [SerializeField] private Animator myAnimator;
+
+    [Header("Localization")]
+    public LocalizedString goMessage;
 
     private bool isCustomMessage = false;
 
@@ -74,6 +78,17 @@ public class DodgeCountDownUI : MonoBehaviour
         }
     }
 
+    public void ShowMessage(LocalizedString localizedMessage)
+    {
+        isCustomMessage = true;
+
+        if (countDownText != null)
+        {
+            countDownText.gameObject.SetActive(true);
+            countDownText.text = localizedMessage.GetLocalizedString();
+        }
+    }
+
     public void ShowGo(float duration = 0.7f)
     {
         StartCoroutine(ShowGoRoutine(duration));
@@ -86,7 +101,7 @@ public class DodgeCountDownUI : MonoBehaviour
         if (countDownText != null)
         {
             countDownText.gameObject.SetActive(true);
-            countDownText.text = "GO!";
+            countDownText.text = goMessage.GetLocalizedString();
         }
 
         yield return new WaitForSeconds(duration);

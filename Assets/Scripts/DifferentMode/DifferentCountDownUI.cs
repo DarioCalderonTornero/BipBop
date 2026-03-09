@@ -1,6 +1,7 @@
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization;
 
 public class DifferentCountDownUI : MonoBehaviour
 {
@@ -9,6 +10,9 @@ public class DifferentCountDownUI : MonoBehaviour
     public TextMeshProUGUI countDownText;
 
     [SerializeField] private Animator myAnimator;
+
+    [Header("Localization")]
+    public LocalizedString goMessage;
 
     private bool isCustomMessage = false;
 
@@ -49,6 +53,7 @@ public class DifferentCountDownUI : MonoBehaviour
     public void Hide()
     {
         countDownText.gameObject.SetActive(false);
+        isCustomMessage = false;
     }
 
     public void ShowMessage(string message)
@@ -56,6 +61,13 @@ public class DifferentCountDownUI : MonoBehaviour
         isCustomMessage = true;
         countDownText.gameObject.SetActive(true);
         countDownText.text = message;
+    }
+
+    public void ShowMessage(LocalizedString localizedMessage)
+    {
+        isCustomMessage = true;
+        countDownText.gameObject.SetActive(true);
+        countDownText.text = localizedMessage.GetLocalizedString();
     }
 
     public void ShowGo(float duration = 0.7f)
@@ -68,7 +80,7 @@ public class DifferentCountDownUI : MonoBehaviour
         isCustomMessage = true;
 
         countDownText.gameObject.SetActive(true);
-        countDownText.text = "GO!";
+        countDownText.text = goMessage.GetLocalizedString();
 
         yield return new WaitForSeconds(duration);
 
@@ -87,4 +99,3 @@ public class DifferentCountDownUI : MonoBehaviour
         }
     }
 }
-

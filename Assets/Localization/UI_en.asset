@@ -1165,6 +1165,10 @@ MonoBehaviour:
     m_Localized: Click on any player in the ranking to view their profile.
     m_Metadata:
       m_Items: []
+  - m_Id: 42004846740471808
+    m_Localized: 'Colliding meteorites:'
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

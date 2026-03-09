@@ -147,6 +147,12 @@ public class SettingsUI : MonoBehaviour
     [Header("FPS UI")]
     [SerializeField] private TextMeshProUGUI fpsValueText;
 
+    [Header("FPS Sprites")]
+    [SerializeField] private Sprite fps60Sprite;
+    [SerializeField] private Sprite fps90Sprite;
+    [SerializeField] private Sprite fps120Sprite;
+    [SerializeField] private Sprite fpsAutoSprite;
+
     private void Awake()
     {
         openSettingsButton.onClick.AddListener(() =>
@@ -303,8 +309,36 @@ public class SettingsUI : MonoBehaviour
 
     private void RefreshFPSValue()
     {
-        if (fpsValueText == null) return;
-        fpsValueText.text = FPSManager.GetFPSDisplay(); // "60" o "90" o "120" o "AUTO"
+        int currentFPS = FPSManager.GetSavedFPS();
+
+        if (fpsValueText != null)
+            fpsValueText.text = FPSManager.GetFPSDisplay(); // "60" / "90" / "120" / "AUTO"
+
+        if (FPSImage != null)
+        {
+            switch (currentFPS)
+            {
+                case 60:
+                    FPSImage.sprite = fps60Sprite;
+                    break;
+
+                case 90:
+                    FPSImage.sprite = fps90Sprite;
+                    break;
+
+                case 120:
+                    FPSImage.sprite = fps120Sprite;
+                    break;
+
+                case -1: // AUTO
+                    FPSImage.sprite = fpsAutoSprite;
+                    break;
+
+                default:
+                    FPSImage.sprite = fpsAutoSprite;
+                    break;
+            }
+        }
     }
 
     private void LocalizationSettings_SelectedLocaleChanged(Locale newLocale)

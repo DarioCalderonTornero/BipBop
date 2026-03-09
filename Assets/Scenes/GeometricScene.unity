@@ -32357,6 +32357,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   countDownText: {fileID: 1119433526}
   myAnimator: {fileID: 1960044258}
+  goMessage:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 43894914908160
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  references:
+    version: 2
+    RefIds: []
 --- !u!225 &1960044257
 CanvasGroup:
   m_ObjectHideFlags: 0

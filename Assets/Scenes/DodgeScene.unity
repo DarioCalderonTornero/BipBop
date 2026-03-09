@@ -2569,6 +2569,7 @@ GameObject:
   - component: {fileID: 369116247}
   - component: {fileID: 369116249}
   - component: {fileID: 369116248}
+  - component: {fileID: 369116250}
   m_Layer: 5
   m_Name: 'Meteoritos chocados:'
   m_TagString: Untagged
@@ -2694,6 +2695,46 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 369116246}
   m_CullTransparentMesh: 1
+--- !u!114 &369116250
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 369116246}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 56eb0353ae6e5124bb35b17aff880f16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_StringReference:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 42004846740471808
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  m_FormatArguments: []
+  m_UpdateString:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 369116248}
+        m_TargetAssemblyTypeName: TMPro.TextMeshProUGUI, Unity.TextMeshPro
+        m_MethodName: set_text
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  references:
+    version: 2
+    RefIds: []
 --- !u!1 &378048297
 GameObject:
   m_ObjectHideFlags: 0
@@ -9144,7 +9185,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   countDownText: {fileID: 349043166}
   myAnimator: {fileID: 1609225736}
+  goMessage:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 43894914908160
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
   forceVisibleDuringCountdown: 1
+  references:
+    version: 2
+    RefIds: []
 --- !u!225 &1609225735
 CanvasGroup:
   m_ObjectHideFlags: 0

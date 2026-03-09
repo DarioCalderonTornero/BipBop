@@ -1,6 +1,7 @@
 ﻿using TMPro;
 using UnityEngine;
 using System.Collections;
+using UnityEngine.Localization;
 
 public class ColorCountDownUI : MonoBehaviour
 {
@@ -10,6 +11,9 @@ public class ColorCountDownUI : MonoBehaviour
 
     private Animator myAnimator;
     private bool isCustomMessage = false;
+
+    [Header("Localization")]
+    public LocalizedString goMessage;
 
     private void Awake()
     {
@@ -42,6 +46,7 @@ public class ColorCountDownUI : MonoBehaviour
     public void Hide()
     {
         countDownText.gameObject.SetActive(false);
+        isCustomMessage = false;
     }
 
     public void ShowMessage(string message)
@@ -49,6 +54,13 @@ public class ColorCountDownUI : MonoBehaviour
         isCustomMessage = true;
         countDownText.gameObject.SetActive(true);
         countDownText.text = message;
+    }
+
+    public void ShowMessage(LocalizedString localizedMessage)
+    {
+        isCustomMessage = true;
+        countDownText.gameObject.SetActive(true);
+        countDownText.text = localizedMessage.GetLocalizedString();
     }
 
     public void ShowGo(float duration = 0.7f)
@@ -61,7 +73,7 @@ public class ColorCountDownUI : MonoBehaviour
         isCustomMessage = true;
 
         countDownText.gameObject.SetActive(true);
-        countDownText.text = "GO!";
+        countDownText.text = goMessage.GetLocalizedString();
 
         yield return new WaitForSeconds(duration);
 

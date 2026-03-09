@@ -863,7 +863,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 32641249560199168
-    m_Localized: "Pulsa el el panel con el color correcto seg\xFAn la ronda"
+    m_Localized: "Pulsa el panel con el color correcto seg\xFAn la ronda"
     m_Metadata:
       m_Items: []
   - m_Id: 32641390400733184
@@ -1168,6 +1168,10 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 41963071845924864
     m_Localized: Pulsa sobre cualquier jugador en el ranking para ver su perfil
+    m_Metadata:
+      m_Items: []
+  - m_Id: 42004846740471808
+    m_Localized: 'Meteoritos chocados:'
     m_Metadata:
       m_Items: []
   references:

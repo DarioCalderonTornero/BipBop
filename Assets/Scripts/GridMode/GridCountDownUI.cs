@@ -1,6 +1,7 @@
 ﻿using TMPro;
 using UnityEngine;
 using System.Collections;
+using UnityEngine.Localization;
 
 public class GridCountDownUI : MonoBehaviour
 {
@@ -9,6 +10,9 @@ public class GridCountDownUI : MonoBehaviour
     public TextMeshProUGUI countDownText;
 
     [SerializeField] private Animator myAnimator;
+
+    [Header("Localization")]
+    public LocalizedString goMessage;
 
     private bool isCustomMessage = false;
 
@@ -46,7 +50,7 @@ public class GridCountDownUI : MonoBehaviour
     public void Show()
     {
         isCustomMessage = false;
-        forceVisibleDuringCountdown = true;   // ✅ clave
+        forceVisibleDuringCountdown = true;
         countDownText.gameObject.SetActive(true);
 
         if (myAnimator != null)
@@ -55,8 +59,9 @@ public class GridCountDownUI : MonoBehaviour
 
     public void Hide()
     {
-        forceVisibleDuringCountdown = false;  // ✅ clave
+        forceVisibleDuringCountdown = false;
         countDownText.gameObject.SetActive(false);
+        isCustomMessage = false;
     }
 
     public void ShowMessage(string message)
@@ -64,6 +69,13 @@ public class GridCountDownUI : MonoBehaviour
         isCustomMessage = true;
         countDownText.gameObject.SetActive(true);
         countDownText.text = message;
+    }
+
+    public void ShowMessage(LocalizedString localizedMessage)
+    {
+        isCustomMessage = true;
+        countDownText.gameObject.SetActive(true);
+        countDownText.text = localizedMessage.GetLocalizedString();
     }
 
     public void ShowGo(float duration = 0.7f)
@@ -74,10 +86,10 @@ public class GridCountDownUI : MonoBehaviour
     private IEnumerator ShowGoRoutine(float duration)
     {
         isCustomMessage = true;
-        forceVisibleDuringCountdown = false; // ✅ ya no hace falta
+        forceVisibleDuringCountdown = false;
 
         countDownText.gameObject.SetActive(true);
-        countDownText.text = "GO!";
+        countDownText.text = goMessage.GetLocalizedString();
 
         yield return new WaitForSeconds(duration);
 
