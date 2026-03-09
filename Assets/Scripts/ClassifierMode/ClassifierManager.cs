@@ -554,10 +554,10 @@ public class ClassifierManager : MonoBehaviour, IGameOverClient
     {
         if (isPausedByOffer) return;
 
+        if (inputModule != null && !inputModule.isInputActive) return;
+
         if (swipeAudioclip != null && SoundManager.Instance != null)
         {
-            SoundManager.Instance.PlaySound(swipeAudioclip, 1.0f);
-            SoundManager.Instance.PlaySound(swipeAudioclip, 1.0f);
             SoundManager.Instance.PlaySound(swipeAudioclip, 1.0f);
         }
 
@@ -570,8 +570,7 @@ public class ClassifierManager : MonoBehaviour, IGameOverClient
 
         if (effectiveDirection == currentCorrectDirection)
         {
-            scoreModule.AddPoint(1);
-            Haptics.TryVibrate();
+            scoreModule.AddPoint(1); 
             timerModule.ApplySuccessReduction();
             AnimateSuccessAndRespawn(currentCorrectDirection);
         }

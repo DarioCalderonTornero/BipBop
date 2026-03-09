@@ -27,6 +27,11 @@ public class DailyLuckSpinnerUI : MonoBehaviour
     [SerializeField] private float spinDuration = 2.0f;
     [SerializeField] private AnimationCurve slowDownCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
 
+    [Header("Spin Sounds")]
+    [SerializeField] private AudioClip tickAudioClip; // El ÚNICO sonido que usaremos
+    [Tooltip("X: Pitch rápido (agudo), Y: Pitch lento (grave)")]
+    [SerializeField] private Vector2 pitchRange = new Vector2(1.6f, 0.7f);
+
     [Header("Overlay Fade")]
     [SerializeField] private float overlayFadeIn = 0.12f;
     [SerializeField] private float overlayFadeOut = 0.12f;
@@ -89,14 +94,8 @@ public class DailyLuckSpinnerUI : MonoBehaviour
         HideOverlayInstant();
     }
 
-    /// <summary>
-    /// feedbackMsg: el texto que quieres mostrar debajo al terminar (ej: "¡Nuevo fondo conseguido!" o "+75 monedas").
-    /// onFinished: se llama JUSTO al terminar el spin (para que tu manager resuelva reward ahí).
-    /// onClosed: se llama cuando el usuario pulsa "¡Genial!" y se cierra el overlay.
-    /// </summary>
     public void PlaySpin(List<Sprite> spinSprites, Sprite finalSprite, string feedbackMsg, Action onFinished, Action onClosed = null)
     {
-
         if (rewardImage == null)
         {
             onFinished?.Invoke();
@@ -122,7 +121,6 @@ public class DailyLuckSpinnerUI : MonoBehaviour
         IsOpen = true;
         onConfirmClosed = onClosed;
 
-        // Overlay visible + fade in
         ShowOverlayInstant();
         ResetResultUIInstant();
 
@@ -153,6 +151,14 @@ public class DailyLuckSpinnerUI : MonoBehaviour
             rewardImage.sprite = spinSprites[idx % spinSprites.Count];
             idx++;
 
+            // --- MAGIA DEL PITCH (La ruleta va frenando) ---
+            //float currentPitch = Mathf.Lerp(pitchRange.x, pitchRange.y, eased);
+
+            if (tickAudioClip != null && SoundManager.Instance != null)
+            {
+                SoundManager.Instance.PlaySound(tickAudioClip, 0.4f);
+            }
+
             if (rewardRT != null)
             {
                 rewardRT.localScale = Vector3.Lerp(
@@ -173,25 +179,27 @@ public class DailyLuckSpinnerUI : MonoBehaviour
         // Final sprite
         rewardImage.sprite = finalSprite;
 
-        // Stop shake
+        // --- EL FRENAZO CON EL MISMO SONIDO PERO SÚPER AGUDO ---
+        if (tickAudioClip != null && SoundManager.Instance != null)
+        {
+            // Pitch 2.5f (muy agudo) y volumen 1.0f (fuerte) para que destaque
+            SoundManager.Instance.PlaySound(tickAudioClip, 1.0f, 2.5f);
+        }
+
         if (rewardRT != null)
             rewardRT.localPosition = originalLocalPos;
 
-        // Pop back
         yield return StopPopToOriginal();
-
-        // Lift up un poquito
         yield return LiftUp();
 
         IsSpinning = false;
         routine = null;
 
-        // Aquí ya puedes resolver la recompensa (dar fondo / devolver monedas)
         onFinished?.Invoke();
-
-        // Mostrar texto + botón con fade-in
         ShowResultUI(feedbackMsg, onClosed);
     }
+
+    // ... (El resto del script se mantiene exactamente igual: LiftUp, ShowResultUI, etc.)
 
     private IEnumerator LiftUp()
     {

@@ -64,6 +64,10 @@ public class DailyLuckManager : MonoBehaviour
     [SerializeField] private GameObject bgAdInfoRoot;     // Imagen + texto para tirada BG con anuncio
     [SerializeField] private GameObject avatarAdInfoRoot; // Imagen + texto para tirada Avatar con anuncio
 
+    [Header("Reward Sounds")]
+    [SerializeField] private AudioClip newRewardSound;      
+    [SerializeField] private AudioClip duplicateRewardSound;
+
     // -------------------- ADS (auto-find) --------------------
     private MediationAds mediationAdsCached;
 
@@ -549,11 +553,20 @@ public class DailyLuckManager : MonoBehaviour
         if (alreadyOwned)
         {
             CurrencyManager.Instance.AddCoins(duplicateRefund);
+
+            // --- SONIDO DE REPETIDO (Monedas) ---
+            if (duplicateRewardSound != null && SoundManager.Instance != null)
+                SoundManager.Instance.PlaySound(duplicateRewardSound, 1.0f);
+
             return;
         }
 
         PlayerPrefs.SetInt("Purchased_" + reward.id, 1);
         PlayerPrefs.Save();
+
+        // --- SONIDO DE PREMIO NUEVO (Celebración) ---
+        if (newRewardSound != null && SoundManager.Instance != null)
+            SoundManager.Instance.PlaySound(newRewardSound, 1.0f);
     }
 
     private void ApplyAvatarReward(AvatarDataSO reward, bool alreadyOwned)
@@ -561,11 +574,20 @@ public class DailyLuckManager : MonoBehaviour
         if (alreadyOwned)
         {
             CurrencyManager.Instance.AddCoins(duplicateRefund);
+
+            // --- SONIDO DE REPETIDO (Monedas) ---
+            if (duplicateRewardSound != null && SoundManager.Instance != null)
+                SoundManager.Instance.PlaySound(duplicateRewardSound, 1.0f);
+
             return;
         }
 
         PlayerPrefs.SetInt("AvatarPurchased_" + reward.id, 1);
         PlayerPrefs.Save();
+
+        // --- SONIDO DE PREMIO NUEVO (Celebración) ---
+        if (newRewardSound != null && SoundManager.Instance != null)
+            SoundManager.Instance.PlaySound(newRewardSound, 1.0f);
     }
 
     private bool IsBackgroundOwned(BackgroundDataSO reward)

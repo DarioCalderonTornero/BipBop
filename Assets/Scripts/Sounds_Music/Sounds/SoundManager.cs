@@ -95,10 +95,20 @@ public class SoundManager : MonoBehaviour
     /// - baseVolume as per-clip relative volume (mixing)
     /// Final output = master * baseVolume.
     /// </summary>
+    // 1. MÉTODO CLÁSICO (Evita que el resto de tu juego dé error)
+    // 1. MÉTODO CLÁSICO (2 parámetros)
     public void PlaySound(AudioClip audioClip, float baseVolume)
+    {
+        // Llama al método de abajo (que tiene el mismo nombre) forzando el pitch a 1
+        PlaySound(audioClip, baseVolume, 1f);
+    }
+
+    // 2. MÉTODO NUEVO (3 parámetros)
+    public void PlaySound(AudioClip audioClip, float baseVolume, float pitch)
     {
         if (audioClip == null || soundAudioSource == null) return;
 
+        soundAudioSource.pitch = pitch;
         soundAudioSource.PlayOneShot(audioClip, Mathf.Clamp01(baseVolume));
     }
 
