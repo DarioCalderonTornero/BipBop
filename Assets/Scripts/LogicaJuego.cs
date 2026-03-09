@@ -359,6 +359,7 @@ public class LogicaJuego : MonoBehaviour, IGameOverClient
         if (hasEnded) return;
 
         MainGamePoints.Instance.AddScore();
+        Haptics.TryVibrate();
         UpdateScoreText();
 
         List<TaskInfo> availableTasks = new List<TaskInfo>(tasks);

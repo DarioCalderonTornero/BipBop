@@ -571,6 +571,7 @@ public class ClassifierManager : MonoBehaviour, IGameOverClient
         if (effectiveDirection == currentCorrectDirection)
         {
             scoreModule.AddPoint(1);
+            Haptics.TryVibrate();
             timerModule.ApplySuccessReduction();
             AnimateSuccessAndRespawn(currentCorrectDirection);
         }

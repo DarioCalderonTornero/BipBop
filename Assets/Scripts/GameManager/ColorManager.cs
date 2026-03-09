@@ -582,11 +582,13 @@ public class ColorManager : MonoBehaviour, IGameOverClient
 
             if (isComboActive)
             {
+                Haptics.TryVibrate();
                 ColorGamePuntos.Instance.AddScore();
                 ColorGamePuntos.Instance.AddScoreRaw(1);
             }
             else
             {
+                Haptics.TryVibrate();
                 ColorGamePuntos.Instance.AddScore();
             }
 

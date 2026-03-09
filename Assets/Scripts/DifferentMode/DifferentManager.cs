@@ -854,6 +854,8 @@ public class DifferentManager : MonoBehaviour, IGameOverClient
 
             SoundManager.Instance.PlaySound(GetRandomCorrectAudio(), 1f);
 
+            Haptics.TryVibrate();
+
             if (score == scoreToEnableOddSwap)
                 RestartOddSwapRoutine();
 
