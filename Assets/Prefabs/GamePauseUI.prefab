@@ -1368,7 +1368,9 @@ MonoBehaviour:
   numberDuration: 1
   goDuration: 1
   triggerName: Pop
-  countdownAudioClip: {fileID: 0}
+  countdownAudioClip: {fileID: 8300000, guid: 67f2999b5e37f60438ae8107e67841eb, type: 3}
+  countdownPitch: 1.5
+  goAudioClip: {fileID: 8300000, guid: 32ba2a9a1f2999749b287937049f995c, type: 3}
 --- !u!95 &8719650515866917184
 Animator:
   serializedVersion: 7
