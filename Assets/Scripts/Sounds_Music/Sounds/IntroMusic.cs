@@ -15,7 +15,7 @@ public class IntroMusic : MonoBehaviour
 
     private void Start()
     {
-        Invoke("PlayIntroSound", .5f);
+        Invoke("PlayIntroSound", .25f);
         
 
         Invoke("PlayIntroMusic", introAudioClip.length);

@@ -31,6 +31,8 @@ public class StoreOfferSlotUI : MonoBehaviour
     [SerializeField] private float popInScale = 0.96f;  // hacia dentro
     [SerializeField] private float popDuration = 0.10f;
 
+    [SerializeField] private AudioClip buyCoinAudioClip;
+
     private Action onBuy;
     private int currentPrice;
     private string currentTitle;
@@ -161,6 +163,7 @@ public class StoreOfferSlotUI : MonoBehaviour
     {
         if (isOwned) return;
         onBuy?.Invoke();
+        SoundManager.Instance.PlaySound(buyCoinAudioClip, 1.0f);
     }
 
     // -------------------------
@@ -170,6 +173,7 @@ public class StoreOfferSlotUI : MonoBehaviour
     private void ApplySelectionVisuals(bool selected)
     {
         // En seleccionado: ocultar precio/moneda y mostrar botón comprar
+
         if (buyButton != null)
             buyButton.gameObject.SetActive(selected);
 

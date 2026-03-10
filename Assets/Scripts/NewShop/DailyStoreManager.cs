@@ -20,6 +20,10 @@ public class DailyStoreManager : MonoBehaviour
     [SerializeField] private BackgroundCatalogSO backgroundCatalog;
     [SerializeField] private AvatarCatalogSO avatarCatalog;
 
+    [Header("Sounds")]
+    [SerializeField] private AudioClip errorBuySoundAudioclip;
+
+
     [Tooltip("Pool SOLO de avatares que se pueden comprar en tienda.")]
     [SerializeField] private DailyStoreAvatarPoolSO avatarStorePool;
 
@@ -313,8 +317,8 @@ public class DailyStoreManager : MonoBehaviour
         // Comprobar monedas
         if (!CurrencyManager.Instance.TrySpendCoins(price))
         {
-            Debug.Log("[DailyStore] No hay monedas suficientes para fondo: " + data.id);
-            // Aquí podrías mostrar un popup de "no tienes monedas"
+            //Debug.Log("[DailyStore] No hay monedas suficientes para fondo: " + data.id);
+            SoundManager.Instance.PlaySound(errorBuySoundAudioclip, 1.0f);
             return;
         }
 
@@ -352,7 +356,8 @@ public class DailyStoreManager : MonoBehaviour
 
         if (!CurrencyManager.Instance.TrySpendCoins(price))
         {
-            Debug.Log("[DailyStore] No hay monedas suficientes para avatar: " + data.id);
+            //Debug.Log("[DailyStore] No hay monedas suficientes para avatar: " + data.id);
+            SoundManager.Instance.PlaySound(errorBuySoundAudioclip, 1.0f);
             return;
         }
 
