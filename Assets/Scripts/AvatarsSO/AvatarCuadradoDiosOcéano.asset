@@ -28,9 +28,8 @@ MonoBehaviour:
   unlockByScore: 0
   requiredScoreKey: 
   requiredScoreValue: 0
-  unlockByOwningAvatars: 1
-  requiredOwnedAvatarIds:
-  - NormalAvatar
+  unlockByOwningAvatars: 0
+  requiredOwnedAvatarIds: []
   unlockDescriptionLS:
     m_TableReference:
       m_TableCollectionName: 

@@ -63,7 +63,7 @@ public class PlayFabLoginManager : MonoBehaviour
     // Lista de palabras vetadas
     private static readonly string[] bannedTerms = new string[]
     {
-        "puta","puto","gilipollas","idiota","imbecil","cabron",
+        "puta","puto","gilipollas","idiota","imbecil","cabron","maricon", "maricón", "maric0n", "mariconcillo", "maric0ncill0",
         "mierda","joder","pene","vagina","porno","follar",
         "nazi","hitler",
         "fuck","shit","bitch","asshole","bastard","dick",
