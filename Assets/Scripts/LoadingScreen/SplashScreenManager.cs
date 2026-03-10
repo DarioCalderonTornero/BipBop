@@ -14,6 +14,18 @@ using Google.Play.Common;
 
 public class SplashScreenManager : MonoBehaviour
 {
+    [Header("Fake Loading Duration")]
+    [SerializeField] private float fakeLoadingDuration = 4f;
+
+    [Header("Fake Loading Randomness")]
+    [SerializeField] private float fakeLoadingMoveSpeed = 0.35f;
+    [SerializeField] private float minPauseBetweenJumps = 0.10f;
+    [SerializeField] private float maxPauseBetweenJumps = 0.40f;
+    [SerializeField] private float minJumpAmount = 0.08f;
+    [SerializeField] private float maxJumpAmount = 0.22f;
+    [SerializeField] private float maxLeadOverTime = 0.18f;  
+    [SerializeField] private float maxLagBehindTime = 0.08f;
+
     [Header("UI References")]
     [SerializeField] private Image firstImage;
     [SerializeField] private TextMeshProUGUI subtitleText;
@@ -440,26 +452,73 @@ public class SplashScreenManager : MonoBehaviour
 
     private IEnumerator FakeLoading()
     {
+        float duration = Mathf.Max(0.1f, fakeLoadingDuration);
+
+        float elapsed = 0f;
         float progress = 0f;
-        float nextTarget = Random.Range(0.1f, 0.3f);
 
-        while (progress < 1f)
+        float nextTarget = Random.Range(0.08f, 0.18f);
+        float pauseTimer = 0f;
+        bool waitingForNextJump = false;
+
+        UpdateProgressUI(progress);
+
+        while (elapsed < duration)
         {
-            progress = Mathf.MoveTowards(progress, nextTarget, Time.deltaTime * 0.3f);
-            UpdateProgressUI(progress);
+            float dt = Time.deltaTime;
+            elapsed += dt;
 
+            float timeProgress = Mathf.Clamp01(elapsed / duration);
+
+            // Límites para que nunca termine demasiado pronto
+            float minAllowed = Mathf.Clamp01(timeProgress - maxLagBehindTime);
+            float maxAllowed = (timeProgress < 0.95f)
+                ? Mathf.Clamp01(timeProgress + maxLeadOverTime)
+                : 1f;
+
+            if (waitingForNextJump)
+            {
+                pauseTimer -= dt;
+
+                if (pauseTimer <= 0f)
+                {
+                    waitingForNextJump = false;
+
+                    float jumpAmount = Random.Range(minJumpAmount, maxJumpAmount);
+                    float softCap = Mathf.Min(maxAllowed, 0.99f);
+
+                    nextTarget = Mathf.Min(progress + jumpAmount, softCap);
+
+                    // Asegura que siempre haya algo de avance visible
+                    if (nextTarget <= progress + 0.005f)
+                        nextTarget = Mathf.Min(progress + 0.02f, softCap);
+                }
+            }
+            else
+            {
+                progress = Mathf.MoveTowards(progress, nextTarget, fakeLoadingMoveSpeed * dt);
+
+                if (Mathf.Abs(progress - nextTarget) < 0.0001f)
+                {
+                    waitingForNextJump = true;
+                    pauseTimer = Random.Range(minPauseBetweenJumps, maxPauseBetweenJumps);
+                }
+            }
+
+            // Corrige el progreso para respetar la duración total
+            progress = Mathf.Clamp(progress, minAllowed, maxAllowed);
+
+            // Cambia el texto de carga aleatoriamente
             if (loadingText != null && Random.value < 0.01f)
                 loadingText.text = GetRandomMessage();
 
-            if (Mathf.Abs(progress - nextTarget) < 0.001f)
-            {
-                yield return new WaitForSeconds(Random.Range(0.1f, 0.4f));
-                nextTarget += Random.Range(0.1f, 0.25f);
-                nextTarget = Mathf.Min(nextTarget, 1f);
-            }
-
+            UpdateProgressUI(progress);
             yield return null;
         }
+
+        // Remate final exacto
+        progress = 1f;
+        UpdateProgressUI(progress);
     }
 
     private void UpdateProgressUI(float progress)

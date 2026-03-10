@@ -1240,6 +1240,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7242a081387574c468d394d64220af32, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  fakeLoadingDuration: 3
+  fakeLoadingMoveSpeed: 0.35
+  minPauseBetweenJumps: 0.1
+  maxPauseBetweenJumps: 0.4
+  minJumpAmount: 0.08
+  maxJumpAmount: 0.22
+  maxLeadOverTime: 0.18
+  maxLagBehindTime: 0.08
   firstImage: {fileID: 1377931399}
   subtitleText: {fileID: 2065768099}
   loadingSpinner: {fileID: 1427027875}
@@ -2229,7 +2237,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: 291.9997, y: 188.00008}
+  m_AnchoredPosition: {x: 293, y: 192}
   m_SizeDelta: {x: 72.985, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1687568808
