@@ -1182,6 +1182,26 @@ MonoBehaviour:
     m_Localized: aciertos
     m_Metadata:
       m_Items: []
+  - m_Id: 42307391597805568
+    m_Localized: Nombre inapropiado
+    m_Metadata:
+      m_Items: []
+  - m_Id: 42307521377959936
+    m_Localized: "Nombre vac\xEDo"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 42307583130697728
+    m_Localized: Nombre muy largo
+    m_Metadata:
+      m_Items: []
+  - m_Id: 42307670430941184
+    m_Localized: Nombre ya en uso
+    m_Metadata:
+      m_Items: []
+  - m_Id: 42307804753526784
+    m_Localized: Error
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

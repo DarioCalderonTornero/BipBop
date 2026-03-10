@@ -1155,6 +1155,26 @@ MonoBehaviour:
     m_Key: Aciertos
     m_Metadata:
       m_Items: []
+  - m_Id: 42307391597805568
+    m_Key: NombreInapropiado
+    m_Metadata:
+      m_Items: []
+  - m_Id: 42307521377959936
+    m_Key: NameEmpty
+    m_Metadata:
+      m_Items: []
+  - m_Id: 42307583130697728
+    m_Key: NombreLargo
+    m_Metadata:
+      m_Items: []
+  - m_Id: 42307670430941184
+    m_Key: NombreCogido
+    m_Metadata:
+      m_Items: []
+  - m_Id: 42307804753526784
+    m_Key: NameError
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
