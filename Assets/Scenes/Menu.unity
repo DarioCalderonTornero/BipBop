@@ -1801,7 +1801,6 @@ MonoBehaviour:
   popTarget: {fileID: 73308652}
   popInScale: 0.96
   popDuration: 0.1
-  buyCoinAudioClip: {fileID: 8300000, guid: 14912c00c401a2c478116060574e4852, type: 3}
 --- !u!114 &73308654
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3197,6 +3196,7 @@ MonoBehaviour:
   backgroundCatalog: {fileID: 11400000, guid: 5aef0aebdd22954448aa449a80ed4132, type: 2}
   avatarCatalog: {fileID: 0}
   errorBuySoundAudioclip: {fileID: 8300000, guid: 3f526d8c448ad1b4291ac62c2440cf4e, type: 3}
+  successBuySoundAudioclip: {fileID: 8300000, guid: 14912c00c401a2c478116060574e4852, type: 3}
   avatarStorePool: {fileID: 11400000, guid: ecf1a89b9117fe34b84c6f06868591c9, type: 2}
   backgroundStorePool: {fileID: 11400000, guid: 5fc38d76adabfac4c8180d960390f118, type: 2}
   references:
@@ -15037,7 +15037,6 @@ MonoBehaviour:
   popTarget: {fileID: 592807432}
   popInScale: 0.96
   popDuration: 0.1
-  buyCoinAudioClip: {fileID: 8300000, guid: 14912c00c401a2c478116060574e4852, type: 3}
 --- !u!114 &592807434
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -22390,7 +22389,6 @@ MonoBehaviour:
   popTarget: {fileID: 855539310}
   popInScale: 0.96
   popDuration: 0.1
-  buyCoinAudioClip: {fileID: 8300000, guid: 14912c00c401a2c478116060574e4852, type: 3}
 --- !u!114 &855539312
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -39285,7 +39283,6 @@ MonoBehaviour:
   popTarget: {fileID: 0}
   popInScale: 0.96
   popDuration: 0.1
-  buyCoinAudioClip: {fileID: 0}
 --- !u!114 &1609093842
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -48001,7 +47998,6 @@ MonoBehaviour:
   popTarget: {fileID: 1944347761}
   popInScale: 0.96
   popDuration: 0.1
-  buyCoinAudioClip: {fileID: 8300000, guid: 14912c00c401a2c478116060574e4852, type: 3}
 --- !u!114 &1944347763
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -50885,7 +50881,6 @@ MonoBehaviour:
   popTarget: {fileID: 2080585670}
   popInScale: 0.96
   popDuration: 0.1
-  buyCoinAudioClip: {fileID: 8300000, guid: 14912c00c401a2c478116060574e4852, type: 3}
 --- !u!114 &2080585672
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -51643,7 +51638,6 @@ MonoBehaviour:
   popTarget: {fileID: 2114438822}
   popInScale: 0.96
   popDuration: 0.1
-  buyCoinAudioClip: {fileID: 8300000, guid: 14912c00c401a2c478116060574e4852, type: 3}
 --- !u!114 &2114438824
 MonoBehaviour:
   m_ObjectHideFlags: 0
