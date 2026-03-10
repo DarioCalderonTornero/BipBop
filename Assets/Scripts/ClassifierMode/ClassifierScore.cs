@@ -31,6 +31,7 @@ public class ClassifierScore : MonoBehaviour
     {
         CurrentScore += score;
         PlayerLevelManager.Instance.AddXP(5);
+        Haptics.TryVibrate();
         // Le pasamos "true" para que haga el POP al sumar puntos
         UpdateScoreUI(true);
     }

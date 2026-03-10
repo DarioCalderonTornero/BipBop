@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools" package="com.twotapsstudio.bipbop">
   <application android:theme="@style/UnityThemeSelector" tools:replace="android:theme">
     <!-- App ID de AdMob (PUEDES USAR ESTE DE TEST SIN PROBLEMA) -->
-    <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="ca-app-pub-3940256099942544~3347511713" />
+    <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="ca-app-pub-1181682761181650~7497368173" />
     <!-- Activity principal de Unity -->
     <activity android:name="com.unity3d.player.UnityPlayerActivity" android:theme="@style/UnityThemeSelector">
       <intent-filter>
