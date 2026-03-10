@@ -22,9 +22,10 @@ public class DailyStoreManager : MonoBehaviour
 
     [Header("Sounds")]
     [SerializeField] private AudioClip errorBuySoundAudioclip;
+    [SerializeField] private AudioClip successBuySoundAudioclip;
 
 
-    [Tooltip("Pool SOLO de avatares que se pueden comprar en tienda.")]
+        [Tooltip("Pool SOLO de avatares que se pueden comprar en tienda.")]
     [SerializeField] private DailyStoreAvatarPoolSO avatarStorePool;
 
     private const string PREF_DAY_KEY = "DailyStore_DayKey";
@@ -335,6 +336,11 @@ public class DailyStoreManager : MonoBehaviour
 
         Debug.Log("[DailyStore] Fondo comprado: " + data.id);
 
+        if (successBuySoundAudioclip != null && SoundManager.Instance != null)
+        {
+            SoundManager.Instance.PlaySound(successBuySoundAudioclip, 1.0f);
+        }
+
         // Actualizar solo este slot a estado "owned"
         if (slotIndex >= 0 && slotIndex < backgroundSlots.Length && backgroundSlots[slotIndex] != null)
         {
@@ -372,6 +378,12 @@ public class DailyStoreManager : MonoBehaviour
         }
 
         Debug.Log("[DailyStore] Avatar comprado: " + data.id);
+
+
+        if (successBuySoundAudioclip != null && SoundManager.Instance != null)
+        {
+            SoundManager.Instance.PlaySound(successBuySoundAudioclip, 1.0f);
+        }
 
         if (slotIndex >= 0 && slotIndex < avatarSlots.Length && avatarSlots[slotIndex] != null)
         {
