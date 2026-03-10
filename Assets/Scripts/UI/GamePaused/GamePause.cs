@@ -50,6 +50,8 @@ public class GamePause : MonoBehaviour
     [Header("Resume Countdown")]
     [SerializeField] private ReviveCountdownUI resumeCountdownUI;
 
+    [SerializeField] private AudioClip buttonAudioclip;
+
     private bool isResuming;
 
     private void OnEnable()
@@ -64,6 +66,16 @@ public class GamePause : MonoBehaviour
 
     private void Awake()
     {
+        //Button sounds
+        Button[] allButtons = GetComponentsInChildren<Button>();
+
+        foreach (Button button in allButtons)
+        {
+            button.onClick.AddListener(() =>
+            {
+                SoundManager.Instance.PlaySound(buttonAudioclip, 1.0f);
+            });
+        }
         // PAUSE
         pauseGameButton.onClick.AddListener(() =>
         {

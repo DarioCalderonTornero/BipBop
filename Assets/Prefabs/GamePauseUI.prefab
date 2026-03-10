@@ -407,7 +407,7 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 16777215
+    rgba: 4294967295
   m_fontColor: {r: 1, g: 1, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
@@ -584,7 +584,7 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 16777215
+    rgba: 4294967295
   m_fontColor: {r: 1, g: 1, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
@@ -2132,6 +2132,7 @@ MonoBehaviour:
     m_WaitForCompletion: 0
     m_LocalVariables: []
   resumeCountdownUI: {fileID: 1520906010954535801}
+  buttonAudioclip: {fileID: 8300000, guid: 97e9c9d6ac663c648a529b4491afa08d, type: 3}
   references:
     version: 2
     RefIds: []
@@ -3087,7 +3088,7 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 16777215
+    rgba: 4294967295
   m_fontColor: {r: 1, g: 1, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
