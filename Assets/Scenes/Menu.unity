@@ -33817,8 +33817,8 @@ MonoBehaviour:
   spinListSize: 18
   bgAdInfoRoot: {fileID: 512934547}
   avatarAdInfoRoot: {fileID: 483238809}
-  newRewardSound: {fileID: 0}
-  duplicateRewardSound: {fileID: 0}
+  newRewardSound: {fileID: 8300000, guid: 043a4ccfc060f7c47bb1494424243958, type: 3}
+  duplicateRewardSound: {fileID: 8300000, guid: 75e3e13b274a394478d27a75de1f1289, type: 3}
   adsEnabled: 0
   references:
     version: 2
@@ -33870,7 +33870,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  tickAudioClip: {fileID: 0}
+  tickAudioClip: {fileID: 8300000, guid: 1e95dff78765a6b4e9fb22ba8f9cc28d, type: 3}
   pitchRange: {x: 1.6, y: 0.7}
   overlayFadeIn: 0.12
   overlayFadeOut: 0.12
