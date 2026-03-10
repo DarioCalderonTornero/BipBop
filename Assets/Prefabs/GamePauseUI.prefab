@@ -1296,6 +1296,18 @@ MonoBehaviour:
   countdownAudioClip: {fileID: 8300000, guid: 67f2999b5e37f60438ae8107e67841eb, type: 3}
   countdownPitch: 1.5
   goAudioClip: {fileID: 8300000, guid: 32ba2a9a1f2999749b287937049f995c, type: 3}
+  goMessage:
+    m_TableReference:
+      m_TableCollectionName: GUID:a56000387c1aa2149885fc7996968516
+    m_TableEntryReference:
+      m_KeyId: 43894914908160
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  references:
+    version: 2
+    RefIds: []
 --- !u!95 &8719650515866917184
 Animator:
   serializedVersion: 7
@@ -1797,6 +1809,7 @@ GameObject:
   - component: {fileID: 504929308824109168}
   - component: {fileID: 6781748636498788471}
   - component: {fileID: 3133405034361631961}
+  - component: {fileID: 6973842459803956246}
   m_Layer: 5
   m_Name: ResumeCountdownText
   m_TagString: Untagged
@@ -1922,6 +1935,20 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &6973842459803956246
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5800350708399392438}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6fab516b250eb44e9124219363a9bad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spanishSize: 230
+  englishSize: 250
 --- !u!1 &5948568378050399473
 GameObject:
   m_ObjectHideFlags: 0

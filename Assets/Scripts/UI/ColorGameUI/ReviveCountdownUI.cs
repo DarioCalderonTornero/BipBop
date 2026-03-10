@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization;
 
 public class ReviveCountdownUI : MonoBehaviour
 {
@@ -19,6 +20,9 @@ public class ReviveCountdownUI : MonoBehaviour
     [SerializeField] private AudioClip countdownAudioClip; // Sonido para 3, 2, 1
     [SerializeField] private float countdownPitch = 1.5f;  // "Más pitch" para hacer el tick más agudo
     [SerializeField] private AudioClip goAudioClip;        // NUEVO: Sonido distinto para el GO!
+
+    [Header("Localization")]
+    [SerializeField] private LocalizedString goMessage;
 
     private Coroutine routine;
 
@@ -49,7 +53,7 @@ public class ReviveCountdownUI : MonoBehaviour
         yield return PlayToken("1", numberDuration, countdownAudioClip, countdownPitch);
 
         // GO (Usamos el clip nuevo con pitch normal = 1f)
-        yield return PlayToken("GO!", goDuration, goAudioClip, 1f);
+        yield return PlayToken(goMessage.GetLocalizedString(), goDuration, goAudioClip, 1f);
 
         if (root != null) root.SetActive(false);
 
