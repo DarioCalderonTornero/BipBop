@@ -2894,7 +2894,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   introMusicAudioSource: {fileID: 2039573167}
-  introAudioClip: {fileID: 8300000, guid: ddd66d250f95d7543a89d622a0db9c0b, type: 3}
+  introAudioClip: {fileID: 8300000, guid: 14912c00c401a2c478116060574e4852, type: 3}
+  secondIntroAudioClip: {fileID: 8300000, guid: e974cf6ebe6139d458115b39d361b84f, type: 3}
   musicIntroAudioClip: {fileID: 8300000, guid: 0a6710f9cbedbb54eb6c8ff2743b11f8, type: 3}
 --- !u!4 &2039573169
 Transform:

@@ -6,6 +6,7 @@ public class IntroMusic : MonoBehaviour
 
     [SerializeField] private AudioSource introMusicAudioSource;
     [SerializeField] private AudioClip introAudioClip;
+    [SerializeField] private AudioClip secondIntroAudioClip;
     [SerializeField] private AudioClip musicIntroAudioClip;
 
     private void Awake()
@@ -15,10 +16,24 @@ public class IntroMusic : MonoBehaviour
 
     private void Start()
     {
-        Invoke("PlayIntroSound", .25f);
+        Invoke("PlayIntroSound", .5f);
         
 
+        Invoke("PlaySecondIntroSound", 1.5f);
+
         Invoke("PlayIntroMusic", introAudioClip.length);
+    }
+
+    void PlayIntroSound()
+    {
+        float volume = 1.0f;
+        introMusicAudioSource.PlayOneShot(introAudioClip, volume);
+    }
+
+    void PlaySecondIntroSound()
+    {
+        float volume = 1.0f;
+        introMusicAudioSource.PlayOneShot(secondIntroAudioClip, volume);
     }
 
     private void PlayIntroMusic()
@@ -27,9 +42,5 @@ public class IntroMusic : MonoBehaviour
         introMusicAudioSource.PlayOneShot(musicIntroAudioClip, volume);  
     }
 
-    void PlayIntroSound()
-    {
-        float volume = 1.0f;
-        introMusicAudioSource.PlayOneShot(introAudioClip, volume);
-    }
+    
 }
