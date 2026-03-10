@@ -65,7 +65,7 @@ public class PlayFabLoginManager : MonoBehaviour
     {
         "puta","puto","gilipollas","idiota","imbecil","cabron","maricon", "maricón", "maric0n", "mariconcillo", "maric0ncill0",
         "mierda","joder","pene","vagina","porno","follar",
-        "nazi","hitler",
+        "nazi","hitler", "pilila", "p1l1l4", "v@g1n@", "p1lila", "nigger", "nigga", "niga", "niger", "nigg3r", "n1gga", 
         "fuck","shit","bitch","asshole","bastard","dick",
         "pussy","cunt","porn","rape", "put0", "p3n3", "v@g1na", "f0llar", "n4z", "Puta", "Puto", "Gilipollas", "Idiota", "Imbecil", "Cabron","Mierda", "Joder",
         "Put0", "P3n3", "V@g1na", "F0llar", "N4z", "Hitler", "Dick", "Pussy", "Fuck", "Asshole"
@@ -76,6 +76,8 @@ public class PlayFabLoginManager : MonoBehaviour
     [Header("Language UI")]
     [SerializeField] private Button languageButton;
     [SerializeField] private TextMeshProUGUI languageButtonText;
+
+    [SerializeField] private LocalizedString invalidCharactersLocalized;
 
     private void Awake()
     {
@@ -155,6 +157,16 @@ public class PlayFabLoginManager : MonoBehaviour
             return;
 
         StartLoginFlow();
+    }
+
+    private bool HasInvalidCharacters(string input)
+    {
+        if (string.IsNullOrEmpty(input))
+            return false;
+
+        // Solo letras y números
+        // Si quieres permitir espacios, usa: @"^[a-zA-Z0-9 ]+$"
+        return !Regex.IsMatch(input, @"^[a-zA-Z0-9]+$");
     }
 
     private IEnumerator ShakeInputField()
@@ -364,6 +376,21 @@ public class PlayFabLoginManager : MonoBehaviour
         if (typed.Length > MAX_NAME_LENGTH)
         {
             feedbackText.text = nameTooLongLocalized.GetLocalizedString();
+            StartCoroutine(ShakeInputField());
+            return;
+        }
+
+        if (HasInvalidCharacters(typed))
+        {
+            feedbackText.text = invalidCharactersLocalized.GetLocalizedString();
+            StartCoroutine(ShakeInputField());
+
+            if (nameInput != null)
+            {
+                nameInput.Select();
+                nameInput.ActivateInputField();
+            }
+
             return;
         }
 
@@ -371,6 +398,13 @@ public class PlayFabLoginManager : MonoBehaviour
         {
             feedbackText.text = inappropriateNameLocalized.GetLocalizedString();
             StartCoroutine(ShakeInputField());
+
+            if (nameInput != null)
+            {
+                nameInput.Select();
+                nameInput.ActivateInputField();
+            }
+
             return;
         }
 
