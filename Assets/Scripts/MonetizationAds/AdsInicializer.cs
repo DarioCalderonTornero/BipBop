@@ -32,6 +32,8 @@ public class AdsInicializer : MonoBehaviour
         LevelPlay.OnInitSuccess += OnInitializationComplete;
         LevelPlay.OnInitFailed += OnInitializationFailed;
 
+        LevelPlay.SetMetaData("is_test_suite", "enable");
+
         LevelPlay.Init(_appKey);
     }
 
