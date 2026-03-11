@@ -18,21 +18,23 @@ public class AdsInicializer : MonoBehaviour
 
     void Awake()
     {
+        LevelPlay.SetMetaData("is_test_suite", "enable");
+
         InitializeLevelPlay();
     }
 
     public void InitializeLevelPlay()
     {
-#if UNITY_ANDROID
-        _appKey = _androidAppKey;
-#elif UNITY_IOS
-        _appKey = _iOSAppKey;
-#endif
-
+        LevelPlay.OnInitSuccess -= OnInitializationComplete;
+        LevelPlay.OnInitFailed -= OnInitializationFailed;
         LevelPlay.OnInitSuccess += OnInitializationComplete;
         LevelPlay.OnInitFailed += OnInitializationFailed;
 
-        LevelPlay.SetMetaData("is_test_suite", "enable");
+#if UNITY_ANDROID
+        _appKey = _androidAppKey;
+#elif UNITY_IOS
+    _appKey = _iOSAppKey;
+#endif
 
         LevelPlay.Init(_appKey);
     }
@@ -41,11 +43,10 @@ public class AdsInicializer : MonoBehaviour
     {
         Debug.Log("LevelPlay SDK initialization complete.");
 
-        // ? Marcamos que ya está inicializado
         IsInitialized = true;
-
-        // Avisamos a todos los scripts que esperan la inicialización
         OnLevelPlayInitialized?.Invoke();
+
+        LevelPlay.LaunchTestSuite();
     }
 
     private void OnInitializationFailed(LevelPlayInitError error)

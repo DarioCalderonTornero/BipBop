@@ -68,10 +68,6 @@ public class MediationAds : MonoBehaviour
 
         adsInitialized = true;
 
-//#if DEVELOPMENT_BUILD || UNITY_EDITOR
-        LevelPlay.LaunchTestSuite();
-//#endif
-
 #if UNITY_ANDROID
         adUnitId = adUnitIdAndroid;
 #elif UNITY_IOS
