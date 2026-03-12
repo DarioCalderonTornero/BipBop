@@ -18,7 +18,7 @@ public class AdsInicializer : MonoBehaviour
 
     void Awake()
     {
-        LevelPlay.SetMetaData("is_test_suite", "enable");
+        // LevelPlay.SetMetaData("is_test_suite", "enable");
 
         InitializeLevelPlay();
     }
@@ -46,7 +46,7 @@ public class AdsInicializer : MonoBehaviour
         IsInitialized = true;
         OnLevelPlayInitialized?.Invoke();
 
-        LevelPlay.LaunchTestSuite();
+        // LevelPlay.LaunchTestSuite();
     }
 
     private void OnInitializationFailed(LevelPlayInitError error)

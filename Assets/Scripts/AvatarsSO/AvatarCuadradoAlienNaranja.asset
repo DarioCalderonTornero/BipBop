@@ -67,6 +67,18 @@ MonoBehaviour:
   effectType: 0
   effectMaterial: {fileID: 2100000, guid: b9082e425b15e784a881ea2fb8f55f0c, type: 2}
   fxPreset: {fileID: 11400000, guid: a9ce636791687fb41b55db14f82ef20b, type: 2}
+  unlockByAdsViewed: 0
+  requiredAdsViewed: 0
+  adsProgressDescriptionLS:
+    m_TableReference:
+      m_TableCollectionName: 
+    m_TableEntryReference:
+      m_KeyId: 0
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  adsProgressDescriptionFallback: Desbloqueo al ver anuncios ({0} / {1})
   references:
     version: 2
     RefIds: []
