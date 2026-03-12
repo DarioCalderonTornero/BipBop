@@ -46888,7 +46888,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 110db40f3b3b2be4e8222bad95628f2d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  reviveOfferChance: 1
+  reviveOfferChance: 0.75
   limitOneOfferPerRun: 1
   reviveOfferUIPrefab: {fileID: 8175444503907699374, guid: 62a4ae7e19720eb4ea5715d33a15a6fa, type: 3}
   uiParent: {fileID: 0}

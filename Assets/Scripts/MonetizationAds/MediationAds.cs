@@ -151,7 +151,10 @@ public class MediationAds : MonoBehaviour
         Action<bool> callback = onAdFinishedCallback;
         onAdFinishedCallback = null;
 
-        callback?.Invoke(rewardEarned);
+        if (callback != null)
+        {
+            callback.Invoke(rewardEarned);
+        }
 
         rewardEarned = false;
     }

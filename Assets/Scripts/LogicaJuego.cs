@@ -1,5 +1,4 @@
-﻿// LogicaJuego.cs
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -23,39 +22,26 @@ public class LogicaJuego : MonoBehaviour, IGameOverClient
     public void PauseOnFail()
     {
         isPausedByOffer = true;
-
-        // Para el juego (Update no corre por el guard) y cortamos cualquier “preview” de countdown.
         isGameActive = false;
         StopCountdownRoutines();
-
-        // Si quieres mantener el overlay del CountDownUI/otros, NO lo toco aquí.
-        // (En tu flow real ya lo controla el offer prefab)
     }
 
     // IGameOverClient
     public void Revive()
     {
-        // Vuelve a permitir el juego
         isPausedByOffer = false;
         hasEnded = false;
         isGameActive = true;
 
-        // “Al máximo posible en ese momento”:
-        // En este modo el máximo del ciclo actual es el startTime ACTUAL (va bajando con dificultad),
-        // así que dejamos currentTime = startTime.
         currentTime = startTime;
 
         if (timerUI != null)
             timerUI.fillAmount = 1f;
-
-        // No cambiamos task / score / nada más. Simplemente retoma.
-        // Si estabas en medio de una tarea, sigue siendo la misma.
     }
 
     // IGameOverClient
     public void FinalGameOver()
     {
-        // Mantén tu lógica actual: evento + EndGame()
         SoundManager.Instance.PlaySound(failAudioClip, 1f);
         OnGameOver?.Invoke(this, EventArgs.Empty);
         EndGame();
@@ -63,21 +49,17 @@ public class LogicaJuego : MonoBehaviour, IGameOverClient
 
     private void TriggerFail()
     {
-        // Evita dobles entradas
         if (hasEnded) return;
 
-        // Marcamos “ended” para cortar Update e inputs mientras decide el flow
         hasEnded = true;
         isGameActive = false;
 
-        // Delegamos al flow centralizado
         if (GameOverFlowManager.Instance != null)
         {
             GameOverFlowManager.Instance.NotifyFail(this);
         }
         else
         {
-            // Fallback si por lo que sea no existe el manager global
             FinalGameOver();
         }
     }
@@ -135,9 +117,6 @@ public class LogicaJuego : MonoBehaviour, IGameOverClient
     [SerializeField] private float iconShuffleInterval = 0.08f;
     [SerializeField] private float iconShuffleDuration = 2f;
 
-    // -------------------------
-    // Tutorial (global toggle)
-    // -------------------------
     [Header("Tutorial Panel")]
     [SerializeField] private TutorialPanelUI tutorialPrefab;
     [SerializeField] private Transform tutorialParent;
@@ -145,9 +124,6 @@ public class LogicaJuego : MonoBehaviour, IGameOverClient
 
     private const string ShowTutorialKey = "ShowTutorialOnStart";
 
-    // -------------------------
-    // Countdown coroutines control
-    // -------------------------
     private Coroutine countdownRoutine;
     private Coroutine fillRoutine;
     private Coroutine shuffleRoutine;
@@ -157,20 +133,16 @@ public class LogicaJuego : MonoBehaviour, IGameOverClient
     private void Awake()
     {
         Instance = this;
-
         instructionText.text = readyText.GetLocalizedString();
         SetInstructionIcon(null);
-
         timerUI.fillAmount = 0f;
     }
 
     private void Start()
     {
-        // Reset partida
         hasEnded = false;
         isPausedByOffer = false;
         HasUsedReviveOffer = false;
-
         isGameActive = false;
 
         bool showTutorialOnStart = PlayerPrefs.GetInt(ShowTutorialKey, 1) == 1;
@@ -188,13 +160,9 @@ public class LogicaJuego : MonoBehaviour, IGameOverClient
 
     private void OnDisable()
     {
-        // Por si cambias de escena o desactivas el GO a mitad countdown
         StopCountdownRoutines();
     }
 
-    // ================
-    // Tutorial flow
-    // ================
     private void ShowTutorial()
     {
         if (tutorialInstance != null) return;
@@ -240,18 +208,13 @@ public class LogicaJuego : MonoBehaviour, IGameOverClient
 
     private void BeginGameAfterTutorial()
     {
-        // Arranque limpio del countdown + preview
         StartCountdownSequence();
     }
 
-    // ================
-    // Countdown flow
-    // ================
     private void StartCountdownSequence()
     {
         StopCountdownRoutines();
 
-        // Estado inicial visual
         instructionText.text = readyText.GetLocalizedString();
         SetInstructionIcon(null);
         timerUI.fillAmount = 0f;
@@ -259,14 +222,12 @@ public class LogicaJuego : MonoBehaviour, IGameOverClient
         if (CountDownUI.Instance != null)
             CountDownUI.Instance.Show();
 
-        // FX durante countdown
         fillRoutine = StartCoroutine(FillTimerDuringCountdown(2f));
         shuffleRoutine = StartCoroutine(ShuffleTaskIcons(iconShuffleDuration));
 
-        // Usa GameStates si existe; si no, fallback local
         if (GameStates.Instance != null)
         {
-            GameStates.Instance.StartCountdown(); // método nuevo en GameStates
+            GameStates.Instance.StartCountdown();
         }
         else
         {
@@ -289,10 +250,9 @@ public class LogicaJuego : MonoBehaviour, IGameOverClient
 
     public void OnCountdownFinishedStartPlaying()
     {
-        if (hasEnded) return;              // si estaba “fallado” no arrancamos
-        if (isPausedByOffer) return;       // NEW: si hay offer abierto, tampoco
+        if (hasEnded) return;
+        if (isPausedByOffer) return;
 
-        // Parar preview/FX por seguridad
         StopCountdownRoutines();
 
         if (CountDownUI.Instance != null)
@@ -302,7 +262,9 @@ public class LogicaJuego : MonoBehaviour, IGameOverClient
         SetInstructionIcon(null);
 
         isGameActive = true;
-        StartNewTask();
+
+        // CAMBIO: Iniciamos con false para que la primera tarea NO sume punto
+        StartNewTask(false);
     }
 
     private void StopCountdownRoutines()
@@ -317,12 +279,23 @@ public class LogicaJuego : MonoBehaviour, IGameOverClient
         isGameActive = false;
     }
 
-    // ================
-    // Game loop
-    // ================
     private void Update()
     {
-        if (isPausedByOffer) return;   // NEW
+        // DEBUG TRICK
+        if (Debug.isDebugBuild || Application.isEditor)
+        {
+            if (Input.GetMouseButtonDown(0))
+            {
+                if (isGameActive && !hasEnded && currentTask != null && !isPausedByOffer)
+                {
+                    Debug.Log($"[DEBUG] Forzando éxito de tarea: {currentTask.type}");
+                    OnTaskAction(currentTask.type);
+                    return;
+                }
+            }
+        }
+
+        if (isPausedByOffer) return;
         if (!isGameActive || hasEnded) return;
 
         currentTime -= Time.deltaTime;
@@ -330,15 +303,13 @@ public class LogicaJuego : MonoBehaviour, IGameOverClient
 
         if (currentTime <= 0f)
         {
-            // CHANGED: antes era GameOver directo
             TriggerFail();
         }
     }
 
     public void OnTaskAction(TaskType actionType)
     {
-        if (isPausedByOffer) return; // NEW
-
+        if (isPausedByOffer) return;
         if (!isGameActive || isTaskCompleted || hasEnded || currentTask == null) return;
 
         if (actionType == currentTask.type)
@@ -349,22 +320,28 @@ public class LogicaJuego : MonoBehaviour, IGameOverClient
             SoundManager.Instance.PlaySound(successAudioClip, 1f);
 
             isTaskCompleted = true;
-            StartNewTask();
+
+            // CAMBIO: Aquí sí sumamos punto porque es un acierto
+            StartNewTask(true);
+
             isTaskCompleted = false;
         }
     }
 
-    private void StartNewTask()
+    // CAMBIO: Parámetro booleano para controlar el incremento del score
+    private void StartNewTask(bool incrementScore = true)
     {
         if (hasEnded) return;
 
-        MainGamePoints.Instance.AddScore();
-        Haptics.TryVibrate();
-        UpdateScoreText();
+        if (incrementScore)
+        {
+            MainGamePoints.Instance.AddScore();
+            Haptics.TryVibrate();
+            UpdateScoreText();
+        }
 
         List<TaskInfo> availableTasks = new List<TaskInfo>(tasks);
 
-        // Filtrar por PlayerPrefs
         if (PlayerPrefs.GetInt("MotionTasks", 1) == 0)
         {
             availableTasks.RemoveAll(t =>
@@ -403,7 +380,6 @@ public class LogicaJuego : MonoBehaviour, IGameOverClient
     private void SetInstructionIcon(Sprite sprite)
     {
         if (instructionIcon == null) return;
-
         instructionIcon.sprite = sprite;
         instructionIcon.enabled = (sprite != null);
     }
@@ -412,14 +388,12 @@ public class LogicaJuego : MonoBehaviour, IGameOverClient
     {
         float t = 0f;
         timerUI.fillAmount = 0f;
-
         while (t < duration)
         {
             t += Time.deltaTime;
             timerUI.fillAmount = Mathf.Clamp01(t / duration);
             yield return null;
         }
-
         timerUI.fillAmount = 1f;
     }
 
@@ -428,28 +402,22 @@ public class LogicaJuego : MonoBehaviour, IGameOverClient
         if (instructionIcon == null || tasks == null || tasks.Length == 0) yield break;
 
         float t = 0f;
-
         List<Sprite> icons = new List<Sprite>();
         bool motionEnabled = PlayerPrefs.GetInt("MotionTasks", 1) == 1;
 
         foreach (var task in tasks)
         {
             if (task == null || task.icon == null) continue;
-
             if (!motionEnabled)
             {
-                if (task.type == TaskType.Shake ||
-                    task.type == TaskType.LookDown ||
-                    task.type == TaskType.RotateRight ||
-                    task.type == TaskType.RotateLeft)
+                if (task.type == TaskType.Shake || task.type == TaskType.LookDown ||
+                    task.type == TaskType.RotateRight || task.type == TaskType.RotateLeft)
                     continue;
             }
-
             icons.Add(task.icon);
         }
 
         if (icons.Count == 0) yield break;
-
         instructionIcon.enabled = true;
 
         while (t < duration)
@@ -472,7 +440,6 @@ public class LogicaJuego : MonoBehaviour, IGameOverClient
 
     private void SaveRecordIfNeeded()
     {
-        int currentRecord = PlayerPrefs.GetInt("MaxRecord", 0);
         MainGamePoints.Instance.SafeRecordIfNeeded();
     }
 
@@ -482,7 +449,7 @@ public class LogicaJuego : MonoBehaviour, IGameOverClient
 
         isGameActive = false;
         hasEnded = true;
-        isPausedByOffer = false; // por si acaso
+        isPausedByOffer = false;
 
         instructionText.text = gameOverText.GetLocalizedString();
         SetInstructionIcon(null);
@@ -498,7 +465,6 @@ public class LogicaJuego : MonoBehaviour, IGameOverClient
         if (motionEnabled)
         {
             SaveRecordIfNeeded();
-
             if (PlayFabLoginManager.Instance != null && PlayFabLoginManager.Instance.IsLoggedIn)
                 PlayFabScoreManager.Instance.SubmitScore("HighScore", MainGamePoints.Instance.GetScore());
         }
