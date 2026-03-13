@@ -153,6 +153,18 @@ public class SettingsUI : MonoBehaviour
     [SerializeField] private Sprite fps120Sprite;
     [SerializeField] private Sprite fpsAutoSprite;
 
+    [Header("Credits Popup")]
+    [SerializeField] private RectTransform creditsPopupRoot;
+    [SerializeField] private CanvasGroup creditsPopupGroup;
+    [SerializeField] private Button closeCreditsButton;
+
+    [SerializeField] private float creditsPopInTime = 0.18f;
+    [SerializeField] private float creditsPopOutTime = 0.12f;
+    [SerializeField] private float creditsStartScale = 0.85f;
+
+    private Coroutine _creditsPopCo;
+    private bool _creditsOpen;
+
     private void Awake()
     {
         openSettingsButton.onClick.AddListener(() =>
@@ -163,13 +175,23 @@ public class SettingsUI : MonoBehaviour
 
         closeSettingsButton.onClick.AddListener(() =>
         {
-            FadeBlackBg(false);
-            PopClose();
+            if (_creditsOpen)
+                CloseCredits();
+            else
+            {
+                FadeBlackBg(false);
+                PopClose();
+            }
         });
+
+        creditsButton.onClick.AddListener(OpenCredits);
+        closeCreditsButton.onClick.AddListener(CloseCredits);
+
+        SetCreditsVisibleInstant(false);
 
         if (settingsAnimator != null)
         {
-            settingsAnimator.enabled = false; // o directamente quítalo del GO en la escena
+            settingsAnimator.enabled = false;
         }
 
         vibrationButton.onClick.AddListener(() =>
@@ -182,7 +204,6 @@ public class SettingsUI : MonoBehaviour
 
             RefreshVibrationUI();
         });
-
 
         soundVolumeButton.onClick.AddListener(() =>
         {
@@ -207,11 +228,7 @@ public class SettingsUI : MonoBehaviour
         {
             settings.ResetSettings();
             RefreshVibrationUI();
-
-            //Change sound UI
             HandleCancelSoundImage();
-
-            //Change music UI
             HandleCancelMusicImage();
         });
 
@@ -528,6 +545,8 @@ public class SettingsUI : MonoBehaviour
 
         if (soundStateText != null) soundStateText.gameObject.SetActive(false);
         if (musicStateText != null) musicStateText.gameObject.SetActive(false);
+
+        SetCreditsVisibleInstant(false);
     }
 
     private Coroutine _soundMoveCo, _musicMoveCo, _idiomaMoveCo;
@@ -703,6 +722,9 @@ public class SettingsUI : MonoBehaviour
 
     private void PopClose()
     {
+        if (_creditsOpen)
+            SetCreditsVisibleInstant(false);
+
         if (_popCo != null) StopCoroutine(_popCo);
         _popCo = StartCoroutine(PopRoutine(false));
     }
@@ -755,6 +777,71 @@ public class SettingsUI : MonoBehaviour
         const float c1 = 1.70158f;
         const float c3 = c1 + 1f;
         return c3 * x * x * x - c1 * x * x;
+    }
+
+    private void OpenCredits()
+    {
+        if (_creditsPopCo != null) StopCoroutine(_creditsPopCo);
+        _creditsPopCo = StartCoroutine(CreditsPopRoutine(true));
+    }
+
+    private void CloseCredits()
+    {
+        if (_creditsPopCo != null) StopCoroutine(_creditsPopCo);
+        _creditsPopCo = StartCoroutine(CreditsPopRoutine(false));
+    }
+
+    private void SetCreditsVisibleInstant(bool show)
+    {
+        if (creditsPopupRoot != null)
+            creditsPopupRoot.localScale = show ? Vector3.one : Vector3.one * creditsStartScale;
+
+        if (creditsPopupGroup != null)
+        {
+            creditsPopupGroup.alpha = show ? 1f : 0f;
+            creditsPopupGroup.blocksRaycasts = show;
+            creditsPopupGroup.interactable = show;
+        }
+
+        _creditsOpen = show;
+    }
+
+    private IEnumerator CreditsPopRoutine(bool opening)
+    {
+        if (creditsPopupRoot == null || creditsPopupGroup == null)
+            yield break;
+
+        _creditsOpen = opening;
+
+        creditsPopupGroup.alpha = 1f;
+        creditsPopupGroup.blocksRaycasts = opening;
+        creditsPopupGroup.interactable = opening;
+
+        float time = opening ? creditsPopInTime : creditsPopOutTime;
+        float t = 0f;
+
+        Vector3 from = opening ? Vector3.one * creditsStartScale : Vector3.one;
+        Vector3 to = opening ? Vector3.one : Vector3.one * creditsStartScale;
+
+        creditsPopupRoot.localScale = from;
+
+        while (t < time)
+        {
+            t += Time.unscaledDeltaTime;
+            float a = time <= 0f ? 1f : Mathf.Clamp01(t / time);
+            float eased = opening ? EaseOutBack(a) : EaseInBack(a);
+            creditsPopupRoot.localScale = Vector3.LerpUnclamped(from, to, eased);
+            yield return null;
+        }
+
+        creditsPopupRoot.localScale = to;
+
+        if (!opening)
+        {
+            creditsPopupGroup.alpha = 0f;
+            creditsPopupGroup.blocksRaycasts = false;
+            creditsPopupGroup.interactable = false;
+        }
     }
 
     void OnDestroy()

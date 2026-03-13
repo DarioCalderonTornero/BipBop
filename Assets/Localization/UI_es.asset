@@ -1202,6 +1202,22 @@ MonoBehaviour:
     m_Localized: Error
     m_Metadata:
       m_Items: []
+  - m_Id: 43234852405739520
+    m_Localized: "Cr\xE9ditos"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 43235032572067840
+    m_Localized: "Desarrollo y dise\xF1o"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 43235109059395584
+    m_Localized: Estudio
+    m_Metadata:
+      m_Items: []
+  - m_Id: 43235146250289152
+    m_Localized: "\xA1Gracias por jugar BipBop!"
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

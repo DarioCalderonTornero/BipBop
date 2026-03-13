@@ -1175,6 +1175,22 @@ MonoBehaviour:
     m_Key: NameError
     m_Metadata:
       m_Items: []
+  - m_Id: 43234852405739520
+    m_Key: "Cr\xE9ditos_panel"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 43235032572067840
+    m_Key: "DesarroloYDise\xF1o"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 43235109059395584
+    m_Key: Estudio
+    m_Metadata:
+      m_Items: []
+  - m_Id: 43235146250289152
+    m_Key: GraciasPorJugar
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
