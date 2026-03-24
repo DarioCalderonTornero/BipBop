@@ -42,15 +42,15 @@ public class LogicaJuego : MonoBehaviour, IGameOverClient
     // IGameOverClient
     public void FinalGameOver()
     {
+        hasEnded = false;
         SoundManager.Instance.PlaySound(failAudioClip, 1f);
         OnGameOver?.Invoke(this, EventArgs.Empty);
         EndGame();
     }
 
     private void TriggerFail()
-    {
+    { 
         if (hasEnded) return;
-
         hasEnded = true;
         isGameActive = false;
 
@@ -62,6 +62,7 @@ public class LogicaJuego : MonoBehaviour, IGameOverClient
         {
             FinalGameOver();
         }
+
     }
 
     [Header("UI")]
@@ -445,7 +446,7 @@ public class LogicaJuego : MonoBehaviour, IGameOverClient
 
     private void EndGame()
     {
-        if (hasEnded) return;
+        if (!isGameActive && hasEnded) return;
 
         isGameActive = false;
         hasEnded = true;
@@ -467,7 +468,11 @@ public class LogicaJuego : MonoBehaviour, IGameOverClient
             SaveRecordIfNeeded();
             if (PlayFabLoginManager.Instance != null && PlayFabLoginManager.Instance.IsLoggedIn)
                 PlayFabScoreManager.Instance.SubmitScore("HighScore", MainGamePoints.Instance.GetScore());
+
+            // Debug.Log("ENtra");
         }
+
+        Debug.Log("ENtra");
 
         int totalCoins = PlayerPrefs.GetInt("CoinCount", 0);
         totalCoins += coinsEarned;
