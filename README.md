@@ -1,4 +1,3 @@
-<img width="452" height="914" alt="Captura de pantalla 2026-03-26 190420" src="https://github.com/user-attachments/assets/c49201d3-51e7-43bd-a5cc-500feb63dd81" />
 # 🎮 Bipbop — Mobile Party Game
 
 > A fast-paced mobile party game featuring 7 independent minigames with unique mechanics, progressive difficulty, and a full online progression system. Published on Google Play.
@@ -120,8 +119,7 @@ Developed by a team of **2 programmers**.
 ## 📸 Screenshots
 
 <!-- Add screenshots or GIFs here -->
-<img width="452" height="914" alt="Captura de pantalla 2026-03-26 190420" src="https://github.com/user-attachments/assets/8e94bc2f-c3a2-4f80-b11e-5c75aab1ea41" />
-
+> *Coming soon*
 
 ---
 
