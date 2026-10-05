@@ -3,16 +3,22 @@
 > A fast-paced mobile party game featuring 7 independent minigames with unique mechanics, progressive difficulty, and a full online progression system. Published on Google Play.
 
 ![Platform](https://img.shields.io/badge/Platform-Android-green?logo=android)
-![Engine](https://img.shields.io/badge/Engine-Unity-black?logo=unity)
+![Engine](https://img.shields.io/badge/Engine-Unity%206-black?logo=unity)
 ![Language](https://img.shields.io/badge/Language-C%23-purple)
 ![Backend](https://img.shields.io/badge/Backend-PlayFab-blue)
 ![Status](https://img.shields.io/badge/Status-Published-brightgreen)
+
+> **About this repository.** This is a public copy of the project, published with the team's permission so the code can be reviewed. The original development took place in a private repository shared between two programmers; the full commit history is preserved here.
+>
+> The paid Asset Store package *AllIn1 Sprite Shader* has been removed and is **not included**, so some materials will show missing shader references if the project is opened in Unity. The published game on Google Play is unaffected.
 
 ---
 
 ## 📲 Download
 
-[![Google Play](https://img.shields.io/badge/Google_Play-Available-green?logo=google-play)](YOUR_GOOGLE_PLAY_LINK)
+[![Google Play](https://img.shields.io/badge/Google_Play-Available-green?logo=google-play)](https://play.google.com/store/apps/details?id=com.twotapsstudio.bipbop)
+
+🌐 [Project page](https://dariogamedev.com/bipbop.html) · 🎬 [Trailer](https://www.youtube.com/watch?v=-W2FQWRpG8g)
 
 ---
 
@@ -22,7 +28,7 @@
 
 The game features a complete meta-progression system with daily missions, in-game currency, unlockables, online leaderboards powered by PlayFab, and full multi-language support.
 
-Developed by a team of two programmers.
+Developed by a team of two programmers, published on Google Play and later migrated from Unity 2022 to Unity 6.
 
 ---
 
@@ -64,6 +70,12 @@ Developed by a team of two programmers.
 - Profile browsing: view other players' avatars and minigame scores
 - Real-time data synchronization via PlayFab backend
 
+### 💰 Monetization & Release
+- **AdMob** and **IronSource / LevelPlay** mediation integrated, including rewarded ads tied to the in-game economy
+- Google Play release pipeline: store listing, signed builds, versioning and updates
+- In-app update prompts handled through the Google Play Core libraries
+- Addressables used to keep build size under control
+
 ### 🌐 Localization
 - Full multi-language support: **English** and **Spanish**
 - Language switchable at runtime from the settings menu
@@ -85,9 +97,11 @@ Developed by a team of two programmers.
 - **Mobile input detection** — Gyroscope, accelerometer, touch gestures, pinch-to-zoom, and multi-tap inputs handled natively
 - **Dynamic difficulty scaling** — Timer acceleration system that increases pressure progressively per minigame
 - **PlayFab integration** — Player authentication, leaderboard management, and profile data stored and retrieved in real time
+- **Ad mediation** — AdMob and IronSource/LevelPlay wired into the reward and economy loops
 - **ScriptableObject architecture** — Minigame configs, shop items, mission definitions, and cosmetic data driven by SO assets
 - **Persistent data management** — Player currency, unlocks, settings, and daily mission state saved and loaded reliably across sessions
 - **Modular UI system** — Independent UI flows for main menu, minigame selection, game over, pause, settings, profile, shop, and leaderboards
+- **Engine migration** — Project upgraded from Unity 2022 to Unity 6 without breaking the live release
 
 ---
 
@@ -95,31 +109,42 @@ Developed by a team of two programmers.
 
 | Category | Technology |
 |----------|------------|
-| Engine | Unity |
+| Engine | Unity 6 (6000.0) — migrated from Unity 2022 |
 | Language | C# |
 | Backend | Microsoft PlayFab |
+| Ads | Google AdMob + IronSource / LevelPlay mediation |
+| Store | Google Play Plugins (in-app updates, delivery) |
 | Input | Unity Input System + Native Mobile APIs |
-| Data | ScriptableObjects + PlayerPrefs |
+| Data | ScriptableObjects + PlayerPrefs + Addressables |
 | UI | Unity UI + TextMeshPro |
+| Rendering | Universal Render Pipeline (URP) |
 | Platform | Android (Google Play) |
 
 ---
 
-## 👥 Team
+## 👥 Team & My Contribution
 
-Developed by a team of **2 programmers**.
+Developed by a team of **2 programmers**: [Darío Calderón Tornero](https://github.com/DarioCalderonTornero) and [Alexr5k7](https://github.com/Alexr5k7).
 
-| Role | Name |
-|------|------|
-| Game Programmer | Darío Calderón Tornero |
-| Game Programmer | [Teammate name] |
+**What I built:**
+- 3 of the 7 minigames end to end: **Color Rush**, **Meteor Crash** and **Sort It**
+- Ad integration: AdMob and IronSource/LevelPlay, including rewarded ads
+- PlayFab integration for authentication, player profiles and online leaderboards
+- Co-developed the shop, the in-game economy, the progression system and the settings menu
+- Google Play release and maintenance, and the Unity 2022 → Unity 6 migration
 
 ---
 
-## 📸 Screenshots
+## 📸 Media
 
-<!-- Add screenshots or GIFs here -->
-> *Coming soon*
+🎬 **[Watch the trailer](https://www.youtube.com/watch?v=-W2FQWRpG8g)** — full showcase of the 7 minigames and the progression systems.
+
+---
+
+## 👤 Author
+
+**Darío Calderón Tornero** — Gameplay Programmer (Unity & Unreal Engine 5)
+[Portfolio](https://dariogamedev.com) · [LinkedIn](https://www.linkedin.com/in/dariocalderontornero/) · [GitHub](https://github.com/DarioCalderonTornero)
 
 ---
 
