@@ -1,4 +1,4 @@
-# 🎮 Bipbop — Mobile Party Game
+# 🎮 Bipbop, Mobile Party Game
 
 > A fast-paced mobile party game featuring 7 independent minigames with unique mechanics, progressive difficulty, and a full online progression system. Published on Google Play.
 
@@ -24,7 +24,7 @@
 
 ## 🕹️ Overview
 
-**Bipbop** is a mobile party game built in Unity where players face 7 fully independent minigames, each with its own mechanics and visual identity. Every minigame is designed around increasing time pressure — the longer you survive, the faster it gets.
+**Bipbop** is a mobile party game built in Unity where players face 7 fully independent minigames, each with its own mechanics and visual identity. Every minigame is designed around increasing time pressure: the longer you survive, the faster it gets.
 
 The game features a complete meta-progression system with daily missions, in-game currency, unlockables, online leaderboards powered by PlayFab, and full multi-language support.
 
@@ -94,14 +94,14 @@ Developed by a team of two programmers, published on Google Play and later migra
 
 ## 🧠 Technical Highlights
 
-- **Mobile input detection** — Gyroscope, accelerometer, touch gestures, pinch-to-zoom, and multi-tap inputs handled natively
-- **Dynamic difficulty scaling** — Timer acceleration system that increases pressure progressively per minigame
-- **PlayFab integration** — Player authentication, leaderboard management, and profile data stored and retrieved in real time
-- **Ad mediation** — AdMob and IronSource/LevelPlay wired into the reward and economy loops
-- **ScriptableObject architecture** — Minigame configs, shop items, mission definitions, and cosmetic data driven by SO assets
-- **Persistent data management** — Player currency, unlocks, settings, and daily mission state saved and loaded reliably across sessions
-- **Modular UI system** — Independent UI flows for main menu, minigame selection, game over, pause, settings, profile, shop, and leaderboards
-- **Engine migration** — Project upgraded from Unity 2022 to Unity 6 without breaking the live release
+- **Mobile input detection.** Gyroscope, accelerometer, touch gestures, pinch-to-zoom, and multi-tap inputs handled natively
+- **Dynamic difficulty scaling.** Timer acceleration system that increases pressure progressively per minigame
+- **PlayFab integration.** Player authentication, leaderboard management, and profile data stored and retrieved in real time
+- **Ad mediation.** AdMob and IronSource/LevelPlay wired into the reward and economy loops
+- **ScriptableObject architecture.** Minigame configs, shop items, mission definitions, and cosmetic data driven by SO assets
+- **Persistent data management.** Player currency, unlocks, settings, and daily mission state saved and loaded reliably across sessions
+- **Modular UI system.** Independent UI flows for main menu, minigame selection, game over, pause, settings, profile, shop, and leaderboards
+- **Engine migration.** Project upgraded from Unity 2022 to Unity 6 without breaking the live release
 
 ---
 
@@ -109,7 +109,7 @@ Developed by a team of two programmers, published on Google Play and later migra
 
 | Category | Technology |
 |----------|------------|
-| Engine | Unity 6 (6000.0) — migrated from Unity 2022 |
+| Engine | Unity 6 (6000.0), migrated from Unity 2022 |
 | Language | C# |
 | Backend | Microsoft PlayFab |
 | Ads | Google AdMob + IronSource / LevelPlay mediation |
@@ -137,13 +137,13 @@ Developed by a team of **2 programmers**: [Darío Calderón Tornero](https://git
 
 ## 📸 Media
 
-🎬 **[Watch the trailer](https://www.youtube.com/watch?v=-W2FQWRpG8g)** — full showcase of the 7 minigames and the progression systems.
+🎬 **[Watch the trailer](https://www.youtube.com/watch?v=-W2FQWRpG8g).** Full showcase of the 7 minigames and the progression systems.
 
 ---
 
 ## 👤 Author
 
-**Darío Calderón Tornero** — Gameplay Programmer (Unity & Unreal Engine 5)
+**Darío Calderón Tornero**, Gameplay Programmer (Unity & Unreal Engine 5)
 [Portfolio](https://dariogamedev.com) · [LinkedIn](https://www.linkedin.com/in/dariocalderontornero/) · [GitHub](https://github.com/DarioCalderonTornero)
 
 ---
